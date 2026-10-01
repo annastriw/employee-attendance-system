@@ -64,3 +64,36 @@ model AuthAuditLog {
   @@index([actorAccountId, createdAt])
   @@map("auth_audit_logs")
 }
+
+enum EmpMasterStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model EmpDepartment {
+  id        String          @id @default(uuid()) @db.Char(36)
+  name      String          @db.VarChar(120)
+  code      String          @unique @db.VarChar(40)
+  status    EmpMasterStatus @default(ACTIVE)
+  createdAt DateTime        @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt DateTime        @updatedAt @map("updated_at") @db.DateTime(3)
+
+  @@unique([name])
+  @@index([status, name])
+  @@map("emp_departments")
+}
+
+model EmpAuditLog {
+  id             String   @id @default(uuid()) @db.Char(36)
+  actorAccountId String?  @map("actor_account_id") @db.Char(36)
+  entityType     String   @map("entity_type") @db.VarChar(40)
+  entityId       String?  @map("entity_id") @db.Char(36)
+  action         String   @db.VarChar(80)
+  reason         String?  @db.VarChar(500)
+  requestId      String?  @map("request_id") @db.Char(36)
+  createdAt      DateTime @default(now()) @map("created_at") @db.DateTime(3)
+
+  @@index([entityType, entityId, createdAt])
+  @@index([actorAccountId, createdAt])
+  @@map("emp_audit_logs")
+}
