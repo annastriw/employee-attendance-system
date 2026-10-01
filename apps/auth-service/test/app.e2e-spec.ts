@@ -23,6 +23,8 @@ describe('AppController (e2e)', () => {
       .expect('Hello World!');
   });
 
+  it('/health (GET) verifies MySQL readiness', () => request(app.getHttpServer()).get('/health').expect(200).expect({ status: 'ok', service: 'auth-service', database: 'up' }));
+
   afterEach(async () => {
     await app.close();
   });

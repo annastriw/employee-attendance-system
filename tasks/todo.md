@@ -279,8 +279,8 @@ Catatan: bagian database development dari T07 selesai berdasarkan laporan penggu
 
 ## T08 — Increment backend Auth
 - [x] T08a.1: Package database backend bersama, generate/build dan test konfigurasi koneksi.
-- [ ] T08a.2: Database module Auth dan healthcheck.
-- [ ] T08b: Seed HRD idempotent, hash bcrypt dan forced password change.
+- [x] T08a.2: Database module Auth dan healthcheck.
+- [x] T08b: Seed HRD idempotent, hash bcrypt dan forced password change.
 - [ ] T08c: Login per role, JWT/session, validasi dan audit.
 - [ ] T08d: Refresh, change-password, revocation dan integration test.
 - Spec: ../docs/sdd/auth-service.md; belum ada integrasi frontend/Gateway.
