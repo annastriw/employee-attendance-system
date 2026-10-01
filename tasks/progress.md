@@ -5,13 +5,18 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 ## Snapshot terakhir
 
 - Tanggal: 2026-10-01 (Asia/Jakarta).
-- Tahap: fondasi/Auth/HR login selesai; T10 (master departemen) dimulai — lapisan schema/migration selesai dan terverifikasi offline, lapisan API/UI/test belum.
-- Commit terbaru pada dev (sesi ini):
+- Tahap: fondasi/Auth/HR login selesai; login HR didesain ulang (split-screen) sesuai revisi spec yang disetujui; T10 (master departemen) lapisan schema/migration selesai & terverifikasi offline, lapisan API/UI/test belum.
+- Commit terbaru pada dev (sesi ini, berurutan):
   - 93488ae docs: record approved simplification, keep 5-service + 2-frontend structure
   - f423e47 feat: add employee department master schema and migration (T10)
-  - HEAD sebelumnya 94e386c (sesuai trigger). Verifikasi dengan git log; jangan anggap hash lama sebagai HEAD.
+  - aa34d48 docs: checkpoint T10 schema done, API/UI pending under memory constraint
+  - 1b7b05d feat(hr-web): add access-help note to HR login per E01/H01 spec
+  - e4a6782 docs: revise login spec - HR split-screen with form card, Attendance single-column
+  - 83537f1 feat(hr-web): split-screen HR login with charcoal aside and form card
+  - 112d7fa docs: define test cost/value tiers to speed the dev loop (plan + AGENTS)
+  - HEAD awal sesi 94e386c. Verifikasi dengan git log; jangan anggap hash lama sebagai HEAD.
 - Branch kerja: dev. Remote belum tersedia; push menunggu repository pilihan pengguna.
-- KENDALA LINGKUNGAN AKTIF: host memory CRITICAL (~0.5 GB free, dispatch paused). Build Nest, prisma generate/client build, migrate apply dan Vitest/Playwright DITUNDA agar tidak OOM atau meninggalkan DB setengah ter-migrasi. Hanya langkah ringan dijalankan sesi ini (edit file, prisma validate, migrate diff offline).
+- KENDALA LINGKUNGAN AKTIF: host memory CRITICAL (~1 GB free, dispatch paused). Build Nest, prisma generate/client build, migrate apply dan E2E DITUNDA agar tidak OOM atau meninggalkan DB setengah ter-migrasi. Langkah ringan dijalankan sesi ini: edit file, `tsc --noEmit` (lulus), prisma validate/migrate diff offline, dan Playwright design suite `test:ui` (12/12 passed — satu run terbukti aman walau posture CRITICAL).
 - Migration `20261001160000_employee_master_departments` BELUM diterapkan ke MySQL dev/test. `prisma migrate diff --from-migrations ... --to-schema ... --exit-code` = 0 (No difference) → SQL cocok dengan schema; aman diterapkan saat memory lega.
 - Layanan/port aktif tidak diperiksa; verifikasi sebelum menjalankan stack.
 
@@ -33,7 +38,9 @@ Folder .agents/, .claude/, .windsurf/ dan skills-lock.json merupakan berkas loka
 
 - Sebelumnya: Auth/Gateway/HR login memiliki hasil test pada task/runbook terkait; hasil tersebut bukan verifikasi ulang sesi ini.
 - Sesi ini (2026-10-01): keputusan penyederhanaan diselaraskan ke AGENTS.md/plan.md/todo.md; aturan bisnis dan struktur 5-service+2-frontend dipertahankan; tautan dokumen diperiksa (semua resolve; packages/contracts & packages/config dicatat belum ada). Schema T10 ditambah (EmpDepartment, EmpAuditLog, enum EmpMasterStatus): `prisma validate` lulus (exit 0); migration SQL ditulis manual mengikuti konvensi auth; `prisma migrate diff --from-migrations --to-schema --exit-code` = 0 (No difference) → SQL cocok schema.
-- TIDAK dijalankan sesi ini (memory CRITICAL): migrate apply ke MySQL, prisma generate/client build, Nest build, Vitest/RTL, Playwright, layanan live, perangkat nyata.
+- Sesi ini — login HR redesign: atas keputusan pengguna, spec login direvisi (HR split-screen + kartu form; Attendance tetap satu kolom) di frontend-design-system.md, frontend-ui-ux.md (E01/H01), baseline.md, hr-auth-flow.md. Implementasi: AuthShell prop `aside` opsional (packages/ui), HR AuthLayout mengaktifkannya, CSS .auth-split/.auth-aside/.auth-card + responsif mobile, baris bantuan akses (E01/H01). `tsc --noEmit` lulus; Playwright design `test:ui` 12/12 passed (HR punya .auth-aside+.auth-card, Attendance tidak, no overflow 320/768/1024/1440). Screenshot HR 1440/320 ditinjau — split-screen desktop, satu kolom mobile.
+- Sesi ini — kebijakan test tier: ditulis ke tasks/plan.md (tabel biaya vs nilai) dan AGENTS.md. Tier 1 statis wajib; Tier 3/4 (test:ui/test:e2e) hanya saat relevan/checkpoint. Bukti aturan bisnis tetap wajib. Nama script test:ui/test:e2e diverifikasi ada di apps/hr-web.
+- TIDAK dijalankan sesi ini (memory CRITICAL): migrate apply ke MySQL, prisma generate/client build, Nest build, Vitest/RTL, Playwright E2E (test:e2e, API/MySQL nyata), layanan live, perangkat nyata. (Playwright design `test:ui` DIJALANKAN dan lulus 12/12.)
 
 ## Langkah berikut
 
