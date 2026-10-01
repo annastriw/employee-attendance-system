@@ -7,7 +7,10 @@ Modern, elegan, minimalis dan mudah dipahami. Tema putih/abu-abu netral, teks ch
 ## Komponen dan layout
 - HeroUI v3 + Tailwind v4: TextField, Input, InputGroup, Label, Button dan Dropdown. Ikuti dokumentasi MCP HeroUI dan pola compound components. Custom component hanya untuk kebutuhan aplikasi dan layout bersama.
 - packages/ui menyimpan token dan AuthShell. Kedua aplikasi mengimpor tema yang sama setelah styles HeroUI. Gunakan tema melalui CSS variables, bukan menggambar ulang tampilan kontrol bawaan.
-- Login berupa form satu kolom di tengah, maksimal 368 px: nama portal, judul Masuk, email, password, tombol Masuk. Tanpa panel samping, slogan, footer atau jadwal. Ganti password hanya memuat petunjuk yang diperlukan.
+- Login (revisi 2026-10-01): dua pola berbagi AuthShell dan token yang sama.
+  - HR Portal: layout split-screen pada layar lebar. Panel kiri (aside) berlatar charcoal #292929 berisi nama portal dan satu kalimat peran yang tenang (bukan slogan jualan). Panel kanan memuat form di dalam kartu ber-border: surface #fafafa, border #e4e4e4, radius 8 px, shadow ringan bawaan HeroUI, lebar form maksimal 368 px. Isi form tetap: judul Masuk, email, password, toggle, tombol Masuk, dan baris bantuan akses. Pada mobile aside menjadi header ringkas di atas kartu, satu kolom, tanpa menutupi form.
+  - Attendance Portal: tetap form satu kolom terpusat, maksimal 368 px, tanpa panel samping maupun kartu — fokus pada ponsel. Nama portal, judul Masuk, email, password, toggle, tombol Masuk.
+  - Keduanya monokrom, tanpa gambar raster, slogan jualan, footer atau jadwal. Panel aside memakai warna/pola dari token, bukan aset berat. Ganti password hanya memuat petunjuk yang diperlukan.
 - HR: sidebar ramping berisi nama portal dan menu yang tersedia, header judul halaman serta dropdown akun. Email ada pada menu akun, bukan paragraf sambutan. Kondisi kosong cukup satu kalimat. Filter/tindakan kelak ditempatkan dekat kontennya.
 - Mobile: sidebar menjadi navigasi buka/tutup dengan tombol Menu, aria-expanded dan aria-controls; dropdown akun tetap dapat dipakai.
 - Karyawan mengikuti tema sama, berfokus pada check-in/checkout saat fitur tersedia. Sekarang hanya menampilkan status singkat login belum tersedia. Jangan membuat kontrol atau statistik palsu.

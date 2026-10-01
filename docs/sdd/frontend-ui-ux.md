@@ -62,7 +62,7 @@ ID layar untuk keterlacakan, bukan ketentuan nama file atau endpoint baru.
 
 | ID | Halaman/alur | Informasi dan tindakan |
 | --- | --- | --- |
-| E01 | Masuk | Form maksimal 368 px di tengah; Attendance Portal, Masuk, email, password, toggle password, tombol Masuk. Bantuan akses mengarahkan ke HR jika diperlukan; tidak membuat reset mandiri/email otomatis. |
+| E01 | Masuk | Form satu kolom terpusat maksimal 368 px, tanpa panel samping maupun kartu; Attendance Portal, Masuk, email, password, toggle password, tombol Masuk. Bantuan akses mengarahkan ke HR jika diperlukan; tidak membuat reset mandiri/email otomatis. |
 | E02 | Password awal | Password sementara/current, password baru, konfirmasi; aturan dekat input. Setelah berhasil jelaskan login ulang sesuai kontrak sesi. |
 | E03 | Hari ini | Tanggal WIB, jadwal 08.00–17.00 pada hari kerja, status, waktu check-in/checkout dan tindakan berikutnya. Link detail/riwayat tidak mendominasi. |
 | E04 | Capture | Satu flow check-in/checkout dengan judul sesuai tindakan. Izin kamera/lokasi, panduan wajah, kedipan auto capture, manual fallback sesuai validitas wajah. |
@@ -104,7 +104,7 @@ Kedipan memicu auto capture, bukan pencocokan wajah/verifikasi identitas. Tidak 
 
 | ID | Halaman/alur | Informasi dan tindakan |
 | --- | --- | --- |
-| H01 | Masuk/password awal | Pola E01/E02 dengan identitas HR Portal; mengikuti auth HR yang sudah ada. |
+| H01 | Masuk/password awal | Layout split-screen pada layar lebar: panel kiri charcoal #292929 dengan nama HR Portal dan satu kalimat peran; panel kanan form di dalam kartu ber-border (surface #fafafa, radius 8 px, shadow ringan), lebar form maksimal 368 px. Mobile menjadi header ringkas di atas kartu, satu kolom. Isi dan validasi mengikuti pola E01/E02 dengan identitas HR Portal dan auth HR yang sudah ada. |
 | H02 | Monitoring | Tanggal, ringkasan aktif/check-in/terlambat/pulang awal/belum checkout/tidak ada absensi dari API, lalu daftar karyawan. Status terkait dapat menyaring daftar. |
 | H03 | Absensi/rekap | Periode, karyawan, departemen, status; tabel harian dan pagination. Rekap dalam aplikasi. |
 | H04 | Detail absensi | Nama/NIK/tanggal/status; bukti check-in/checkout, waktu, foto privat, alasan, Leaflet, accuracy/waktu lokasi; Hapus/Pulihkan sesuai keadaan. |
