@@ -26,14 +26,14 @@ Konsistensi datang dari bahasa visual, istilah, navigasi, pola formulir, daftar,
 
 | Elemen | Kontrak implementasi |
 | --- | --- |
-| Warna | Background/surface putih; panel #fafafa; foreground #242424; primary charcoal #292929; muted #6b6b6b; border #e4e4e4. Gunakan token packages/ui/src/theme.css, bukan palet per halaman. |
+| Warna | Netral zinc dengan satu aksen emerald (terang #047857, gelap #34d399) untuk tindakan utama, fokus, tautan dan penanda aktif. Mode terang dan gelap mengikuti sistem. Nilai lengkap ada di [design system](frontend-design-system.md); gunakan token packages/ui/src/theme.css, bukan palet per halaman. |
 | Status | Warna semantik terbatas untuk berhasil, gagal dan peringatan. Sertai teks/ikon; jangan mengandalkan warna saja. |
-| Tipografi | Segoe UI/system sans-serif yang sudah digunakan. Judul auth 24 px, workspace 18 px, isi 14 px; label/metadata 12–13 px jika tetap terbaca. Angka waktu/tabel memakai tabular numerals. |
+| Tipografi | Geist Variable (self-hosted). Judul auth 28 px, workspace 20 px, isi 14 px; label/metadata 12-13 px jika tetap terbaca. Angka waktu/tabel memakai Geist Mono atau tabular numerals. |
 | Spacing | Kelipatan 4 px. Jarak antarkelompok lebih besar dari jarak elemen dalam kelompok. Form lapang; tabel cukup padat untuk perbandingan. |
-| Bentuk | Radius field/panel 8 px; bentuk tombol mengikuti HeroUI yang disepakati. Bayangan hanya membantu mengenali lapisan seperti menu/dialog. |
+| Bentuk | Tombol dan field 8 px, panel/kartu 12 px, menu 10 px; berlaku di semua halaman. Bayangan hanya membantu mengenali lapisan seperti menu/dialog. |
 | Tindakan | Satu primary per konteks; secondary untuk alternatif; tertiary untuk Batal/Kembali. Danger hanya saat konsekuensi memerlukan penekanan. |
 | Teks | Judul menyebut tugas/objek, label selalu terlihat. Bantuan menjelaskan format, langkah atau konsekuensi saat diperlukan. Hindari slogan, sambutan panjang, paragraf dekoratif dan statistik pengisi ruang. |
-| Ikon/gerakan | Satu gaya ikon dengan label pada tindakan penting. Transisi singkat; hormati reduced motion. |
+| Ikon/gerakan | Ikon @phosphor-icons/react saja, dengan label atau aria-label pada tindakan penting. Transisi 150-200 ms hanya untuk umpan balik dan perubahan keadaan; hormati reduced motion. |
 
 Gunakan section, alignment dan separator. Jangan membungkus setiap field/baris dalam kartu atau menumpuk kartu di dalam kartu. Foto dan peta asli menjadi bukti pada detail.
 
@@ -104,7 +104,7 @@ Kedipan memicu auto capture, bukan pencocokan wajah/verifikasi identitas. Tidak 
 
 | ID | Halaman/alur | Informasi dan tindakan |
 | --- | --- | --- |
-| H01 | Masuk/password awal | Layout split-screen pada layar lebar: panel kiri charcoal #292929 dengan nama HR Portal dan satu kalimat peran; panel kanan form di dalam kartu ber-border (surface #fafafa, radius 8 px, shadow ringan), lebar form maksimal 368 px. Mobile menjadi header ringkas di atas kartu, satu kolom. Isi dan validasi mengikuti pola E01/E02 dengan identitas HR Portal dan auth HR yang sudah ada. |
+| H01 | Masuk/password awal | Split-screen pada lebar >= 1024 px: kolom kiri penanda portal, judul, form maksimal 368 px dan bantuan akses; kolom kanan panel berpola titik dengan tiga kemampuan nyata produk. Di bawah 1024 px hanya form satu kolom. Isi dan validasi mengikuti pola E01/E02 dengan identitas HR Portal dan auth HR yang sudah ada. |
 | H02 | Monitoring | Tanggal, ringkasan aktif/check-in/terlambat/pulang awal/belum checkout/tidak ada absensi dari API, lalu daftar karyawan. Status terkait dapat menyaring daftar. |
 | H03 | Absensi/rekap | Periode, karyawan, departemen, status; tabel harian dan pagination. Rekap dalam aplikasi. |
 | H04 | Detail absensi | Nama/NIK/tanggal/status; bukti check-in/checkout, waktu, foto privat, alasan, Leaflet, accuracy/waktu lokasi; Hapus/Pulihkan sesuai keadaan. |

@@ -1,6 +1,6 @@
 # Attendance Portal
 React + TypeScript, tema HeroUI dan shell bersama @attendance/ui.
-Halaman menampilkan status login belum tersedia dengan tema monokrom yang sama dengan HR. Login dan absensi belum diimplementasikan; mengikuti T13 dan task berikutnya.
+Halaman menampilkan status login belum tersedia dengan tema bersama HR (netral zinc, aksen emerald, mode terang/gelap). Login dan absensi belum diimplementasikan; mengikuti T13 dan task berikutnya.
 
 ## Jalankan lokal
 Dari root repository: pnpm --dir apps/attendance-web run dev --port 5173 --strictPort.

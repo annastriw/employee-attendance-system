@@ -316,6 +316,12 @@ Catatan: bagian database development dari T07 selesai berdasarkan laporan penggu
 - Verification: Build/lint dua frontend, 11 component tests, 12 browser layout/interaction checks, 2 E2E autentikasi nyata.
 - Target: packages/ui/, apps/{attendance-web,hr-web}/, docs/sdd/frontend-design-system.md
 
+## T09c — Redesign visual ala Linear (menggantikan tema monokrom T09b)
+- [ ] Selesai
+- Acceptance: Token zinc + satu aksen emerald, mode terang/gelap mengikuti sistem, font Geist self-hosted, ikon Phosphor; radius tombol/field 8 px, panel 12 px. Login HR split-screen (form + panel kemampuan produk) >= 1024 px dan satu kolom di bawahnya; login Attendance satu kolom; workspace HR sidebar ikon, header, tombol akun inisial, empty state berikon. Alur auth, label, fokus keyboard, aria dan pesan tetap.
+- Verification: tsc kedua frontend, Vitest auth hr-web, Playwright design (test:ui) terang dan gelap pada 320/768/1024/1440 px, screenshot ditinjau. E2E nyata di checkpoint integrasi berikutnya.
+- Target: packages/ui/, apps/{attendance-web,hr-web}/, docs/sdd/frontend-design-system.md, docs/sdd/frontend-ui-ux.md
+
 ## Keterlacakan desain UI/UX dalam implementasi proyek
 - [x] Desain seluruh E01–E09/H01–H14 dan alur implementasi ditulis sesuai arahan pengguna.
 - Spec: [UI/UX](../docs/sdd/frontend-ui-ux.md), [design system](../docs/sdd/frontend-design-system.md).

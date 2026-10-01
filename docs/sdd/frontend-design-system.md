@@ -1,20 +1,32 @@
 # Tema bersama Attendance Portal dan HR Portal
-Status: disetujui pengguna; revisi monokrom 2026-10-01. Berlaku untuk semua frontend sekarang dan berikutnya.
+Status: disetujui pengguna; revisi visual 2026-10-01 (arah "produk modern ala Linear", menggantikan tema monokrom charcoal). Berlaku untuk semua frontend sekarang dan berikutnya.
 
 ## Kontrak desain
-Modern, elegan, minimalis dan mudah dipahami. Tema putih/abu-abu netral, teks charcoal, tombol utama charcoal #292929. Warna hijau/merah/kuning hanya untuk status bermakna. Hilangkan slogan, jadwal berulang, panel promosi, status dekoratif dan bantuan yang tidak diperlukan.
+Modern, tegas dan teknis, tetap mudah dipahami. Netral zinc dengan satu aksen emerald yang dipakai konsisten untuk tindakan utama, fokus, tautan dan penanda aktif. Mode terang dan gelap mengikuti prefers-color-scheme sistem. Warna merah/kuning hanya untuk status bermakna. Hindari slogan jualan, statistik palsu, gambar dekoratif buatan tangan, gradien ungu/glow dan em-dash pada teks tampilan.
+
+## Token
+| Token | Terang | Gelap |
+| --- | --- | --- |
+| background | #fafafa (zinc-50) | #09090b (zinc-950) |
+| surface / panel | #fdfdfd / #f4f4f5 | #111113 / #18181b |
+| foreground / muted | #18181b / #71717a | #fafafa / #a1a1aa |
+| border / field-border | #e4e4e7 / #d4d4d8 | #27272a / #3f3f46 |
+| accent / accent-foreground | #047857 / #fdfdfd (kontras 5,4:1) | #34d399 / #022c22 |
+| focus ring | #059669 | #34d399 |
+
+Token berada di packages/ui/src/theme.css dan menimpa variabel HeroUI v3 (--accent, --surface, --field-*, dst.). Aplikasi tidak menambah palet sendiri.
 
 ## Komponen dan layout
-- HeroUI v3 + Tailwind v4: TextField, Input, InputGroup, Label, Button dan Dropdown. Ikuti dokumentasi MCP HeroUI dan pola compound components. Custom component hanya untuk kebutuhan aplikasi dan layout bersama.
-- packages/ui menyimpan token dan AuthShell. Kedua aplikasi mengimpor tema yang sama setelah styles HeroUI. Gunakan tema melalui CSS variables, bukan menggambar ulang tampilan kontrol bawaan.
-- Login (revisi 2026-10-01): dua pola berbagi AuthShell dan token yang sama.
-  - HR Portal: layout split-screen pada layar lebar. Panel kiri (aside) berlatar charcoal #292929 berisi nama portal dan satu kalimat peran yang tenang (bukan slogan jualan). Panel kanan memuat form di dalam kartu ber-border: surface #fafafa, border #e4e4e4, radius 8 px, shadow ringan bawaan HeroUI, lebar form maksimal 368 px. Isi form tetap: judul Masuk, email, password, toggle, tombol Masuk, dan baris bantuan akses. Pada mobile aside menjadi header ringkas di atas kartu, satu kolom, tanpa menutupi form.
-  - Attendance Portal: tetap form satu kolom terpusat, maksimal 368 px, tanpa panel samping maupun kartu — fokus pada ponsel. Nama portal, judul Masuk, email, password, toggle, tombol Masuk.
-  - Keduanya monokrom, tanpa gambar raster, slogan jualan, footer atau jadwal. Panel aside memakai warna/pola dari token, bukan aset berat. Ganti password hanya memuat petunjuk yang diperlukan.
-- HR: sidebar ramping berisi nama portal dan menu yang tersedia, header judul halaman serta dropdown akun. Email ada pada menu akun, bukan paragraf sambutan. Kondisi kosong cukup satu kalimat. Filter/tindakan kelak ditempatkan dekat kontennya.
-- Mobile: sidebar menjadi navigasi buka/tutup dengan tombol Menu, aria-expanded dan aria-controls; dropdown akun tetap dapat dipakai.
-- Karyawan mengikuti tema sama, berfokus pada check-in/checkout saat fitur tersedia. Sekarang hanya menampilkan status singkat login belum tersedia. Jangan membuat kontrol atau statistik palsu.
-- Font lokal Segoe UI/system sans-serif; judul auth 24 px, judul workspace 18 px, isi 14 px. Spacing kelipatan 4 px; radius field 8 px, tombol mengikuti bentuk bawaan HeroUI; shadow ringan bawaan HeroUI. Label terlihat, fokus keyboard terlihat, notifikasi error/success dan busy tetap berfungsi. Hormati prefers-reduced-motion.
+- HeroUI v3 + Tailwind v4: TextField, Input, InputGroup, Label, Button, Dropdown. Dokumentasi HeroUI v3 diperiksa melalui MCP (context7 bila MCP HeroUI tidak tersedia). Custom component hanya untuk kebutuhan aplikasi dan layout bersama.
+- Font Geist Variable (self-hosted via @fontsource-variable/geist) untuk seluruh teks; Geist Mono untuk angka waktu/tabel. Ikon dari @phosphor-icons/react saja, weight regular, tanpa SVG buatan tangan.
+- Bentuk: tombol dan field radius 8 px, panel/kartu 12 px, menu 10 px. Tombol HeroUI bawaan pill ditimpa agar mengikuti aturan ini. Tombol ditekan memberi umpan balik scale 0.98.
+- Tipografi: judul auth 28 px semibold tracking rapat, judul workspace 20 px, isi 14 px, label 13 px medium. Spacing kelipatan 4 px.
+- Login HR (H01): split-screen pada lebar >= 1024 px. Kolom kiri berisi penanda portal (ikon dalam kotak emerald + nama portal), judul Masuk, satu kalimat petunjuk, form dan baris bantuan akses; lebar form maksimal 368 px. Kolom kanan adalah panel surface berpola titik halus (CSS, bukan gambar) berisi satu judul dan tiga kemampuan nyata produk dengan ikon. Di bawah 1024 px panel kanan disembunyikan; form satu kolom.
+- Login Attendance (E01): satu kolom terpusat, maksimal 368 px, penanda portal yang sama, tanpa panel samping. Fokus pada ponsel.
+- HR workspace: sidebar 240 px berisi penanda portal dan menu dengan ikon; item aktif memakai latar default dan ikon emerald. Header 56 px berisi judul halaman dan tombol akun (inisial dalam lingkaran). Email tampil di menu akun. Kondisi kosong: ikon dalam kotak lembut, satu judul, satu kalimat.
+- Mobile: sidebar menjadi navigasi buka/tutup dengan tombol ikon Menu, aria-expanded dan aria-controls; dropdown akun tetap dapat dipakai.
+- Karyawan berfokus pada check-in/checkout saat fitur tersedia. Sekarang hanya status singkat login belum tersedia. Jangan membuat kontrol atau statistik palsu.
+- Motion rendah dan bermakna: konten auth muncul fade-up 200 ms, transisi hover/fokus 150 ms. Semua dimatikan pada prefers-reduced-motion. Label terlihat, fokus keyboard terlihat, notifikasi error/success dan busy tetap berfungsi.
 - Halaman berikutnya wajib memakai token dan komponen bersama, tanpa palet baru atau menyalin tema ke aplikasi.
 
 ## Verifikasi
