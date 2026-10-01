@@ -189,6 +189,14 @@ a:focus-visible, button:focus-visible {
   font-size: 0.875rem;
 }
 
+.auth-help {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--muted);
+  text-align: center;
+}
+
 .unavailable-message {
   font-size: 0.875rem;
   color: var(--muted);

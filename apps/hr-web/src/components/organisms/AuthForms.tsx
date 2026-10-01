@@ -53,6 +53,9 @@ export function LoginForm({ busy, error, onSubmit }: LoginProps) {
       <Button type="submit" className="primary-button" isDisabled={busy}>
         {busy ? "Sedang masuk…" : "Masuk"}
       </Button>
+      <p className="auth-help">
+        Butuh bantuan akses? Hubungi admin HRD untuk pembuatan atau reset akun.
+      </p>
     </form>
   );
 }
