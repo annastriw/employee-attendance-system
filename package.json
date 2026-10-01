@@ -1,0 +1,28 @@
+{
+  "name": "employee-attendance-platform",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=24.15.0 <25"
+  },
+  "scripts": {
+    "build": "pnpm -r --if-present run build",
+    "test": "pnpm -r --if-present run test",
+    "lint": "pnpm -r --if-present run lint",
+    "db:setup": "node scripts/database/setup-local.mjs",
+    "db:validate": "prisma validate",
+    "db:grants": "node scripts/database/setup-local.mjs --grants",
+    "db:migrate": "prisma migrate deploy",
+    "db:generate": "prisma generate && pnpm --filter @attendance/database build",
+    "db:verify": "tsx scripts/database/verify.ts",
+    "db:migrate:test": "prisma migrate deploy --config prisma.test.config.ts",
+    "db:typecheck": "pnpm --dir apps/auth-service exec tsc --ignoreConfig --noEmit --strict --skipLibCheck --esModuleInterop --target ES2023 --module NodeNext --moduleResolution NodeNext ../../scripts/database/verify.ts"
+  },
+  "devDependencies": {
+    "dotenv": "^18.0.4",
+    "prisma": "7.10.0",
+    "tsx": "^4.23.15",
+    "@attendance/database": "workspace:*"
+  }
+}

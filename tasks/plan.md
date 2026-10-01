@@ -1,5 +1,5 @@
 # Rencana implementasi — Attendance Portal dan HR Portal
-Status: rancangan untuk review, belum implementasi. Tanggal: 2026-10-01 (Asia/Jakarta).
+Status: implementasi fondasi berlangsung; task lengkap tetap mengikuti todo.md. Tanggal: 2026-10-01 (Asia/Jakarta).
 
 ## Acuan
 Kebutuhan/database/API disetujui: ../docs/requirements/baseline.md.
@@ -7,6 +7,9 @@ Daftar pekerjaan: todo.md. Checklist belum dicentang berarti belum dikerjakan.
 
 ## Pendekatan
 Monorepo, lima service dengan kepemilikan tabel, dua frontend. Selesaikan jalur pengguna bertahap; bukan seluruh backend lalu seluruh frontend. Setiap perubahan menggunakan spec terkait, test relevan, review dan dokumentasi.
+
+## Tooling disetujui
+pnpm workspace, Prisma dengan migration terpusat untuk satu database, HTTP internal + transactional outbox/worker. Detail pada ../docs/architecture/adr-002-project-tooling.md. Kompatibilitas versi dan spesifikasi worker masih bagian task fondasi; Workspace dan dependency awal sudah dipasang; Prisma CLI/client/adapter dikunci 7.10.0.
 
 ## Urutan dan checkpoint
 1. Dokumen module SDD dan aturan context; keputusan tooling kompatibel; kesiapan lingkungan.
@@ -30,7 +33,7 @@ Auth mendasari otorisasi. Employee membutuhkan akun; Attendance menggunakan kela
 
 ## Pemeriksaan
 Per-task: unit/API/component test yang relevan. Per-checkpoint: build, lint, test terfokus, dan alur manual atau Playwright. Tidak menganggap mock cukup untuk MySQL/MinIO AIStor Free/kamera nyata. TDD untuk aturan bisnis; tidak menulis test yang hanya meniru implementasi UI.
-Script build/lint/test baru ditetapkan saat bootstrap; belum ada command proyek yang bisa dijalankan.
+Script build/lint dan unit test scaffold tersedia. Script db:* menguji migration dan constraint MySQL. Harness frontend dan test aturan bisnis belum tersedia.
 
 ## Risiko dan mitigasi
 - MySQL dan MinIO AIStor Free tidak satu transaksi: upload READY, transaksi attendance, outbox, retry dan cleanup orphan.
@@ -43,7 +46,7 @@ Script build/lint/test baru ditetapkan saat bootstrap; belum ada command proyek 
 - Live belum bisa dikonfigurasi tanpa akses layanan: siapkan artefak deployment dahulu; minta hanya akses yang dibutuhkan ketika tahap deploy.
 
 ## Batas pekerjaan
-Git lokal telah diinisialisasi pada dev. Migration, instalasi dependency, deployment, dan perubahan akun eksternal belum dilakukan. Status commit dicatat melalui riwayat Git; push menunggu repository GitHub.
+Git lokal telah diinisialisasi pada dev. Dependency dan migration fondasi Auth sudah diterapkan lokal. Deployment dan perubahan akun eksternal belum dilakukan. Database test terpisah schema, belum instance. Status commit dicatat melalui riwayat Git; push menunggu repository GitHub.
 Pengguna telah mengotorisasi commit dan push setiap perubahan yang selesai dan diverifikasi pada branch dev. Pengguna menunda penentuan repository GitHub: pengembangan dan commit lokal tetap berjalan, push menunggu remote. Branch main hanya untuk production.
 Rahasia tetap lokal, .env.example tanpa nilai asli, dokumentasi aman di GitHub.
 

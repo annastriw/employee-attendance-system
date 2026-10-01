@@ -246,3 +246,41 @@ Status: belum dikerjakan. Semua path adalah target rencana, bukan file yang suda
 ### Checkpoint setelah T31
 - [ ] Test relevan dan build/lint lulus.
 - [ ] Alur fase diverifikasi, batasan dicatat dan ditinjau.
+## Subtask lingkungan — AIStor lokal (diminta pengguna)
+- [x] Pasang WSL dan Docker Desktop.
+- [x] Aktifkan komponen WSL/VirtualMachinePlatform tanpa restart otomatis.
+- [x] Siapkan Compose image terkunci, mount lisensi read-only dan volume persisten.
+- [x] Buat kredensial lokal, verifikasi Git ignore, validasi Compose config.
+- [x] Pengguna restart Windows, Docker engine aktif (dikonfirmasi pengguna).
+- [x] Pull image, startup, verifikasi lisensi dan healthcheck (pengujian manual pengguna).
+- [x] Buat bucket privat, upload/read, uji akses anonim dan persistensi (pengujian manual pengguna).
+Catatan: ini bagian storage dari T07; T07 keseluruhan belum selesai. Status terperinci: docs/deployment/installation-status.md.
+## Subtask lingkungan — MySQL lokal (diminta pengguna)
+- [x] Compose MySQL 8.4.11, localhost:3307, UTC dan volume persisten.
+- [x] Pengguna mengonfirmasi login/query, penyimpanan dan persistensi sesudah restart serta koneksi port Windows.
+- [x] Kredensial lokal dipisahkan; template environment aman disediakan.
+- [ ] Instance MySQL testing terpisah dan harness testing aplikasi.
+- [ ] Akun database dengan hak akses per service.
+Catatan: bagian database development dari T07 selesai berdasarkan laporan pengguna; T07 keseluruhan belum selesai. Panduan: docs/deployment/mysql-local.md.
+
+## T07a — Konfigurasi koneksi database lokal
+- [x] Konfigurasi Prisma 7 standar, akun migrasi dan kredensial lokal terpisah.
+- [x] Schema dev/test/shadow terpisah pada satu instance MySQL lokal.
+- [x] Setup lokal berhasil, prisma validate lulus.
+- [ ] Migration domain dan verifikasi runtime dilanjutkan pada T07b.
+- Batas: T07 keseluruhan belum selesai; instance test khusus dan harness frontend belum tersedia.
+
+## T07b — Fondasi schema Auth dan verifikasi database
+- [x] T07b.1: Spec tiga tabel Auth, migration awal dev/test dan client Prisma 7.10.0.
+- [x] T07b.2: Hak runtime, verifikasi MySQL nyata, constraint dan rollback pada attendance_test.
+- [x] Migration berulang tanpa pending, tidak ada drift, typecheck script lulus.
+- [ ] Database module NestJS, seed/login, schema service lain dan outbox dikerjakan berikutnya.
+- [ ] Container test khusus dan harness frontend tetap belum tersedia; T07 induk belum selesai.
+
+## T08 — Increment backend Auth
+- [x] T08a.1: Package database backend bersama, generate/build dan test konfigurasi koneksi.
+- [x] T08a.2: Database module Auth dan healthcheck.
+- [x] T08b: Seed HRD idempotent, hash bcrypt dan forced password change.
+- [ ] T08c: Login per role, JWT/session, validasi dan audit.
+- [ ] T08d: Refresh, change-password, revocation dan integration test.
+- Spec: ../docs/sdd/auth-service.md; belum ada integrasi frontend/Gateway.
