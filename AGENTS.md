@@ -16,7 +16,7 @@
 - Jangan force push atau menghapus perubahan pengguna.
 - Jika remote, autentikasi, atau Git belum tersedia, laporkan penghalangnya secara akurat. Jangan mengklaim commit/push berhasil.
 - Persetujuan commit dan push ke dev telah diberikan pengguna; tidak perlu meminta izin ulang untuk setiap perubahan.
-- Pengguna menentukan repository private [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system) pada 2026-10-02; origin memakai https://github.com/annastriw/employee-attendance-system.git. Setelah perubahan logis diverifikasi dan di-commit, push ke dev. Jangan membuat/memilih repository lain sendiri. Deployment dikerjakan terakhir sesuai tahap rilis, bukan setelah setiap push.
+- Pengguna menentukan repository public [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system) pada 2026-10-02; origin memakai https://github.com/annastriw/employee-attendance-system.git. Setelah perubahan logis diverifikasi dan di-commit, push ke dev. Jangan membuat/memilih repository lain sendiri. Deployment dikerjakan terakhir sesuai tahap rilis, bukan setelah setiap push.
 - Promosi ke main mengikuti tahap rilis, verifikasi, dan instruksi pengguna.
 
 ## Cara kerja
