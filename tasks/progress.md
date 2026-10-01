@@ -5,7 +5,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 ## Snapshot terakhir
 
 - Tanggal: 2026-10-02 (Asia/Jakarta). HEAD diverifikasi dengan `git log`; jangan anggap hash di sini sebagai HEAD.
-- Tahap: T08-T10 selesai. Redesign visual ala Linear (T09c) selesai kecuali E2E checkpoint; T10 master departemen selesai ujung ke ujung dengan bukti nyata.
+- Tahap: T08-T11 selesai. T11 master jabatan selesai database → Employee → Gateway → H12 → test nyata. T09c tetap belum dicentang, menunggu instruksi pengguna.
 - Commit sesi ini pada dev (lama ke baru): 93488ae, f423e47, aa34d48, 1b7b05d, e4a6782, 83537f1, 112d7fa, a485480 (lihat git log), lalu:
   - c2f98fe docs: switch frontend theme to Linear-style zinc + emerald, Geist, Phosphor, light/dark
   - 36a24e4 feat(ui): Linear-style redesign with zinc + emerald, Geist, Phosphor and light/dark
@@ -15,17 +15,17 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
   - bb3c6af feat(hr-web): H11 department list, form and status actions on real API (T10)
   - 20b53e0 fix(auth): give /auth/me its own rate limit for per-request service verification
   - d9738b1 test(hr-web): real-API department journey with Employee Service in the E2E stack
-- Commit T11 sejauh ini: 85143ce (schema/migration/grants), 73293bc (Employee API + unit/MySQL), c4da4dd (Gateway allowlist/kontrak), 49e4eb7 (filter aktif untuk penugasan).
+- Commit T11: 85143ce (schema/migration/grants), 73293bc (Employee API + unit/MySQL), c4da4dd (Gateway allowlist/kontrak), 49e4eb7 (filter aktif untuk penugasan), 2f46086 (H12/shared UI/selector/polesan H11), fbc034a (HRD nyata + assertion refetch). Penutupan spec/todo/progress ada pada commit docs setelah ini; baca git log sebagai sumber HEAD.
 - Branch: dev. Remote belum ada; push menunggu repository pilihan pengguna.
 - Database lokal (Docker MySQL 127.0.0.1:3307): migration `20261001160000_employee_master_departments` dan `20261002080000_employee_master_positions` DITERAPKAN ke attendance_dev dan attendance_test. Akun `attendance_employee`/`attendance_employee_test` dibuat via `pnpm db:grants`; kredensial ada di `.env.database` (ignored).
 - Host memory sering CRITICAL (1-2 GB). Jalankan suite berat satu per satu; Playwright 1 worker terbukti stabil.
-- Tidak ada proses/port yang dibiarkan berjalan; stack E2E dimatikan Playwright setelah test.
+- Semua port aplikasi/test 3000/3001/3002, 15173/15174/15175 dan 15300/15301/15302 diperiksa tertutup. Stack E2E dimatikan setelah test; Docker MySQL tetap berjalan di 3307.
 
 ## Satu pekerjaan aktif
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T11 master jabatan | Codex, 2026-10-02 | apps/hr-web/src/, test/, docs/sdd/employee-positions.md | T10 (selesai); schema/API/Gateway T11 terverifikasi | E2E HR 15174, gateway 15300, auth 15301, employee 15302; MySQL 3307 | Aktif: checkpoint HRD nyata; build backend lulus |
+| — | — | — | T11 selesai | hanya Docker MySQL 3307 | Tidak ada increment aktif; berikutnya T12 |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 
@@ -35,9 +35,9 @@ Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .w
 
 ## Bukti pemeriksaan
 
-- T11 sementara: diff migrations→schema exit 0; migrate dev/test dan grants lulus. Employee typecheck/lint, 9 unit dan 12 API MySQL (6 departemen + 6 jabatan) lulus; tambahan filter ACTIVE jabatan 6 API lulus. Gateway typecheck/lint, 12 unit + 37 kontrak HTTP lulus. HR typecheck/lint, 38 Vitest/RTL lulus (satu worker), termasuk refetch dan selector aktif/nilai lama nonaktif. Visual 36 test lulus (H11/H12 terang/gelap 320/768/1024/1440; screenshot ditinjau). Backend Auth/Employee/Gateway build lulus. HRD nyata sedang diverifikasi.
+- T11 selesai (rincian di docs/sdd/employee-positions.md): diff migrations→schema exit 0; migrate dev/test dan grants lulus. Employee typecheck/lint, 9 unit dan 12 API MySQL (6 departemen + 6 jabatan) lulus; tambahan filter ACTIVE jabatan 6 API lulus. Gateway typecheck/lint, 12 unit + 37 kontrak HTTP lulus. HR typecheck/lint, 38 Vitest/RTL lulus (satu worker), termasuk refetch dan selector aktif/nilai lama nonaktif. Visual 36 test lulus (H11/H12 terang/gelap 320/768/1024/1440; screenshot ditinjau). Backend Auth/Employee/Gateway dan HR build lulus. E2E jabatan nyata desktop/mobile 2 lulus; regresi departemen desktop/mobile 2 lulus, dijalankan terpisah. Cleanup: 0 fixture E2E jabatan/departemen/akun browser. Typecheck test E2E + pemeriksaan sintaks harness lulus.
 
-- T09c redesign: tsc kedua frontend, Vitest auth, Playwright `test:ui` terang/gelap 320/768/1024/1440 px; screenshot ditinjau. Belum dicentang di todo sampai E2E checkpoint; E2E auth nyata sudah lulus pada run 2026-10-02 (lihat di bawah), jadi T09c dapat dicentang setelah ditinjau ulang.
+- T09c redesign: tsc kedua frontend, Vitest auth, Playwright `test:ui` terang/gelap 320/768/1024/1440 px; screenshot ditinjau. E2E auth nyata telah lulus pada sesi sebelumnya; T09c tetap belum dicentang karena pengguna menunda keputusan.
 - T10 (rincian di docs/sdd/employee-departments.md):
   - Employee: 5 unit + 6 e2e Supertest terhadap MySQL attendance_test (auth/role, unik case-insensitive 409, validasi, nonaktif tanpa hapus, audit per perubahan, filter/pagination). Lint 0.
   - Gateway: 12 unit + 27 kontrak HTTP (allowlist path/query, header dibuang, 503 khusus Employee). Lint 0.
@@ -47,15 +47,17 @@ Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .w
 
 ## Langkah berikut
 
-1. T11 master jabatan: pola sama dengan T10 (schema `emp_positions` + migration via `prisma migrate diff`, grant di setup-local.mjs, modul positions di Employee, route di Gateway dengan allowlist, layar H12 memakai ulang ConfirmDialog/StatusBadge/pola daftar). Acceptance tambahan: selector penugasan tidak menawarkan master nonaktif (relevan T12).
-2. Putuskan perbaikan limit 429 E2E: beri `refresh` limit sendiri di Auth (mirip `/me`) atau pisahkan run E2E per spec. Jangan longgarkan limit login.
-3. Tinjau dan centang T09c bila screenshot + E2E dinilai cukup.
-4. Polesan H11 (pengguna menyetujui tampilan 2026-10-02; kerjakan bersama H12 karena memakai pola daftar yang sama): (a) screenshot E2E mobile menampilkan baris "Nonaktif" di filter Nonaktif sesudah pesan "diaktifkan kembali" (desktop benar, daftar kosong). Pastikan apakah race pada `refresh()` atau screenshot diambil sebelum refetch; tambahkan assertion daftar terbarui. (b) teks pager "1-1 dari 1" jatuh ke font monospace, seharusnya Geist. (c) filter status belum tampil sebagai satu grup.
+1. T12 pembuatan akun karyawan: baca baseline/todo dan tulis module spec provisioning akun+profil (unik NIK/email, idempotensi, kompensasi/pemulihan). Integrasikan selector master aktif yang sudah diuji ke form H07; pemuatan pilihan harus berfilter ACTIVE dan mendukung pagination. Jangan membuka akun/hasil sukses sebelum profil+akun konsisten.
+2. Limit 429 E2E Auth tetap menunggu keputusan pengguna: refresh limit sendiri atau run per spec. Jangan longgarkan limit login. Run T11 per spec terpisah lulus; konfigurasi Auth tidak diubah.
+3. T09c tetap menunggu instruksi pengguna untuk dicentang.
+4. Polesan H11 selesai bersama H12: (a) shared MasterDataPage menampilkan skeleton selama refetch sehingga baris lama tidak tampil bersama pesan sukses; test komponen dan E2E desktop/mobile menunggu baris hilang sesudah aktifkan pada filter Nonaktif. (b) pager tidak lagi memakai kelas monospace, diverifikasi computed font pada test visual. (c) status memakai satu ToggleButtonGroup berbatas dan separator HeroUI, screenshot terang/gelap ditinjau.
 
 Catatan: E2E memakai service dari `dist`; jalankan `pnpm --dir apps/<service> run build` setelah mengubah backend. employee-service bind 127.0.0.1; hanya Gateway publik.
 ## Kendala dan kebutuhan eksternal
 
 - Remote GitHub belum ditentukan.
+- Tool resource_status tidak tersedia pada sesi ini; RAM diperiksa via OS (sekitar 0,57–1,64 GiB tersedia). Playwright/Vitest memakai satu worker.
+- Build HR lulus dengan warning ukuran chunk JS sekitar 650 kB; tidak menurunkan batas warning atau menambah tooling.
 - Akses Vercel/VPS/Cloudflare dan instruksi promosi main belum tersedia pada snapshot; siapkan artefak independen dahulu.
 - Detail teknis terbuka seperti threshold capture, batas foto/lokasi, presisi waktu dan outbox harus dituntaskan melalui spike/spec/test terkait.
 - Tidak ada keputusan tambahan pengguna yang diperlukan untuk meneruskan task rutin dalam scope saat ini.

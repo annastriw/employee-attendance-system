@@ -32,8 +32,17 @@ Toolbar (cari dengan debounce, filter Semua/Aktif/Nonaktif, Tambah) → tabel �
 ## Acceptance dan verifikasi
 - HRD membuat, mencari, mengubah, menonaktifkan dan mengaktifkan jabatan. Konflik nama/kode 409; audit dan data tetap utuh.
 - H12 mengikuti pola H11 dan memakai ConfirmDialog, StatusBadge, list-toolbar/list-pager. Filter berada di URL.
-- Daftar pilihan penugasan hanya mengambil status ACTIVE dan menyaring hasil nonaktif; UI penugasan karyawan ditutup pada T12.
+- API `status=ACTIVE` mengecualikan master nonaktif. `MasterAssignmentSelect` (HeroUI) menyaring pilihan aktif dan menjelaskan nilai lama nonaktif. Komponen diuji untuk jabatan dan departemen; integrasi pemuatan pilihan serta form karyawan dilakukan pada T12.
 - Tier 1 typecheck/lint; Tier 2 unit/komponen; API MySQL nyata; Tier 3 layout terang/gelap; checkpoint Tier 4 HRD nyata dengan backend dist terbaru, satu worker.
 
-## Bukti
-Belum dijalankan; diperbarui setelah verifikasi T11.
+## Bukti (2026-10-02)
+- Migration `20261002080000_employee_master_positions`: `pnpm exec prisma migrate diff --from-migrations prisma/migrations --to-schema prisma/schema.prisma --exit-code` menghasilkan 0. Diterapkan ke attendance_dev dan attendance_test; grants runtime dan generate/build client lulus.
+- Employee: typecheck/lint, 9 unit (5 guard/AuthClient + 4 transaksi jabatan), 12 API MySQL (6 departemen + 6 jabatan) lulus. Test jabatan membuktikan konflik nama/kode case-insensitive, normalisasi, validasi/404/403/401, audit/no-op, nonaktif tanpa hapus dan filter ACTIVE yang mengecualikan nonaktif. API MySQL memakai profile Auth stub; Auth nyata diverifikasi pada journey browser.
+- Gateway: typecheck/lint, 12 unit dan 37 kontrak HTTP lulus; allowlist/query/header/outage pada kedua master.
+- HR: typecheck/lint/build, 38 Vitest/RTL lulus, termasuk 12 halaman jabatan, 9 departemen dan 6 selector aktif/nilai lama nonaktif. Vitest satu worker untuk RAM terbatas.
+- Visual: `pnpm --dir apps/hr-web run test:ui --workers=1`: 36 test lulus, termasuk H11/H12 terang/gelap pada 320/768/1024/1440 px. Screenshot daftar/form ditinjau; pager Geist, filter satu grup, aksi terlihat dan tanpa overflow.
+- Backend Auth/Employee/Gateway dist dibangun sebelum checkpoint. `pnpm --dir apps/hr-web run test:e2e hr-positions.spec.ts --workers=1`: 2 lulus (desktop/mobile); login → tambah → konflik kode → ubah → konfirmasi nonaktif → filter URL + reload → aktifkan → baris hilang dari filter Nonaktif. Regresi `hr-departments.spec.ts` dijalankan terpisah: 2 lulus dengan assertion refetch yang sama.
+- Cleanup test diverifikasi: 0 jabatan/departemen berprefiks E2E dan 0 akun browser tersisa. Seluruh port aplikasi/test ditutup; MySQL lokal tetap pada 3307.
+
+## Batas checkpoint
+Form akun/profil karyawan serta pemuatan selector terintegrasi masuk T12. Tidak ada perubahan limit login/refresh Auth atau centang T09c. E2E per spec dijalankan terpisah; kendala 429 gabungan tetap menunggu keputusan pengguna.
