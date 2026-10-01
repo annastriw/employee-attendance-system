@@ -5,19 +5,21 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 ## Snapshot terakhir
 
 - Tanggal: 2026-10-01 (Asia/Jakarta).
-- Tahap: fondasi/Auth/HR login sebagian selesai; domain bisnis berikutnya belum diimplementasikan penuh.
-- T08/T09 tersedia; beberapa task induk T01–T07 belum ditutup. Audit source/test sebelum mengubah checklist.
-- Desain semua layar E01–E09/H01–H14 tersedia; panduan netral seluruh proyek telah diperbarui menjadi serial: dua agen bergantian, satu aktif, tanpa subagen.
-- Commit terakhir diketahui sebelum revisi serial: 9cb85c4. Gunakan git log/status untuk commit terbaru; jangan menganggap hash snapshot adalah HEAD permanen.
-- Branch kerja: dev. Remote belum tersedia pada pemeriksaan terakhir; push menunggu repository pilihan pengguna.
-- Perubahan dokumen aman; tidak ada implementasi domain bisnis pada revisi panduan ini.
-- Layanan/port aktif tidak diperiksa pada revisi dokumentasi; verifikasi sebelum menjalankan stack.
+- Tahap: fondasi/Auth/HR login selesai; T10 (master departemen) dimulai — lapisan schema/migration selesai dan terverifikasi offline, lapisan API/UI/test belum.
+- Commit terbaru pada dev (sesi ini):
+  - 93488ae docs: record approved simplification, keep 5-service + 2-frontend structure
+  - f423e47 feat: add employee department master schema and migration (T10)
+  - HEAD sebelumnya 94e386c (sesuai trigger). Verifikasi dengan git log; jangan anggap hash lama sebagai HEAD.
+- Branch kerja: dev. Remote belum tersedia; push menunggu repository pilihan pengguna.
+- KENDALA LINGKUNGAN AKTIF: host memory CRITICAL (~0.5 GB free, dispatch paused). Build Nest, prisma generate/client build, migrate apply dan Vitest/Playwright DITUNDA agar tidak OOM atau meninggalkan DB setengah ter-migrasi. Hanya langkah ringan dijalankan sesi ini (edit file, prisma validate, migrate diff offline).
+- Migration `20261001160000_employee_master_departments` BELUM diterapkan ke MySQL dev/test. `prisma migrate diff --from-migrations ... --to-schema ... --exit-code` = 0 (No difference) → SQL cocok dengan schema; aman diterapkan saat memory lega.
+- Layanan/port aktif tidak diperiksa; verifikasi sebelum menjalankan stack.
 
 ## Satu pekerjaan aktif
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | Belum ada task coding aktif; sesi sekarang belum dipindahkan |
+| T10 master departemen | sesi aktif (dev) | prisma/schema.prisma, prisma/migrations/20261001160000_employee_master_departments/, berikutnya apps/employee-service/, apps/api-gateway/, apps/hr-web/ | T09 (selesai) | employee-service port target 3002 (belum jalan) | Schema+migration selesai & commit (f423e47); migrate apply + API + UI + test TERTUNDA (memory CRITICAL) |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 
@@ -30,16 +32,21 @@ Folder .agents/, .claude/, .windsurf/ dan skills-lock.json merupakan berkas loka
 ## Bukti pemeriksaan
 
 - Sebelumnya: Auth/Gateway/HR login memiliki hasil test pada task/runbook terkait; hasil tersebut bukan verifikasi ulang sesi ini.
-- Revisi serial: 29 tautan lokal dan blok Markdown lulus; instruksi lama coding paralel dihapus, dua agen bergantian/satu aktif serta trigger pergantian terverifikasi. Perubahan hanya dokumentasi.
-- Test aplikasi, perangkat nyata dan layanan live tidak dijalankan dalam pekerjaan dokumentasi ini.
+- Sesi ini (2026-10-01): keputusan penyederhanaan diselaraskan ke AGENTS.md/plan.md/todo.md; aturan bisnis dan struktur 5-service+2-frontend dipertahankan; tautan dokumen diperiksa (semua resolve; packages/contracts & packages/config dicatat belum ada). Schema T10 ditambah (EmpDepartment, EmpAuditLog, enum EmpMasterStatus): `prisma validate` lulus (exit 0); migration SQL ditulis manual mengikuti konvensi auth; `prisma migrate diff --from-migrations --to-schema --exit-code` = 0 (No difference) → SQL cocok schema.
+- TIDAK dijalankan sesi ini (memory CRITICAL): migrate apply ke MySQL, prisma generate/client build, Nest build, Vitest/RTL, Playwright, layanan live, perangkat nyata.
 
 ## Langkah berikut
 
-1. Baca AGENTS, baseline, plan/todo, alur implementasi dan snapshot ini; periksa Git/source/runtime.
-2. Audit task fondasi yang belum ditutup dan module specs yang belum lengkap; jangan mengulang Auth/HR login yang sudah bekerja.
-3. Tetapkan task siap dan file scope. Jalur awal berikutnya adalah master departemen T10; spike kamera/lokasi T18 dapat dijadwalkan sebagai task serial setelah fondasi terkait T07 terverifikasi. Persiapan schema/contracts/testing/infra mengikuti dependency masing-masing.
-4. Kerjakan slice API + UI + test sesuai kontrak, integrasikan dengan MySQL/AIStor nyata dan lanjutkan seluruh plan. Review UI mengikuti spesifikasi, tanpa membatasi pekerjaan pada frontend.
-5. Update todo/progress, review diff dan commit perubahan terverifikasi pada dev; push ketika remote pengguna tersedia.
+Prasyarat: pastikan host memory sudah lega (jangan jalankan build/migrate saat posture CRITICAL). Lanjutkan T10 ujung ke ujung:
+
+1. Terapkan migration: `pnpm db:generate` (prisma generate + build @attendance/database), lalu `pnpm db:migrate` (dev) dan `pnpm db:migrate:test` (schema test). Verifikasi tabel `emp_departments`/`emp_audit_logs` ada dan `pnpm db:verify` lulus. Pastikan akun runtime employee punya grant pada tabel emp_* (lihat scripts/database/setup-local.mjs; tambah grant bila belum ada).
+2. employee-service (apps/employee-service/): tiru pola auth-service — EmployeeConfig (EMPLOYEE_DATABASE_URL, port 3002, origins), DatabaseModule/DatabaseService memakai createDatabaseClient, configureApp (ValidationPipe whitelist, Swagger /docs, request-id, SafeExceptionFilter), guard sesi/role ADMIN_HRD. Modul departments: controller GET/POST /departments, GET/PATCH /departments/:id, POST /departments/:id/activate dan /:id/deactivate; DTO validasi name/code; service dengan unik name/code (409), tidak hard-delete, audit ke emp_audit_logs. Pecah bila >5 file.
+3. api-gateway (apps/api-gateway/): tambah EMPLOYEE_SERVICE_URL + proxy route /api/v1/departments* dan /api/v1/employees* (teruskan Authorization/JWT, tanpa menyimpan state). Tiru auth-proxy.service.ts/controller.ts.
+4. hr-web (apps/hr-web/): halaman H11 Departemen — daftar (toolbar cari/status → tabel → pagination), form tambah/edit (dialog pendek), aksi aktif/nonaktif kontekstual, states loading/empty/error/busy/success. Pakai token+komponen packages/ui, HeroUI via MCP, Atomic Design, monokrom charcoal, Bahasa Indonesia. Selector penugasan baru hanya master aktif (relevan T11/T12).
+5. Test terfokus: Jest/Supertest employee-service (unik name/code, otorisasi ADMIN_HRD, activate/deactivate, data dipakai tidak dihapus), Vitest/RTL hr-web (interaksi daftar/form), 1 Playwright journey HR kelola departemen dengan API/MySQL test nyata. Suite lengkap di checkpoint, bukan tiap langkah.
+6. Review diff, stage file terkait saja, commit berprefix pada dev; update todo (centang T10 hanya dengan bukti) dan progress. Lalu lanjut T11 (jabatan) memakai pola yang sama.
+
+Catatan: baseline peta API memakai /api/v1 base; employee-service bind 127.0.0.1 lokal, hanya Gateway yang publik. Jangan commit .env/rahasia/data pribadi. .agents/, .claude/, .kiro/, .windsurf/, skills-lock.json tetap untracked; jangan di-stage.
 
 ## Kendala dan kebutuhan eksternal
 
