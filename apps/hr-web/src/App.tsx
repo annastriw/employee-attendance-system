@@ -74,7 +74,8 @@ export function App({ client = authClient }: { client?: AuthClient }) {
     );
   if (user && !user.mustChangePassword)
     return (
-      <DashboardPage user={user} busy={busy} error={error} onLogout={logout} />
+      <DashboardPage user={user} client={client} busy={busy} error={error} onLogout={logout}
+        onSessionExpired={() => { setUser(null); setError("Sesi Anda telah berakhir. Silakan masuk kembali."); }} />
     );
   return (
     <AuthLayout>

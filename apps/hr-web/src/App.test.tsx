@@ -13,6 +13,7 @@ const admin: AdminUser = {
 function client(): AuthClient {
   return {
     restore: vi.fn().mockResolvedValue(null),
+    api: vi.fn().mockResolvedValue({ items: [], total: 0, page: 1, pageSize: 20 }),
     currentUser: vi.fn().mockReturnValue(admin),
     login: vi.fn().mockResolvedValue(admin),
     changePassword: vi.fn().mockResolvedValue(undefined),
