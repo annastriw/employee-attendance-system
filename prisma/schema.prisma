@@ -1,13 +1,66 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
 }
 
 datasource db {
   provider = "mysql"
+}
+
+enum AuthRole {
+  ADMIN_HRD
+  EMPLOYEE
+}
+
+enum AuthAccountStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+model AuthAccount {
+  id                 String            @id @default(uuid()) @db.Char(36)
+  email              String            @unique @db.VarChar(254)
+  employeeId         String?           @unique @map("employee_id") @db.Char(36)
+  passwordHash       String            @map("password_hash") @db.VarChar(60)
+  role               AuthRole
+  status             AuthAccountStatus @default(INACTIVE)
+  mustChangePassword Boolean           @default(true) @map("must_change_password")
+  passwordChangedAt  DateTime?         @map("password_changed_at") @db.DateTime(3)
+  archivedAt         DateTime?         @map("archived_at") @db.DateTime(3)
+  createdAt          DateTime          @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt          DateTime          @updatedAt @map("updated_at") @db.DateTime(3)
+  sessions           AuthSession[]
+
+  @@index([role, status])
+  @@map("auth_accounts")
+}
+
+model AuthSession {
+  id               String      @id @default(uuid()) @db.Char(36)
+  accountId        String      @map("account_id") @db.Char(36)
+  refreshTokenHash String      @unique @map("refresh_token_hash") @db.Char(64)
+  expiresAt        DateTime    @map("expires_at") @db.DateTime(3)
+  revokedAt        DateTime?   @map("revoked_at") @db.DateTime(3)
+  createdAt        DateTime    @default(now()) @map("created_at") @db.DateTime(3)
+  account          AuthAccount @relation(fields: [accountId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([accountId, revokedAt])
+  @@index([expiresAt])
+  @@map("auth_sessions")
+}
+
+model AuthAuditLog {
+  id              String   @id @default(uuid()) @db.Char(36)
+  actorAccountId  String?  @map("actor_account_id") @db.Char(36)
+  targetAccountId String?  @map("target_account_id") @db.Char(36)
+  action          String   @db.VarChar(80)
+  reason          String?  @db.VarChar(500)
+  requestId       String?  @map("request_id") @db.Char(36)
+  createdAt       DateTime @default(now()) @map("created_at") @db.DateTime(3)
+
+  @@index([targetAccountId, createdAt])
+  @@index([actorAccountId, createdAt])
+  @@map("auth_audit_logs")
 }

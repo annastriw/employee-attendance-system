@@ -269,3 +269,10 @@ Catatan: bagian database development dari T07 selesai berdasarkan laporan penggu
 - [x] Setup lokal berhasil, prisma validate lulus.
 - [ ] Migration domain dan verifikasi runtime dilanjutkan pada T07b.
 - Batas: T07 keseluruhan belum selesai; instance test khusus dan harness frontend belum tersedia.
+
+## T07b — Fondasi schema Auth dan verifikasi database
+- [x] T07b.1: Spec tiga tabel Auth, migration awal dev/test dan client Prisma 7.10.0.
+- [x] T07b.2: Hak runtime, verifikasi MySQL nyata, constraint dan rollback pada attendance_test.
+- [x] Migration berulang tanpa pending, tidak ada drift, typecheck script lulus.
+- [ ] Database module NestJS, seed/login, schema service lain dan outbox dikerjakan berikutnya.
+- [ ] Container test khusus dan harness frontend tetap belum tersedia; T07 induk belum selesai.

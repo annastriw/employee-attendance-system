@@ -78,4 +78,3 @@ if (process.argv.includes("--grants")) {
 mysql(sql);
 console.log("Local database setup complete. Credentials are in ignored .env.database.");
 console.log("Dev/test/shadow databases are isolated schemas on the same local MySQL instance.");
-
