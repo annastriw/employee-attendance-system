@@ -6,6 +6,7 @@ import {
   type ExceptionFilter,
   type ArgumentsHost,
 } from '@nestjs/common';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { randomUUID } from 'node:crypto';
 import { isUUID } from 'class-validator';
@@ -35,6 +36,8 @@ class SafeExceptionFilter implements ExceptionFilter {
 }
 export function configureApp(app: INestApplication) {
   const config = app.get(AuthConfig);
+  // Only the local Gateway may supply client addresses for rate limiting.
+  (app as NestExpressApplication).set('trust proxy', 'loopback');
   app.use(helmet());
   app.use(cookieParser());
   app.use((request: Request, response: Response, next: NextFunction) => {

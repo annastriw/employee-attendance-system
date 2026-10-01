@@ -284,3 +284,10 @@ Catatan: bagian database development dari T07 selesai berdasarkan laporan penggu
 - [x] T08c: Login per role, JWT/session, validasi dan audit.
 - [x] T08d: Refresh, change-password, revocation dan integration test.
 - Spec: ../docs/sdd/auth-service.md; belum ada integrasi frontend/Gateway.
+
+## T09a — Integrasi Auth melalui Gateway
+- [x] Route autentikasi tetap, cookie dan JWT diteruskan tanpa penyimpanan Gateway.
+- [x] Batas body, timeout, CORS, request ID dan readiness terverifikasi.
+- [x] Supertest upstream HTTP nyata serta smoke Auth/MySQL lulus.
+- [x] Dokumen menjalankan Gateway tersedia; commit lokal dev.
+- Batas: UI HRD, component test dan Playwright dilanjutkan T09b/T09c.

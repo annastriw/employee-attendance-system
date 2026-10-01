@@ -233,4 +233,23 @@ describe('Auth API with isolated MySQL', () => {
       .auth(response.body.accessToken, { type: 'bearer' })
       .expect(401);
   });
+  it('limits each client behind the trusted local Gateway independently', async () => {
+    for (let attempt = 0; attempt < 10; attempt++) {
+      await request(app.getHttpServer())
+        .post('/api/v1/auth/admin/login')
+        .set('X-Forwarded-For', '192.0.2.10')
+        .send({})
+        .expect(400);
+    }
+    await request(app.getHttpServer())
+      .post('/api/v1/auth/admin/login')
+      .set('X-Forwarded-For', '192.0.2.10')
+      .send({})
+      .expect(429);
+    await request(app.getHttpServer())
+      .post('/api/v1/auth/admin/login')
+      .set('X-Forwarded-For', '192.0.2.11')
+      .send({})
+      .expect(400);
+  });
 });
