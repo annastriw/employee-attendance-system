@@ -255,3 +255,10 @@ Status: belum dikerjakan. Semua path adalah target rencana, bukan file yang suda
 - [x] Pull image, startup, verifikasi lisensi dan healthcheck (pengujian manual pengguna).
 - [x] Buat bucket privat, upload/read, uji akses anonim dan persistensi (pengujian manual pengguna).
 Catatan: ini bagian storage dari T07; T07 keseluruhan belum selesai. Status terperinci: docs/deployment/installation-status.md.
+## Subtask lingkungan — MySQL lokal (diminta pengguna)
+- [x] Compose MySQL 8.4.11, localhost:3307, UTC dan volume persisten.
+- [x] Pengguna mengonfirmasi login/query, penyimpanan dan persistensi sesudah restart serta koneksi port Windows.
+- [x] Kredensial lokal dipisahkan; template environment aman disediakan.
+- [ ] Instance MySQL testing terpisah dan harness testing aplikasi.
+- [ ] Akun database dengan hak akses per service.
+Catatan: bagian database development dari T07 selesai berdasarkan laporan pengguna; T07 keseluruhan belum selesai. Panduan: docs/deployment/mysql-local.md.

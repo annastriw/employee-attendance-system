@@ -22,7 +22,7 @@ Setelah mengikuti tutorial setup dan pengujian penyimpanan, pengguna menyatakan 
 - Integrasi Media Service menggunakan kredensial/policy aplikasi, bukan akun root.
 - Pengujian otorisasi foto lintas karyawan ketika aplikasi tersedia.
 - Uji backup/restore dan deployment VPS sebelum live.
-T07 keseluruhan belum selesai: MySQL dan harness testing aplikasi masih perlu disiapkan.
+MySQL development telah disiapkan dan pengujiannya dikonfirmasi pengguna; lihat mysql-local.md. T07 keseluruhan belum selesai: instance database testing dan harness testing aplikasi masih perlu disiapkan.
 
 ## Panduan
 Lihat aistor-local.md untuk menjalankan, menghentikan, dan menguji storage.
