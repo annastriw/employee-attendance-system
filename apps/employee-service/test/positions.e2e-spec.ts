@@ -117,6 +117,10 @@ describe('Positions API with isolated MySQL', () => {
     await api().post(`/api/v1/positions/${created.body.id}/deactivate`).set(as('admin')).expect(200);
     const inactive = await api().get('/api/v1/positions').query({ search: prefix, status: 'INACTIVE' }).set(as('admin')).expect(200);
     expect(inactive.body.items.map((item: { code: string }) => item.code)).toEqual([prefix + '-RND']);
+    const active = await api().get('/api/v1/positions').query({ search: prefix, status: 'ACTIVE' }).set(as('admin')).expect(200);
+    expect(active.body.items.length).toBeGreaterThan(0);
+    expect(active.body.items.every((item: { status: string }) => item.status === 'ACTIVE')).toBe(true);
+    expect(active.body.items.some((item: { id: string }) => item.id === created.body.id)).toBe(false);
     const page = await api().get('/api/v1/positions').query({ search: prefix, pageSize: 2, page: 1 }).set(as('admin')).expect(200);
     expect(page.body).toMatchObject({ page: 1, pageSize: 2 });
     expect(page.body.items).toHaveLength(2);
