@@ -144,7 +144,7 @@ for (const scheme of ['light', 'dark'] as const) for (const width of [320, 768, 
     await expect(page.getByRole('button',{name:'Selesai',exact:true})).toBeInViewport({ratio:1});expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
     await page.screenshot({path:info.outputPath('temporary-password-'+scheme+'-'+width+'.png'),fullPage:true});await page.keyboard.press('Escape');await expect(page.getByLabel('Password sementara',{exact:true})).toHaveCount(0);
     const failedId='22222222-2222-4222-8222-222222222222';await page.route('**/api/v1/employee-provisioning/'+failedId,route=>route.fulfill({json:{id:failedId,employeeId:failedId,email:'used@example.test',status:'FAILED',errorCode:'EMAIL_CONFLICT',canCorrectEmail:true}}));
-    await page.goto('http://127.0.0.1:15175/#karyawan?operation='+failedId);await expect(page.getByLabel('Email pengganti',{exact:true})).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
+    await page.goto('http://127.0.0.1:15175/#karyawan?operation='+failedId);await expect(page.getByLabel('Email pengganti',{exact:true})).toBeVisible();await expect(page.getByText('Karyawan berhasil dibuat. Password sementara telah ditutup.')).toHaveCount(0);expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
     await page.screenshot({path:info.outputPath('employee-email-recovery-'+scheme+'-'+width+'.png'),fullPage:true});expect(errors).toEqual([]);
   });
 }

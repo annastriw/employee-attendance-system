@@ -17,8 +17,8 @@ function setup(params = '', override?: (path: string, init?: { body?: unknown; m
     return completed;
   });
   const onParamsChange = vi.fn(), onSessionExpired = vi.fn();
-  render(<EmployeesPage client={{ api: api as never }} params={new URLSearchParams(params)} onParamsChange={onParamsChange} onSessionExpired={onSessionExpired} />);
-  return { api, onParamsChange, onSessionExpired, user: userEvent.setup() };
+  const rendered = render(<EmployeesPage client={{ api: api as never }} params={new URLSearchParams(params)} onParamsChange={onParamsChange} onSessionExpired={onSessionExpired} />);
+  return { api, onParamsChange, onSessionExpired, rerender: rendered.rerender, user: userEvent.setup() };
 }
 async function fill(user: ReturnType<typeof userEvent.setup>) {
   await user.click(await screen.findByRole('button', { name: 'Tambah' }));
@@ -38,11 +38,13 @@ describe('Employee creation and one-time password UI', () => {
     expect(await screen.findByText('Masukkan email yang valid.')).toBeInTheDocument(); expect(screen.getByText('Pilih departemen aktif.')).toBeInTheDocument(); expect(api.mock.calls.some(([path]) => path === 'employees')).toBe(false);
   });
   it('submits a stable idempotency key and removes password from DOM after close', async () => {
-    const { user, api } = setup(); await fill(user); await user.click(screen.getByRole('button', { name: 'Buat karyawan' }));
+    const { user, api, rerender, onParamsChange, onSessionExpired } = setup(); await fill(user); await user.click(screen.getByRole('button', { name: 'Buat karyawan' }));
     const dialog = await screen.findByRole('dialog'); expect(within(dialog).getByLabelText('Password sementara')).toHaveValue('one-time-ui-test-password');
     const call = api.mock.calls.find(([path]) => path === 'employees'); expect(call?.[1]).toMatchObject({ method: 'POST', idempotencyKey: expect.stringMatching(/^[0-9a-f-]{36}$/), body: { nik: 'EMP-02', name: 'New Employee', email: 'new@example.test' } });
     expect(localStorage.length).toBe(0); expect(sessionStorage.length).toBe(0);
     await user.click(within(dialog).getByRole('button', { name: 'Selesai' })); await waitFor(() => expect(screen.queryByDisplayValue('one-time-ui-test-password')).not.toBeInTheDocument());
+    rerender(<EmployeesPage client={{ api: api as never }} params={new URLSearchParams('operation=' + id)} onParamsChange={onParamsChange} onSessionExpired={onSessionExpired} />);
+    expect(screen.queryByText('Karyawan berhasil dibuat. Password sementara telah ditutup.')).not.toBeInTheDocument();
   });
   it('reports an expired session', async () => {
     const { onSessionExpired } = setup('', async () => { throw new AuthError(401, 'Sesi berakhir.'); });
