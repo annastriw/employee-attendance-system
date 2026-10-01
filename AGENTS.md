@@ -24,6 +24,15 @@
 - Jaga struktur monorepo dan Atomic Design frontend.
 - Gunakan test yang relevan untuk aturan bisnis dan alur pengguna.
 
+## Penyederhanaan disetujui (revisi 2026-10-01)
+Struktur tetap: satu monorepo, lima service NestJS (API Gateway, Auth, Employee, Attendance, Media) dengan proses/port berbeda, dua frontend React (Attendance, HR). Jangan menggabungkan backend menjadi satu service. MySQL, AIStor Free, dua project Vercel, VPS Ubuntu dan Cloudflare tetap sesuai baseline.
+- T01–T31 satu backlog utama; UX01–UX07 adalah pemetaan layar ke task, bukan pekerjaan terpisah.
+- Selesaikan satu fitur ujung ke ujung: schema/kontrak → API → UI → test → review → commit.
+- Pakai pola bersama untuk form, daftar, detail dan konfirmasi; pisah komponen Atomic Design hanya atas tanggung jawab atau reuse nyata. Tunda abstraksi generik.
+- Gunakan controller/DTO/service dan Prisma sesuai kepemilikan data; batasi outbox/retry pada alur konsistensi lintas service, tetap penuhi idempotensi/kompensasi/pemulihan baseline.
+- Test terfokus per perubahan; suite lengkap pada checkpoint integrasi. Ringkas dokumentasi menjadi module spec + acceptance; hindari dokumen berulang untuk CRUD kecil.
+- Gunakan tooling yang ada; tunda broker/cache/orchestration/build system tanpa kebutuhan nyata.
+
 ## Object storage
 - Gunakan MinIO AIStor Free, bukan MinIO Community. Jalankan melalui Docker Compose pada lokal dan VPS; ikuti docs/architecture/adr-001-object-storage.md. Jangan commit berkas lisensi atau data volume.
 

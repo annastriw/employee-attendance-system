@@ -2,6 +2,8 @@
 
 Status: implementasi sebagian berjalan; checklist per-task dan subtask menunjukkan bukti yang telah selesai. Path pada task yang belum selesai merupakan target rencana. Checklist induk tidak otomatis selesai hanya karena subtask tertentu sudah tersedia. Task lintas beberapa service dipecah lagi sebelum implementasi agar sekitar 1–5 file per task.
 
+Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01–UX07 hanyalah pemetaan layar E01–E09/H01–H14 ke task T10–T31 untuk keterlacakan frontend, bukan pekerjaan terpisah. Setiap fitur diselesaikan ujung ke ujung (schema/kontrak → API → UI → test → review → commit) memakai pola bersama; abstraksi generik ditunda. Struktur tetap: 5 service NestJS + 2 frontend React. Detail: [plan](plan.md) bagian Penyederhanaan.
+
 ## T01 — Dokumen module SDD dan context
 - [ ] Selesai
 - Acceptance: Pisahkan scope Auth, Employee, Attendance, Media dan Gateway; dokumentasikan aturan yang disetujui tanpa kehilangan kebutuhan.

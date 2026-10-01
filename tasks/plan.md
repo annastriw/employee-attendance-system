@@ -1,5 +1,5 @@
 # Rencana implementasi — Attendance Portal dan HR Portal
-Status: implementasi fondasi berlangsung; task lengkap tetap mengikuti todo.md. Tanggal: 2026-10-01 (Asia/Jakarta).
+Status: implementasi fondasi berlangsung; penyederhanaan pelaksanaan disetujui (lihat bagian Penyederhanaan). Task lengkap tetap mengikuti todo.md. Tanggal: 2026-10-01 (Asia/Jakarta).
 
 ## Acuan
 Kebutuhan/database/API disetujui: ../docs/requirements/baseline.md.
@@ -49,6 +49,21 @@ Script build/lint dan unit test scaffold tersedia. Script db:* menguji migration
 Git lokal telah diinisialisasi pada dev. Dependency dan migration fondasi Auth sudah diterapkan lokal. Deployment dan perubahan akun eksternal belum dilakukan. Database test terpisah schema, belum instance. Status commit dicatat melalui riwayat Git; push menunggu repository GitHub.
 Pengguna telah mengotorisasi commit dan push setiap perubahan yang selesai dan diverifikasi pada branch dev. Pengguna menunda penentuan repository GitHub: pengembangan dan commit lokal tetap berjalan, push menunggu remote. Branch main hanya untuk production.
 Rahasia tetap lokal, .env.example tanpa nilai asli, dokumentasi aman di GitHub.
+
+## Penyederhanaan yang disetujui (revisi 2026-10-01)
+Pengguna menyetujui penyederhanaan pelaksanaan dengan syarat struktur proyek tetap: satu monorepo, lima service NestJS (API Gateway, Auth, Employee, Attendance, Media) dengan proses/port berbeda, dan dua frontend React TypeScript (Attendance Portal dan HR Portal). Backend tidak digabung menjadi satu service. MySQL, AIStor Free, dua project Vercel, VPS Ubuntu dan Cloudflare tetap sesuai baseline. UI/UX tetap mengikuti spesifikasi disetujui: modern, elegan, minimalis, monokrom tombol charcoal, HeroUI via MCP dan komponen custom, Atomic Design, responsif, teks seperlunya.
+
+- T01–T31 adalah satu backlog utama. UX01–UX07 bukan task kerja terpisah, melainkan pemetaan layar (E01–E09/H01–H14) ke task T10–T31 untuk keterlacakan frontend.
+- Dokumentasi diringkas menjadi spesifikasi modul + acceptance terkait; hindari dokumen berulang untuk CRUD kecil. Tulis module spec hanya saat menambah/mengubah perilaku, bukan satu dokumen per endpoint.
+- Setiap fitur diselesaikan ujung ke ujung: schema/kontrak → API → UI → test → review → commit, sebelum pindah task.
+- Gunakan pola bersama untuk form, daftar, detail dan konfirmasi. Komponen Atomic Design dipisah hanya berdasarkan tanggung jawab atau penggunaan ulang nyata, bukan abstraksi dini.
+- Tunda abstraksi generik; gunakan controller/DTO/service dan Prisma sesuai kepemilikan data tiap service.
+- Outbox/retry dibatasi pada alur yang membutuhkan konsistensi lintas service (provisioning akun+profil, media READY→attendance). Idempotensi, kompensasi dan pemulihan yang diwajibkan baseline tetap dipenuhi.
+- Test terfokus per perubahan; suite lengkap pada checkpoint integrasi. Prioritas: aturan bisnis, otorisasi, revokasi, lokasi wajib, pemulihan.
+- Gunakan tooling yang ada; tunda tambahan broker/cache/orchestration/build system tanpa kebutuhan nyata.
+- Spike kamera/lokasi (T18) dijadwalkan lebih awal secara serial setelah prasyarat T07 siap.
+
+Catatan struktur aktual: packages/contracts dan packages/config belum dibuat; dibuat saat task pertama yang membutuhkannya (kontrak Employee pada T10). packages/ui dan packages/database sudah ada.
 
 ## Cara menjalankan pekerjaan
 Task pada todo.md berukuran kecil. Jika implementasi perlu lebih dari sekitar lima file, pecah task sebelum bekerja dan catat dependensi. Checkpoint ditinjau sebelum fase berikutnya. Update spec dahulu bila keputusan berubah.
