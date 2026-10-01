@@ -60,6 +60,18 @@ Pengguna menyetujui penyederhanaan pelaksanaan dengan syarat struktur proyek tet
 - Tunda abstraksi generik; gunakan controller/DTO/service dan Prisma sesuai kepemilikan data tiap service.
 - Outbox/retry dibatasi pada alur yang membutuhkan konsistensi lintas service (provisioning akun+profil, media READY→attendance). Idempotensi, kompensasi dan pemulihan yang diwajibkan baseline tetap dipenuhi.
 - Test terfokus per perubahan; suite lengkap pada checkpoint integrasi. Prioritas: aturan bisnis, otorisasi, revokasi, lokasi wajib, pemulihan.
+
+### Tier test (biaya vs nilai) — revisi 2026-10-01
+Tujuan: loop pengembangan cepat tanpa mengorbankan bukti kontrak bisnis. Jalankan tier sesuai jenis perubahan, bukan semua suite setiap langkah.
+
+| Tier | Isi | Kapan dijalankan |
+| --- | --- | --- |
+| 1. Statis (wajib tiap perubahan) | `tsc --noEmit` (typecheck) + lint berkas terkait | Setiap perubahan sebelum commit. Ringan (~detik). |
+| 2. Unit/komponen terfokus | Jest/Supertest atau Vitest/RTL hanya untuk berkas/modul yang disentuh | Saat mengubah logika, API, atau komponen. Ringan (jsdom/node). |
+| 3. Visual/design (`pnpm --dir apps/hr-web run test:ui`, Playwright screenshot) | Layout/tema lintas viewport (suite menguji kedua portal) | HANYA saat menyentuh layout/CSS/shell. Berat (butuh dev server); lewati untuk perubahan logika murni. |
+| 4. E2E nyata (`pnpm --dir apps/hr-web run test:e2e`, API+MySQL+AIStor) | Alur ujung ke ujung dengan backend nyata | Checkpoint integrasi per fitur dan sebelum promosi ke `main`. Paling berat; BUKAN gate per commit. |
+
+Wajib ada buktinya dan tidak boleh dipangkas oleh pemangkasan tier: aturan bisnis absensi (late/early/cutoff), otorisasi role, revokasi sesi, lokasi wajib, idempotensi check-in/out, pemulihan/kompensasi. Mock hanya untuk test/prototipe; hasil akhir memakai MySQL/AIStor nyata.
 - Gunakan tooling yang ada; tunda tambahan broker/cache/orchestration/build system tanpa kebutuhan nyata.
 - Spike kamera/lokasi (T18) dijadwalkan lebih awal secara serial setelah prasyarat T07 siap.
 

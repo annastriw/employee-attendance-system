@@ -30,7 +30,7 @@ Struktur tetap: satu monorepo, lima service NestJS (API Gateway, Auth, Employee,
 - Selesaikan satu fitur ujung ke ujung: schema/kontrak → API → UI → test → review → commit.
 - Pakai pola bersama untuk form, daftar, detail dan konfirmasi; pisah komponen Atomic Design hanya atas tanggung jawab atau reuse nyata. Tunda abstraksi generik.
 - Gunakan controller/DTO/service dan Prisma sesuai kepemilikan data; batasi outbox/retry pada alur konsistensi lintas service, tetap penuhi idempotensi/kompensasi/pemulihan baseline.
-- Test terfokus per perubahan; suite lengkap pada checkpoint integrasi. Ringkas dokumentasi menjadi module spec + acceptance; hindari dokumen berulang untuk CRUD kecil.
+- Test terfokus per perubahan; suite lengkap pada checkpoint integrasi. Ikuti tier test (biaya vs nilai) di tasks/plan.md: Tier 1 statis (tsc/lint) wajib tiap perubahan; Tier 2 unit/komponen terfokus saat menyentuh logika/komponen; Tier 3 visual/design (test:ui) hanya saat mengubah layout/CSS; Tier 4 E2E nyata (test:e2e, API+MySQL+AIStor) di checkpoint integrasi dan sebelum promosi ke main, bukan gate per commit. Bukti aturan bisnis/otorisasi/revokasi/lokasi/idempotensi/pemulihan tetap wajib. Ringkas dokumentasi menjadi module spec + acceptance; hindari dokumen berulang untuk CRUD kecil.
 - Gunakan tooling yang ada; tunda broker/cache/orchestration/build system tanpa kebutuhan nyata.
 
 ## Object storage
