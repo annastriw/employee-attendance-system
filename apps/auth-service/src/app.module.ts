@@ -1,3 +1,4 @@
+import { AccountProvisioningModule } from './provisioning/provisioning.controller';
 import { AuthModule } from './auth/auth.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
@@ -12,6 +13,7 @@ import { AppService } from './app.service';
   imports: [
     DatabaseModule,
     AuthModule,
+    AccountProvisioningModule,
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 10 }]),
   ],
   controllers: [AppController, HealthController],
