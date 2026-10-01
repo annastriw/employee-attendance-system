@@ -1,0 +1,37 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+*.p12
+
+# Dependencies and generated output
+node_modules/
+dist/
+build/
+coverage/
+.vercel/
+.turbo/
+playwright-report/
+test-results/
+*.log
+
+# Private data and local backups
+backups/
+uploads/
+private/
+.local/
+*.sql.gz
+
+# Local editor and OS files
+.idea/
+.vscode/
+Thumbs.db
+.DS_Store
+
+# AIStor license and persistent local storage
+minio.license
+.licenses/
+.data/
