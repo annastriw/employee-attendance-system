@@ -46,7 +46,7 @@ Script build/lint dan unit test scaffold tersedia. Script db:* menguji migration
 - Live belum bisa dikonfigurasi tanpa akses layanan: siapkan artefak deployment dahulu; minta hanya akses yang dibutuhkan ketika tahap deploy.
 
 ## Batas pekerjaan
-Git lokal telah diinisialisasi pada dev. Dependency dan migration fondasi Auth sudah diterapkan lokal. Repository GitHub private telah dibuat atas pilihan pengguna pada 2026-10-02; deployment belum dilakukan. Database test terpisah schema, belum instance. Status commit/push dicatat melalui riwayat Git dan origin/dev.
+Git lokal telah diinisialisasi pada dev. Dependency dan migration fondasi Auth sudah diterapkan lokal. Repository GitHub public telah dibuat atas pilihan pengguna pada 2026-10-02; deployment belum dilakukan. Database test terpisah schema, belum instance. Status commit/push dicatat melalui riwayat Git dan origin/dev.
 Pengguna telah mengotorisasi commit dan push setiap perubahan yang selesai dan diverifikasi pada branch dev. Remote origin ditetapkan ke [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system); commit terverifikasi dipush ke dev. Deployment tetap tahap terakhir. Branch main hanya untuk production.
 Rahasia tetap lokal, .env.example tanpa nilai asli, dokumentasi aman di GitHub.
 
