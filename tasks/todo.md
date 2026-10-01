@@ -56,7 +56,7 @@ Status: belum dikerjakan. Semua path adalah target rencana, bukan file yang suda
 - [ ] Alur fase diverifikasi, batasan dicatat dan ditinjau.
 
 ## T08 — Login admin backend
-- [ ] Selesai
+- [x] Selesai
 - Acceptance: Seed password hash, endpoint login role terpisah, sesi/revokasi, forced password change.
 - Verification: Jest/Supertest: login salah role, password salah, sesi lama, restricted session.
 - Dependencies: 7
@@ -281,6 +281,6 @@ Catatan: bagian database development dari T07 selesai berdasarkan laporan penggu
 - [x] T08a.1: Package database backend bersama, generate/build dan test konfigurasi koneksi.
 - [x] T08a.2: Database module Auth dan healthcheck.
 - [x] T08b: Seed HRD idempotent, hash bcrypt dan forced password change.
-- [ ] T08c: Login per role, JWT/session, validasi dan audit.
-- [ ] T08d: Refresh, change-password, revocation dan integration test.
+- [x] T08c: Login per role, JWT/session, validasi dan audit.
+- [x] T08d: Refresh, change-password, revocation dan integration test.
 - Spec: ../docs/sdd/auth-service.md; belum ada integrasi frontend/Gateway.
