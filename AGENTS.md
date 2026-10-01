@@ -35,6 +35,6 @@
 - Seluruh implementasi mengikuti docs/development/implementation-workflow.md serta tasks/plan.md dan tasks/todo.md. Checklist UX01–UX07 hanya keterlacakan frontend, bukan pembatas scope proyek.
 - Arahan desain telah diberikan pengguna; lanjutkan increment dalam scope tanpa meminta persetujuan rutin berulang. Keputusan bisnis baru dan akses eksternal yang belum tersedia ditangani secara spesifik.
 
-- Frontend, backend/service, database/storage, testing, CI dan deployment tetap termasuk scope. Kerjakan task independen secara paralel sesuai dependency plan, dengan skills/agen paralel yang tersedia.
-- Catat pemilik task, scope file dan proses/port sebelum kerja paralel; koordinasikan perubahan shared contracts/UI, schema/migration, lockfile dan operasi Git. Jangan menimpa pekerjaan sesi lain.
-- Gunakan tasks/progress.md sebagai checkpoint bersama saat agen/alat berganti; baca Git/source/task aktual sebelum melanjutkan. Batas token/sesi tidak mengubah scope atau berarti proyek selesai.
+- Frontend, backend/service, database/storage, testing, CI dan deployment tetap termasuk scope. Kerjakan serial sesuai dependency plan. Hanya dua agen bergantian, satu agen aktif pada satu waktu; jangan menjalankan subagen atau coding paralel.
+- Catat satu task/increment aktif, file terkait dan proses/port dalam tasks/progress.md. Sebelum berganti agen, periksa diff dan proses yang masih berjalan; jangan menimpa pekerjaan sesi sebelumnya.
+- Saat sesi mendekati batas kapasitas, selesaikan increment yang aman, verifikasi/commit perubahan yang selesai, update tasks/progress.md dan berikan prompt trigger singkat untuk agen berikutnya. Jika kapasitas tidak dapat dibaca, jangan mengarang sisa kuota. Pergantian dilakukan pengguna; agen berikut membaca Git/source/task aktual dan melanjutkan serial. Batas sesi tidak mengubah scope atau berarti proyek selesai.

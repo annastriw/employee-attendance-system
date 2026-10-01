@@ -62,17 +62,9 @@ Persetujuan arah desain dan kelanjutan implementasi telah diberikan; checkpoint 
 
 Definisi selesai lokal: seluruh capability frontend, backend, database/storage dan integrasi sesuai baseline, termasuk E01–E09/H01–H14, API nyata, keamanan/pemulihan, build/lint/test, CI dan runbook/artefak deployment. Artefak live disiapkan sampai akses/rilis tersedia; hasil live tidak diklaim sebelum pengujian nyata. Commit tetap dev; push menunggu remote pengguna.
 
-## Paralelisme dan kelanjutan lintas sesi
-Scope tetap seluruh T01–T31: dua frontend, lima service, kontrak/API/Swagger, schema/migration/grants MySQL, AIStor Free, keamanan, tests, CI, deployment dan operasi. Jalur yang independen berjalan paralel; task yang bergantung kontrak/data menunggu provider dan verification terkait.
+## Pengerjaan serial dan kelanjutan lintas sesi
+Scope tetap seluruh T01–T31: dua frontend, lima service, kontrak/API/Swagger, database/storage, keamanan, testing, CI dan deployment. Pengguna menetapkan dua agen bergantian karena keterbatasan sesi; hanya satu agen aktif, tanpa subagen/coding paralel.
 
-| Jalur siap | Dapat berjalan bersama | Batas |
-| --- | --- | --- |
-| Master/provisioning/lifecycle | Backend service, UI sesuai kontrak, test dan runbook | Integrasi T10–T15 mengikuti dependency; shared Auth/Gateway dikoordinasikan |
-| Spike kamera/lokasi T18 | Jalur master/akun dan persiapan test/infra | Fondasi T07 terkait diverifikasi dahulu |
-| Media T19 | Aturan waktu/libur T16/T17 sesudah T13 siap | Capture T20 terintegrasi setelah T18/T19; check-in T21 menunggu policy/media/capture |
-| Riwayat/monitoring | Backend query/authorization, UI daftar/detail, test dan Leaflet | Mengikuti T23–T26; tidak menganggap mock sebagai hasil akhir |
-| Testing/CI/deploy config | Setiap vertical slice dan jalur domain | Task rilis tetap menunggu acceptance, akses dan verification live |
+Kerjakan satu increment sesuai dependensi: kontrak/schema terkait → API → UI → test/integrasi → review/commit. Pilih task berikut yang siap setelah increment ditutup. Jika terhalang akses, catat kendala lalu kerjakan satu task lain yang siap. Spike kamera/lokasi boleh dijadwalkan lebih awal secara serial setelah fondasi terkait siap.
 
-Kontrak/schema/migration, shared UI, manifests/lockfile dan operasi Git pada working tree sama memiliki satu pemilik aktif pada satu waktu. Pembagian task/file/port dicatat di [progress](progress.md); ownership diakhiri saat task selesai atau sesi berganti. Paralelisme tidak mengubah batas kepemilikan service atau urutan penerapan migration.
-
-[Alur implementasi](../docs/development/implementation-workflow.md) berlaku bagi semua agen/alat yang mengakses repo ini. Sebelum berhenti/berganti sesi, tulis checkpoint progres, diff belum di-commit, proses/port, verification dan langkah berikut. Agen berikut membaca kondisi lokal dan melanjutkan pekerjaan; tidak memulai ulang proyek.
+Sebelum batas sesi, update [progress](progress.md) dan berikan prompt trigger ringkas sesuai [alur implementasi](../docs/development/implementation-workflow.md). Pengguna memilih waktu pindah. Agen berikut memeriksa checkpoint/Git/source/proses dan meneruskan progres tanpa mengulang proyek. Jangan mengarang kuota ketika informasi kapasitas tidak tersedia.

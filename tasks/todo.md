@@ -370,7 +370,7 @@ Catatan: bagian database development dari T07 selesai berdasarkan laporan penggu
 - Target: infra/, docs/deployment/, konfigurasi layanan sesuai akses.
 
 ## Koordinasi seluruh proyek dan checkpoint
-- [x] Panduan kelanjutan dinetralkan terhadap alat; scope seluruh T01–T31 dan aturan paralelisme dicatat.
+- [x] Panduan kelanjutan netral seluruh T01–T31: dua agen bergantian secara serial, satu aktif, tanpa subagen/paralel; checkpoint dan trigger sebelum batas sesi.
 - [x] [Checkpoint bersama](progress.md) disediakan; setiap sesi memperbarui task aktif, scope file, proses/port, bukti dan langkah berikut.
 - Backlog utama tetap T01–T31. UX01–UX07 hanya checklist layar/UX, bukan instruksi bekerja pada frontend saja.
-- Task independen dijalankan paralel sesuai plan. Perubahan shared files/schema/migration/Git dikoordinasikan; task selesai hanya sesudah acceptance dan verification.
+- Kerjakan satu task/increment serial sesuai dependensi. Completion tetap membutuhkan acceptance/verification; sebelum sesi berganti update progress dan berikan trigger singkat.

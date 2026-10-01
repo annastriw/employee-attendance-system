@@ -7,19 +7,19 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 - Tanggal: 2026-10-01 (Asia/Jakarta).
 - Tahap: fondasi/Auth/HR login sebagian selesai; domain bisnis berikutnya belum diimplementasikan penuh.
 - T08/T09 tersedia; beberapa task induk T01–T07 belum ditutup. Audit source/test sebelum mengubah checklist.
-- Desain semua layar E01–E09/H01–H14 tersedia; panduan kelanjutan netral seluruh proyek dan aturan paralelisme telah ditulis.
-- Commit terakhir diketahui sebelum revisi panduan: 40ac89f. Gunakan git log/status untuk commit terbaru; jangan menganggap hash snapshot adalah HEAD permanen.
+- Desain semua layar E01–E09/H01–H14 tersedia; panduan netral seluruh proyek telah diperbarui menjadi serial: dua agen bergantian, satu aktif, tanpa subagen.
+- Commit terakhir diketahui sebelum revisi serial: 9cb85c4. Gunakan git log/status untuk commit terbaru; jangan menganggap hash snapshot adalah HEAD permanen.
 - Branch kerja: dev. Remote belum tersedia pada pemeriksaan terakhir; push menunggu repository pilihan pengguna.
 - Perubahan dokumen aman; tidak ada implementasi domain bisnis pada revisi panduan ini.
 - Layanan/port aktif tidak diperiksa pada revisi dokumentasi; verifikasi sebelum menjalankan stack.
 
-## Pekerjaan aktif dan ownership
+## Satu pekerjaan aktif
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | Belum ada task coding paralel didaftarkan pada snapshot ini |
+| — | — | — | — | — | Belum ada task coding aktif; sesi sekarang belum dipindahkan |
 
-Isi baris sebelum mulai task paralel. Untuk shared contracts/UI, schema/migration, lockfile dan operasi Git, tetapkan satu pemilik pada satu waktu. Status harus diperbarui sebelum mengambil alih task sesi lain.
+Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 
 ## Perubahan yang belum di-commit
 
@@ -30,14 +30,14 @@ Folder .agents/, .claude/, .windsurf/ dan skills-lock.json merupakan berkas loka
 ## Bukti pemeriksaan
 
 - Sebelumnya: Auth/Gateway/HR login memiliki hasil test pada task/runbook terkait; hasil tersebut bukan verifikasi ulang sesi ini.
-- Revisi panduan: pemeriksaan 38 tautan lokal, ketiadaan rujukan khusus alat, blok Markdown, konsistensi scope/dependency dan diff lulus. Test aplikasi tidak dijalankan karena perubahan hanya dokumentasi.
+- Revisi serial: 29 tautan lokal dan blok Markdown lulus; instruksi lama coding paralel dihapus, dua agen bergantian/satu aktif serta trigger pergantian terverifikasi. Perubahan hanya dokumentasi.
 - Test aplikasi, perangkat nyata dan layanan live tidak dijalankan dalam pekerjaan dokumentasi ini.
 
 ## Langkah berikut
 
 1. Baca AGENTS, baseline, plan/todo, alur implementasi dan snapshot ini; periksa Git/source/runtime.
 2. Audit task fondasi yang belum ditutup dan module specs yang belum lengkap; jangan mengulang Auth/HR login yang sudah bekerja.
-3. Tetapkan task siap dan file scope. Jalur awal berikutnya adalah master departemen T10; spike kamera/lokasi T18 dapat berjalan paralel setelah fondasi terkait T07 terverifikasi. Persiapan schema/contracts/testing/infra mengikuti dependency masing-masing.
+3. Tetapkan task siap dan file scope. Jalur awal berikutnya adalah master departemen T10; spike kamera/lokasi T18 dapat dijadwalkan sebagai task serial setelah fondasi terkait T07 terverifikasi. Persiapan schema/contracts/testing/infra mengikuti dependency masing-masing.
 4. Kerjakan slice API + UI + test sesuai kontrak, integrasikan dengan MySQL/AIStor nyata dan lanjutkan seluruh plan. Review UI mengikuti spesifikasi, tanpa membatasi pekerjaan pada frontend.
 5. Update todo/progress, review diff dan commit perubahan terverifikasi pada dev; push ketika remote pengguna tersedia.
 
@@ -58,3 +58,4 @@ Folder .agents/, .claude/, .windsurf/ dan skills-lock.json merupakan berkas loka
 - Verification dijalankan + hasil:
 - Kendala nyata:
 - Langkah berikut + dependency:
+- Trigger pergantian bila sesi mendekati batas:

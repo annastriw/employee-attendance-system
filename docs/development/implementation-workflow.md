@@ -4,7 +4,7 @@ Tanggal: 2026-10-01. Seluruh pekerjaan berlanjut dalam repo lokal yang sama sesu
 
 ## Tujuan dan urutan membaca
 
-Selesaikan seluruh proyek sesuai T01–T31: frontend Attendance/HR, lima service NestJS, kontrak API/Swagger, schema dan migration MySQL, AIStor Free, keamanan, pengujian, CI dan deployment. Frontend mengikuti spesifikasi UI/UX, sedangkan backend/data/infrastruktur mengikuti baseline dan module specs/ADR. Jalur yang independen dapat berjalan paralel; integrasi mengikuti dependensi dan acceptance.
+Selesaikan seluruh proyek sesuai T01–T31: frontend Attendance/HR, lima service NestJS, kontrak API/Swagger, schema dan migration MySQL, AIStor Free, keamanan, pengujian, CI dan deployment. Frontend mengikuti spesifikasi UI/UX, sedangkan backend/data/infrastruktur mengikuti baseline dan module specs/ADR. Seluruh pekerjaan berjalan serial sesuai dependensi dan acceptance. Hanya dua agen bergantian, satu aktif pada satu waktu; tidak ada subagen/coding paralel.
 
 1. [AGENTS.md](../../AGENTS.md): instruksi kerja, Git dan data.
 2. [Baseline](../requirements/baseline.md): aturan seluruh proyek.
@@ -24,47 +24,34 @@ Setelah inventaris awal, gunakan context engineering untuk memuat bagian spec/so
 - Branch dev; belum ada remote saat penulisan. Pengguna menentukan GitHub kemudian; jangan membuat/memilih remote sendiri.
 - Tabel status awal adalah snapshot, bukan asumsi permanen. Status terbaru dibaca dari Git, todo dan progress.
 
-## Jalur kerja paralel sesuai dependensi
+## Pelaksanaan serial sesuai dependensi
 
-T01–T31 tetap backlog utama; UX01–UX07 merupakan keterlacakan layar, bukan pembatas scope atau pengganti plan.
+T01–T31 adalah backlog utama; UX01–UX07 hanya keterlacakan layar. Pilih satu task siap dan satu increment konkret. Kerjakan kontrak/schema yang dibutuhkan → API → UI → test/integrasi → review/commit, lalu lanjutkan increment berikut. Tidak perlu menyelesaikan seluruh backend sebelum mulai frontend.
 
-| Jalur | Pekerjaan | Batas integrasi |
-| --- | --- | --- |
-| Kontrak dan database | Module specs, DTO/response/error, schema/migration, grants, outbox | Kontrak provider disepakati sebelum consumer; schema/migration terpusat hanya satu pemilik aktif |
-| Backend bisnis | Employee/Auth lifecycle, Attendance policy/events, Media, Gateway | Mengikuti dependency task; akses lintas service melalui kontrak, bukan query lintas tabel |
-| Frontend | Dua portal, shared UI, form/list/detail, kamera/lokasi/Leaflet | Layout/component test dapat berjalan terhadap kontrak yang jelas; fitur selesai wajib API nyata |
-| Pengujian dan kualitas | Unit/API/component, integration/E2E, fault injection, review UI/accessibility | Test tumbuh bersama slice; backend/frontend tidak menunggu akhir proyek untuk diuji |
-| Infrastruktur dan rilis | Data testing, service health, Compose, CI, deploy config, runbook/backup | Artefak aman dapat disiapkan lebih awal; perubahan live mengikuti akses, verifikasi dan rilis |
+- Dua agen digunakan bergantian untuk mengatasi batas sesi. Jangan menjalankan keduanya bersamaan atau membuat subagen tambahan.
+- Pertahankan satu task/increment aktif; catat file, proses/port, dependency dan langkah berikut di tasks/progress.md.
+- Integrasi tetap mengikuti graph: master/akun/lifecycle → policy/libur/media/capture → check-in/out → riwayat/monitoring → validasi/rilis.
+- Spike kamera/lokasi T18 dapat dijadwalkan sebagai task serial awal setelah prasyarat terkait siap untuk mengurangi risiko, lalu kembali ke task prioritas berikut.
+- Schema/migration terpusat, shared packages dan operasi Git dikerjakan agen aktif. Periksa perubahan/proses sesi sebelumnya sebelum mulai.
+- Jika task terhalang akses, catat kendala lalu pilih satu task lain yang siap; jangan memulai banyak task sekaligus.
 
-Contoh pembagian yang sesuai plan:
-- Setelah fondasi terkait terverifikasi, backend master dan UI master dapat dikerjakan bersamaan pada kontrak yang sama, kemudian diintegrasikan untuk T10/T11.
-- Spike kamera/lokasi T18 dapat berjalan bersamaan dengan jalur master/akun setelah prasyarat T07 terkait siap; tidak perlu menunggu seluruh UI HR selesai.
-- Setelah T13 dan kontrak terkait siap, Media T19 dapat berjalan bersama policy/kalender T16/T17; Capture T20 menunggu hasil T18/T19 untuk integrasi nyata.
-- Persiapan form, test, dokumentasi dan deployment dapat berjalan saat service lain dikerjakan; completion task tetap mensyaratkan semua dependensi dan verification.
-- Jangan paralelkan dependent mutations, penerapan migration, perubahan lockfile atau commit pada working tree yang sama.
+## Checkpoint dan trigger pergantian sesi
 
-## Koordinasi pada satu repo lokal
+tasks/todo.md menyimpan completion/acceptance; tasks/progress.md menyimpan titik lanjut dan Git menyimpan perubahan. Dokumen ini berlaku bagi kedua agen dan tidak menetapkan perpindahan sekarang.
 
-- Sebelum mulai, periksa git status/diff, task aktif, file yang sedang disentuh, proses/port dan checkpoint. Pertahankan perubahan pengguna/agen lain.
-- Daftarkan task, pemilik/identitas sesi, file scope dan dependensi di tasks/progress.md sebelum kerja paralel. Agen baru tidak mengerjakan task yang masih aktif milik sesi lain tanpa koordinasi.
-- Jalur paralel memakai scope file terpisah. Perubahan packages/contracts, packages/database, shared UI, manifests/lockfile dan config test dibagi lebih kecil dan dikoordinasikan.
-- Satu pemilik mengelola schema/migration untuk MySQL. Satu pemilik melakukan operasi Git yang mengubah index/branch/commit/push pada satu working tree pada satu waktu.
-- Jangan mematikan proses milik sesi lain, memakai port test yang sama, atau mengubah data/env test bersama tanpa koordinasi. Catat port/proses yang dijalankan.
-- Jika alat berganti secara bergiliran, tutup task/sesi lama dengan checkpoint. Jika terputus mendadak, agen baru memeriksa fakta disk dan proses sebelum mengambil alih; tidak menganggap proses lama sudah berhenti.
-- Jika hanya satu agen tersedia, interleave jalur yang siap dan selesaikan slice bertahap; jangan mengklaim eksekusi paralel yang tidak terjadi.
+Saat informasi kapasitas yang tersedia menunjukkan sesi mendekati batas, atau pengguna meminta pindah:
+1. Hindari memulai increment besar; tutup pekerjaan yang dapat diverifikasi dengan aman.
+2. Verifikasi/commit perubahan yang selesai. Jika ada perubahan parsial, jelaskan file, tujuan dan pemeriksaan yang belum dilakukan; jangan menandainya selesai.
+3. Update progress: task terakhir, commit, satu task aktif, diff parsial, proses/port, hasil pemeriksaan, kendala dan langkah berikut.
+4. Berikan prompt trigger singkat yang merujuk AGENTS.md, tasks/progress.md, tasks/plan.md, tasks/todo.md dan dokumen ini. Sertakan task/commit terakhir yang benar-benar diketahui serta langkah berikut jika tersedia.
+5. Pengguna memindahkan pengerjaan ke agen berikut; agen lama tidak terus coding bersamaan. Agen berikut memeriksa disk/Git lalu melanjutkan dari checkpoint.
 
-## Checkpoint dan pergantian sesi
+Jika kuota/batas sesi tidak tersedia, jangan mengarang persentase atau menjanjikan deteksi otomatis. Update checkpoint setiap increment selesai agar perpindahan mendadak tetap dapat dilakukan.
 
-tasks/todo.md menyimpan status/acceptance task; tasks/progress.md menyimpan titik lanjut, kepemilikan aktif, verifikasi dan kendala. Git menyimpan riwayat perubahan. Ketiganya harus selaras.
+Contoh trigger:
+> Baca AGENTS.md, tasks/progress.md, tasks/plan.md, tasks/todo.md dan docs/development/implementation-workflow.md. Periksa Git lalu lanjutkan dari checkpoint terakhir, satu task pada satu waktu, tanpa subagen/paralel. Gunakan skills/MCP terkait, selesaikan API/UI/test sesuai dependensi, commit perubahan terverifikasi pada dev dan update checkpoint. Saat sesi mendekati batas, siapkan trigger berikutnya.
 
-Sebelum sesi berakhir atau berganti alat, catat:
-1. Task/subtask terakhir yang selesai dan commit terkait bila sudah ada.
-2. Perubahan belum di-commit: file, maksud dan pemeriksaan yang masih diperlukan.
-3. Task aktif, pemilik, proses/port dan dependensi yang belum terpenuhi.
-4. Perintah test yang benar-benar dijalankan, hasil dan pemeriksaan manual yang tertunda.
-5. Langkah berikutnya yang konkret dan kendala yang membutuhkan akses/keputusan pengguna.
-
-Checkpoint tidak boleh berisi password, token, private key, signed URL, foto/data pribadi atau nilai .env. Agen berikutnya membaca checkpoint lalu memeriksa Git/source untuk melanjutkan, bukan mengulang pekerjaan yang selesai.
+Checkpoint/trigger tidak memuat rahasia, signed URL atau data/foto pribadi. Tidak perlu mengulang seluruh baseline ke dalam prompt.
 
 ## Pelaksanaan sampai selesai
 
