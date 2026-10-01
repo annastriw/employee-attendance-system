@@ -8,9 +8,15 @@
     "./theme.css": "./src/theme.css"
   },
   "peerDependencies": {
+    "@phosphor-icons/react": "2.1.10",
     "react": "^19.2.8"
   },
   "devDependencies": {
+    "@phosphor-icons/react": "2.1.10",
     "@types/react": "^19.2.18"
+  },
+  "dependencies": {
+    "@fontsource-variable/geist": "5.3.0",
+    "@fontsource-variable/geist-mono": "5.3.0"
   }
 }

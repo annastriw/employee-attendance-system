@@ -13,11 +13,12 @@
     "test:ui": "playwright test --config playwright.design.config.ts"
   },
   "dependencies": {
+    "@attendance/ui": "workspace:*",
     "@heroui/react": "^3.2.6",
     "@heroui/styles": "^3.2.6",
+    "@phosphor-icons/react": "2.1.10",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8",
-    "@attendance/ui": "workspace:*"
+    "react-dom": "^19.2.8"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

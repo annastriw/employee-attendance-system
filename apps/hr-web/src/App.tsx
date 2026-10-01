@@ -103,6 +103,7 @@ export function App({ client = authClient }: { client?: AuthClient }) {
       ) : (
         <>
           <PageTitle>Masuk</PageTitle>
+          <p className="page-intro">Gunakan akun admin HRD Anda.</p>
           {message && <Notice message={message} success />}
           <LoginForm
             busy={busy}

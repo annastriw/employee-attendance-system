@@ -1,37 +1,49 @@
 import { test, expect } from "@playwright/test";
+for (const scheme of ["light", "dark"] as const) {
 for (const portal of ["hr", "attendance"] as const) {
   for (const width of [320, 768, 1024, 1440]) {
-    test(portal + ": shared theme and usable layout at " + width + "px", async ({ page }, info) => {
+    test(portal + " " + scheme + ": shared theme and usable layout at " + width + "px", async ({ page }, info) => {
       const errors: string[] = [];
       page.on("pageerror", error => errors.push(error.message));
+      await page.emulateMedia({ colorScheme: scheme });
       await page.setViewportSize({ width, height: 900 });
       if (portal === "hr")
         await page.route("**/api/v1/auth/refresh", route => route.fulfill({ status: 401, contentType: "application/json", body: "{}" }));
       await page.goto(portal === "hr" ? "http://127.0.0.1:15175" : "http://127.0.0.1:15173");
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
       const layout = await page.evaluate(() => {
-        const style = getComputedStyle(document.documentElement);
-        return { overflow: document.documentElement.scrollWidth > innerWidth, accent: style.getPropertyValue("--accent").trim(), scheme: style.colorScheme };
+        const root = getComputedStyle(document.documentElement);
+        return {
+          overflow: document.documentElement.scrollWidth > innerWidth,
+          accent: root.getPropertyValue("--accent").trim(),
+          scheme: root.colorScheme,
+          font: getComputedStyle(document.body).fontFamily,
+        };
       });
       expect(layout.overflow).toBe(false);
-      expect(layout.accent).toBe("#292929");
-      expect(layout.scheme).toBe("light");
+      expect(layout.accent).toBe(scheme === "dark" ? "#34d399" : "#047857");
+      expect(layout.scheme).toBe(scheme);
+      expect(layout.font).toContain("Geist");
       await expect(page.locator(".auth-content")).toBeVisible();
+      await expect(page.locator(".brand-mark")).toBeVisible();
       if (portal === "hr") {
-        await expect(page.locator(".auth-aside")).toHaveCount(1);
-        await expect(page.locator(".auth-card")).toHaveCount(1);
+        const showcase = page.locator(".auth-showcase");
+        await expect(showcase).toHaveCount(1);
+        if (width >= 1024) await expect(showcase).toBeVisible();
+        else await expect(showcase).toBeHidden();
         await page.keyboard.press("Tab");
         await expect(page.getByLabel("Email", { exact: true })).toBeFocused();
         await expect(page.getByRole("button", { name: "Masuk", exact: true })).toBeEnabled();
       }
       else {
-        await expect(page.locator(".auth-aside")).toHaveCount(0);
+        await expect(page.locator(".auth-showcase")).toHaveCount(0);
         await expect(page.getByText("Login karyawan belum tersedia.")).toBeVisible();
       }
-      await page.screenshot({ path: info.outputPath(portal + "-" + width + ".png"), fullPage: true });
+      await page.screenshot({ path: info.outputPath(portal + "-" + scheme + "-" + width + ".png"), fullPage: true });
       expect(errors).toEqual([]);
     });
   }
+}
 }
 
 for (const width of [320, 768, 1024, 1440]) {

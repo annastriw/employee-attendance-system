@@ -54,7 +54,7 @@ export function LoginForm({ busy, error, onSubmit }: LoginProps) {
         {busy ? "Sedang masuk…" : "Masuk"}
       </Button>
       <p className="auth-help">
-        Butuh bantuan akses? Hubungi admin HRD untuk pembuatan atau reset akun.
+        Belum punya akun atau lupa password? Hubungi admin HRD.
       </p>
     </form>
   );

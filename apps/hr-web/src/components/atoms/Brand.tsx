@@ -1,8 +1,10 @@
 import { useEffect, useRef } from "react";
 import { PortalBrand } from "@attendance/ui";
+
 export function Brand() {
   return <PortalBrand name="HR Portal" />;
 }
+
 export function PageTitle({ children }: { children: string }) {
   const ref = useRef<HTMLHeadingElement>(null);
   useEffect(() => { ref.current?.focus(); }, []);
