@@ -25,7 +25,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T12 — Auth provisioning | Codex, 2026-10-02 | apps/auth-service/src/provisioning; config templates/setup; spec/progress | T11 selesai | hanya Docker MySQL 3307; tidak menambah proses | Auth prepare/finalize/credential selesai secara unit; berikutnya Employee coordinator/worker, T12 belum selesai |
+| T12 — Employee provisioning | Codex, 2026-10-02 | apps/employee-service/src/employees; app/config; spec/progress | T11 selesai | hanya Docker MySQL 3307; tidak menambah proses | Employee coordinator/worker selesai secara unit; berikutnya Gateway/UI dan checkpoint MySQL, T12 belum selesai |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 
@@ -34,6 +34,8 @@ Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increme
 Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .windsurf/ dan skills-lock.json adalah berkas lokal; jangan di-stage, dihapus atau diubah tanpa scope jelas. Rahasia dan data pribadi tetap ignored.
 
 ## Bukti pemeriksaan
+
+- T12 increment backend: schema/migration diterapkan dev/test, diff migrations→schema exit 0, grant milik service lulus/akses lintas service ditolak. Auth typecheck/lint + 6 unit; Employee typecheck/lint + 5 unit (tanggal kalender, idempotensi, timeout durable, lease dan actor) lulus. Integrasi MySQL lintas service/E2E menyusul saat fitur lengkap.
 
 - GitHub tersedia: push awal dev diverifikasi hash lokal=remote (7cd397f); keputusan repository dicatat dan dipush pada 89aa568. T12 dimulai melalui [kontrak provisioning](../docs/sdd/employee-provisioning.md); belum ada perubahan runtime atau test T12. Dokumen diperiksa isi/tautan/diff.
 

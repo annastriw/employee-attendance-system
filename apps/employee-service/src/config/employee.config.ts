@@ -11,6 +11,8 @@ export class EmployeeConfig {
   readonly authUrl: string;
   readonly port: number;
   readonly timeoutMs = 5000;
+  readonly provisioningSecret: string;
+  readonly workerEnabled = process.env.NODE_ENV !== 'test' && process.env.PROVISIONING_WORKER_ENABLED !== 'false';
   readonly production = process.env.NODE_ENV === 'production';
   constructor() {
     if (!this.production) {
@@ -23,6 +25,8 @@ export class EmployeeConfig {
       config({ path: join(root, '.env.database'), quiet: true });
       config({ path: join(root, '.env.employee'), quiet: true });
     }
+    this.provisioningSecret = process.env.PROVISIONING_SERVICE_SECRET ?? '';
+    if (!/^[a-f0-9]{64}$/.test(this.provisioningSecret)) throw new Error('Configure provisioning service secret (32 random bytes as hex).');
     this.databaseUrl = process.env.EMPLOYEE_DATABASE_URL ?? '';
     let db: URL;
     try { db = new URL(this.databaseUrl); } catch { throw new Error('EMPLOYEE_DATABASE_URL is required.'); }
