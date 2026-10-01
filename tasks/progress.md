@@ -47,6 +47,7 @@ Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .w
 1. T11 master jabatan: pola sama dengan T10 (schema `emp_positions` + migration via `prisma migrate diff`, grant di setup-local.mjs, modul positions di Employee, route di Gateway dengan allowlist, layar H12 memakai ulang ConfirmDialog/StatusBadge/pola daftar). Acceptance tambahan: selector penugasan tidak menawarkan master nonaktif (relevan T12).
 2. Putuskan perbaikan limit 429 E2E: beri `refresh` limit sendiri di Auth (mirip `/me`) atau pisahkan run E2E per spec. Jangan longgarkan limit login.
 3. Tinjau dan centang T09c bila screenshot + E2E dinilai cukup.
+4. Polesan H11 (pengguna menyetujui tampilan 2026-10-02; kerjakan bersama H12 karena memakai pola daftar yang sama): (a) screenshot E2E mobile menampilkan baris "Nonaktif" di filter Nonaktif sesudah pesan "diaktifkan kembali" (desktop benar, daftar kosong). Pastikan apakah race pada `refresh()` atau screenshot diambil sebelum refetch; tambahkan assertion daftar terbarui. (b) teks pager "1-1 dari 1" jatuh ke font monospace, seharusnya Geist. (c) filter status belum tampil sebagai satu grup.
 
 Catatan: E2E memakai service dari `dist`; jalankan `pnpm --dir apps/<service> run build` setelah mengubah backend. employee-service bind 127.0.0.1; hanya Gateway publik.
 ## Kendala dan kebutuhan eksternal
