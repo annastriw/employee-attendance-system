@@ -22,3 +22,10 @@ Build/lint kedua frontend, test komponen auth/menu akun, E2E autentikasi dengan 
 
 ## Sumber
 MCP HeroUI: Button, Dropdown, InputGroup, Input dan Label. [Theming](https://heroui.com/docs/react/getting-started/theming), [Dropdown](https://heroui.com/docs/react/components/dropdown), [InputGroup](https://heroui.com/docs/react/components/input-group).
+
+## Konsep dan penerapan seluruh halaman
+Kontrak visual ini dipakai bersama [spesifikasi UI/UX](frontend-ui-ux.md). Spesifikasi tersebut memetakan E01–E09 dan H01–H14, navigasi, keluarga layar, capture, lifecycle, states, responsivitas dan acceptance. Tema yang sama tidak mewajibkan susunan kartu yang sama: halaman karyawan berpusat pada tindakan, HR berpusat pada daftar/detail.
+
+Susunan daftar: judul → toolbar → tabel/daftar → pagination. Detail: identitas/status → bukti check-in/checkout → tindakan kontekstual. Form: kelompok field → validasi → satu tindakan utama. Seluruh halaman memakai token packages/ui; tidak menambah palet/teks dekoratif.
+
+Kelanjutan implementasi mengikuti [panduan Kiro](../development/kiro-implementation.md), [plan](../../tasks/plan.md), dan checklist UX dalam [todo](../../tasks/todo.md).

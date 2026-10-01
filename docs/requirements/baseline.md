@@ -1,6 +1,6 @@
 # Spesifikasi disetujui — versi 1
 
-Dokumen ini merekam keputusan pengguna dalam sesi perencanaan. Dokumen rancangan terperinci berikutnya harus menjaga aturan ini. Status: kebutuhan, rancangan database, dan peta endpoint API telah disetujui; rencana implementasi belum ditinjau.
+Dokumen ini merekam keputusan pengguna dalam sesi perencanaan. Dokumen rancangan terperinci berikutnya harus menjaga aturan ini. Status: kebutuhan, rancangan database, peta endpoint API dan arah UI/UX telah disetujui; rencana serta kemajuan implementasi mengikuti tasks/plan.md dan tasks/todo.md.
 
 ## Produk dan platform
 - Attendance Portal: attendance.annastriwidagdo.me.
@@ -100,3 +100,6 @@ Base /api/v1; Swagger /docs; UUID; waktu response ISO8601 +07:00; pagination/fil
 
 ## Tema visual frontend
 - Kedua portal dan seluruh halaman berikutnya memakai tema monokrom putih/abu-abu netral, tombol charcoal, modern, elegan, minimalis dan mudah dipahami. Login satu form di tengah tanpa slogan/panel samping; HR sidebar ramping dan menu akun. HeroUI dan custom component Atomic Design mengikuti [kontrak desain](../sdd/frontend-design-system.md); token serta shell bersama disimpan di packages/ui.
+
+- Konsep seluruh halaman: ruang kerja yang tenang dan terstruktur; karyawan berfokus tindakan berikutnya, HR berfokus pencarian/pemeriksaan catatan. Susunan layar, capture, states, daftar/detail, lifecycle dan acceptance mengikuti [spesifikasi UI/UX](../sdd/frontend-ui-ux.md).
+- Pengguna memilih Kiro CLI untuk melanjutkan implementasi sesudah penulisan desain. Acuan pelaksanaan: [panduan Kiro](../development/kiro-implementation.md).

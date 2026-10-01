@@ -29,3 +29,8 @@
 
 ## Tema frontend
 - Semua frontend wajib mengikuti docs/sdd/frontend-design-system.md. Gunakan token dan komponen packages/ui, HeroUI, Atomic Design; pertahankan tema monokrom dengan tombol charcoal, teks seperlunya, modern, elegan, minimalis dan mudah dipahami pada halaman berikutnya.
+
+## Desain UI/UX dan kelanjutan Kiro
+- Ikuti docs/sdd/frontend-ui-ux.md untuk konsep seluruh halaman, alur, states dan acceptance; bukan hanya warna atau halaman login.
+- Implementasi melalui Kiro CLI mengikuti docs/development/kiro-implementation.md dan checklist UX01–UX07 pada tasks/todo.md tanpa mengganti dependensi T01–T31.
+- Arahan desain telah diberikan pengguna; lanjutkan increment dalam scope tanpa meminta persetujuan rutin berulang. Keputusan bisnis baru dan akses eksternal yang belum tersedia ditangani secara spesifik.

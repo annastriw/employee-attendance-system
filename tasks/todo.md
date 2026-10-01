@@ -1,6 +1,6 @@
 # Daftar tugas implementasi
 
-Status: belum dikerjakan. Semua path adalah target rencana, bukan file yang sudah dibuat. Task lintas beberapa service dipecah lagi sebelum implementasi agar sekitar 1–5 file per task.
+Status: implementasi sebagian berjalan; checklist per-task dan subtask menunjukkan bukti yang telah selesai. Path pada task yang belum selesai merupakan target rencana. Checklist induk tidak otomatis selesai hanya karena subtask tertentu sudah tersedia. Task lintas beberapa service dipecah lagi sebelum implementasi agar sekitar 1–5 file per task.
 
 ## T01 — Dokumen module SDD dan context
 - [ ] Selesai
@@ -313,3 +313,58 @@ Catatan: bagian database development dari T07 selesai berdasarkan laporan penggu
 - Acceptance: Login terpusat tanpa slogan/panel, charcoal, input password dan dropdown akun HeroUI; navigasi mobile buka/tutup; teks seperlunya.
 - Verification: Build/lint dua frontend, 11 component tests, 12 browser layout/interaction checks, 2 E2E autentikasi nyata.
 - Target: packages/ui/, apps/{attendance-web,hr-web}/, docs/sdd/frontend-design-system.md
+
+## Kelanjutan desain UI/UX melalui Kiro CLI
+- [x] Desain seluruh E01–E09/H01–H14 dan panduan implementasi ditulis sesuai arahan pengguna.
+- Spec: [UI/UX](../docs/sdd/frontend-ui-ux.md), [design system](../docs/sdd/frontend-design-system.md).
+- Pelaksanaan: [panduan Kiro](../docs/development/kiro-implementation.md).
+- UX01–UX07 merupakan koordinasi lintas layar; dependensi task T01–T31 tetap berlaku. Pecah setiap UX task menjadi increment kecil sebelum perubahan kode.
+
+### UX01 — Audit keadaan dan fondasi
+- [ ] Selesai
+- Acceptance: Audit source/test/runtime, task induk fondasi yang belum ditutup dan detail terbuka; pertahankan T08/T09 yang bekerja; catat task pertama yang dapat dijalankan.
+- Verification: Review keterlacakan baseline/spec dan bukti runtime; jangan mencentang hanya karena dokumen/config tersedia.
+- Dependencies: Dokumen desain tersedia.
+- Target: tasks/, docs/sdd/, konfigurasi terkait jika diperlukan.
+
+### UX02 — Wireframe dan pola UI bersama
+- [ ] Selesai
+- Acceptance: Lima keluarga layar (akses, Hari ini, capture, daftar HR, detail) memiliki hierarki, states dan layout mobile/desktop yang mengikuti konsep; shared UI dikembangkan sesuai kebutuhan slice.
+- Verification: Review wireframe dan screenshot/browser pola yang sudah diimplementasikan, keyboard dan tidak ada overflow; mockup bukan fitur selesai.
+- Dependencies: UX01; T06.
+- Target: packages/ui/, kedua frontend; pecah per keluarga layar.
+
+### UX03 — Master, akun dan lifecycle
+- [ ] Selesai
+- Acceptance: E01/E02/E09 dan H01/H06–H12/H14 terintegrasi sesuai T10–T15: master aktif/nonaktif, profil+akun konsisten, password tampil sekali, restore Nonaktif, revokasi.
+- Verification: API/MySQL test, component tests dan E2E HR membuat karyawan hingga login/ganti password serta lifecycle/reset.
+- Dependencies: UX01/UX02; T10–T15 berurutan.
+- Target: Employee/Auth/Gateway, kedua frontend, spec/tests.
+
+### UX04 — Absensi dan capture
+- [ ] Selesai
+- Acceptance: E03–E06/H13 sesuai T16–T22; satu wajah, blink/manual fallback, lokasi wajib, preview, alasan, waktu resmi dan pengiriman idempotent.
+- Verification: Boundary/API tests, browser core journey, izin/gagal/retry, perangkat nyata; threshold/hasil dicatat.
+- Dependencies: UX03; T16–T22 sesuai graph.
+- Target: Attendance/Media/Gateway, attendance-web, hr-web dan tests/spec.
+
+### UX05 — Riwayat, monitoring dan pemulihan
+- [ ] Selesai
+- Acceptance: E07/E08/H02–H05 sesuai T23–T26; filter/pagination, foto terotorisasi, Leaflet kedua lokasi, soft delete/restore seluruh hari, deleted bukan missing.
+- Verification: API authorization/history, integration/MySQL/AIStor dan browser detail/filter/restore.
+- Dependencies: UX04; T23–T26.
+- Target: Attendance/Media/Gateway, kedua frontend dan tests/spec.
+
+### UX06 — Review semua halaman dan kualitas
+- [ ] Selesai
+- Acceptance: Seluruh ID layar/states sesuai spec; pemulihan outbox/integrasi, responsivitas, aksesibilitas, build/lint/test dan CI sesuai T27–T29.
+- Verification: Screenshot lima keluarga dan halaman terkait pada viewport sasaran, keyboard/zoom/reduced motion, API nyata core journeys; catat keterbatasan manual secara jujur.
+- Dependencies: UX05; T27–T29.
+- Target: kedua frontend, service/tests/CI dan docs.
+
+### UX07 — Kesiapan rilis dan live
+- [ ] Selesai
+- Acceptance: T30 artefak/runbook/backup/rollback siap; T31 live hanya setelah akses layanan dan tahap rilis pengguna tersedia.
+- Verification: Review konfigurasi aman, restore backup test; kemudian smoke live DNS/HTTPS/kamera/lokasi/auth/absensi/monitoring saat tersedia.
+- Dependencies: UX06; T30–T31.
+- Target: infra/, docs/deployment/, konfigurasi layanan sesuai akses.
