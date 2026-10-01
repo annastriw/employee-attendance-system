@@ -314,10 +314,10 @@ Catatan: bagian database development dari T07 selesai berdasarkan laporan penggu
 - Verification: Build/lint dua frontend, 11 component tests, 12 browser layout/interaction checks, 2 E2E autentikasi nyata.
 - Target: packages/ui/, apps/{attendance-web,hr-web}/, docs/sdd/frontend-design-system.md
 
-## Kelanjutan desain UI/UX melalui Kiro CLI
-- [x] Desain seluruh E01–E09/H01–H14 dan panduan implementasi ditulis sesuai arahan pengguna.
+## Keterlacakan desain UI/UX dalam implementasi proyek
+- [x] Desain seluruh E01–E09/H01–H14 dan alur implementasi ditulis sesuai arahan pengguna.
 - Spec: [UI/UX](../docs/sdd/frontend-ui-ux.md), [design system](../docs/sdd/frontend-design-system.md).
-- Pelaksanaan: [panduan Kiro](../docs/development/kiro-implementation.md).
+- Pelaksanaan: [alur implementasi](../docs/development/implementation-workflow.md).
 - UX01–UX07 merupakan koordinasi lintas layar; dependensi task T01–T31 tetap berlaku. Pecah setiap UX task menjadi increment kecil sebelum perubahan kode.
 
 ### UX01 — Audit keadaan dan fondasi
@@ -368,3 +368,9 @@ Catatan: bagian database development dari T07 selesai berdasarkan laporan penggu
 - Verification: Review konfigurasi aman, restore backup test; kemudian smoke live DNS/HTTPS/kamera/lokasi/auth/absensi/monitoring saat tersedia.
 - Dependencies: UX06; T30–T31.
 - Target: infra/, docs/deployment/, konfigurasi layanan sesuai akses.
+
+## Koordinasi seluruh proyek dan checkpoint
+- [x] Panduan kelanjutan dinetralkan terhadap alat; scope seluruh T01–T31 dan aturan paralelisme dicatat.
+- [x] [Checkpoint bersama](progress.md) disediakan; setiap sesi memperbarui task aktif, scope file, proses/port, bukti dan langkah berikut.
+- Backlog utama tetap T01–T31. UX01–UX07 hanya checklist layar/UX, bukan instruksi bekerja pada frontend saja.
+- Task independen dijalankan paralel sesuai plan. Perubahan shared files/schema/migration/Git dikoordinasikan; task selesai hanya sesudah acceptance dan verification.

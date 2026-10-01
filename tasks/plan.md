@@ -3,7 +3,7 @@ Status: implementasi fondasi berlangsung; task lengkap tetap mengikuti todo.md. 
 
 ## Acuan
 Kebutuhan/database/API disetujui: ../docs/requirements/baseline.md.
-Daftar pekerjaan: todo.md. Checklist belum dicentang berarti belum dikerjakan.
+Daftar pekerjaan: todo.md. Checklist belum dicentang berarti acceptance/verification task belum sepenuhnya ditutup; baca subtask dan progress untuk pekerjaan yang sudah berjalan.
 
 ## Pendekatan
 Satu repository GitHub monorepo, lima service dengan kepemilikan tabel, dua frontend. Kedua frontend memakai project Vercel terpisah; backend, MySQL dan AIStor berada di VPS Ubuntu. Topologi: [ADR-003](../docs/architecture/adr-003-repository-and-deployment.md). Selesaikan jalur pengguna bertahap; bukan seluruh backend lalu seluruh frontend. Setiap perubahan menggunakan spec terkait, test relevan, review dan dokumentasi.
@@ -53,11 +53,26 @@ Rahasia tetap lokal, .env.example tanpa nilai asli, dokumentasi aman di GitHub.
 ## Cara menjalankan pekerjaan
 Task pada todo.md berukuran kecil. Jika implementasi perlu lebih dari sekitar lima file, pecah task sebelum bekerja dan catat dependensi. Checkpoint ditinjau sebelum fase berikutnya. Update spec dahulu bila keputusan berubah.
 
-## Desain seluruh halaman dan implementasi Kiro
-Pengguna meminta rancangan seluruh halaman dicatat dan implementasi dilanjutkan melalui Kiro CLI. [UI/UX](../docs/sdd/frontend-ui-ux.md) dan [design system](../docs/sdd/frontend-design-system.md) menjadi acuan frontend; [panduan Kiro](../docs/development/kiro-implementation.md) menjelaskan read order, status awal, proses dan definisi selesai.
+## Desain seluruh halaman dan kelanjutan proyek
+Rancangan seluruh halaman menjadi bagian dari kelanjutan seluruh proyek sesuai plan. [UI/UX](../docs/sdd/frontend-ui-ux.md) dan [design system](../docs/sdd/frontend-design-system.md) menjadi acuan frontend; [alur implementasi](../docs/development/implementation-workflow.md) menjelaskan read order, status awal, proses dan definisi selesai.
 
 Ikuti UX01–UX07 dalam todo sebagai koordinasi lintas layar; dependensi T01–T31 tetap berlaku. Audit status task fondasi yang belum ditutup, susun wireframe lima keluarga layar (akses, Hari ini, capture, daftar HR, detail), lalu lanjutkan vertical slice master/akun → capture/absensi → riwayat/monitoring. Review visual/states dilakukan setiap slice, bukan hanya T28.
 
 Persetujuan arah desain dan kelanjutan implementasi telah diberikan; checkpoint rutin berarti memverifikasi dan mencatat bukti lalu melanjutkan. Jangan membuat gate persetujuan ulang untuk keputusan rutin dalam scope. Perubahan kebutuhan dan akses eksternal yang belum tersedia memerlukan penanganan spesifik.
 
-Definisi selesai lokal: seluruh E01–E09/H01–H14 sesuai acceptance, API nyata, build/lint/test dan runbook. Artefak live disiapkan sampai akses/rilis tersedia; hasil live tidak diklaim sebelum pengujian nyata. Commit tetap dev; push menunggu remote pengguna.
+Definisi selesai lokal: seluruh capability frontend, backend, database/storage dan integrasi sesuai baseline, termasuk E01–E09/H01–H14, API nyata, keamanan/pemulihan, build/lint/test, CI dan runbook/artefak deployment. Artefak live disiapkan sampai akses/rilis tersedia; hasil live tidak diklaim sebelum pengujian nyata. Commit tetap dev; push menunggu remote pengguna.
+
+## Paralelisme dan kelanjutan lintas sesi
+Scope tetap seluruh T01–T31: dua frontend, lima service, kontrak/API/Swagger, schema/migration/grants MySQL, AIStor Free, keamanan, tests, CI, deployment dan operasi. Jalur yang independen berjalan paralel; task yang bergantung kontrak/data menunggu provider dan verification terkait.
+
+| Jalur siap | Dapat berjalan bersama | Batas |
+| --- | --- | --- |
+| Master/provisioning/lifecycle | Backend service, UI sesuai kontrak, test dan runbook | Integrasi T10–T15 mengikuti dependency; shared Auth/Gateway dikoordinasikan |
+| Spike kamera/lokasi T18 | Jalur master/akun dan persiapan test/infra | Fondasi T07 terkait diverifikasi dahulu |
+| Media T19 | Aturan waktu/libur T16/T17 sesudah T13 siap | Capture T20 terintegrasi setelah T18/T19; check-in T21 menunggu policy/media/capture |
+| Riwayat/monitoring | Backend query/authorization, UI daftar/detail, test dan Leaflet | Mengikuti T23–T26; tidak menganggap mock sebagai hasil akhir |
+| Testing/CI/deploy config | Setiap vertical slice dan jalur domain | Task rilis tetap menunggu acceptance, akses dan verification live |
+
+Kontrak/schema/migration, shared UI, manifests/lockfile dan operasi Git pada working tree sama memiliki satu pemilik aktif pada satu waktu. Pembagian task/file/port dicatat di [progress](progress.md); ownership diakhiri saat task selesai atau sesi berganti. Paralelisme tidak mengubah batas kepemilikan service atau urutan penerapan migration.
+
+[Alur implementasi](../docs/development/implementation-workflow.md) berlaku bagi semua agen/alat yang mengakses repo ini. Sebelum berhenti/berganti sesi, tulis checkpoint progres, diff belum di-commit, proses/port, verification dan langkah berikut. Agen berikut membaca kondisi lokal dan melanjutkan pekerjaan; tidak memulai ulang proyek.

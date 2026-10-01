@@ -30,7 +30,11 @@
 ## Tema frontend
 - Semua frontend wajib mengikuti docs/sdd/frontend-design-system.md. Gunakan token dan komponen packages/ui, HeroUI, Atomic Design; pertahankan tema monokrom dengan tombol charcoal, teks seperlunya, modern, elegan, minimalis dan mudah dipahami pada halaman berikutnya.
 
-## Desain UI/UX dan kelanjutan Kiro
+## Desain UI/UX dan kelanjutan pekerjaan
 - Ikuti docs/sdd/frontend-ui-ux.md untuk konsep seluruh halaman, alur, states dan acceptance; bukan hanya warna atau halaman login.
-- Implementasi melalui Kiro CLI mengikuti docs/development/kiro-implementation.md dan checklist UX01–UX07 pada tasks/todo.md tanpa mengganti dependensi T01–T31.
+- Seluruh implementasi mengikuti docs/development/implementation-workflow.md serta tasks/plan.md dan tasks/todo.md. Checklist UX01–UX07 hanya keterlacakan frontend, bukan pembatas scope proyek.
 - Arahan desain telah diberikan pengguna; lanjutkan increment dalam scope tanpa meminta persetujuan rutin berulang. Keputusan bisnis baru dan akses eksternal yang belum tersedia ditangani secara spesifik.
+
+- Frontend, backend/service, database/storage, testing, CI dan deployment tetap termasuk scope. Kerjakan task independen secara paralel sesuai dependency plan, dengan skills/agen paralel yang tersedia.
+- Catat pemilik task, scope file dan proses/port sebelum kerja paralel; koordinasikan perubahan shared contracts/UI, schema/migration, lockfile dan operasi Git. Jangan menimpa pekerjaan sesi lain.
+- Gunakan tasks/progress.md sebagai checkpoint bersama saat agen/alat berganti; baca Git/source/task aktual sebelum melanjutkan. Batas token/sesi tidak mengubah scope atau berarti proyek selesai.

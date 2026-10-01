@@ -7,7 +7,7 @@ Status: arah desain hasil diskusi disetujui untuk ditulis sebagai acuan implemen
 - [Baseline kebutuhan](../requirements/baseline.md) mengatur aturan bisnis, akses, waktu, foto, lokasi, dan penghapusan.
 - [Design system](frontend-design-system.md) mengatur token visual dan kontrol bersama.
 - [Rencana](../../tasks/plan.md) dan [tugas](../../tasks/todo.md) mengatur dependensi implementasi dan bukti verifikasi.
-- [Panduan implementasi Kiro](../development/kiro-implementation.md) mengatur cara meneruskan pekerjaan dari keadaan repo saat ini.
+- [Alur implementasi](../development/implementation-workflow.md) mengatur cara meneruskan pekerjaan dari keadaan repo saat ini.
 - Spesifikasi ini merinci pengalaman pengguna; tidak mengubah kontrak bisnis/API. Jika ditemukan benturan, selesaikan spesifikasi tanpa melonggarkan kebutuhan yang disetujui.
 
 ## Konsep produk

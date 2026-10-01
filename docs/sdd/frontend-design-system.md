@@ -28,4 +28,4 @@ Kontrak visual ini dipakai bersama [spesifikasi UI/UX](frontend-ui-ux.md). Spesi
 
 Susunan daftar: judul → toolbar → tabel/daftar → pagination. Detail: identitas/status → bukti check-in/checkout → tindakan kontekstual. Form: kelompok field → validasi → satu tindakan utama. Seluruh halaman memakai token packages/ui; tidak menambah palet/teks dekoratif.
 
-Kelanjutan implementasi mengikuti [panduan Kiro](../development/kiro-implementation.md), [plan](../../tasks/plan.md), dan checklist UX dalam [todo](../../tasks/todo.md).
+Kelanjutan implementasi mengikuti [alur implementasi](../development/implementation-workflow.md), [plan](../../tasks/plan.md), dan checklist UX dalam [todo](../../tasks/todo.md).
