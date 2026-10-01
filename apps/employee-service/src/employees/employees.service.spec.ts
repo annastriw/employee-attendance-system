@@ -8,7 +8,7 @@ import type { EmployeeConfig } from '../config/employee.config';
 const id = randomUUID(), actorId = randomUUID();
 const input: CreateEmployeeDto = { nik: 'TEST-01', name: 'Test Employee', email: 'employee@example.test', departmentId: randomUUID(), positionId: randomUUID(), startDate: '2026-10-02', status: 'ACTIVE' };
 function setup() {
-  const row = { id, employeeId: randomUUID(), actorAccountId: actorId, payloadHash: employeePayloadHash(input), email: input.email, desiredStatus: 'ACTIVE', status: 'PENDING', phase: 'PREPARE', attempts: 0, requestId: null };
+  const row = { id, employeeId: randomUUID(), actorAccountId: actorId, payloadHash: employeePayloadHash(input), email: input.email, desiredStatus: 'ACTIVE', status: 'PENDING', phase: 'PREPARE', attempts: 0, requestId: null, errorCode: null as string | null };
   const tx = { empProvisioning: { findUnique: jest.fn().mockResolvedValue(row), findUniqueOrThrow: jest.fn().mockResolvedValue(row), updateMany: jest.fn().mockResolvedValue({ count: 1 }) }, empEmployee: { create: jest.fn(), update: jest.fn() }, empAuditLog: { create: jest.fn().mockResolvedValue({}) } };
   const client = { ...tx, $transaction: (work: (value: typeof tx) => unknown) => work(tx) };
   const accounts = { call: jest.fn().mockRejectedValue(new ServiceUnavailableException()) };
@@ -33,6 +33,11 @@ describe('Employee provisioning retry invariants', () => {
   it('does not contact Auth when another worker owns the lease', async () => {
     const { service, tx, accounts } = setup(); tx.empProvisioning.updateMany.mockResolvedValue({ count: 0 });
     await service.runOne(id); expect(accounts.call).not.toHaveBeenCalled();
+  });
+  it('cannot correct email after prepare already published an account', async () => {
+    const { service, row, tx } = setup(); row.status = 'FAILED'; row.phase = 'PUBLISH'; row.errorCode = 'EMAIL_CONFLICT';
+    await expect(service.retry(id, { accountId: actorId }, { email: 'other@example.test' })).rejects.toThrow('Email hanya dapat diperbaiki');
+    expect(tx.empProvisioning.updateMany).not.toHaveBeenCalled();
   });
   it('does not expose another actor operation', async () => {
     const { service } = setup(); await expect(service.operation(id, { accountId: randomUUID() })).rejects.toThrow('tidak ditemukan');

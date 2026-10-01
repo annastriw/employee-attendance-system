@@ -17,3 +17,7 @@ export class CreateEmployeeDto {
 }
 export class ListEmployeesQuery extends ListPositionsQuery {}
 export class CredentialRequestDto { @IsOptional() @IsIn([true, false]) recover?: boolean; }
+
+export class RetryEmployeeDto {
+  @IsOptional() @Transform(({ value }: { value: unknown }) => typeof value === 'string' ? value.trim().toLowerCase() : value) @IsEmail() @MaxLength(254) email?: string;
+}

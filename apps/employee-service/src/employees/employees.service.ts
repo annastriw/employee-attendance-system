@@ -4,13 +4,13 @@ import { createHash, randomUUID } from 'node:crypto';
 import { DatabaseService } from '../database/database.module';
 import { EmployeeConfig } from '../config/employee.config';
 import { ProvisioningAuthClient, type AccountReceipt } from './provisioning-auth.client';
-import type { CreateEmployeeDto, ListEmployeesQuery, CredentialRequestDto } from './employees.dto';
+import type { CreateEmployeeDto, ListEmployeesQuery, CredentialRequestDto, RetryEmployeeDto } from './employees.dto';
 type Tx = Prisma.TransactionClient;
 interface Actor { accountId: string; requestId?: string }
 export function employeePayloadHash(input: CreateEmployeeDto) {
   return createHash('sha256').update(JSON.stringify({ nik: input.nik, name: input.name, phone: input.phone ?? null, email: input.email, departmentId: input.departmentId, positionId: input.positionId, startDate: input.startDate, status: input.status })).digest('hex');
 }
-const operationView = (row: EmpProvisioning) => ({ id: row.id, employeeId: row.employeeId, status: row.status, errorCode: row.errorCode, email: row.email });
+const operationView = (row: EmpProvisioning) => ({ id: row.id, employeeId: row.employeeId, status: row.status, errorCode: row.errorCode, email: row.email, canCorrectEmail: row.status === 'FAILED' && row.phase === 'PREPARE' && row.errorCode === 'EMAIL_CONFLICT' });
 @Injectable()
 export class EmployeesService implements OnModuleInit, OnModuleDestroy {
   private timer?: ReturnType<typeof setInterval>; private ticking = false;
@@ -61,10 +61,16 @@ export class EmployeesService implements OnModuleInit, OnModuleDestroy {
     return row;
   }
   async operation(id: string, actor: Actor) { return operationView(await this.owned(id, actor.accountId)); }
-  async retry(id: string, actor: Actor) {
+  async retry(id: string, actor: Actor, body: RetryEmployeeDto = {}) {
     const row = await this.owned(id, actor.accountId);
-    if (row.status === 'COMPLETED') return operationView(row);
-    if (row.errorCode === 'EMAIL_CONFLICT') throw new ConflictException('Email sudah digunakan. Hubungi HRD untuk koreksi data; tidak membuat akun kedua.');
+    if (row.status === 'COMPLETED') { if (body.email && body.email !== row.email) throw new BadRequestException('Email akun yang sudah selesai tidak diubah lewat retry.'); return operationView(row); }
+    if (body.email) {
+      if (row.status !== 'FAILED' || row.phase !== 'PREPARE' || row.errorCode !== 'EMAIL_CONFLICT') throw new BadRequestException('Email hanya dapat diperbaiki setelah prepare gagal karena konflik email.');
+      const profile = await this.database.client.empEmployee.findUniqueOrThrow({ where: { id: row.employeeId } });
+      const payloadHash = employeePayloadHash({ nik: profile.nik, name: profile.name, phone: profile.phone ?? undefined, email: body.email, departmentId: profile.departmentId, positionId: profile.positionId, startDate: profile.startDate.toISOString().slice(0,10), status: row.desiredStatus as 'ACTIVE' | 'INACTIVE' });
+      const changed = await this.database.client.empProvisioning.updateMany({ where: { id, status: 'FAILED', phase: 'PREPARE', payloadHash: row.payloadHash, leaseUntil: null }, data: { email: body.email, payloadHash, errorCode: null } });
+      if (!changed.count) throw new ConflictException('Operasi berubah. Muat ulang sebelum memperbaiki email.');
+    } else if (row.errorCode === 'EMAIL_CONFLICT') throw new ConflictException('Perbaiki email pada operasi yang sama sebelum melanjutkan.');
     await this.database.client.empProvisioning.updateMany({ where: { id, OR: [{ leaseUntil: null }, { leaseUntil: { lt: new Date() } }] }, data: { status: 'PENDING', errorCode: null, attempts: 0, nextAttemptAt: new Date() } });
     await this.runOne(id); return this.operation(id, actor);
   }

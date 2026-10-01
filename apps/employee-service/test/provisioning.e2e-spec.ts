@@ -106,8 +106,11 @@ describe('T12 real Auth + Employee + MySQL', () => {
     await db.empDepartment.update({where:{id:departmentId},data:{status:'ACTIVE'}}); const retried=await api().post('/api/v1/employee-provisioning/'+id+'/retry').set(as()).send({}).expect(200);expect(retried.body.status).toBe('COMPLETED');expect(await db.authAccount.count({where:{employeeId:before.employeeId}})).toBe(1);
   });
   it('rejects email conflict without enabling a partial profile and enforces requested inactive status', async () => {
-    const conflict=await api().post('/api/v1/employees').set(as()).set('Idempotency-Key',randomUUID()).send({...input('EMAIL'),email:prefix.toLowerCase()+'-actor0@example.invalid'}).expect(409); expect(conflict.body.message).toContain('Email');
+    const conflictId=randomUUID();
+    const conflict=await api().post('/api/v1/employees').set(as()).set('Idempotency-Key',conflictId).send({...input('EMAIL'),email:prefix.toLowerCase()+'-actor0@example.invalid'}).expect(409); expect(conflict.body.message).toContain('Email');
     const row=await db.empEmployee.findUniqueOrThrow({where:{nik:input('EMAIL').nik}});expect(row.status).toBe('INACTIVE');expect(row.ready).toBe(false);
+    const corrected=await api().post('/api/v1/employee-provisioning/'+conflictId+'/retry').set(as()).send({email:input('EMAIL').email}).expect(200);expect(corrected.body.status).toBe('COMPLETED');expect(corrected.body.employeeId).toBe(row.id);expect(await db.empEmployee.count({where:{nik:row.nik}})).toBe(1);
+    await api().post('/api/v1/employee-provisioning/'+conflictId+'/retry').set(as()).send({email:input('EMAIL').email}).expect(200);
     const off=await api().post('/api/v1/employees').set(as()).set('Idempotency-Key',randomUUID()).send({...input('OFF'),status:'INACTIVE'}).expect(201);expect(off.body.status).toBe('COMPLETED');expect((await db.authAccount.findUniqueOrThrow({where:{employeeId:off.body.employeeId}})).status).toBe('INACTIVE');
   });
   it('rejects spoofed internal signatures and another actor receipt request', async () => {
