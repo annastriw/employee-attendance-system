@@ -126,3 +126,25 @@ for (const scheme of ["light", "dark"] as const) {
 }
 
 }
+
+for (const scheme of ['light', 'dark'] as const) for (const width of [320, 768, 1024, 1440]) {
+  test('HR employees ' + scheme + ' layout at ' + width + 'px', async ({ page }, info) => {
+    const errors: string[] = []; page.on('pageerror',error=>errors.push(error.message)); await page.emulateMedia({colorScheme:scheme}); await page.setViewportSize({width,height:900});
+    const id='11111111-1111-4111-8111-111111111111';
+    await page.route('**/api/v1/auth/refresh',route=>route.fulfill({json:{accessToken:'ui-test-session',expiresIn:3600,user:{id:'ui-test',email:'admin@example.test',role:'ADMIN_HRD',employeeId:null,mustChangePassword:false}}}));
+    await page.route('**/api/v1/employees?*',route=>route.fulfill({json:{items:[{id,nik:'EMP-2026-001',name:'Karyawan Operasional Regional',email:'employee@example.test',department:'Operasional',position:'Analis',status:'ACTIVE'}],total:1,page:1,pageSize:20}}));
+    for (const resource of ['departments','positions']) await page.route('**/api/v1/'+resource+'?*',route=>route.fulfill({json:{items:[{id,name:'Operasional',code:'OPS',status:'ACTIVE',createdAt:'',updatedAt:''}],total:1,page:1,pageSize:100}}));
+    await page.route('**/api/v1/employee-provisioning/'+id,route=>route.fulfill({json:{id,employeeId:id,email:'employee@example.test',status:'COMPLETED',errorCode:null}}));
+    await page.route('**/api/v1/employee-provisioning/'+id+'/credentials',route=>route.fulfill({json:{email:'employee@example.test',temporaryPassword:'Visual-Dummy-Password-123'}}));
+    await page.goto('http://127.0.0.1:15175/#karyawan');await expect(page.getByRole('grid',{name:'Daftar karyawan'})).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
+    await page.screenshot({path:info.outputPath('employees-'+scheme+'-'+width+'.png'),fullPage:true});
+    await page.getByRole('button',{name:'Tambah',exact:true}).click();await expect(page.getByRole('form',{name:'Tambah karyawan'})).toBeVisible();await expect(page.getByLabel('Email',{exact:true})).toBeVisible();
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);await page.screenshot({path:info.outputPath('employee-form-'+scheme+'-'+width+'.png'),fullPage:true});
+    await page.getByRole('button',{name:'Batal',exact:true}).click();await page.goto('http://127.0.0.1:15175/#karyawan?operation='+id);await page.getByRole('button',{name:'Tampilkan password'}).click();await expect(page.getByRole('dialog')).toBeVisible();
+    await expect(page.getByRole('button',{name:'Selesai',exact:true})).toBeInViewport({ratio:1});expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
+    await page.screenshot({path:info.outputPath('temporary-password-'+scheme+'-'+width+'.png'),fullPage:true});await page.keyboard.press('Escape');await expect(page.getByLabel('Password sementara',{exact:true})).toHaveCount(0);
+    const failedId='22222222-2222-4222-8222-222222222222';await page.route('**/api/v1/employee-provisioning/'+failedId,route=>route.fulfill({json:{id:failedId,employeeId:failedId,email:'used@example.test',status:'FAILED',errorCode:'EMAIL_CONFLICT',canCorrectEmail:true}}));
+    await page.goto('http://127.0.0.1:15175/#karyawan?operation='+failedId);await expect(page.getByLabel('Email pengganti',{exact:true})).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
+    await page.screenshot({path:info.outputPath('employee-email-recovery-'+scheme+'-'+width+'.png'),fullPage:true});expect(errors).toEqual([]);
+  });
+}

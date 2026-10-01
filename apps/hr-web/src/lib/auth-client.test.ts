@@ -113,4 +113,10 @@ describe("HR authentication client", () => {
       clock.mockRestore();
     }
   });
+  it('passes an explicit creation idempotency key through authenticated API', async () => {
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValueOnce(response(session)).mockResolvedValueOnce(response({ id: 'operation', status: 'PENDING' }));
+    const client = createAuthClient('/api/v1', fetcher); await client.login('admin@example.test', 'test-password');
+    await client.api('employees', { method: 'POST', body: { nik: 'TEST-01' }, idempotencyKey: 'test-operation-key' });
+    expect(fetcher.mock.calls[1][1]?.headers).toMatchObject({ 'Idempotency-Key': 'test-operation-key', Authorization: 'Bearer ' + session.accessToken });
+  });
 });

@@ -25,7 +25,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T12 — integrasi backend | Codex, 2026-10-02 | Auth receipt; Employee integration test; progress | T11 selesai | hanya Docker MySQL 3307; tidak menambah proses | 7 integrasi MySQL lulus; UI/visual tersedia, E2E browser dan review akhir menyusul |
+| T12 — HRD H07/H10 | Codex, 2026-10-02 | apps/hr-web/src; test/portal-design.spec.ts; progress | T11 selesai | hanya Docker MySQL 3307; tidak menambah proses | H07/H10 dan recovery UI lulus statis/komponen/visual; E2E browser nyata menyusul |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 
@@ -34,6 +34,8 @@ Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increme
 Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .windsurf/ dan skills-lock.json adalah berkas lokal; jangan di-stage, dihapus atau diubah tanpa scope jelas. Rahasia dan data pribadi tetap ignored.
 
 ## Bukti pemeriksaan
+
+- T12 UI: typecheck/lint dan 25 test terfokus HR (Employees 7, AuthClient 8, selector 6, App 4) lulus. Visual T12 8 test terang/gelap pada 320/768/1024/1440 lulus; daftar, H07, H10 dan koreksi email diperiksa, screenshot ditinjau. E2E nyata belum dijalankan pada increment UI ini.
 
 - T12 integrasi backend: 7 test Auth–Employee–MySQL nyata lulus: concurrent/idempotensi, receipt atomik, recovery/revokasi, worker restart, response finalize hilang, master berubah/kompensasi, email unik/inactive dan internal signature/actor. Auth dist dibangun dahulu.
 
