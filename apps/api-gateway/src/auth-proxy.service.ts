@@ -1,23 +1,33 @@
 import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { GatewayConfig } from './gateway.config';
 
+export type Upstream = 'auth' | 'employee';
+type Method = 'GET' | 'POST' | 'PATCH';
+const OUTAGE: Record<Upstream, string> = {
+  auth: 'Layanan autentikasi sementara tidak tersedia.',
+  employee: 'Layanan data karyawan sementara tidak tersedia.',
+};
+
 @Injectable()
 export class AuthProxyService {
   constructor(private readonly config: GatewayConfig) {}
   async forward(
     path: string,
-    method: 'GET' | 'POST',
+    method: Method,
     headers: Record<string, string> = {},
     body?: unknown,
+    upstream: Upstream = 'auth',
   ) {
+    const base = upstream === 'auth' ? this.config.authUrl : this.config.employeeUrl;
+    const withBody = method !== 'GET';
     try {
-      const response = await fetch(`${this.config.authUrl}${path}`, {
+      const response = await fetch(`${base}${path}`, {
         method,
         headers: {
           ...headers,
-          ...(method === 'POST' ? { 'Content-Type': 'application/json' } : {}),
+          ...(withBody ? { 'Content-Type': 'application/json' } : {}),
         },
-        ...(method === 'POST' ? { body: JSON.stringify(body ?? {}) } : {}),
+        ...(withBody ? { body: JSON.stringify(body ?? {}) } : {}),
         signal: AbortSignal.timeout(this.config.timeoutMs),
         redirect: 'manual',
       });
@@ -33,7 +43,7 @@ export class AuthProxyService {
         const chunk = await reader.read();
         if (chunk.done) break;
         size += chunk.value.byteLength;
-        if (size > 65536) {
+        if (size > 262144) {
           await reader.cancel();
           throw new Error('Oversized response');
         }
@@ -51,9 +61,7 @@ export class AuthProxyService {
         retryAfter: response.headers.get('retry-after'),
       };
     } catch {
-      throw new ServiceUnavailableException(
-        'Layanan autentikasi sementara tidak tersedia.',
-      );
+      throw new ServiceUnavailableException(OUTAGE[upstream]);
     }
   }
 }

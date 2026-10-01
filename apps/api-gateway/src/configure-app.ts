@@ -27,9 +27,13 @@ class SafeExceptionFilter implements ExceptionFilter {
           : parserType === 'entity.parse.failed'
             ? 400
             : 503;
+    const own =
+      error instanceof HttpException && statusCode === 503
+        ? error.message
+        : null;
     const message =
       statusCode === 503
-        ? 'Layanan autentikasi sementara tidak tersedia.'
+        ? own || 'Layanan sementara tidak tersedia.'
         : statusCode === 413
           ? 'Ukuran request terlalu besar.'
           : statusCode === 400
@@ -76,7 +80,7 @@ export function configureApp(app: INestApplication) {
   app.enableCors({
     origin: config.origins,
     credentials: true,
-    methods: ['GET', 'POST', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID'],
   });
   (app as NestExpressApplication).useBodyParser('json', {
