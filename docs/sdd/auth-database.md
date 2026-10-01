@@ -24,4 +24,4 @@ Migration dev/test dapat diterapkan ulang tanpa perubahan.
 Client membaca MySQL nyata; transaksi test memverifikasi email/token unik dan FK.
 Transaksi di-rollback agar data uji tidak tertinggal.
 Hak runtime diverifikasi lewat operasi yang harus ditolak.
-Login dan seed belum diimplementasikan.
+Login dan seed diimplementasikan pada [spec Auth Service](auth-service.md).

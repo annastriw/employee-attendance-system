@@ -56,14 +56,14 @@ Status: belum dikerjakan. Semua path adalah target rencana, bukan file yang suda
 - [ ] Alur fase diverifikasi, batasan dicatat dan ditinjau.
 
 ## T08 — Login admin backend
-- [ ] Selesai
+- [x] Selesai
 - Acceptance: Seed password hash, endpoint login role terpisah, sesi/revokasi, forced password change.
 - Verification: Jest/Supertest: login salah role, password salah, sesi lama, restricted session.
 - Dependencies: 7
 - Target: apps/auth-service/
 
 ## T09 — Login admin UI
-- [ ] Selesai
+- [x] Selesai
 - Acceptance: Panel HRD login dan ganti password awal hingga dashboard kosong.
 - Verification: Component test dan Playwright login/ganti password.
 - Dependencies: 8
@@ -275,12 +275,29 @@ Catatan: bagian database development dari T07 selesai berdasarkan laporan penggu
 - [x] T07b.2: Hak runtime, verifikasi MySQL nyata, constraint dan rollback pada attendance_test.
 - [x] Migration berulang tanpa pending, tidak ada drift, typecheck script lulus.
 - [ ] Database module NestJS, seed/login, schema service lain dan outbox dikerjakan berikutnya.
-- [ ] Container test khusus dan harness frontend tetap belum tersedia; T07 induk belum selesai.
+- [ ] Container test khusus belum tersedia; harness HR frontend tersedia pada T09. T07 induk belum selesai.
 
 ## T08 — Increment backend Auth
 - [x] T08a.1: Package database backend bersama, generate/build dan test konfigurasi koneksi.
 - [x] T08a.2: Database module Auth dan healthcheck.
 - [x] T08b: Seed HRD idempotent, hash bcrypt dan forced password change.
-- [ ] T08c: Login per role, JWT/session, validasi dan audit.
-- [ ] T08d: Refresh, change-password, revocation dan integration test.
-- Spec: ../docs/sdd/auth-service.md; belum ada integrasi frontend/Gateway.
+- [x] T08c: Login per role, JWT/session, validasi dan audit.
+- [x] T08d: Refresh, change-password, revocation dan integration test.
+- Spec: ../docs/sdd/auth-service.md; integrasi Gateway dan frontend selesai pada T09.
+
+## T09a — Integrasi Auth melalui Gateway
+- [x] Route autentikasi tetap, cookie dan JWT diteruskan tanpa penyimpanan Gateway.
+- [x] Batas body, timeout, CORS, request ID dan readiness terverifikasi.
+- [x] Supertest upstream HTTP nyata serta smoke Auth/MySQL lulus.
+- [x] Dokumen menjalankan Gateway tersedia; commit lokal dev.
+- Batas: UI HRD, component test dan Playwright dilanjutkan T09b/T09c.
+
+## T09b/T09c — Login HRD frontend dan browser
+- [x] HeroUI/Tailwind, client sesi dalam memori, refresh single-flight dan test client.
+- [x] Atomic Design: form login, forced password change, ringkasan kosong dan logout.
+- [x] 11 unit/component test; build dan lint frontend lulus.
+- [x] 2 Playwright journeys dengan Gateway/Auth/MySQL test nyata, desktop/mobile dan keyboard.
+- [x] Tidak ada overflow 320/768/1024/1440 px; screenshot ditinjau.
+- [x] Panduan lokal dan spesifikasi tersedia; commit lokal dev.
+- Spec: ../docs/sdd/hr-auth-flow.md. Runbook: ../docs/deployment/hr-local.md.
+- Batas: CRUD/master departemen dimulai T10; belum deploy. MCP HeroUI/DevTools tidak merespons, dokumentasi resmi dan Playwright digunakan.

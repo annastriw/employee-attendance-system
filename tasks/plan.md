@@ -33,7 +33,7 @@ Auth mendasari otorisasi. Employee membutuhkan akun; Attendance menggunakan kela
 
 ## Pemeriksaan
 Per-task: unit/API/component test yang relevan. Per-checkpoint: build, lint, test terfokus, dan alur manual atau Playwright. Tidak menganggap mock cukup untuk MySQL/MinIO AIStor Free/kamera nyata. TDD untuk aturan bisnis; tidak menulis test yang hanya meniru implementasi UI.
-Script build/lint dan unit test scaffold tersedia. Script db:* menguji migration dan constraint MySQL. Harness frontend dan test aturan bisnis belum tersedia.
+Script build/lint dan unit test scaffold tersedia. Script db:* menguji migration dan constraint MySQL. Harness Vitest/RTL dan Playwright HRD serta test aturan Auth tersedia; domain absensi belum diimplementasikan.
 
 ## Risiko dan mitigasi
 - MySQL dan MinIO AIStor Free tidak satu transaksi: upload READY, transaksi attendance, outbox, retry dan cleanup orphan.

@@ -29,7 +29,7 @@ Shadow database hanya untuk Prisma migrate dev, tidak digunakan service.
 Migration tabel domain dibuat bertahap berdasarkan baseline.
 Runtime hanya mendapat hak pada tabel miliknya setelah migration berhasil.
 Audit mendapat SELECT dan INSERT saja, tanpa UPDATE atau DELETE.
-Login, seed HRD, dan database module NestJS belum dibuat pada tahap setup ini.
+Auth Service, seed HRD dan login sudah tersedia; lihat [Auth lokal](auth-local.md).
 
 
 ## Migration Auth dan verifikasi
@@ -68,8 +68,7 @@ Driver verifikasi mengambil RSA public key untuk caching_sha2_password hanya pad
 loopback lokal yang divalidasi. Untuk VPS gunakan TLS terverifikasi; jangan menyalin
 allowPublicKeyRetrieval ke koneksi remote tanpa rancangan transport yang aman.
 
-Tahap ini belum menghubungkan module NestJS ke database, membuat seed HRD/login,
-atau membuat tabel Employee/Attendance/Media/outbox.
+Auth Service sudah terhubung ke database dan memiliki seed/login. Tabel Employee/Attendance/Media/outbox belum dibuat.
 Frontend belum memakai data database. Test database masih pada instance lokal yang sama.
 
 ## Referensi
