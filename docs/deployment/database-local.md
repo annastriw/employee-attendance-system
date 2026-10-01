@@ -52,7 +52,7 @@ db:migrate:test hanya mengizinkan attendance_test pada 127.0.0.1:3307.
 db:grants dijalankan sesudah migration kedua database tersedia.
 db:verify memakai Prisma Client dan adapter resmi PrismaMariaDb, tetap ke MySQL 8.4.
 Nama adapter bukan perubahan database menjadi MariaDB.
-Client terhasilkan di generated/prisma, diabaikan Git; generate ulang setelah checkout/schema berubah.
+Client terhasilkan di packages/database/src/generated, diabaikan Git; generate ulang setelah checkout/schema berubah.
 
 Verifikasi 2026-10-01:
 - Schema valid, migration dev/test berhasil; pengulangan tidak memiliki pending migration.

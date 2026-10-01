@@ -38,3 +38,4 @@ minio.license
 .data/
 
 /generated/prisma
+/packages/database/src/generated/

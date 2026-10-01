@@ -14,16 +14,15 @@
     "db:validate": "prisma validate",
     "db:grants": "node scripts/database/setup-local.mjs --grants",
     "db:migrate": "prisma migrate deploy",
-    "db:generate": "prisma generate",
+    "db:generate": "prisma generate && pnpm --filter @attendance/database build",
     "db:verify": "tsx scripts/database/verify.ts",
     "db:migrate:test": "prisma migrate deploy --config prisma.test.config.ts",
     "db:typecheck": "pnpm --dir apps/auth-service exec tsc --ignoreConfig --noEmit --strict --skipLibCheck --esModuleInterop --target ES2023 --module NodeNext --moduleResolution NodeNext ../../scripts/database/verify.ts"
   },
   "devDependencies": {
-    "@prisma/adapter-mariadb": "7.10.0",
-    "@prisma/client": "7.10.0",
     "dotenv": "^18.0.4",
     "prisma": "7.10.0",
-    "tsx": "^4.23.15"
+    "tsx": "^4.23.15",
+    "@attendance/database": "workspace:*"
   }
 }

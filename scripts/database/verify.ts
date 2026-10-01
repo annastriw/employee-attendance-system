@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { randomUUID, createHash } from "node:crypto";
 import { config } from "dotenv";
-import { PrismaMariaDb } from "@prisma/adapter-mariadb";
-import { PrismaClient } from "../../generated/prisma/client";
+import { createDatabaseClient } from "@attendance/database";
+
 
 config({ path: ".env.database", quiet: true });
 
@@ -14,15 +14,7 @@ function client(key: string, database: string, username: string) {
   assert.equal(url.port, "3307");
   assert.equal(url.pathname, "/" + database);
   assert.equal(url.username, username);
-  return new PrismaClient({
-    adapter: new PrismaMariaDb({
-      host: url.hostname, port: Number(url.port),
-      user: decodeURIComponent(url.username), password: decodeURIComponent(url.password),
-      database, connectionLimit: 2, timezone: "+00:00",
-      // Local loopback only; VPS connections must use verified TLS.
-      allowPublicKeyRetrieval: true,
-    }),
-  });
+  return createDatabaseClient(value, { poolSize: 2 });
 }
 
 async function main() {
