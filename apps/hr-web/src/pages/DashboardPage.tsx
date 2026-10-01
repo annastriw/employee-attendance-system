@@ -5,7 +5,9 @@ import type { AdminUser, AuthClient } from "../lib/auth-client";
 import { useHashRoute } from "../lib/use-hash-route";
 import { DepartmentsPage } from "./DepartmentsPage";
 
-const TITLES = { ringkasan: "Ringkasan", departemen: "Departemen" } as const;
+import { PositionsPage } from "./PositionsPage";
+
+const TITLES = { ringkasan: "Ringkasan", departemen: "Departemen", jabatan: "Jabatan" } as const;
 
 export function DashboardPage({ user, client, busy, error, onLogout, onSessionExpired }: {
   user: AdminUser;
@@ -22,6 +24,9 @@ export function DashboardPage({ user, client, busy, error, onLogout, onSessionEx
       {view === "departemen" ? (
         <DepartmentsPage client={client} params={params} onSessionExpired={onSessionExpired}
           onParamsChange={(next) => navigate("departemen", next)} />
+      ) : view === "jabatan" ? (
+        <PositionsPage client={client} params={params} onSessionExpired={onSessionExpired}
+          onParamsChange={(next) => navigate("jabatan", next)} />
       ) : (
         <div className="empty-state">
           <span className="empty-icon" aria-hidden="true"><ChartBar size={22} /></span>

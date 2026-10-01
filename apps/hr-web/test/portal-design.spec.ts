@@ -89,9 +89,10 @@ const departments = [
   createdAt: "2026-10-01T00:00:00.000Z", updatedAt: "2026-10-01T00:00:00.000Z",
 }));
 
+for (const master of [{ resource: "departments", route: "departemen", title: "Departemen", label: "departemen" }, { resource: "positions", route: "jabatan", title: "Jabatan", label: "jabatan" }]) {
 for (const scheme of ["light", "dark"] as const) {
   for (const width of [320, 768, 1024, 1440]) {
-    test(`HR departments ${scheme} layout at ${width}px`, async ({ page }, info) => {
+    test(`HR ${master.resource} ${scheme} layout at ${width}px`, async ({ page }, info) => {
       const errors: string[] = [];
       page.on("pageerror", error => errors.push(error.message));
       await page.emulateMedia({ colorScheme: scheme });
@@ -100,24 +101,28 @@ for (const scheme of ["light", "dark"] as const) {
         json: { accessToken: "ui-test-session", expiresIn: 3600,
           user: { id: "ui-test", email: "admin@example.test", role: "ADMIN_HRD", employeeId: null, mustChangePassword: false } },
       }));
-      await page.route("**/api/v1/departments?*", route => route.fulfill({
+      await page.route(`**/api/v1/${master.resource}?*`, route => route.fulfill({
         json: { items: departments, total: departments.length, page: 1, pageSize: 20 },
       }));
-      await page.goto("http://127.0.0.1:15175/#departemen");
-      await expect(page.getByRole("heading", { name: "Departemen", level: 1 })).toBeVisible();
-      await expect(page.getByRole("grid", { name: "Daftar departemen" })).toBeVisible();
+      await page.goto(`http://127.0.0.1:15175/#${master.route}`);
+      await expect(page.getByRole("heading", { name: master.title, level: 1 })).toBeVisible();
+      await expect(page.getByRole("grid", { name: `Daftar ${master.label}` })).toBeVisible();
       await expect(page.getByRole("button", { name: "Nonaktifkan Keuangan" })).toBeInViewport({ ratio: 1 });
       await expect(page.getByText("1-4 dari 4")).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
-      await page.screenshot({ path: info.outputPath(`departments-${scheme}-${width}.png`), fullPage: true });
+      expect(await page.locator(".list-pager-range").evaluate(el => getComputedStyle(el).fontFamily)).not.toContain("Mono");
+      expect(await page.locator(".status-filter").evaluate(el => getComputedStyle(el).borderTopStyle)).toBe("solid");
+      await page.screenshot({ path: info.outputPath(`${master.resource}-${scheme}-${width}.png`), fullPage: true });
       await page.getByRole("button", { name: "Tambah", exact: true }).click();
       await expect(page.getByRole("dialog")).toBeVisible();
       await page.getByRole("button", { name: "Simpan" }).click();
       await expect(page.getByText("Nama minimal 2 karakter.")).toBeVisible();
-      await page.screenshot({ path: info.outputPath(`departments-form-${scheme}-${width}.png`) });
+      await page.screenshot({ path: info.outputPath(`${master.resource}-form-${scheme}-${width}.png`) });
       await page.keyboard.press("Escape");
       await expect(page.getByRole("dialog")).toBeHidden();
       expect(errors).toEqual([]);
     });
   }
+}
+
 }

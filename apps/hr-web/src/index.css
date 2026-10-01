@@ -120,7 +120,10 @@
 .list-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
 .list-search { flex: 1 1 16rem; max-width: 22rem; }
 .list-add { margin-left: auto; }
-.status-filter .toggle-button { border-radius: 0.5rem; }
+.status-filter { border: 1px solid var(--border); border-radius: 0.5rem; background: var(--surface); overflow: hidden; }
+.status-filter .toggle-button { border-radius: 0; }
+.status-filter .toggle-button:first-child { border-radius: 0.5rem 0 0 0.5rem; }
+.status-filter .toggle-button:last-child { border-radius: 0 0.5rem 0.5rem 0; }
 
 .load-error { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; }
 .load-error .notice { flex: 1 1 18rem; }

@@ -1,7 +1,7 @@
 import { useState, type SubmitEvent } from "react";
 import { Button, Description, FieldError, Input, Label, Modal, TextField } from "@heroui/react";
 import { Notice } from "../molecules/Notice";
-import type { Department } from "../../lib/departments";
+import type { MasterRecord } from "../../lib/master-data";
 
 const CODE = /^[A-Z0-9][A-Z0-9_-]*$/;
 type Errors = { name?: string; code?: string };
@@ -16,18 +16,19 @@ function validate(name: string, code: string): Errors {
   return errors;
 }
 
-export function DepartmentFormDialog({ open, department, busy, error, onSubmit, onClose }: {
+export function MasterFormDialog({ open, record, label, busy, error, onSubmit, onClose }: {
   open: boolean;
-  /** Department being edited; undefined when adding. */
-  department?: Department;
+  label: "departemen" | "jabatan";
+  /** MasterRecord being edited; undefined when adding. */
+  record?: MasterRecord;
   busy: boolean;
   /** Server error; a name/code conflict is shown next to its field. */
   error: string;
   onSubmit: (input: { name: string; code: string }) => void;
   onClose: () => void;
 }) {
-  const [name, setName] = useState(department?.name ?? "");
-  const [code, setCode] = useState(department?.code ?? "");
+  const [name, setName] = useState(record?.name ?? "");
+  const [code, setCode] = useState(record?.code ?? "");
   const [errors, setErrors] = useState<Errors>({});
   const conflict: Errors = error.startsWith("Kode") ? { code: error } : error.startsWith("Nama") ? { name: error } : {};
   const shown = { ...conflict, ...errors };
@@ -47,7 +48,7 @@ export function DepartmentFormDialog({ open, department, busy, error, onSubmit, 
           <Modal.Dialog className="dialog">
             <form onSubmit={submit} noValidate aria-busy={busy}>
               <Modal.Header>
-                <Modal.Heading className="dialog-title">{department ? "Ubah departemen" : "Tambah departemen"}</Modal.Heading>
+                <Modal.Heading className="dialog-title">{`${record ? "Ubah" : "Tambah"} ${label}`}</Modal.Heading>
               </Modal.Header>
               <Modal.Body className="dialog-body">
                 <TextField className="form-field" value={name} onChange={(value) => { setName(value); setErrors({ ...errors, name: undefined }); }}

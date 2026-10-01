@@ -15,8 +15,9 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
   - bb3c6af feat(hr-web): H11 department list, form and status actions on real API (T10)
   - 20b53e0 fix(auth): give /auth/me its own rate limit for per-request service verification
   - d9738b1 test(hr-web): real-API department journey with Employee Service in the E2E stack
+- Commit T11 sejauh ini: 85143ce (schema/migration/grants), 73293bc (Employee API + unit/MySQL), c4da4dd (Gateway allowlist/kontrak), 49e4eb7 (filter aktif untuk penugasan).
 - Branch: dev. Remote belum ada; push menunggu repository pilihan pengguna.
-- Database lokal (Docker MySQL 127.0.0.1:3307): migration `20261001160000_employee_master_departments` DITERAPKAN ke attendance_dev dan attendance_test. Akun `attendance_employee`/`attendance_employee_test` dibuat via `pnpm db:grants`; kredensial ada di `.env.database` (ignored).
+- Database lokal (Docker MySQL 127.0.0.1:3307): migration `20261001160000_employee_master_departments` dan `20261002080000_employee_master_positions` DITERAPKAN ke attendance_dev dan attendance_test. Akun `attendance_employee`/`attendance_employee_test` dibuat via `pnpm db:grants`; kredensial ada di `.env.database` (ignored).
 - Host memory sering CRITICAL (1-2 GB). Jalankan suite berat satu per satu; Playwright 1 worker terbukti stabil.
 - Tidak ada proses/port yang dibiarkan berjalan; stack E2E dimatikan Playwright setelah test.
 
@@ -24,7 +25,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T11 master jabatan | Codex, 2026-10-02 | prisma/, scripts/database/setup-local.mjs, docs/sdd/employee-positions.md; lalu Employee/Gateway/HR | T10 (selesai) | belum ada service berjalan; target employee 3002, gateway 3000, auth 3001 | Aktif: schema/kontrak dan migration |
+| T11 master jabatan | Codex, 2026-10-02 | apps/hr-web/src/, test/, docs/sdd/employee-positions.md | T10 (selesai); schema/API/Gateway T11 terverifikasi | E2E HR 15174, gateway 15300, auth 15301, employee 15302; MySQL 3307 | Aktif: checkpoint HRD nyata; build backend lulus |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 
@@ -33,6 +34,8 @@ Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increme
 Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .windsurf/ dan skills-lock.json adalah berkas lokal; jangan di-stage, dihapus atau diubah tanpa scope jelas. Rahasia dan data pribadi tetap ignored.
 
 ## Bukti pemeriksaan
+
+- T11 sementara: diff migrations→schema exit 0; migrate dev/test dan grants lulus. Employee typecheck/lint, 9 unit dan 12 API MySQL (6 departemen + 6 jabatan) lulus; tambahan filter ACTIVE jabatan 6 API lulus. Gateway typecheck/lint, 12 unit + 37 kontrak HTTP lulus. HR typecheck/lint, 38 Vitest/RTL lulus (satu worker), termasuk refetch dan selector aktif/nilai lama nonaktif. Visual 36 test lulus (H11/H12 terang/gelap 320/768/1024/1440; screenshot ditinjau). Backend Auth/Employee/Gateway build lulus. HRD nyata sedang diverifikasi.
 
 - T09c redesign: tsc kedua frontend, Vitest auth, Playwright `test:ui` terang/gelap 320/768/1024/1440 px; screenshot ditinjau. Belum dicentang di todo sampai E2E checkpoint; E2E auth nyata sudah lulus pada run 2026-10-02 (lihat di bawah), jadi T09c dapat dicentang setelah ditinjau ulang.
 - T10 (rincian di docs/sdd/employee-departments.md):
