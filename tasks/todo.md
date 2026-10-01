@@ -72,14 +72,14 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 - Target: apps/hr-web/
 
 ## T10 — Master departemen
-- [ ] Selesai
+- [x] Selesai (2026-10-02; bukti di docs/sdd/employee-departments.md)
 - Acceptance: HRD create/list/edit/activate/deactivate; data dipakai tidak dihapus.
 - Verification: API test dan satu alur HRD nyata.
 - Dependencies: 9
 - Target: apps/employee-service/, apps/hr-web/
 
 ## T11 — Master jabatan
-- [ ] Selesai
+- [x] Selesai (2026-10-02; bukti di docs/sdd/employee-positions.md)
 - Acceptance: HRD mengelola jabatan dengan aturan aktif/nonaktif.
 - Verification: API/component test serta selector tidak menawarkan data nonaktif.
 - Dependencies: 10

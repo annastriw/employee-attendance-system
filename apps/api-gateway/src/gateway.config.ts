@@ -3,9 +3,28 @@ import { existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { config } from 'dotenv';
 
+function upstream(name: string, fallback: string) {
+  if (process.env.NODE_ENV === 'production' && !process.env[name]) {
+    throw new Error(`${name} wajib pada production.`);
+  }
+  const url = new URL(process.env[name] ?? fallback);
+  if (
+    !['http:', 'https:'].includes(url.protocol) ||
+    url.username ||
+    url.password ||
+    url.search ||
+    url.hash ||
+    url.pathname !== '/'
+  ) {
+    throw new Error(`${name} harus berupa origin HTTP/HTTPS tanpa kredensial.`);
+  }
+  return url.origin;
+}
+
 @Injectable()
 export class GatewayConfig {
   readonly authUrl: string;
+  readonly employeeUrl: string;
   readonly origins: string[];
   readonly port: number;
   readonly timeoutMs = 5000;
@@ -19,28 +38,8 @@ export class GatewayConfig {
       }
       config({ path: join(root, '.env.gateway'), quiet: true });
     }
-    const url = new URL(
-      process.env.AUTH_SERVICE_URL ?? 'http://127.0.0.1:3001',
-    );
-    if (
-      !['http:', 'https:'].includes(url.protocol) ||
-      url.username ||
-      url.password ||
-      url.search ||
-      url.hash ||
-      url.pathname !== '/'
-    ) {
-      throw new Error(
-        'AUTH_SERVICE_URL harus berupa origin HTTP/HTTPS tanpa kredensial.',
-      );
-    }
-    if (
-      process.env.NODE_ENV === 'production' &&
-      !process.env.AUTH_SERVICE_URL
-    ) {
-      throw new Error('AUTH_SERVICE_URL wajib pada production.');
-    }
-    this.authUrl = url.origin;
+    this.authUrl = upstream('AUTH_SERVICE_URL', 'http://127.0.0.1:3001');
+    this.employeeUrl = upstream('EMPLOYEE_SERVICE_URL', 'http://127.0.0.1:3002');
     this.origins = (
       process.env.GATEWAY_ALLOWED_ORIGINS ??
       (process.env.NODE_ENV === 'production'

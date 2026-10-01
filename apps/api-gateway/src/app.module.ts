@@ -4,9 +4,10 @@ import { AppService } from './app.service';
 import { GatewayConfig } from './gateway.config';
 import { AuthProxyService } from './auth-proxy.service';
 import { AuthProxyController } from './auth-proxy.controller';
+import { EmployeeProxyController } from './employee-proxy.controller';
 
 @Module({
-  controllers: [AppController, AuthProxyController],
+  controllers: [AppController, AuthProxyController, EmployeeProxyController],
   providers: [AppService, GatewayConfig, AuthProxyService],
 })
 export class AppModule {}

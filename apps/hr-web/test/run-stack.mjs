@@ -8,6 +8,7 @@ import {
   assertTestDatabase,
 } from "./environment.mjs";
 assertTestDatabase(databaseEnv.AUTH_TEST_DATABASE_URL);
+assertTestDatabase(databaseEnv.EMPLOYEE_TEST_DATABASE_URL);
 const children = [];
 function start(file, env) {
   const child = spawn(process.execPath, [file], {
@@ -46,12 +47,19 @@ try {
     AUTH_JWT_SECRET: authEnv.AUTH_JWT_SECRET,
     AUTH_ALLOWED_ORIGINS: origin,
   });
+  start(resolve(root, "apps/employee-service/dist/main.js"), {
+    PORT: "15302",
+    EMPLOYEE_DATABASE_URL: databaseEnv.EMPLOYEE_TEST_DATABASE_URL,
+    AUTH_SERVICE_URL: "http://127.0.0.1:15301",
+  });
   start(resolve(root, "apps/api-gateway/dist/main.js"), {
     PORT: "15300",
     AUTH_SERVICE_URL: "http://127.0.0.1:15301",
+    EMPLOYEE_SERVICE_URL: "http://127.0.0.1:15302",
     GATEWAY_ALLOWED_ORIGINS: origin,
   });
   await ready("http://127.0.0.1:15300/health");
+  await ready("http://127.0.0.1:15302/health");
   const requireWeb = createRequire(resolve(root, "apps/hr-web/package.json"));
   const vite = resolve(
     requireWeb.resolve("vite/package.json"),

@@ -130,8 +130,50 @@ export function createAuthClient(
         "Sesi Anda telah berakhir. Silakan masuk kembali.",
       );
   }
+  async function api<T>(
+    path: string,
+    init: { method?: "GET" | "POST" | "PATCH"; body?: unknown } = {},
+  ): Promise<T> {
+    await ensureSession();
+    const method = init.method ?? "GET";
+    let response: Response;
+    try {
+      response = await fetcher(`${baseUrl}/${path}`, {
+        method,
+        credentials: "include",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          ...(method !== "GET" ? { "Content-Type": "application/json" } : {}),
+        },
+        ...(method !== "GET" ? { body: JSON.stringify(init.body ?? {}) } : {}),
+        signal: AbortSignal.timeout(10000),
+      });
+    } catch {
+      throw new AuthError(0, "Tidak dapat terhubung. Periksa koneksi Anda dan coba lagi.");
+    }
+    const payload = (await response.json().catch(() => null)) as { message?: unknown } | null;
+    if (!response.ok) {
+      if (response.status === 401) {
+        clear();
+        throw new AuthError(401, "Sesi Anda telah berakhir. Silakan masuk kembali.");
+      }
+      // Domain services return short, user-facing Indonesian messages for these.
+      const own = Array.isArray(payload?.message) ? payload.message[0] : payload?.message;
+      if ([400, 404, 409].includes(response.status) && typeof own === "string")
+        throw new AuthError(response.status, own);
+      throw new AuthError(
+        response.status,
+        response.status === 403
+          ? "Anda tidak memiliki akses untuk tindakan ini."
+          : "Layanan sementara tidak tersedia. Coba lagi sebentar.",
+      );
+    }
+    if (!payload) throw new AuthError(503, "Respons layanan tidak dapat dibaca. Coba lagi sebentar.");
+    return payload as T;
+  }
   return {
     restore,
+    api,
     currentUser: () => user,
     async login(email: string, password: string) {
       return accept(await send("admin/login", { email, password }));

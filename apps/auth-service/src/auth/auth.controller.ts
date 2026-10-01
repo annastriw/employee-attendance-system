@@ -10,6 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import type { CookieOptions, Response } from 'express';
 import { AuthConfig } from '../config/auth.config';
 import { AuthService } from './auth.service';
@@ -98,7 +99,10 @@ export class AuthController {
       ),
     );
   }
+  // Services verify every request through /me (revocation-aware), so it cannot
+  // share the 10/min login budget. It still requires a valid bearer session.
   @Get('me')
+  @Throttle({ default: { limit: 600, ttl: 60000 } })
   @UseGuards(SessionGuard)
   @ApiBearerAuth()
   me(@Req() request: AuthRequest) {

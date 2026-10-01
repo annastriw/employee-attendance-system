@@ -100,6 +100,18 @@ describe('Auth API with isolated MySQL', () => {
       .expect(200);
     expect(me.body.email).toBe(adminEmail);
   });
+  it('lets services verify /me per request while login stays rate-limited', async () => {
+    const response = await login(adminEmail).expect(200);
+    for (let i = 0; i < 15; i++)
+      await request(app.getHttpServer())
+        .get('/api/v1/auth/me')
+        .auth(response.body.accessToken, { type: 'bearer' })
+        .expect(200);
+    let status = 200;
+    for (let i = 0; i < 12 && status !== 429; i++)
+      status = (await login(adminEmail, 'admin', 'Wrong-Password-123456')).status;
+    expect(status).toBe(429);
+  });
   it('rejects wrong passwords and wrong panels with the same response', async () => {
     const wrongPassword = await login(
       adminEmail,

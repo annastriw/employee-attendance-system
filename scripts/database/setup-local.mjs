@@ -43,10 +43,24 @@ if (!existsSync(envFile)) {
   ].join("\n"), { flag: "wx", mode: 0o600 });
 }
 const env = parse(readFileSync(envFile));
+// Employee runtime accounts were added after the initial setup (T10). Append
+// missing credentials to the existing ignored file; never replace or print them.
+const employeeKeys = [
+  ["EMPLOYEE_DATABASE_URL", "attendance_employee", "attendance_dev"],
+  ["EMPLOYEE_TEST_DATABASE_URL", "attendance_employee_test", "attendance_test"],
+];
+const missing = employeeKeys.filter(([key]) => !env[key]);
+if (missing.length) {
+  const lines = missing.map(([key, user, db]) =>
+    `${key}=mysql://${user}:${randomBytes(32).toString("hex")}@127.0.0.1:3307/${db}`);
+  writeFileSync(envFile, (readFileSync(envFile, "utf8").endsWith("\n") ? "" : "\n") + lines.join("\n") + "\n", { flag: "a" });
+  Object.assign(env, parse(readFileSync(envFile)));
+}
 const users = [
   ["DATABASE_URL", "attendance_migrator", "attendance_dev"],
   ["AUTH_DATABASE_URL", "attendance_auth", "attendance_dev"],
   ["AUTH_TEST_DATABASE_URL", "attendance_auth_test", "attendance_test"],
+  ...employeeKeys,
 ];
 for (const [key, user, database] of users) {
   const url = new URL(env[key]);
@@ -73,6 +87,12 @@ if (process.argv.includes("--grants")) {
       sql += `GRANT SELECT, INSERT, UPDATE ON \`${db}\`.\`${table}\` TO '${user}'@'%';\n`;
     }
     sql += `GRANT SELECT, INSERT ON \`${db}\`.auth_audit_logs TO '${user}'@'%';\n`;
+  }
+  // Employee master data is deactivated, never hard-deleted; audit is append-only.
+  for (const [db, user] of [["attendance_dev", "attendance_employee"], ["attendance_test", "attendance_employee_test"]]) {
+    sql += `GRANT SELECT, INSERT, UPDATE ON \`${db}\`.emp_departments TO '${user}'@'%';\n`;
+    sql += `GRANT SELECT, INSERT, UPDATE ON \`${db}\`.emp_positions TO '${user}'@'%';\n`;
+    sql += `GRANT SELECT, INSERT ON \`${db}\`.emp_audit_logs TO '${user}'@'%';\n`;
   }
 }
 mysql(sql);

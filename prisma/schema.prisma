@@ -83,6 +83,19 @@ model EmpDepartment {
   @@map("emp_departments")
 }
 
+model EmpPosition {
+  id        String          @id @default(uuid()) @db.Char(36)
+  name      String          @db.VarChar(120)
+  code      String          @unique @db.VarChar(40)
+  status    EmpMasterStatus @default(ACTIVE)
+  createdAt DateTime        @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt DateTime        @updatedAt @map("updated_at") @db.DateTime(3)
+
+  @@unique([name])
+  @@index([status, name])
+  @@map("emp_positions")
+}
+
 model EmpAuditLog {
   id             String   @id @default(uuid()) @db.Char(36)
   actorAccountId String?  @map("actor_account_id") @db.Char(36)

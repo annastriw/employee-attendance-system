@@ -17,3 +17,6 @@ export function assertTestDatabase(url) {
     );
 }
 export const fixturePath = resolve(root, ".local/hr-e2e.json");
+export const departmentFixturePath = resolve(root, ".local/hr-e2e-departments.json");
+
+export const positionFixturePath = resolve(root, ".local/hr-e2e-positions.json");
