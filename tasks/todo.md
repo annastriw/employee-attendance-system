@@ -251,7 +251,7 @@ Status: belum dikerjakan. Semua path adalah target rencana, bukan file yang suda
 - [x] Aktifkan komponen WSL/VirtualMachinePlatform tanpa restart otomatis.
 - [x] Siapkan Compose image terkunci, mount lisensi read-only dan volume persisten.
 - [x] Buat kredensial lokal, verifikasi Git ignore, validasi Compose config.
-- [ ] Pengguna restart Windows, Docker engine aktif.
-- [ ] Pull image, startup, verifikasi lisensi dan healthcheck.
-- [ ] Buat bucket privat, upload/read, uji akses anonim dan persistensi.
+- [x] Pengguna restart Windows, Docker engine aktif (dikonfirmasi pengguna).
+- [x] Pull image, startup, verifikasi lisensi dan healthcheck (pengujian manual pengguna).
+- [x] Buat bucket privat, upload/read, uji akses anonim dan persistensi (pengujian manual pengguna).
 Catatan: ini bagian storage dari T07; T07 keseluruhan belum selesai. Status terperinci: docs/deployment/installation-status.md.

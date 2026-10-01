@@ -1,34 +1,31 @@
 # Status instalasi AIStor lokal
 Tanggal: 2026-10-01 (Asia/Jakarta).
 
-## Selesai
-- WSL 2.7.13 terpasang melalui paket resmi Microsoft.
-- Komponen Microsoft-Windows-Subsystem-Linux dan VirtualMachinePlatform berhasil diaktifkan.
-- Docker Desktop 4.93.0 terpasang per-user menggunakan backend WSL 2.
-- Docker CLI 29.8.1 dan Compose 5.5.1 tersedia.
-- Image AIStor dipilih dari registry resmi dan dipin ke release/digest pada Compose.
+## Instalasi dan konfigurasi yang diperiksa agent
+- WSL 2.7.13, Docker Desktop 4.93.0, Docker CLI 29.8.1 dan Compose 5.5.1 terpasang.
+- Komponen Microsoft-Windows-Subsystem-Linux dan VirtualMachinePlatform diaktifkan.
+- Image resmi AIStor dipin ke release/digest pada infra/compose.aistor.local.yml.
 - Konfigurasi Compose lulus config --quiet.
-- Kredensial root lokal acak dibuat di .env.aistor; tidak ditampilkan atau di-commit.
-- Berkas .licenses/minio.license ditemukan; isi dan validitas lisensi belum diverifikasi oleh AIStor.
-- File lisensi, kredensial dan log lokal dikecualikan dari Git.
+- Kredensial acak lokal ada di .env.aistor, lisensi di .licenses/minio.license.
+- Kredensial, lisensi, log dan data lokal dikecualikan dari Git.
 
-## Tindakan pengguna yang diperlukan
-Restart Windows untuk menyelesaikan aktivasi komponen WSL. Restart tidak dilakukan oleh agent.
-Sesudah restart, buka Docker Desktop dan tunggu engine siap. Bila baru diminta onboarding, selesaikan halaman tersebut.
+## Pengujian manual yang dikonfirmasi pengguna
+Setelah mengikuti tutorial setup dan pengujian penyimpanan, pengguna menyatakan semuanya sudah oke. Hasil berikut dicatat berdasarkan laporan pengguna, bukan pengujian ulang oleh agent:
+- Docker engine dan container AIStor berjalan.
+- Lisensi diterima, healthcheck dan login Console berhasil.
+- Bucket attendance-photos privat tersedia.
+- Upload/download objek berhasil dan isi hasil download sesuai.
+- Akses objek tanpa autentikasi ditolak.
+- Data tetap tersedia setelah restart container dan stop/start.
 
-## Belum selesai
-- Docker engine terverifikasi aktif.
-- Download image AIStor dan startup container.
-- Penerimaan lisensi Free oleh server.
-- HTTP healthcheck, login Console dan upload/read S3.
-- Bucket privat attendance-photos dan uji akses anonim.
-- Uji persistensi sesudah restart container.
+## Pekerjaan berikutnya
+- Integrasi Media Service menggunakan kredensial/policy aplikasi, bukan akun root.
+- Pengujian otorisasi foto lintas karyawan ketika aplikasi tersedia.
+- Uji backup/restore dan deployment VPS sebelum live.
+T07 keseluruhan belum selesai: MySQL dan harness testing aplikasi masih perlu disiapkan.
 
-Instalasi prasyarat dan persiapan konfigurasi selesai; server AIStor belum berjalan. Jangan menganggap healthcheck, lisensi atau operasi S3 sudah berhasil.
-
-## Jika docker compose belum dikenali
-Komponen Compose tersedia pada:
-C:UsersAnnasAppDataLocalProgramsDockerDesktopesourcescli-pluginsdocker-compose.exe
-Gunakan executable tersebut untuk perintah Compose, atau buka ulang terminal setelah menjalankan Docker Desktop.
-
-Panduan penggunaan: aistor-local.md.
+## Panduan
+Lihat aistor-local.md untuk menjalankan, menghentikan, dan menguji storage.
+Jika docker compose belum dikenali, executable tersedia pada:
+C:/Users/Annas/AppData/Local/Programs/DockerDesktop/resources/cli-plugins/docker-compose.exe
+PowerShell boleh ditutup setelah up -d. Docker Engine harus tetap berjalan; data disimpan pada volume persisten.
