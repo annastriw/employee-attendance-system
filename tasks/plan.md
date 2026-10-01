@@ -61,17 +61,24 @@ Pengguna menyetujui penyederhanaan pelaksanaan dengan syarat struktur proyek tet
 - Outbox/retry dibatasi pada alur yang membutuhkan konsistensi lintas service (provisioning akun+profil, media READY→attendance). Idempotensi, kompensasi dan pemulihan yang diwajibkan baseline tetap dipenuhi.
 - Test terfokus per perubahan; suite lengkap pada checkpoint integrasi. Prioritas: aturan bisnis, otorisasi, revokasi, lokasi wajib, pemulihan.
 
-### Tier test (biaya vs nilai) — revisi 2026-10-01
-Tujuan: loop pengembangan cepat tanpa mengorbankan bukti kontrak bisnis. Jalankan tier sesuai jenis perubahan, bukan semua suite setiap langkah.
+### Tier test (biaya vs nilai) — disetujui 2026-10-02
+Tujuan: mempercepat pengembangan dengan memilih pemeriksaan berdasarkan perubahan dan risiko. Kebijakan ini berlaku untuk task berikutnya; test yang sudah ada tetap dipertahankan.
 
 | Tier | Isi | Kapan dijalankan |
 | --- | --- | --- |
-| 1. Statis (wajib tiap perubahan) | `tsc --noEmit` (typecheck) + lint berkas terkait | Setiap perubahan sebelum commit. Ringan (~detik). |
-| 2. Unit/komponen terfokus | Jest/Supertest atau Vitest/RTL hanya untuk berkas/modul yang disentuh | Saat mengubah logika, API, atau komponen. Ringan (jsdom/node). |
-| 3. Visual/design (`pnpm --dir apps/hr-web run test:ui`, Playwright screenshot) | Layout/tema lintas viewport (suite menguji kedua portal) | HANYA saat menyentuh layout/CSS/shell. Berat (butuh dev server); lewati untuk perubahan logika murni. |
-| 4. E2E nyata (`pnpm --dir apps/hr-web run test:e2e`, API+MySQL+AIStor) | Alur ujung ke ujung dengan backend nyata | Checkpoint integrasi per fitur dan sebelum promosi ke `main`. Paling berat; BUKAN gate per commit. |
+| 1. Statis | Typecheck dan lint package/berkas terkait | Setiap perubahan kode/config yang relevan sebelum commit; tidak harus seluruh monorepo. Dokumentasi saja cukup diperiksa isi, tautan dan diff. |
+| 2. Unit/komponen terfokus | Jest, kontrak HTTP dengan dependency mock, atau Vitest/RTL untuk modul/komponen terdampak | Saat mengubah logika, API atau komponen; sertakan dependensi/pemakai yang berisiko terdampak. |
+| 3. Visual/design (test:ui) | Halaman terdampak pada 320 px dan 1440 px, masing-masing terang/gelap | Hanya saat layout/CSS berubah. Tambahkan 768/1024 px saat breakpoint berubah; seluruh viewport/portal pada checkpoint integrasi. Perubahan shell/token bersama mencakup halaman pemakainya yang relevan. |
+| 4. Integrasi/E2E nyata | API terhadap MySQL dan alur browser dengan backend nyata; AIStor bila fitur memakai storage | Setelah fitur ujung ke ujung lengkap, pada checkpoint integrasi, dan sebelum promosi ke main; bukan gate setiap commit. Minimal satu alur nyata per fitur. |
 
-Wajib ada buktinya dan tidak boleh dipangkas oleh pemangkasan tier: aturan bisnis absensi (late/early/cutoff), otorisasi role, revokasi sesi, lokasi wajib, idempotensi check-in/out, pemulihan/kompensasi. Mock hanya untuk test/prototipe; hasil akhir memakai MySQL/AIStor nyata.
+- Loop tiap increment: kode → statis + test terfokus → review → commit. Integrasi/E2E dijalankan setelah fitur lengkap; fitur belum dicentang selesai sebelum bukti nyata lulus.
+- Suite lengkap/build monorepo dijalankan pada checkpoint integrasi dan sebelum promosi ke main. Build package terkait dijalankan jika perubahan menyentuh bundling/startup; build dist backend terbaru wajib sebelum E2E.
+- Hindari mengulang pemeriksaan yang sudah lulus jika source, dependensi, konfigurasi dan lingkungan terkait tidak berubah. Catat scope dan hasil bukti; perubahan baru, kegagalan atau risiko yang belum terjawab menjadi alasan mengulang/memperluas pemeriksaan.
+- Periksa resource_status jika tersedia, atau RAM OS jika alat tidak tersedia. Jalankan suite berat satu per satu dengan Playwright 1 worker. E2E Auth/master dijalankan per spec untuk menghindari 429; kebijakan ini tidak mengubah limit login/refresh Auth.
+- Verifikasi migration/schema/constraint/grants tetap wajib ketika schema berubah, termasuk diff migrations→schema exit 0 dan penerapan ke dev/test sesuai runbook.
+
+Bukti kritis tetap wajib: aturan bisnis absensi (late/early/cutoff), otorisasi role, revokasi sesi, unik/konflik data, lokasi wajib, keamanan foto, idempotensi check-in/out/provisioning, pemulihan/kompensasi. Mock membantu unit/komponen, sedangkan penerimaan integrasi memakai MySQL/AIStor nyata sesuai fitur. Pengujian kamera/lokasi perangkat nyata tetap mengikuti acceptance. Jangan menghapus test atau menurunkan acceptance untuk mempercepat loop.
+
 - Gunakan tooling yang ada; tunda tambahan broker/cache/orchestration/build system tanpa kebutuhan nyata.
 - Spike kamera/lokasi (T18) dijadwalkan lebih awal secara serial setelah prasyarat T07 siap.
 

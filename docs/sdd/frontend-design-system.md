@@ -30,7 +30,7 @@ Token berada di packages/ui/src/theme.css dan menimpa variabel HeroUI v3 (--acce
 - Halaman berikutnya wajib memakai token dan komponen bersama, tanpa palet baru atau menyalin tema ke aplikasi.
 
 ## Verifikasi
-Build/lint kedua frontend, test komponen auth/menu akun, E2E autentikasi dengan API/MySQL test nyata; layout dua portal pada 320/768/1024/1440 px. Periksa navigasi mobile, keyboard, menu akun, overflow dan screenshot.
+Ikuti [tier test disetujui 2026-10-02](../../tasks/plan.md#tier-test-biaya-vs-nilai--disetujui-2026-10-02): typecheck/lint dan komponen terfokus pada package terdampak. Saat layout/CSS berubah, periksa halaman terdampak pada 320/1440 px terang/gelap; tambah 768/1024 px bila breakpoint berubah. Perubahan token/shell bersama mencakup pemakai yang relevan. Pada checkpoint integrasi, periksa kedua portal pada seluruh viewport tersebut; E2E API/MySQL nyata setelah fitur lengkap. Periksa navigasi mobile, keyboard, menu akun, overflow dan screenshot sesuai perubahan.
 - pnpm --dir apps/hr-web run test:ui: layout tanpa database (sesi dimock untuk login, workspace serta master data).
 - pnpm --dir apps/hr-web run test:e2e: alur API nyata.
 - MCP Chrome DevTools untuk screenshot/accessibility tree; ukuran 320 px diuji melalui Playwright.

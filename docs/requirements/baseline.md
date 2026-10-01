@@ -17,7 +17,7 @@ Dokumen ini merekam keputusan pengguna dalam sesi perencanaan. Dokumen rancangan
 - Instruksi pengguna: setiap perubahan logis yang selesai dan sudah diverifikasi harus di-commit dan dipush ke GitHub pada branch dev, termasuk dokumentasi. Instruksi persisten ada pada AGENTS.md.
 - GitHub: kode, spesifikasi, migration, konfigurasi aman, .env.example. Lokal: .env, kredensial, backup, data/foto pribadi.
 - SDD, context engineering, Kanban, implementasi bertahap, skills relevan, clean code dan maintainability.
-- Testing: frontend Vitest + React Testing Library + Playwright; backend Jest + @nestjs/testing + Supertest, MySQL khusus testing; kamera nyata/mobile diuji manual.
+- Testing: frontend Vitest + React Testing Library + Playwright; backend Jest + @nestjs/testing + Supertest, MySQL khusus testing; kamera nyata/mobile diuji manual. Pengguna menyetujui [testing terfokus dan cadence checkpoint](../../tasks/plan.md#tier-test-biaya-vs-nilai--disetujui-2026-10-02) pada 2026-10-02: pemeriksaan ringan per perubahan, visual sesuai layout/CSS, integrasi/E2E setelah fitur lengkap, suite lengkap pada checkpoint/rilis. Bukti aturan bisnis dan keamanan tetap wajib.
 
 ## Akun dan karyawan
 - Login email/password, panel dan endpoint admin/karyawan terpisah.
