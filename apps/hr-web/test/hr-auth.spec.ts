@@ -15,7 +15,7 @@ test("HRD: initial password change, login again, restore and logout through real
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { name: "Masuk ke portal HRD" }),
+    page.getByRole("heading", { name: "Masuk" }),
   ).toBeVisible();
   await page.keyboard.press("Tab");
   await expect(page.getByLabel("Email", { exact: true })).toBeFocused();
@@ -73,7 +73,7 @@ test("HRD: initial password change, login again, restore and logout through real
   });
   await page.getByRole("button", { name: "Simpan password" }).click();
   await expect(
-    page.getByRole("heading", { name: "Masuk ke portal HRD" }),
+    page.getByRole("heading", { name: "Masuk" }),
   ).toBeVisible();
   await expect(page.getByRole("status")).toContainText(
     "Password berhasil diperbarui",
@@ -93,13 +93,14 @@ test("HRD: initial password change, login again, restore and logout through real
     path: testInfo.outputPath("dashboard.png"),
     fullPage: true,
   });
-  await page.getByRole("button", { name: "Keluar", exact: true }).click();
+  await page.getByRole("button", { name: "Menu akun" }).click();
+  await page.getByRole("menuitem", { name: "Keluar", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Masuk ke portal HRD" }),
+    page.getByRole("heading", { name: "Masuk" }),
   ).toBeVisible();
   await page.reload();
   await expect(
-    page.getByRole("heading", { name: "Masuk ke portal HRD" }),
+    page.getByRole("heading", { name: "Masuk" }),
   ).toBeVisible();
   expect(errors).toEqual([]);
 });

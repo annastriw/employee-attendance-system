@@ -1,12 +1,12 @@
 # Rencana implementasi — Attendance Portal dan HR Portal
-Status: implementasi fondasi berlangsung; task lengkap tetap mengikuti todo.md. Tanggal: 2026-10-01 (Asia/Jakarta).
+Status: implementasi fondasi berlangsung; penyederhanaan pelaksanaan disetujui (lihat bagian Penyederhanaan). Task lengkap tetap mengikuti todo.md. Tanggal: 2026-10-01 (Asia/Jakarta).
 
 ## Acuan
 Kebutuhan/database/API disetujui: ../docs/requirements/baseline.md.
-Daftar pekerjaan: todo.md. Checklist belum dicentang berarti belum dikerjakan.
+Daftar pekerjaan: todo.md. Checklist belum dicentang berarti acceptance/verification task belum sepenuhnya ditutup; baca subtask dan progress untuk pekerjaan yang sudah berjalan.
 
 ## Pendekatan
-Monorepo, lima service dengan kepemilikan tabel, dua frontend. Selesaikan jalur pengguna bertahap; bukan seluruh backend lalu seluruh frontend. Setiap perubahan menggunakan spec terkait, test relevan, review dan dokumentasi.
+Satu repository GitHub monorepo, lima service dengan kepemilikan tabel, dua frontend. Kedua frontend memakai project Vercel terpisah; backend, MySQL dan AIStor berada di VPS Ubuntu. Topologi: [ADR-003](../docs/architecture/adr-003-repository-and-deployment.md). Selesaikan jalur pengguna bertahap; bukan seluruh backend lalu seluruh frontend. Setiap perubahan menggunakan spec terkait, test relevan, review dan dokumentasi.
 
 ## Tooling disetujui
 pnpm workspace, Prisma dengan migration terpusat untuk satu database, HTTP internal + transactional outbox/worker. Detail pada ../docs/architecture/adr-002-project-tooling.md. Kompatibilitas versi dan spesifikasi worker masih bagian task fondasi; Workspace dan dependency awal sudah dipasang; Prisma CLI/client/adapter dikunci 7.10.0.
@@ -50,5 +50,48 @@ Git lokal telah diinisialisasi pada dev. Dependency dan migration fondasi Auth s
 Pengguna telah mengotorisasi commit dan push setiap perubahan yang selesai dan diverifikasi pada branch dev. Pengguna menunda penentuan repository GitHub: pengembangan dan commit lokal tetap berjalan, push menunggu remote. Branch main hanya untuk production.
 Rahasia tetap lokal, .env.example tanpa nilai asli, dokumentasi aman di GitHub.
 
+## Penyederhanaan yang disetujui (revisi 2026-10-01)
+Pengguna menyetujui penyederhanaan pelaksanaan dengan syarat struktur proyek tetap: satu monorepo, lima service NestJS (API Gateway, Auth, Employee, Attendance, Media) dengan proses/port berbeda, dan dua frontend React TypeScript (Attendance Portal dan HR Portal). Backend tidak digabung menjadi satu service. MySQL, AIStor Free, dua project Vercel, VPS Ubuntu dan Cloudflare tetap sesuai baseline. UI/UX tetap mengikuti spesifikasi disetujui: modern, elegan, minimalis, netral zinc dengan aksen emerald (revisi 2026-10-01), HeroUI via MCP dan komponen custom, Atomic Design, responsif, teks seperlunya.
+
+- T01–T31 adalah satu backlog utama. UX01–UX07 bukan task kerja terpisah, melainkan pemetaan layar (E01–E09/H01–H14) ke task T10–T31 untuk keterlacakan frontend.
+- Dokumentasi diringkas menjadi spesifikasi modul + acceptance terkait; hindari dokumen berulang untuk CRUD kecil. Tulis module spec hanya saat menambah/mengubah perilaku, bukan satu dokumen per endpoint.
+- Setiap fitur diselesaikan ujung ke ujung: schema/kontrak → API → UI → test → review → commit, sebelum pindah task.
+- Gunakan pola bersama untuk form, daftar, detail dan konfirmasi. Komponen Atomic Design dipisah hanya berdasarkan tanggung jawab atau penggunaan ulang nyata, bukan abstraksi dini.
+- Tunda abstraksi generik; gunakan controller/DTO/service dan Prisma sesuai kepemilikan data tiap service.
+- Outbox/retry dibatasi pada alur yang membutuhkan konsistensi lintas service (provisioning akun+profil, media READY→attendance). Idempotensi, kompensasi dan pemulihan yang diwajibkan baseline tetap dipenuhi.
+- Test terfokus per perubahan; suite lengkap pada checkpoint integrasi. Prioritas: aturan bisnis, otorisasi, revokasi, lokasi wajib, pemulihan.
+
+### Tier test (biaya vs nilai) — revisi 2026-10-01
+Tujuan: loop pengembangan cepat tanpa mengorbankan bukti kontrak bisnis. Jalankan tier sesuai jenis perubahan, bukan semua suite setiap langkah.
+
+| Tier | Isi | Kapan dijalankan |
+| --- | --- | --- |
+| 1. Statis (wajib tiap perubahan) | `tsc --noEmit` (typecheck) + lint berkas terkait | Setiap perubahan sebelum commit. Ringan (~detik). |
+| 2. Unit/komponen terfokus | Jest/Supertest atau Vitest/RTL hanya untuk berkas/modul yang disentuh | Saat mengubah logika, API, atau komponen. Ringan (jsdom/node). |
+| 3. Visual/design (`pnpm --dir apps/hr-web run test:ui`, Playwright screenshot) | Layout/tema lintas viewport (suite menguji kedua portal) | HANYA saat menyentuh layout/CSS/shell. Berat (butuh dev server); lewati untuk perubahan logika murni. |
+| 4. E2E nyata (`pnpm --dir apps/hr-web run test:e2e`, API+MySQL+AIStor) | Alur ujung ke ujung dengan backend nyata | Checkpoint integrasi per fitur dan sebelum promosi ke `main`. Paling berat; BUKAN gate per commit. |
+
+Wajib ada buktinya dan tidak boleh dipangkas oleh pemangkasan tier: aturan bisnis absensi (late/early/cutoff), otorisasi role, revokasi sesi, lokasi wajib, idempotensi check-in/out, pemulihan/kompensasi. Mock hanya untuk test/prototipe; hasil akhir memakai MySQL/AIStor nyata.
+- Gunakan tooling yang ada; tunda tambahan broker/cache/orchestration/build system tanpa kebutuhan nyata.
+- Spike kamera/lokasi (T18) dijadwalkan lebih awal secara serial setelah prasyarat T07 siap.
+
+Catatan struktur aktual: packages/contracts dan packages/config belum dibuat; dibuat saat task pertama yang membutuhkannya (kontrak Employee pada T10). packages/ui dan packages/database sudah ada.
+
 ## Cara menjalankan pekerjaan
 Task pada todo.md berukuran kecil. Jika implementasi perlu lebih dari sekitar lima file, pecah task sebelum bekerja dan catat dependensi. Checkpoint ditinjau sebelum fase berikutnya. Update spec dahulu bila keputusan berubah.
+
+## Desain seluruh halaman dan kelanjutan proyek
+Rancangan seluruh halaman menjadi bagian dari kelanjutan seluruh proyek sesuai plan. [UI/UX](../docs/sdd/frontend-ui-ux.md) dan [design system](../docs/sdd/frontend-design-system.md) menjadi acuan frontend; [alur implementasi](../docs/development/implementation-workflow.md) menjelaskan read order, status awal, proses dan definisi selesai.
+
+Ikuti UX01–UX07 dalam todo sebagai koordinasi lintas layar; dependensi T01–T31 tetap berlaku. Audit status task fondasi yang belum ditutup, susun wireframe lima keluarga layar (akses, Hari ini, capture, daftar HR, detail), lalu lanjutkan vertical slice master/akun → capture/absensi → riwayat/monitoring. Review visual/states dilakukan setiap slice, bukan hanya T28.
+
+Persetujuan arah desain dan kelanjutan implementasi telah diberikan; checkpoint rutin berarti memverifikasi dan mencatat bukti lalu melanjutkan. Jangan membuat gate persetujuan ulang untuk keputusan rutin dalam scope. Perubahan kebutuhan dan akses eksternal yang belum tersedia memerlukan penanganan spesifik.
+
+Definisi selesai lokal: seluruh capability frontend, backend, database/storage dan integrasi sesuai baseline, termasuk E01–E09/H01–H14, API nyata, keamanan/pemulihan, build/lint/test, CI dan runbook/artefak deployment. Artefak live disiapkan sampai akses/rilis tersedia; hasil live tidak diklaim sebelum pengujian nyata. Commit tetap dev; push menunggu remote pengguna.
+
+## Pengerjaan serial dan kelanjutan lintas sesi
+Scope tetap seluruh T01–T31: dua frontend, lima service, kontrak/API/Swagger, database/storage, keamanan, testing, CI dan deployment. Pengguna menetapkan dua agen bergantian karena keterbatasan sesi; hanya satu agen aktif, tanpa subagen/coding paralel.
+
+Kerjakan satu increment sesuai dependensi: kontrak/schema terkait → API → UI → test/integrasi → review/commit. Pilih task berikut yang siap setelah increment ditutup. Jika terhalang akses, catat kendala lalu kerjakan satu task lain yang siap. Spike kamera/lokasi boleh dijadwalkan lebih awal secara serial setelah fondasi terkait siap.
+
+Sebelum batas sesi, update [progress](progress.md) dan berikan prompt trigger ringkas sesuai [alur implementasi](../docs/development/implementation-workflow.md). Pengguna memilih waktu pindah. Agen berikut memeriksa checkpoint/Git/source/proses dan meneruskan progres tanpa mengulang proyek. Jangan mengarang kuota ketika informasi kapasitas tidak tersedia.

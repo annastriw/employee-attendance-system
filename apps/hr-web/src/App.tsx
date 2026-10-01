@@ -80,11 +80,9 @@ export function App({ client = authClient }: { client?: AuthClient }) {
     <AuthLayout>
       {user ? (
         <>
-          <p className="eyebrow">AMANKAN AKUN ANDA</p>
           <PageTitle>Buat password baru</PageTitle>
           <p className="page-intro">
-            Ganti password awal sebelum menggunakan portal. Setelah disimpan,
-            silakan masuk kembali dengan password baru.
+            Ganti password awal untuk melanjutkan.
           </p>
           <p className="signed-in-email">{user.email}</p>
           <ChangePasswordForm
@@ -104,11 +102,8 @@ export function App({ client = authClient }: { client?: AuthClient }) {
         </>
       ) : (
         <>
-          <p className="eyebrow">AKSES ADMINISTRATOR</p>
-          <PageTitle>Masuk ke portal HRD</PageTitle>
-          <p className="page-intro">
-            Kelola data dan kehadiran karyawan melalui akun administrator Anda.
-          </p>
+          <PageTitle>Masuk</PageTitle>
+          <p className="page-intro">Gunakan akun admin HRD Anda.</p>
           {message && <Notice message={message} success />}
           <LoginForm
             busy={busy}
@@ -119,9 +114,6 @@ export function App({ client = authClient }: { client?: AuthClient }) {
               })
             }
           />
-          <p className="login-help">
-            Portal ini khusus HRD. Karyawan menggunakan portal absensi.
-          </p>
         </>
       )}
     </AuthLayout>

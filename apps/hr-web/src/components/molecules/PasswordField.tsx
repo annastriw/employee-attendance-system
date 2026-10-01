@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { Button, Description, Input, Label, TextField } from "@heroui/react";
+import { Button, Description, InputGroup, Label, TextField } from "@heroui/react";
+import { Eye, EyeSlash } from "@phosphor-icons/react";
+
 interface Props {
   label: string;
   value: string;
@@ -8,6 +10,7 @@ interface Props {
   description?: string;
   disabled?: boolean;
 }
+
 export function PasswordField({
   label,
   value,
@@ -17,6 +20,7 @@ export function PasswordField({
   disabled,
 }: Props) {
   const [visible, setVisible] = useState(false);
+  const action = visible ? "Sembunyikan" : "Tampilkan";
   return (
     <TextField
       className="form-field"
@@ -27,23 +31,26 @@ export function PasswordField({
       validationBehavior="aria"
     >
       <Label>{label}</Label>
-      <div className="password-input">
-        <Input
+      <InputGroup>
+        <InputGroup.Input
           type={visible ? "text" : "password"}
           autoComplete={autoComplete}
         />
-        <Button
-          type="button"
-          variant="ghost"
-          className="reveal-password"
-          aria-label={`${visible ? "Sembunyikan" : "Tampilkan"} ${label.toLowerCase()}`}
-          aria-pressed={visible}
-          onPress={() => setVisible(!visible)}
-          isDisabled={disabled}
-        >
-          {visible ? "Sembunyikan" : "Lihat"}
-        </Button>
-      </div>
+        <InputGroup.Suffix>
+          <Button
+            type="button"
+            variant="ghost"
+            isIconOnly
+            className="password-toggle"
+            aria-label={`${action} ${label.toLowerCase()}`}
+            aria-pressed={visible}
+            onPress={() => setVisible(!visible)}
+            isDisabled={disabled}
+          >
+            {visible ? <EyeSlash size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
+          </Button>
+        </InputGroup.Suffix>
+      </InputGroup>
       {description && <Description>{description}</Description>}
     </TextField>
   );

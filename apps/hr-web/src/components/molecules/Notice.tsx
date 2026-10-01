@@ -1,3 +1,5 @@
+import { CheckCircle, WarningCircle } from "@phosphor-icons/react";
+
 export function Notice({
   message,
   success = false,
@@ -5,12 +7,13 @@ export function Notice({
   message: string;
   success?: boolean;
 }) {
+  const Icon = success ? CheckCircle : WarningCircle;
   return (
     <div
       className={`notice ${success ? "notice-success" : "notice-error"}`}
       role={success ? "status" : "alert"}
     >
-      <span aria-hidden="true">{success ? "✓" : "!"}</span>
+      <Icon size={16} weight="fill" aria-hidden="true" />
       <p>{message}</p>
     </div>
   );

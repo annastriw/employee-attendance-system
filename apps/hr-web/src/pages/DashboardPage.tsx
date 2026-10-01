@@ -1,89 +1,57 @@
+import { useRef, useState } from "react";
 import { Button } from "@heroui/react";
+import { ChartBar, List, SquaresFour } from "@phosphor-icons/react";
 import { Brand, PageTitle } from "../components/atoms/Brand";
 import { Notice } from "../components/molecules/Notice";
+import { AccountMenu } from "../components/molecules/AccountMenu";
 import type { AdminUser } from "../lib/auth-client";
-export function DashboardPage({
-  user,
-  busy,
-  error,
-  onLogout,
-}: {
+
+// Only destinations that exist in this increment are listed (spec: no dead links).
+function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
+  return (
+    <a href="#ringkasan" aria-current="page" className="nav-link" onClick={onNavigate}>
+      <SquaresFour size={18} aria-hidden="true" />
+      Ringkasan
+    </a>
+  );
+}
+
+export function DashboardPage({ user, busy, error, onLogout }: {
   user: AdminUser;
   busy: boolean;
   error: string;
   onLogout: () => Promise<void>;
 }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuToggle = useRef<HTMLButtonElement>(null);
   return (
     <div className="dashboard-layout">
       <aside className="dashboard-sidebar">
         <Brand />
-        <nav aria-label="Navigasi utama">
-          <a href="#ringkasan" aria-current="page">
-            Ringkasan<span aria-hidden="true">↗</span>
-          </a>
-        </nav>
-        <p className="sidebar-footnote">Portal administrator HRD</p>
+        <nav aria-label="Navigasi utama" className="nav-list"><NavLinks /></nav>
       </aside>
       <main id="ringkasan" className="dashboard-main">
         <header className="dashboard-header">
-          <span>Ruang kerja / Ringkasan</span>
-          <Button
-            variant="secondary"
-            isDisabled={busy}
-            onPress={() => {
-              void onLogout();
-            }}
-          >
-            {busy ? "Keluar…" : "Keluar"}
-          </Button>
-        </header>
-        <section className="dashboard-content">
-          <p className="eyebrow">SELAMAT DATANG</p>
-          <PageTitle>Ringkasan</PageTitle>
-          <p className="page-intro">
-            Anda masuk sebagai{" "}
-            <strong className="account-email">{user.email}</strong>.
-          </p>
-          {error && <Notice message={error} />}
-          <div className="overview-section">
-            <div className="section-heading">
-              <h2>Karyawan &amp; kehadiran</h2>
-              <span>Area administrasi</span>
-            </div>
-            <div className="empty-state">
-              <svg
-                width="48"
-                height="48"
-                viewBox="0 0 48 48"
-                fill="none"
-                aria-hidden="true"
-              >
-                <rect
-                  x="10"
-                  y="7"
-                  width="28"
-                  height="34"
-                  rx="3"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                />
-                <path
-                  d="M17 17h14M17 24h14M17 31h8"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <h3>Belum ada data yang ditampilkan</h3>
-              <p>
-                Data karyawan dan rekap kehadiran akan tampil di area ini
-                setelah tersedia.
-              </p>
-            </div>
+          <div className="header-title">
+            <Button ref={menuToggle} variant="ghost" isIconOnly className="mobile-menu-toggle" aria-label="Menu navigasi"
+              aria-expanded={menuOpen} aria-controls="mobile-navigation" onPress={() => setMenuOpen(!menuOpen)}>
+              <List size={20} aria-hidden="true" />
+            </Button>
+            <PageTitle>Ringkasan</PageTitle>
           </div>
-          <p className="dashboard-note">
-            Jadwal kerja: Senin–Jumat, 08.00–17.00 WIB.
-          </p>
+          <AccountMenu email={user.email} busy={busy} onLogout={onLogout} />
+        </header>
+        <nav id="mobile-navigation" className="mobile-navigation nav-list" aria-label="Navigasi mobile" hidden={!menuOpen}
+          onKeyDown={event => { if (event.key === "Escape") { setMenuOpen(false); menuToggle.current?.focus(); } }}>
+          <NavLinks onNavigate={() => setMenuOpen(false)} />
+        </nav>
+        <section className="dashboard-content" aria-label="Data ringkasan">
+          {error && <Notice message={error} />}
+          <div className="empty-state">
+            <span className="empty-icon" aria-hidden="true"><ChartBar size={22} /></span>
+            <p className="empty-title">Belum ada data yang ditampilkan</p>
+            <p className="empty-body">Ringkasan kehadiran muncul setelah karyawan mulai melakukan absensi.</p>
+          </div>
         </section>
       </main>
     </div>

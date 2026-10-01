@@ -9,11 +9,14 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:ui": "playwright test --config playwright.design.config.ts"
   },
   "dependencies": {
+    "@attendance/ui": "workspace:*",
     "@heroui/react": "^3.2.6",
     "@heroui/styles": "^3.2.6",
+    "@phosphor-icons/react": "2.1.10",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },

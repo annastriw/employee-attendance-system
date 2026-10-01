@@ -1,6 +1,6 @@
 # Spesifikasi disetujui — versi 1
 
-Dokumen ini merekam keputusan pengguna dalam sesi perencanaan. Dokumen rancangan terperinci berikutnya harus menjaga aturan ini. Status: kebutuhan, rancangan database, dan peta endpoint API telah disetujui; rencana implementasi belum ditinjau.
+Dokumen ini merekam keputusan pengguna dalam sesi perencanaan. Dokumen rancangan terperinci berikutnya harus menjaga aturan ini. Status: kebutuhan, rancangan database, peta endpoint API dan arah UI/UX telah disetujui; rencana serta kemajuan implementasi mengikuti tasks/plan.md dan tasks/todo.md.
 
 ## Produk dan platform
 - Attendance Portal: attendance.annastriwidagdo.me.
@@ -10,8 +10,9 @@ Dokumen ini merekam keputusan pengguna dalam sesi perencanaan. Dokumen rancangan
 - React TypeScript, HeroUI melalui MCP HeroUI dan komponen custom; Atomic Design; antarmuka Bahasa Indonesia, responsif dan memiliki arah desain yang jelas.
 - NestJS TypeScript; MySQL saja; JWT; bcrypt dengan salt; Swagger.
 - API Gateway, Auth, Employee, Attendance, Media: service terpisah dengan port internal berbeda.
-- Frontend Vercel; backend dan MinIO AIStor Free VPS Ubuntu; DNS Cloudflare, domain dibeli di Hostinger.
-- Monorepo: apps/{attendance-web,hr-web,api-gateway,auth-service,employee-service,attendance-service,media-service}, packages/{contracts,ui,config}, docs/{requirements,sdd,architecture,api,testing,deployment}, infra/.
+- Dua frontend memakai dua project Vercel terpisah: Attendance Portal dan HR Portal. Seluruh backend, MySQL, dan MinIO AIStor Free berjalan di VPS Ubuntu; DNS Cloudflare, domain dibeli di Hostinger.
+- Satu repository GitHub berbentuk monorepo: apps/{attendance-web,hr-web,api-gateway,auth-service,employee-service,attendance-service,media-service}, packages/{contracts,ui,config}, docs/{requirements,sdd,architecture,api,testing,deployment}, infra/.
+- Topologi repository/deployment disetujui: satu repo, dua project Vercel, backend/MySQL/storage di VPS. Detail: [ADR-003](../architecture/adr-003-repository-and-deployment.md).
 - Branch dev untuk development, main untuk production. Git lokal diinisialisasi pada dev; repository GitHub ditentukan pengguna nanti. Commit lokal tetap dilakukan, push menunggu remote.
 - Instruksi pengguna: setiap perubahan logis yang selesai dan sudah diverifikasi harus di-commit dan dipush ke GitHub pada branch dev, termasuk dokumentasi. Instruksi persisten ada pada AGENTS.md.
 - GitHub: kode, spesifikasi, migration, konfigurasi aman, .env.example. Lokal: .env, kredensial, backup, data/foto pribadi.
@@ -96,3 +97,9 @@ Base /api/v1; Swagger /docs; UUID; waktu response ISO8601 +07:00; pagination/fil
 - Presisi ambang 08.00 dan 23.59.59, eligibility tanggal aktivasi/nonaktif, rekap hari dengan event campuran setelah perubahan kalender.
 - TTL token/signed URL, kebijakan password, retensi foto/data/audit.
 - Akses Vercel/VPS/Cloudflare/GitHub dan kapasitas VPS sebelum deployment; kredensial tidak disimpan dalam dokumen.
+
+## Tema visual frontend
+- Kedua portal dan seluruh halaman berikutnya memakai tema produk modern ala Linear (revisi 2026-10-01): netral zinc, satu aksen emerald, font Geist, ikon Phosphor, mode terang dan gelap mengikuti sistem, tetap mudah dipahami. Login Attendance satu form terpusat satu kolom; login HR split-screen (form + panel kemampuan produk) pada layar lebar; keduanya tanpa slogan jualan atau statistik palsu. HR sidebar ramping dan menu akun. HeroUI dan custom component Atomic Design mengikuti [kontrak desain](../sdd/frontend-design-system.md); token serta shell bersama disimpan di packages/ui.
+
+- Konsep seluruh halaman: ruang kerja yang tenang dan terstruktur; karyawan berfokus tindakan berikutnya, HR berfokus pencarian/pemeriksaan catatan. Susunan layar, capture, states, daftar/detail, lifecycle dan acceptance mengikuti [spesifikasi UI/UX](../sdd/frontend-ui-ux.md).
+- Seluruh proyek berlanjut sesuai plan dalam repo lokal yang sama, termasuk saat agen/alat berganti karena kapasitas sesi. Seluruh lapisan dikerjakan serial sesuai dependensi, dengan dua agen bergantian dan satu agen aktif pada satu waktu. Saat sesi mendekati batas, checkpoint dan prompt trigger disiapkan untuk melanjutkan progres. Acuan: [alur implementasi](../development/implementation-workflow.md).

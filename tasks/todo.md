@@ -1,6 +1,8 @@
 # Daftar tugas implementasi
 
-Status: belum dikerjakan. Semua path adalah target rencana, bukan file yang sudah dibuat. Task lintas beberapa service dipecah lagi sebelum implementasi agar sekitar 1–5 file per task.
+Status: implementasi sebagian berjalan; checklist per-task dan subtask menunjukkan bukti yang telah selesai. Path pada task yang belum selesai merupakan target rencana. Checklist induk tidak otomatis selesai hanya karena subtask tertentu sudah tersedia. Task lintas beberapa service dipecah lagi sebelum implementasi agar sekitar 1–5 file per task.
+
+Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01–UX07 hanyalah pemetaan layar E01–E09/H01–H14 ke task T10–T31 untuk keterlacakan frontend, bukan pekerjaan terpisah. Setiap fitur diselesaikan ujung ke ujung (schema/kontrak → API → UI → test → review → commit) memakai pola bersama; abstraksi generik ditunda. Struktur tetap: 5 service NestJS + 2 frontend React. Detail: [plan](plan.md) bagian Penyederhanaan.
 
 ## T01 — Dokumen module SDD dan context
 - [ ] Selesai
@@ -231,7 +233,7 @@ Status: belum dikerjakan. Semua path adalah target rencana, bukan file yang suda
 
 ## T30 — Artefak deploy dan runbook
 - [ ] Selesai
-- Acceptance: VPS/Vercel/Cloudflare, migration/seed, healthcheck, backup/restore dan rollback siap.
+- Acceptance: Satu repo GitHub, dua project Vercel terpisah, backend/MySQL/AIStor VPS Ubuntu, Cloudflare, migration/seed, healthcheck, backup/restore dan rollback siap; topologi mengikuti ADR-003.
 - Verification: Review konfigurasi tanpa secret; uji restore backup test.
 - Dependencies: 29
 - Target: infra/, docs/deployment/
@@ -301,3 +303,82 @@ Catatan: bagian database development dari T07 selesai berdasarkan laporan penggu
 - [x] Panduan lokal dan spesifikasi tersedia; commit lokal dev.
 - Spec: ../docs/sdd/hr-auth-flow.md. Runbook: ../docs/deployment/hr-local.md.
 - Batas: CRUD/master departemen dimulai T10; belum deploy. MCP HeroUI/DevTools tidak merespons, dokumentasi resmi dan Playwright digunakan.
+
+## T09a — Tema frontend bersama
+- [x] Selesai
+- Acceptance: Tema modern/elegan/minimalis bersama, shell autentikasi Atomic Design, HR login/password/ringkasan dan landing karyawan konsisten. Halaman berikutnya mengikuti kontrak desain.
+- Verification: Build/lint dua frontend, 11 test komponen, 2 E2E auth nyata, 8 pemeriksaan layout/tema pada 320/768/1024/1440 px; MCP HeroUI dan Chrome DevTools.
+- Target: packages/ui/, apps/{attendance-web,hr-web}/, docs/sdd/frontend-design-system.md
+
+## T09b — Penyederhanaan frontend monokrom
+- [x] Selesai
+- Acceptance: Login terpusat tanpa slogan/panel, charcoal, input password dan dropdown akun HeroUI; navigasi mobile buka/tutup; teks seperlunya.
+- Verification: Build/lint dua frontend, 11 component tests, 12 browser layout/interaction checks, 2 E2E autentikasi nyata.
+- Target: packages/ui/, apps/{attendance-web,hr-web}/, docs/sdd/frontend-design-system.md
+
+## T09c — Redesign visual ala Linear (menggantikan tema monokrom T09b)
+- [ ] Selesai
+- Acceptance: Token zinc + satu aksen emerald, mode terang/gelap mengikuti sistem, font Geist self-hosted, ikon Phosphor; radius tombol/field 8 px, panel 12 px. Login HR split-screen (form + panel kemampuan produk) >= 1024 px dan satu kolom di bawahnya; login Attendance satu kolom; workspace HR sidebar ikon, header, tombol akun inisial, empty state berikon. Alur auth, label, fokus keyboard, aria dan pesan tetap.
+- Verification: tsc kedua frontend, Vitest auth hr-web, Playwright design (test:ui) terang dan gelap pada 320/768/1024/1440 px, screenshot ditinjau. E2E nyata di checkpoint integrasi berikutnya.
+- Target: packages/ui/, apps/{attendance-web,hr-web}/, docs/sdd/frontend-design-system.md, docs/sdd/frontend-ui-ux.md
+
+## Keterlacakan desain UI/UX dalam implementasi proyek
+- [x] Desain seluruh E01–E09/H01–H14 dan alur implementasi ditulis sesuai arahan pengguna.
+- Spec: [UI/UX](../docs/sdd/frontend-ui-ux.md), [design system](../docs/sdd/frontend-design-system.md).
+- Pelaksanaan: [alur implementasi](../docs/development/implementation-workflow.md).
+- UX01–UX07 merupakan koordinasi lintas layar; dependensi task T01–T31 tetap berlaku. Pecah setiap UX task menjadi increment kecil sebelum perubahan kode.
+
+### UX01 — Audit keadaan dan fondasi
+- [ ] Selesai
+- Acceptance: Audit source/test/runtime, task induk fondasi yang belum ditutup dan detail terbuka; pertahankan T08/T09 yang bekerja; catat task pertama yang dapat dijalankan.
+- Verification: Review keterlacakan baseline/spec dan bukti runtime; jangan mencentang hanya karena dokumen/config tersedia.
+- Dependencies: Dokumen desain tersedia.
+- Target: tasks/, docs/sdd/, konfigurasi terkait jika diperlukan.
+
+### UX02 — Wireframe dan pola UI bersama
+- [ ] Selesai
+- Acceptance: Lima keluarga layar (akses, Hari ini, capture, daftar HR, detail) memiliki hierarki, states dan layout mobile/desktop yang mengikuti konsep; shared UI dikembangkan sesuai kebutuhan slice.
+- Verification: Review wireframe dan screenshot/browser pola yang sudah diimplementasikan, keyboard dan tidak ada overflow; mockup bukan fitur selesai.
+- Dependencies: UX01; T06.
+- Target: packages/ui/, kedua frontend; pecah per keluarga layar.
+
+### UX03 — Master, akun dan lifecycle
+- [ ] Selesai
+- Acceptance: E01/E02/E09 dan H01/H06–H12/H14 terintegrasi sesuai T10–T15: master aktif/nonaktif, profil+akun konsisten, password tampil sekali, restore Nonaktif, revokasi.
+- Verification: API/MySQL test, component tests dan E2E HR membuat karyawan hingga login/ganti password serta lifecycle/reset.
+- Dependencies: UX01/UX02; T10–T15 berurutan.
+- Target: Employee/Auth/Gateway, kedua frontend, spec/tests.
+
+### UX04 — Absensi dan capture
+- [ ] Selesai
+- Acceptance: E03–E06/H13 sesuai T16–T22; satu wajah, blink/manual fallback, lokasi wajib, preview, alasan, waktu resmi dan pengiriman idempotent.
+- Verification: Boundary/API tests, browser core journey, izin/gagal/retry, perangkat nyata; threshold/hasil dicatat.
+- Dependencies: UX03; T16–T22 sesuai graph.
+- Target: Attendance/Media/Gateway, attendance-web, hr-web dan tests/spec.
+
+### UX05 — Riwayat, monitoring dan pemulihan
+- [ ] Selesai
+- Acceptance: E07/E08/H02–H05 sesuai T23–T26; filter/pagination, foto terotorisasi, Leaflet kedua lokasi, soft delete/restore seluruh hari, deleted bukan missing.
+- Verification: API authorization/history, integration/MySQL/AIStor dan browser detail/filter/restore.
+- Dependencies: UX04; T23–T26.
+- Target: Attendance/Media/Gateway, kedua frontend dan tests/spec.
+
+### UX06 — Review semua halaman dan kualitas
+- [ ] Selesai
+- Acceptance: Seluruh ID layar/states sesuai spec; pemulihan outbox/integrasi, responsivitas, aksesibilitas, build/lint/test dan CI sesuai T27–T29.
+- Verification: Screenshot lima keluarga dan halaman terkait pada viewport sasaran, keyboard/zoom/reduced motion, API nyata core journeys; catat keterbatasan manual secara jujur.
+- Dependencies: UX05; T27–T29.
+- Target: kedua frontend, service/tests/CI dan docs.
+
+### UX07 — Kesiapan rilis dan live
+- [ ] Selesai
+- Acceptance: T30 artefak/runbook/backup/rollback siap; T31 live hanya setelah akses layanan dan tahap rilis pengguna tersedia.
+- Verification: Review konfigurasi aman, restore backup test; kemudian smoke live DNS/HTTPS/kamera/lokasi/auth/absensi/monitoring saat tersedia.
+- Dependencies: UX06; T30–T31.
+- Target: infra/, docs/deployment/, konfigurasi layanan sesuai akses.
+
+## Koordinasi seluruh proyek dan checkpoint
+- [x] Panduan kelanjutan netral seluruh T01–T31: dua agen bergantian secara serial, satu aktif, tanpa subagen/paralel; checkpoint dan trigger sebelum batas sesi.
+- [x] [Checkpoint bersama](progress.md) disediakan; setiap sesi memperbarui task aktif, scope file, proses/port, bukti dan langkah berikut.
+- Backlog utama tetap T01–T31. UX01–UX07 hanya checklist layar/UX, bukan instruksi bekerja pada frontend saja.
+- Kerjakan satu task/increment serial sesuai dependensi. Completion tetap membutuhkan acceptance/verification; sebelum sesi berganti update progress dan berikan trigger singkat.

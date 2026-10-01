@@ -1,10 +1,26 @@
 <!doctype html>
-<html lang="en">
+<html lang="id">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>attendance-web</title>
+    <meta name="color-scheme" content="light dark" />
+    <script>
+      // Follow the OS colour scheme before first paint; HeroUI reads .dark / data-theme.
+      (function () {
+        var media = window.matchMedia("(prefers-color-scheme: dark)");
+        function apply() {
+          var theme = media.matches ? "dark" : "light";
+          var root = document.documentElement;
+          root.classList.remove("light", "dark");
+          root.classList.add(theme);
+          root.dataset.theme = theme;
+        }
+        apply();
+        media.addEventListener("change", apply);
+      })();
+    </script>
+    <title>Attendance Portal</title>
   </head>
   <body>
     <div id="root"></div>
