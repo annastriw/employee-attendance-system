@@ -26,3 +26,6 @@
 
 ## Object storage
 - Gunakan MinIO AIStor Free, bukan MinIO Community. Jalankan melalui Docker Compose pada lokal dan VPS; ikuti docs/architecture/adr-001-object-storage.md. Jangan commit berkas lisensi atau data volume.
+
+## Tema frontend
+- Semua frontend wajib mengikuti docs/sdd/frontend-design-system.md. Gunakan token dan komponen packages/ui, HeroUI, Atomic Design; pertahankan tema modern, elegan, minimalis dan mudah dipahami pada halaman berikutnya.

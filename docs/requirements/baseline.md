@@ -97,3 +97,6 @@ Base /api/v1; Swagger /docs; UUID; waktu response ISO8601 +07:00; pagination/fil
 - Presisi ambang 08.00 dan 23.59.59, eligibility tanggal aktivasi/nonaktif, rekap hari dengan event campuran setelah perubahan kalender.
 - TTL token/signed URL, kebijakan password, retensi foto/data/audit.
 - Akses Vercel/VPS/Cloudflare/GitHub dan kapasitas VPS sebelum deployment; kredensial tidak disimpan dalam dokumen.
+
+## Tema visual frontend
+- Kedua portal dan seluruh halaman berikutnya memakai tema bersama modern, elegan, minimalis dan mudah dipahami. HeroUI dan custom component Atomic Design mengikuti [kontrak desain](../sdd/frontend-design-system.md); token serta shell bersama disimpan di packages/ui.

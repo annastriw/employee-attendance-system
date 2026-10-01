@@ -18,11 +18,12 @@ export function DashboardPage({
       <aside className="dashboard-sidebar">
         <Brand />
         <nav aria-label="Navigasi utama">
+          <p className="nav-label">RUANG KERJA</p>
           <a href="#ringkasan" aria-current="page">
             Ringkasan<span aria-hidden="true">↗</span>
           </a>
         </nav>
-        <p className="sidebar-footnote">Portal administrator HRD</p>
+        <p className="sidebar-footnote">Akses administrator HRD<br />Waktu Indonesia Barat</p>
       </aside>
       <main id="ringkasan" className="dashboard-main">
         <header className="dashboard-header">
@@ -38,7 +39,10 @@ export function DashboardPage({
           </Button>
         </header>
         <section className="dashboard-content">
-          <p className="eyebrow">SELAMAT DATANG</p>
+          <div className="overview-intro">
+            <p className="eyebrow">RUANG KERJA HRD</p>
+            <span className="status-tag">Sesi aktif</span>
+          </div>
           <PageTitle>Ringkasan</PageTitle>
           <p className="page-intro">
             Anda masuk sebagai{" "}
@@ -51,29 +55,7 @@ export function DashboardPage({
               <span>Area administrasi</span>
             </div>
             <div className="empty-state">
-              <svg
-                width="48"
-                height="48"
-                viewBox="0 0 48 48"
-                fill="none"
-                aria-hidden="true"
-              >
-                <rect
-                  x="10"
-                  y="7"
-                  width="28"
-                  height="34"
-                  rx="3"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                />
-                <path
-                  d="M17 17h14M17 24h14M17 31h8"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                />
-              </svg>
+              <span className="empty-mark" aria-hidden="true">≡</span>
               <h3>Belum ada data yang ditampilkan</h3>
               <p>
                 Data karyawan dan rekap kehadiran akan tampil di area ini
@@ -82,7 +64,8 @@ export function DashboardPage({
             </div>
           </div>
           <p className="dashboard-note">
-            Jadwal kerja: Senin–Jumat, 08.00–17.00 WIB.
+            <span>Senin–Jumat</span>
+            <span>08.00–17.00 WIB · Jadwal kerja</span>
           </p>
         </section>
       </main>

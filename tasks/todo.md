@@ -301,3 +301,9 @@ Catatan: bagian database development dari T07 selesai berdasarkan laporan penggu
 - [x] Panduan lokal dan spesifikasi tersedia; commit lokal dev.
 - Spec: ../docs/sdd/hr-auth-flow.md. Runbook: ../docs/deployment/hr-local.md.
 - Batas: CRUD/master departemen dimulai T10; belum deploy. MCP HeroUI/DevTools tidak merespons, dokumentasi resmi dan Playwright digunakan.
+
+## T09a — Tema frontend bersama
+- [x] Selesai
+- Acceptance: Tema modern/elegan/minimalis bersama, shell autentikasi Atomic Design, HR login/password/ringkasan dan landing karyawan konsisten. Halaman berikutnya mengikuti kontrak desain.
+- Verification: Build/lint dua frontend, 11 test komponen, 2 E2E auth nyata, 8 pemeriksaan layout/tema pada 320/768/1024/1440 px; MCP HeroUI dan Chrome DevTools.
+- Target: packages/ui/, apps/{attendance-web,hr-web}/, docs/sdd/frontend-design-system.md
