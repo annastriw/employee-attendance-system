@@ -25,7 +25,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T12 — Employee provisioning | Codex, 2026-10-02 | apps/employee-service/src/employees; app/config; spec/progress | T11 selesai | hanya Docker MySQL 3307; tidak menambah proses | Employee coordinator/worker selesai secara unit; berikutnya Gateway/UI dan checkpoint MySQL, T12 belum selesai |
+| T12 — Gateway provisioning | Codex, 2026-10-02 | apps/api-gateway/src; test/auth-proxy.e2e-spec.ts; progress | T11 selesai | hanya Docker MySQL 3307; tidak menambah proses | Gateway route/allowlist lulus 45 kontrak HTTP; berikutnya H07/H10 dan checkpoint MySQL, T12 belum selesai |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 
@@ -34,6 +34,8 @@ Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increme
 Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .windsurf/ dan skills-lock.json adalah berkas lokal; jangan di-stage, dihapus atau diubah tanpa scope jelas. Rahasia dan data pribadi tetap ignored.
 
 ## Bukti pemeriksaan
+
+- T12 Gateway: typecheck/lint dan 45 kontrak HTTP lulus, termasuk route provisioning, header idempotensi, penolakan internal path/query/header palsu. Backend nyata belum diuji pada increment ini.
 
 - T12 increment backend: schema/migration diterapkan dev/test, diff migrations→schema exit 0, grant milik service lulus/akses lintas service ditolak. Auth typecheck/lint + 6 unit; Employee typecheck/lint + 5 unit (tanggal kalender, idempotensi, timeout durable, lease dan actor) lulus. Integrasi MySQL lintas service/E2E menyusul saat fitur lengkap.
 

@@ -81,7 +81,7 @@ export function configureApp(app: INestApplication) {
     origin: config.origins,
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID', 'Idempotency-Key'],
   });
   (app as NestExpressApplication).useBodyParser('json', {
     limit: '16kb',
