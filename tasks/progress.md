@@ -24,7 +24,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T11 master jabatan | belum dimulai | apps/employee-service/, apps/api-gateway/, apps/hr-web/, prisma/ | T10 (selesai) | employee 3002, gateway 3000, auth 3001 | Siap dikerjakan |
+| T11 master jabatan | Codex, 2026-10-02 | prisma/, scripts/database/setup-local.mjs, docs/sdd/employee-positions.md; lalu Employee/Gateway/HR | T10 (selesai) | belum ada service berjalan; target employee 3002, gateway 3000, auth 3001 | Aktif: schema/kontrak dan migration |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 

@@ -91,6 +91,7 @@ if (process.argv.includes("--grants")) {
   // Employee master data is deactivated, never hard-deleted; audit is append-only.
   for (const [db, user] of [["attendance_dev", "attendance_employee"], ["attendance_test", "attendance_employee_test"]]) {
     sql += `GRANT SELECT, INSERT, UPDATE ON \`${db}\`.emp_departments TO '${user}'@'%';\n`;
+    sql += `GRANT SELECT, INSERT, UPDATE ON \`${db}\`.emp_positions TO '${user}'@'%';\n`;
     sql += `GRANT SELECT, INSERT ON \`${db}\`.emp_audit_logs TO '${user}'@'%';\n`;
   }
 }
