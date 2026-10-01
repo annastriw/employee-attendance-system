@@ -99,6 +99,7 @@ Base /api/v1; Swagger /docs; UUID; waktu response ISO8601 +07:00; pagination/fil
 - Akses Vercel/VPS/Cloudflare/GitHub dan kapasitas VPS sebelum deployment; kredensial tidak disimpan dalam dokumen.
 
 ## Tema visual frontend
+- Penegasan pengguna 2026-10-02: T09c disetujui dan wajib pada seluruh halaman Attendance/HR yang tersedia maupun yang dibangun selanjutnya (E01–E09/H01–H14), beserta seluruh state dan dialog. Tema monokrom T09b telah digantikan.
 - Kedua portal dan seluruh halaman berikutnya memakai tema produk modern ala Linear (revisi 2026-10-01): netral zinc, satu aksen emerald, font Geist, ikon Phosphor, mode terang dan gelap mengikuti sistem, tetap mudah dipahami. Login Attendance satu form terpusat satu kolom; login HR split-screen (form + panel kemampuan produk) pada layar lebar; keduanya tanpa slogan jualan atau statistik palsu. HR sidebar ramping dan menu akun. HeroUI dan custom component Atomic Design mengikuti [kontrak desain](../sdd/frontend-design-system.md); token serta shell bersama disimpan di packages/ui.
 
 - Konsep seluruh halaman: ruang kerja yang tenang dan terstruktur; karyawan berfokus tindakan berikutnya, HR berfokus pencarian/pemeriksaan catatan. Susunan layar, capture, states, daftar/detail, lifecycle dan acceptance mengikuti [spesifikasi UI/UX](../sdd/frontend-ui-ux.md).

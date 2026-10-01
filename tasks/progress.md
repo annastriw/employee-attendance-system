@@ -5,7 +5,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 ## Snapshot terakhir
 
 - Tanggal: 2026-10-02 (Asia/Jakarta). HEAD diverifikasi dengan `git log`; jangan anggap hash di sini sebagai HEAD.
-- Tahap: T08-T11 selesai. T11 master jabatan selesai database → Employee → Gateway → H12 → test nyata. T09c tetap belum dicentang, menunggu instruksi pengguna.
+- Tahap: T08-T11 selesai. T11 master jabatan selesai database → Employee → Gateway → H12 → test nyata. T09c disetujui pengguna dan selesai; seluruh halaman wajib mengikuti tema Linear.
 - Commit sesi ini pada dev (lama ke baru): 93488ae, f423e47, aa34d48, 1b7b05d, e4a6782, 83537f1, 112d7fa, a485480 (lihat git log), lalu:
   - c2f98fe docs: switch frontend theme to Linear-style zinc + emerald, Geist, Phosphor, light/dark
   - 36a24e4 feat(ui): Linear-style redesign with zinc + emerald, Geist, Phosphor and light/dark
@@ -15,7 +15,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
   - bb3c6af feat(hr-web): H11 department list, form and status actions on real API (T10)
   - 20b53e0 fix(auth): give /auth/me its own rate limit for per-request service verification
   - d9738b1 test(hr-web): real-API department journey with Employee Service in the E2E stack
-- Commit T11: 85143ce (schema/migration/grants), 73293bc (Employee API + unit/MySQL), c4da4dd (Gateway allowlist/kontrak), 49e4eb7 (filter aktif untuk penugasan), 2f46086 (H12/shared UI/selector/polesan H11), fbc034a (HRD nyata + assertion refetch). Penutupan spec/todo/progress ada pada commit docs setelah ini; baca git log sebagai sumber HEAD.
+- Commit T11: 85143ce (schema/migration/grants), 73293bc (Employee API + unit/MySQL), c4da4dd (Gateway allowlist/kontrak), 49e4eb7 (filter aktif untuk penugasan), 2f46086 (H12/shared UI/selector/polesan H11), fbc034a (HRD nyata + assertion refetch). Penutupan T11: 0d33caf. Persetujuan T09c dicatat pada commit docs berikutnya; baca git log sebagai sumber HEAD.
 - Branch: dev. Remote belum ada; push menunggu repository pilihan pengguna.
 - Database lokal (Docker MySQL 127.0.0.1:3307): migration `20261001160000_employee_master_departments` dan `20261002080000_employee_master_positions` DITERAPKAN ke attendance_dev dan attendance_test. Akun `attendance_employee`/`attendance_employee_test` dibuat via `pnpm db:grants`; kredensial ada di `.env.database` (ignored).
 - Host memory sering CRITICAL (1-2 GB). Jalankan suite berat satu per satu; Playwright 1 worker terbukti stabil.
@@ -37,7 +37,7 @@ Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .w
 
 - T11 selesai (rincian di docs/sdd/employee-positions.md): diff migrations→schema exit 0; migrate dev/test dan grants lulus. Employee typecheck/lint, 9 unit dan 12 API MySQL (6 departemen + 6 jabatan) lulus; tambahan filter ACTIVE jabatan 6 API lulus. Gateway typecheck/lint, 12 unit + 37 kontrak HTTP lulus. HR typecheck/lint, 38 Vitest/RTL lulus (satu worker), termasuk refetch dan selector aktif/nilai lama nonaktif. Visual 36 test lulus (H11/H12 terang/gelap 320/768/1024/1440; screenshot ditinjau). Backend Auth/Employee/Gateway dan HR build lulus. E2E jabatan nyata desktop/mobile 2 lulus; regresi departemen desktop/mobile 2 lulus, dijalankan terpisah. Cleanup: 0 fixture E2E jabatan/departemen/akun browser. Typecheck test E2E + pemeriksaan sintaks harness lulus.
 
-- T09c redesign: tsc kedua frontend, Vitest auth, Playwright `test:ui` terang/gelap 320/768/1024/1440 px; screenshot ditinjau. E2E auth nyata telah lulus pada sesi sebelumnya; T09c tetap belum dicentang karena pengguna menunda keputusan.
+- T09c redesign: tsc kedua frontend, Vitest auth, Playwright `test:ui` terang/gelap 320/768/1024/1440 px; screenshot ditinjau. E2E auth nyata telah lulus pada sesi sebelumnya; T09c disetujui pengguna pada 2026-10-02 dan dicentang. Audit source memastikan seluruh halaman tersedia memakai tema bersama; 36 test visual dan 38 komponen serta E2E jabatan/departemen dari T11 menjadi bukti terbaru. Tidak ada perubahan runtime untuk penegasan tema ini.
 - T10 (rincian di docs/sdd/employee-departments.md):
   - Employee: 5 unit + 6 e2e Supertest terhadap MySQL attendance_test (auth/role, unik case-insensitive 409, validasi, nonaktif tanpa hapus, audit per perubahan, filter/pagination). Lint 0.
   - Gateway: 12 unit + 27 kontrak HTTP (allowlist path/query, header dibuang, 503 khusus Employee). Lint 0.
@@ -49,7 +49,7 @@ Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .w
 
 1. T12 pembuatan akun karyawan: baca baseline/todo dan tulis module spec provisioning akun+profil (unik NIK/email, idempotensi, kompensasi/pemulihan). Integrasikan selector master aktif yang sudah diuji ke form H07; pemuatan pilihan harus berfilter ACTIVE dan mendukung pagination. Jangan membuka akun/hasil sukses sebelum profil+akun konsisten.
 2. Limit 429 E2E Auth tetap menunggu keputusan pengguna: refresh limit sendiri atau run per spec. Jangan longgarkan limit login. Run T11 per spec terpisah lulus; konfigurasi Auth tidak diubah.
-3. T09c tetap menunggu instruksi pengguna untuk dicentang.
+3. T09c selesai dan menjadi acuan wajib semua halaman berikutnya: gunakan token/komponen packages/ui, HeroUI, zinc–emerald, Geist, Phosphor dan mode terang/gelap. Kontrak mencakup E01–E09/H01–H14, seluruh state/dialog/mobile; jangan kembali ke T09b monokrom.
 4. Polesan H11 selesai bersama H12: (a) shared MasterDataPage menampilkan skeleton selama refetch sehingga baris lama tidak tampil bersama pesan sukses; test komponen dan E2E desktop/mobile menunggu baris hilang sesudah aktifkan pada filter Nonaktif. (b) pager tidak lagi memakai kelas monospace, diverifikasi computed font pada test visual. (c) status memakai satu ToggleButtonGroup berbatas dan separator HeroUI, screenshot terang/gelap ditinjau.
 
 Catatan: E2E memakai service dari `dist`; jalankan `pnpm --dir apps/<service> run build` setelah mengubah backend. employee-service bind 127.0.0.1; hanya Gateway publik.
