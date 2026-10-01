@@ -25,7 +25,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T12 — kontrak provisioning | Codex, 2026-10-02 | docs/sdd/employee-provisioning.md; tasks/progress.md; tasks/todo.md | T11 selesai | hanya Docker MySQL 3307; tidak menambah proses | Kontrak awal ditulis; berikutnya schema/migration/grants, T12 belum selesai |
+| T12 — schema provisioning | Codex, 2026-10-02 | prisma/; packages/database; scripts/database/setup-local.mjs; spec/progress | T11 selesai | hanya Docker MySQL 3307; tidak menambah proses | Schema/grants selesai; berikutnya Auth prepare/finalize/credential, T12 belum selesai |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 

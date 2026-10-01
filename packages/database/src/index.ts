@@ -1,7 +1,7 @@
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "./generated/client";
-export { Prisma, PrismaClient, AuthRole, AuthAccountStatus, EmpMasterStatus } from "./generated/client";
-export type { AuthAccount, AuthSession, EmpDepartment, EmpPosition, EmpAuditLog } from "./generated/client";
+export { Prisma, PrismaClient, AuthRole, AuthAccountStatus, EmpMasterStatus, EmpEmployeeStatus, EmpProvisioningStatus, EmpProvisioningPhase } from "./generated/client";
+export type { AuthAccount, AuthSession, EmpDepartment, EmpPosition, EmpAuditLog, EmpEmployee, EmpProvisioning, AuthProvisioning } from "./generated/client";
 
 export function createDatabaseClient(databaseUrl: string, options: { caCertificate?: string; poolSize?: number } = {}) {
   let url: URL;
