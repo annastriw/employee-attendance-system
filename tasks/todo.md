@@ -246,3 +246,12 @@ Status: belum dikerjakan. Semua path adalah target rencana, bukan file yang suda
 ### Checkpoint setelah T31
 - [ ] Test relevan dan build/lint lulus.
 - [ ] Alur fase diverifikasi, batasan dicatat dan ditinjau.
+## Subtask lingkungan — AIStor lokal (diminta pengguna)
+- [x] Pasang WSL dan Docker Desktop.
+- [x] Aktifkan komponen WSL/VirtualMachinePlatform tanpa restart otomatis.
+- [x] Siapkan Compose image terkunci, mount lisensi read-only dan volume persisten.
+- [x] Buat kredensial lokal, verifikasi Git ignore, validasi Compose config.
+- [ ] Pengguna restart Windows, Docker engine aktif.
+- [ ] Pull image, startup, verifikasi lisensi dan healthcheck.
+- [ ] Buat bucket privat, upload/read, uji akses anonim dan persistensi.
+Catatan: ini bagian storage dari T07; T07 keseluruhan belum selesai. Status terperinci: docs/deployment/installation-status.md.
