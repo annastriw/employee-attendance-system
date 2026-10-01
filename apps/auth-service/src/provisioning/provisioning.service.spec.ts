@@ -23,6 +23,9 @@ describe('Credential authorization and recovery', () => {
     expect(tx.authProvisioning.update).toHaveBeenCalledWith({ where: { id: operationId }, data: { credentialEnvelope: null, credentialClaimedAt: expect.any(Date) } });
     expect(JSON.stringify(tx.authAuditLog.create.mock.calls)).not.toContain('one-time-test-password');
   });
+  it('uses canonical receipt ID when a case-insensitive UUID is requested', async () => {
+    const { service } = setup(); await expect(service.claim(operationId.toUpperCase(), {}, 'Bearer test')).resolves.toMatchObject({ temporaryPassword: 'one-time-test-password' });
+  });
   it('rejects another actor and a revoked session at the transaction boundary', async () => {
     const first = setup(); first.receipt.actorAccountId = randomUUID();
     await expect(first.service.claim(operationId, {}, 'Bearer test')).rejects.toThrow('tidak ditemukan');

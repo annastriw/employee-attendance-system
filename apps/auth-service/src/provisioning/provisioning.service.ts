@@ -85,7 +85,7 @@ export class AccountProvisioningService {
         password = replacement;
       } else {
         if (!row.credentialEnvelope) throw new ConflictException('Password sudah ditampilkan. Gunakan buat pengganti jika respons sebelumnya hilang.');
-        password = openCredential(row.credentialEnvelope, this.security.credentialKey, id);
+        password = openCredential(row.credentialEnvelope, this.security.credentialKey, row.id);
       }
       await tx.authProvisioning.update({ where: { id }, data: { credentialEnvelope: null, credentialClaimedAt: new Date() } });
       await this.audit(tx, row.actorAccountId, row.accountId, replacement ? 'PROVISIONING_CREDENTIAL_RECOVERED' : 'PROVISIONING_CREDENTIAL_CLAIMED', requestId);

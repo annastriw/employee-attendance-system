@@ -1,0 +1,121 @@
+import { type INestApplication, ServiceUnavailableException } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
+import { createDatabaseClient } from '@attendance/database';
+import { randomUUID } from 'node:crypto';
+import request from 'supertest';
+import { AppModule } from '../src/app.module';
+import { EmployeeConfig } from '../src/config/employee.config';
+import { EmployeesService } from '../src/employees/employees.service';
+import { ProvisioningAuthClient } from '../src/employees/provisioning-auth.client';
+import { DatabaseService } from '../src/database/database.module';
+import { configureApp } from '../src/configure-app';
+import { AppModule as AuthAppModule } from '../../auth-service/dist/app.module';
+import { AuthConfig } from '../../auth-service/dist/config/auth.config';
+import { AuthService } from '../../auth-service/dist/auth/auth.service';
+import { configureApp as configureAuth } from '../../auth-service/dist/configure-app';
+import { internalSignature } from '../../auth-service/dist/provisioning/provisioning-security';
+import { createRequire } from 'node:module';
+import { resolve } from 'node:path';
+const { hash } = createRequire(resolve(__dirname, '../../auth-service/package.json'))('bcrypt') as { hash: (password: string, cost: number) => Promise<string> };
+
+describe('T12 real Auth + Employee + MySQL', () => {
+  let app: INestApplication, authApp: INestApplication, db: ReturnType<typeof createDatabaseClient>, client: ProvisioningAuthClient;
+  let token: string, departmentId: string, positionId: string;
+  const actorId = randomUUID(), otherActorId = randomUUID(), employeeActorId = randomUUID();
+  const prefix = 'API' + randomUUID().slice(0,8).toUpperCase(); const password = 'Integration-Admin-Test-123';
+  const api = () => request(app.getHttpServer()); const as = () => ({ Authorization: 'Bearer ' + token });
+  const input = (suffix: string) => ({ nik: prefix + '-' + suffix, name: prefix + ' Employee ' + suffix, email: prefix.toLowerCase() + '-' + suffix.toLowerCase() + '@example.invalid', departmentId, positionId, startDate: '2026-10-02', status: 'ACTIVE' });
+  const create = async (suffix: string) => { const id = randomUUID(); const result = await api().post('/api/v1/employees').set(as()).set('Idempotency-Key', id).send(input(suffix)); return { id, result }; };
+  beforeAll(async () => {
+    const authConfig = new AuthConfig(); const employeeConfig = new EmployeeConfig();
+    for (const url of [process.env.TEST_DATABASE_URL!, process.env.AUTH_TEST_DATABASE_URL!, process.env.EMPLOYEE_TEST_DATABASE_URL!]) if (new URL(url).pathname !== '/attendance_test' || new URL(url).hostname !== '127.0.0.1') throw new Error('Use isolated local test DB only.');
+    db = createDatabaseClient(process.env.TEST_DATABASE_URL!);
+    const passwordHash = await hash(password, 12);
+    await db.authAccount.createMany({ data: [actorId, otherActorId, employeeActorId].map((id,index) => ({ id, email: prefix.toLowerCase() + '-actor' + index + '@example.invalid', passwordHash, role: index === 2 ? 'EMPLOYEE' : 'ADMIN_HRD', status: 'ACTIVE', mustChangePassword: false })) });
+    departmentId = (await db.empDepartment.create({ data: { name: prefix + ' Department', code: prefix + '-D' } })).id;
+    positionId = (await db.empPosition.create({ data: { name: prefix + ' Position', code: prefix + '-P' } })).id;
+    const authModule = await Test.createTestingModule({ imports: [AuthAppModule] }).overrideProvider(AuthConfig).useValue(Object.assign({}, authConfig, { databaseUrl: process.env.AUTH_TEST_DATABASE_URL })).compile();
+    authApp = authModule.createNestApplication({ logger: false }); configureAuth(authApp); await authApp.listen(0,'127.0.0.1');
+    token = (await authApp.get(AuthService).login(prefix.toLowerCase() + '-actor0@example.invalid', password, 'ADMIN_HRD')).body.accessToken;
+    const module = await Test.createTestingModule({ imports: [AppModule] }).overrideProvider(EmployeeConfig).useValue(Object.assign({}, employeeConfig, { databaseUrl: process.env.EMPLOYEE_TEST_DATABASE_URL, authUrl: await authApp.getUrl(), workerEnabled: false })).compile();
+    app = module.createNestApplication({ logger: false }); configureApp(app); await app.init(); client = app.get(ProvisioningAuthClient);
+  });
+  afterAll(async () => {
+    await app?.close(); await authApp?.close();
+    if (!db) return;
+    const ops = await db.empProvisioning.findMany({ where: { actorAccountId: actorId } }); const employeeIds = ops.map(row => row.employeeId);
+    const accounts = await db.authAccount.findMany({ where: { OR: [{ id: { in: [actorId, otherActorId, employeeActorId] } }, { employeeId: { in: employeeIds } }] } }); const ids = accounts.map(row => row.id);
+    await db.authProvisioning.deleteMany({ where: { accountId: { in: ids } } });
+    await db.authSession.deleteMany({ where: { accountId: { in: ids } } });
+    await db.authAuditLog.deleteMany({ where: { OR: [{ actorAccountId: { in: ids } }, { targetAccountId: { in: ids } }] } });
+    await db.authAccount.deleteMany({ where: { id: { in: ids } } });
+    await db.empAuditLog.deleteMany({ where: { actorAccountId: actorId } }); await db.empProvisioning.deleteMany({ where: { actorAccountId: actorId } }); await db.empEmployee.deleteMany({ where: { id: { in: employeeIds } } });
+    await db.empDepartment.delete({ where: { id: departmentId } }); await db.empPosition.delete({ where: { id: positionId } }); await db.$disconnect();
+  });
+  it('rejects missing/employee/restricted/revoked sessions and invalid dates/fields/master', async () => {
+    await api().get('/api/v1/employees').expect(401);
+    const employeeToken = (await authApp.get(AuthService).login(prefix.toLowerCase() + '-actor2@example.invalid', password, 'EMPLOYEE')).body.accessToken;
+    await api().get('/api/v1/employees').set('Authorization','Bearer ' + employeeToken).expect(403);
+    await db.authAccount.update({ where: { id: actorId }, data: { mustChangePassword: true } }); await api().get('/api/v1/employees').set(as()).expect(403); await db.authAccount.update({ where: { id: actorId }, data: { mustChangePassword: false } });
+    await api().post('/api/v1/employees').set(as()).send(input('MISSINGKEY')).expect(400);
+    await api().post('/api/v1/employees').set(as()).set('Idempotency-Key',randomUUID()).send({ ...input('DATE'), startDate: '2026-02-30' }).expect(400);
+    await api().post('/api/v1/employees').set(as()).set('Idempotency-Key',randomUUID()).send({ ...input('FIELD'), password: 'must-not-be-accepted' }).expect(400);
+    await db.empPosition.update({ where: { id: positionId }, data: { status: 'INACTIVE' } }); await api().post('/api/v1/employees').set(as()).set('Idempotency-Key',randomUUID()).send(input('MASTER')).expect(400); await db.empPosition.update({ where: { id: positionId }, data: { status: 'ACTIVE' } });
+  });
+  it('creates once under concurrent submissions, keeps password out of safe views, and consumes receipt atomically', async () => {
+    const id = randomUUID(); const body = input('SUCCESS');
+    const results = await Promise.all([api().post('/api/v1/employees').set(as()).set('Idempotency-Key',id).send(body),api().post('/api/v1/employees').set(as()).set('Idempotency-Key',id).send(body)]);
+    expect(results.every(row => row.status === 201)).toBe(true);
+    await app.get(EmployeesService).runOne(id);
+    const operation = await api().get('/api/v1/employee-provisioning/' + id).set(as()).expect(200); expect(operation.body.status).toBe('COMPLETED');
+    expect(await db.empEmployee.count({ where: { nik: body.nik } })).toBe(1); expect(await db.authAccount.count({ where: { email: body.email } })).toBe(1);
+    const claims = await Promise.all([api().post('/api/v1/employee-provisioning/' + id + '/credentials').set(as()).send({}), api().post('/api/v1/employee-provisioning/' + id + '/credentials').set(as()).send({})]); expect(claims.map(row=>row.status).sort((a,b)=>a-b)).toEqual([200,409]);
+    const secret = claims.find(row=>row.status === 200)!.body.temporaryPassword as string;
+    expect(JSON.stringify(operation.body)).not.toContain(secret); expect(JSON.stringify(await db.empAuditLog.findMany({ where: { actorAccountId: actorId } }))).not.toContain(secret);
+    const receipt = await db.authProvisioning.findUniqueOrThrow({ where: { id } }); expect(receipt.credentialEnvelope).toBeNull();
+    const login = await authApp.get(AuthService).login(body.email, secret, 'EMPLOYEE'); expect(login.body.user.mustChangePassword).toBe(true);
+    const recovered = await api().post('/api/v1/employee-provisioning/' + id + '/credentials').set(as()).send({ recover: true }).expect(200); expect(recovered.body.temporaryPassword).not.toBe(secret);
+    await expect(authApp.get(AuthService).authenticate(login.body.accessToken,false)).rejects.toThrow(); await expect(authApp.get(AuthService).login(body.email,secret,'EMPLOYEE')).rejects.toThrow();
+    const replacement = await authApp.get(AuthService).login(body.email,recovered.body.temporaryPassword,'EMPLOYEE'); const session = await authApp.get(AuthService).authenticate(replacement.body.accessToken,true);
+    await authApp.get(AuthService).changePassword(session,recovered.body.temporaryPassword,'Employee-New-Test-123456');
+    await api().post('/api/v1/employee-provisioning/' + id + '/credentials').set(as()).send({ recover: true }).expect(409);
+    await api().post('/api/v1/employees').set(as()).set('Idempotency-Key',id).send({ ...body, name: 'Different' }).expect(409);
+    await api().post('/api/v1/employees').set(as()).set('Idempotency-Key',randomUUID()).send({ ...input('NIK'), nik: body.nik.toLowerCase() }).expect(409);
+  });
+  it('leaves account inactive on ambiguous prepare delivery and resumes after a worker restart', async () => {
+    const original = client.call.bind(client);
+    const fault = jest.spyOn(client,'call').mockImplementationOnce(async (...args: Parameters<typeof client.call>) => { await original(...args); throw new ServiceUnavailableException(); });
+    const { id, result } = await create('RESTART'); expect(result.status).toBe(201); expect(result.body.status).toBe('PENDING'); fault.mockRestore();
+    const before = await db.empProvisioning.findUniqueOrThrow({ where: { id } }); const account = await db.authAccount.findUniqueOrThrow({ where: { employeeId: before.employeeId } }); expect(account.status).toBe('INACTIVE');
+    await api().post('/api/v1/employee-provisioning/' + id + '/credentials').set(as()).send({}).expect(409);
+    await db.empProvisioning.update({ where: { id }, data: { nextAttemptAt: new Date(0), leaseUntil: new Date(0), leaseToken: randomUUID() } });
+    const restarted = new EmployeesService(app.get(DatabaseService),client,{ workerEnabled: false } as EmployeeConfig); await restarted.runOne(id);
+    expect((await db.empProvisioning.findUniqueOrThrow({ where: { id } })).status).toBe('COMPLETED'); expect(await db.authAccount.count({ where: { employeeId: before.employeeId } })).toBe(1);
+  });
+  it('deduplicates a finalize committed before its response was lost', async () => {
+    const original = client.call.bind(client);
+    const fault = jest.spyOn(client,'call').mockImplementation(async (...args: Parameters<typeof client.call>) => { const result = await original(...args); if (args[1] === 'finalize') throw new ServiceUnavailableException(); return result; });
+    const { id, result } = await create('FINALIZE'); expect(result.body.status).toBe('PENDING'); fault.mockRestore();
+    const before = await db.empProvisioning.findUniqueOrThrow({ where: { id },include:{employee:true} }); expect(before.phase).toBe('FINALIZE'); expect(before.employee.ready).toBe(true);
+    const retry = await api().post('/api/v1/employee-provisioning/' + id + '/retry').set(as()).send({}).expect(200); expect(retry.body.status).toBe('COMPLETED');
+    expect(await db.authAuditLog.count({ where: { targetAccountId: before.authAccountId!,action:'EMPLOYEE_ACCOUNT_FINALIZED' } })).toBe(1);
+  });
+  it('compensates changed master to inactive and retries the same prepared account after repair', async () => {
+    const original = client.call.bind(client); const fault=jest.spyOn(client,'call').mockImplementationOnce(async (...args: Parameters<typeof client.call>) => { const result=await original(...args);await db.empDepartment.update({where:{id:departmentId},data:{status:'INACTIVE'}});return result; });
+    const {id,result}=await create('COMPENSATE'); expect(result.status).toBe(409);fault.mockRestore(); const before=await db.empProvisioning.findUniqueOrThrow({where:{id},include:{employee:true}});expect(before.employee.ready).toBe(false);expect((await db.authAccount.findUniqueOrThrow({where:{employeeId:before.employeeId}})).status).toBe('INACTIVE');
+    await db.empDepartment.update({where:{id:departmentId},data:{status:'ACTIVE'}}); const retried=await api().post('/api/v1/employee-provisioning/'+id+'/retry').set(as()).send({}).expect(200);expect(retried.body.status).toBe('COMPLETED');expect(await db.authAccount.count({where:{employeeId:before.employeeId}})).toBe(1);
+  });
+  it('rejects email conflict without enabling a partial profile and enforces requested inactive status', async () => {
+    const conflict=await api().post('/api/v1/employees').set(as()).set('Idempotency-Key',randomUUID()).send({...input('EMAIL'),email:prefix.toLowerCase()+'-actor0@example.invalid'}).expect(409); expect(conflict.body.message).toContain('Email');
+    const row=await db.empEmployee.findUniqueOrThrow({where:{nik:input('EMAIL').nik}});expect(row.status).toBe('INACTIVE');expect(row.ready).toBe(false);
+    const off=await api().post('/api/v1/employees').set(as()).set('Idempotency-Key',randomUUID()).send({...input('OFF'),status:'INACTIVE'}).expect(201);expect(off.body.status).toBe('COMPLETED');expect((await db.authAccount.findUniqueOrThrow({where:{employeeId:off.body.employeeId}})).status).toBe('INACTIVE');
+  });
+  it('rejects spoofed internal signatures and another actor receipt request', async () => {
+    const id=randomUUID();const path='/api/v1/internal/provisioning/'+id+'/prepare';const body={employeeId:randomUUID(),actorAccountId:actorId,email:prefix.toLowerCase()+'-signature@example.invalid',status:'ACTIVE'};
+    await request(authApp.getHttpServer()).post(path).send(body).expect(401);
+    const timestamp=String(Date.now()-61000);await request(authApp.getHttpServer()).post(path).set('X-Service-Timestamp',timestamp).set('X-Service-Signature',internalSignature(process.env.PROVISIONING_SERVICE_SECRET!,timestamp,path,body)).send(body).expect(401);
+    const completed=await create('ACTOR'); const other=(await authApp.get(AuthService).login(prefix.toLowerCase()+'-actor1@example.invalid',password,'ADMIN_HRD')).body.accessToken;
+    await api().post('/api/v1/employee-provisioning/'+completed.id+'/credentials').set('Authorization','Bearer '+other).send({}).expect(404);
+    await db.authSession.updateMany({where:{accountId:otherActorId},data:{revokedAt:new Date()}});await api().get('/api/v1/employees').set('Authorization','Bearer '+other).expect(401);
+  });
+});

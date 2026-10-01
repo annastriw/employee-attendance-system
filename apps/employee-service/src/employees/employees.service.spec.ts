@@ -21,7 +21,7 @@ describe('Employee provisioning retry invariants', () => {
   });
   it('rejects a reused key with another payload before creating another profile', async () => {
     const { service, tx } = setup();
-    await expect(service.create(id, { ...input, email: 'other@example.test' }, { accountId: actorId })).rejects.toThrow('data lain');
+    await expect(service.create(id, Object.assign({}, input, { email: 'other@example.test' }), { accountId: actorId })).rejects.toThrow('data lain');
     expect(tx.empEmployee.create).not.toHaveBeenCalled();
   });
   it('persists a recoverable upstream timeout without marking successful', async () => {
