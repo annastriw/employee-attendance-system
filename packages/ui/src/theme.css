@@ -90,6 +90,85 @@ a:focus-visible, button:focus-visible {
   padding: 2rem 1.5rem;
 }
 
+.auth-split {
+  padding: 0;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  place-items: stretch;
+}
+
+.auth-aside {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.auth-aside .brand {
+  color: var(--accent-foreground);
+}
+
+.auth-aside-lead {
+  font-size: 1.125rem;
+  line-height: 1.5;
+  font-weight: 500;
+  max-width: 22rem;
+}
+
+.auth-panel {
+  display: grid;
+  place-items: center;
+  padding: 2rem 1.5rem;
+  min-width: 0;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 25rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.06);
+  padding: 2.5rem;
+}
+
+.auth-content-card {
+  max-width: 23rem;
+  margin: 0 auto;
+}
+
+.auth-content-card > .brand {
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 767px) {
+  .auth-split {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 100dvh;
+    align-content: start;
+  }
+  .auth-aside {
+    padding: 1.5rem;
+    justify-content: flex-start;
+    gap: 0.5rem;
+  }
+  .auth-aside-lead {
+    font-size: 0.9375rem;
+  }
+  .auth-panel {
+    padding: 1.5rem;
+    align-items: start;
+  }
+  .auth-card {
+    border: none;
+    box-shadow: none;
+    background: transparent;
+    padding: 0;
+  }
+}
+
 .auth-content {
   width: 100%;
   max-width: 23rem;
@@ -194,7 +273,6 @@ a:focus-visible, button:focus-visible {
   font-size: 0.8125rem;
   line-height: 1.6;
   color: var(--muted);
-  text-align: center;
 }
 
 .unavailable-message {

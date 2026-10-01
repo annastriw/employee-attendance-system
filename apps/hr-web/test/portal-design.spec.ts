@@ -17,13 +17,15 @@ for (const portal of ["hr", "attendance"] as const) {
       expect(layout.accent).toBe("#292929");
       expect(layout.scheme).toBe("light");
       await expect(page.locator(".auth-content")).toBeVisible();
-      await expect(page.locator(".auth-aside")).toHaveCount(0);
       if (portal === "hr") {
+        await expect(page.locator(".auth-aside")).toHaveCount(1);
+        await expect(page.locator(".auth-card")).toHaveCount(1);
         await page.keyboard.press("Tab");
         await expect(page.getByLabel("Email", { exact: true })).toBeFocused();
         await expect(page.getByRole("button", { name: "Masuk", exact: true })).toBeEnabled();
       }
       else {
+        await expect(page.locator(".auth-aside")).toHaveCount(0);
         await expect(page.getByText("Login karyawan belum tersedia.")).toBeVisible();
       }
       await page.screenshot({ path: info.outputPath(portal + "-" + width + ".png"), fullPage: true });
