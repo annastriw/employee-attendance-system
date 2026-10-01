@@ -87,6 +87,7 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 
 ## T12 — Pembuatan akun karyawan
 - [ ] Selesai
+- Kontrak awal: [employee-provisioning](../docs/sdd/employee-provisioning.md); implementasi dan bukti acceptance belum tersedia.
 - Acceptance: Profil+akun dibuat terkoordinasi; password sementara tampil sekali; NIK/email unik.
 - Verification: Integration test konflik unik, kegagalan antarservice, retry dan sanitasi log.
 - Dependencies: 11

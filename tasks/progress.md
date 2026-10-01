@@ -25,7 +25,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | T11 selesai | hanya Docker MySQL 3307 | Tidak ada increment aktif; berikutnya T12 |
+| T12 — kontrak provisioning | Codex, 2026-10-02 | docs/sdd/employee-provisioning.md; tasks/progress.md; tasks/todo.md | T11 selesai | hanya Docker MySQL 3307; tidak menambah proses | Kontrak awal ditulis; berikutnya schema/migration/grants, T12 belum selesai |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 
@@ -34,6 +34,8 @@ Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increme
 Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .windsurf/ dan skills-lock.json adalah berkas lokal; jangan di-stage, dihapus atau diubah tanpa scope jelas. Rahasia dan data pribadi tetap ignored.
 
 ## Bukti pemeriksaan
+
+- GitHub tersedia: push awal dev diverifikasi hash lokal=remote (7cd397f); keputusan repository dicatat dan dipush pada 89aa568. T12 dimulai melalui [kontrak provisioning](../docs/sdd/employee-provisioning.md); belum ada perubahan runtime atau test T12. Dokumen diperiksa isi/tautan/diff.
 
 - Revisi kebijakan testing (2026-10-02): AGENTS, plan, workflow, baseline dan design system diselaraskan dengan persetujuan pengguna. Verifikasi dokumentasi: isi/tautan lokal dan diff; test aplikasi tidak diulang karena tidak ada perubahan runtime.
 
@@ -49,7 +51,7 @@ Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .w
 
 ## Langkah berikut
 
-1. Terapkan [tier test terbaru](plan.md#tier-test-biaya-vs-nilai--disetujui-2026-10-02) pada T12: statis + unit/komponen terfokus per increment, visual halaman terdampak saat layout/CSS berubah, API MySQL/E2E saat fitur lengkap. T12 pembuatan akun karyawan: baca baseline/todo dan tulis module spec provisioning akun+profil (unik NIK/email, idempotensi, kompensasi/pemulihan). Integrasikan selector master aktif yang sudah diuji ke form H07; pemuatan pilihan harus berfilter ACTIVE dan mendukung pagination. Jangan membuka akun/hasil sukses sebelum profil+akun konsisten.
+1. Terapkan [tier test terbaru](plan.md#tier-test-biaya-vs-nilai--disetujui-2026-10-02) pada T12: statis + unit/komponen terfokus per increment, visual halaman terdampak saat layout/CSS berubah, API MySQL/E2E saat fitur lengkap. T12 pembuatan akun karyawan: lanjutkan [module spec provisioning](../docs/sdd/employee-provisioning.md) ke schema/migration/grants akun+profil (unik NIK/email, idempotensi, kompensasi/pemulihan). Integrasikan selector master aktif yang sudah diuji ke form H07; pemuatan pilihan harus berfilter ACTIVE dan mendukung pagination. Jangan membuka akun/hasil sukses sebelum profil+akun konsisten.
 2. Limit 429 E2E Auth tetap menunggu keputusan pengguna: refresh limit sendiri atau run per spec. Jangan longgarkan limit login. Run T11 per spec terpisah lulus; konfigurasi Auth tidak diubah.
 3. T09c selesai dan menjadi acuan wajib semua halaman berikutnya: gunakan token/komponen packages/ui, HeroUI, zinc–emerald, Geist, Phosphor dan mode terang/gelap. Kontrak mencakup E01–E09/H01–H14, seluruh state/dialog/mobile; jangan kembali ke T09b monokrom.
 4. Polesan H11 selesai bersama H12: (a) shared MasterDataPage menampilkan skeleton selama refetch sehingga baris lama tidak tampil bersama pesan sukses; test komponen dan E2E desktop/mobile menunggu baris hilang sesudah aktifkan pada filter Nonaktif. (b) pager tidak lagi memakai kelas monospace, diverifikasi computed font pada test visual. (c) status memakai satu ToggleButtonGroup berbatas dan separator HeroUI, screenshot terang/gelap ditinjau.
