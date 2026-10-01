@@ -2,19 +2,19 @@ import { BadRequestException, Controller, Get, Patch, Post, Req, Res } from '@ne
 import type { Request, Response } from 'express';
 import { AuthProxyService } from './auth-proxy.service';
 
-// Only these department paths reach Employee Service; anything else is refused
+// Only these master-data paths reach Employee Service; anything else is refused
 // before a request is built, so the Gateway is never an open proxy.
-const DEPARTMENT_PATH =
-  /^\/api\/v1\/departments(\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(\/(activate|deactivate))?)?$/i;
+const MASTER_PATH =
+  /^\/api\/v1\/(departments|positions)(\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(\/(activate|deactivate))?)?$/i;
 const QUERY_KEYS = new Set(['search', 'status', 'page', 'pageSize']);
 
-@Controller('api/v1/departments')
+@Controller(['api/v1/departments', 'api/v1/positions'])
 export class EmployeeProxyController {
   constructor(private readonly proxy: AuthProxyService) {}
 
   private async employee(method: 'GET' | 'POST' | 'PATCH', request: Request, response: Response) {
     const url = new URL(request.originalUrl, 'http://gateway.local');
-    if (!DEPARTMENT_PATH.test(url.pathname)) throw new BadRequestException('Request tidak valid.');
+    if (!MASTER_PATH.test(url.pathname)) throw new BadRequestException('Request tidak valid.');
     const query = new URLSearchParams();
     for (const [key, value] of url.searchParams) {
       if (!QUERY_KEYS.has(key) || query.has(key)) throw new BadRequestException('Request tidak valid.');

@@ -80,15 +80,15 @@ describe('Auth Gateway HTTP contract', () => {
   beforeEach(() => {
     mode = 'ok';
   });
-  describe('department routes', () => {
+  describe.each(['departments', 'positions'])('%s routes', (resource) => {
     const id = '0b7c2f4e-3d1a-4c8b-9e6f-2a5d7c9e1b3f';
     it.each([
-      ['get', '/api/v1/departments?search=fin&status=ACTIVE&page=2&pageSize=10', 'GET'],
-      ['post', '/api/v1/departments', 'POST'],
-      ['get', `/api/v1/departments/${id}`, 'GET'],
-      ['patch', `/api/v1/departments/${id}`, 'PATCH'],
-      ['post', `/api/v1/departments/${id}/activate`, 'POST'],
-      ['post', `/api/v1/departments/${id}/deactivate`, 'POST'],
+      ['get', `/api/v1/${resource}?search=fin&status=ACTIVE&page=2&pageSize=10`, 'GET'],
+      ['post', `/api/v1/${resource}`, 'POST'],
+      ['get', `/api/v1/${resource}/${id}`, 'GET'],
+      ['patch', `/api/v1/${resource}/${id}`, 'PATCH'],
+      ['post', `/api/v1/${resource}/${id}/activate`, 'POST'],
+      ['post', `/api/v1/${resource}/${id}/deactivate`, 'POST'],
     ] as const)('forwards %s %s to Employee Service', async (verb, path, method) => {
       const call = request(app.getHttpServer())[verb](path)
         .set('Authorization', 'Bearer token')
@@ -103,9 +103,9 @@ describe('Auth Gateway HTTP contract', () => {
       if (method !== 'GET') expect(JSON.parse(received.body)).toEqual({ name: 'Keuangan' });
     });
     it.each([
-      '/api/v1/departments/not-a-uuid',
-      '/api/v1/departments?admin=true',
-      '/api/v1/departments?page=1&page=2',
+      `/api/v1/${resource}/not-a-uuid`,
+      `/api/v1/${resource}?admin=true`,
+      `/api/v1/${resource}?page=1&page=2`,
     ])('refuses %s without calling the upstream', async (path) => {
       received = { headers: {}, body: '' };
       await request(app.getHttpServer()).get(path).expect(400);
@@ -113,7 +113,7 @@ describe('Auth Gateway HTTP contract', () => {
     });
     it('reports an Employee outage with its own message', async () => {
       mode = 'slow';
-      const result = await request(app.getHttpServer()).get('/api/v1/departments').expect(503);
+      const result = await request(app.getHttpServer()).get(`/api/v1/${resource}`).expect(503);
       expect(result.body.message).toBe('Layanan data karyawan sementara tidak tersedia.');
     });
   });
