@@ -2,11 +2,11 @@ import { test, expect } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-test("HRD manages departments through the real Gateway, Employee Service and MySQL", async ({ page }, testInfo) => {
-  const fixtures = JSON.parse(readFileSync(resolve("../../.local/hr-e2e-departments.json"), "utf8")) as
+test("HRD manages positions through the real Gateway, Employee Service and MySQL", async ({ page }, testInfo) => {
+  const fixtures = JSON.parse(readFileSync(resolve("../../.local/hr-e2e-positions.json"), "utf8")) as
     { project: string; email: string; password: string; codePrefix: string }[];
   const fixture = fixtures.find((entry) => entry.project === testInfo.project.name)!;
-  const name = `Departemen ${fixture.codePrefix}`;
+  const name = `Jabatan ${fixture.codePrefix}`;
   const code = `${fixture.codePrefix}-FIN`;
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
@@ -17,8 +17,8 @@ test("HRD manages departments through the real Gateway, Employee Service and MyS
   await page.getByRole("button", { name: "Masuk", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Ringkasan", exact: true })).toBeVisible();
 
-  await page.goto("/#departemen");
-  await expect(page.getByRole("heading", { name: "Departemen", level: 1 })).toBeVisible();
+  await page.goto("/#jabatan");
+  await expect(page.getByRole("heading", { name: "Jabatan", level: 1 })).toBeVisible();
 
   // Create; the code is normalised to upper case by the client and the API.
   await page.getByRole("button", { name: "Tambah", exact: true }).click();
@@ -27,7 +27,7 @@ test("HRD manages departments through the real Gateway, Employee Service and MyS
   await dialog.getByLabel("Kode").fill(code.toLowerCase());
   await dialog.getByRole("button", { name: "Simpan" }).click();
   await expect(page.getByRole("status")).toContainText(`${name} ditambahkan.`);
-  await page.getByRole("searchbox", { name: "Cari departemen" }).fill(fixture.codePrefix);
+  await page.getByRole("searchbox", { name: "Cari jabatan" }).fill(fixture.codePrefix);
   const row = page.getByRole("row", { name: new RegExp(name) });
   await expect(row).toBeVisible();
   await expect(row).toContainText("Aktif");
@@ -37,7 +37,7 @@ test("HRD manages departments through the real Gateway, Employee Service and MyS
   await dialog.getByLabel("Nama").fill(`${name} Dua`);
   await dialog.getByLabel("Kode").fill(code);
   await dialog.getByRole("button", { name: "Simpan" }).click();
-  await expect(dialog.getByText("Kode departemen sudah digunakan.")).toBeVisible();
+  await expect(dialog.getByText("Kode jabatan sudah digunakan.")).toBeVisible();
   await dialog.getByRole("button", { name: "Batal" }).click();
 
   // Edit.
@@ -61,7 +61,7 @@ test("HRD manages departments through the real Gateway, Employee Service and MyS
   await page.getByRole("button", { name: `Aktifkan ${name} Pusat` }).click();
   await expect(page.getByRole("status")).toContainText("diaktifkan kembali.");
   await expect(page.getByRole("row", { name: new RegExp(`${name} Pusat`) })).toHaveCount(0);
-  await expect(page.getByText("Tidak ada departemen yang cocok")).toBeVisible();
-  await page.screenshot({ path: testInfo.outputPath("departments.png"), fullPage: true });
+  await expect(page.getByText("Tidak ada jabatan yang cocok")).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath("positions.png"), fullPage: true });
   expect(errors).toEqual([]);
 });

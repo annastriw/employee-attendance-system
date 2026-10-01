@@ -8,6 +8,7 @@ import {
   assertTestDatabase,
   fixturePath,
   departmentFixturePath,
+  positionFixturePath,
 } from "./environment.mjs";
 export default async function setup() {
   assertTestDatabase(databaseEnv.TEST_DATABASE_URL);
@@ -26,15 +27,19 @@ export default async function setup() {
     ...account(project),
     codePrefix: `E2E${randomUUID().slice(0, 6).toUpperCase()}`,
   }));
+  const positionFixtures = ["desktop", "mobile"].map((project) => ({
+    ...account(project), codePrefix: `E2E${randomUUID().slice(0, 6).toUpperCase()}`,
+  }));
   mkdirSync(dirname(fixturePath), { recursive: true });
   writeFileSync(fixturePath, JSON.stringify(fixtures));
   writeFileSync(departmentFixturePath, JSON.stringify(departmentFixtures));
+  writeFileSync(positionFixturePath, JSON.stringify(positionFixtures));
   try {
     const passwordHash = await hash(password, 12);
     await db.authAccount.createMany({
       data: [
         ...fixtures.map(({ id, email }) => ({ id, email, passwordHash, role: "ADMIN_HRD", status: "ACTIVE", mustChangePassword: true })),
-        ...departmentFixtures.map(({ id, email }) => ({ id, email, passwordHash, role: "ADMIN_HRD", status: "ACTIVE", mustChangePassword: false })),
+        ...[...departmentFixtures, ...positionFixtures].map(({ id, email }) => ({ id, email, passwordHash, role: "ADMIN_HRD", status: "ACTIVE", mustChangePassword: false })),
       ],
     });
   } finally {
