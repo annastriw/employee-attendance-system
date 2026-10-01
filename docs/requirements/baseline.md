@@ -10,8 +10,9 @@ Dokumen ini merekam keputusan pengguna dalam sesi perencanaan. Dokumen rancangan
 - React TypeScript, HeroUI melalui MCP HeroUI dan komponen custom; Atomic Design; antarmuka Bahasa Indonesia, responsif dan memiliki arah desain yang jelas.
 - NestJS TypeScript; MySQL saja; JWT; bcrypt dengan salt; Swagger.
 - API Gateway, Auth, Employee, Attendance, Media: service terpisah dengan port internal berbeda.
-- Frontend Vercel; backend dan MinIO AIStor Free VPS Ubuntu; DNS Cloudflare, domain dibeli di Hostinger.
-- Monorepo: apps/{attendance-web,hr-web,api-gateway,auth-service,employee-service,attendance-service,media-service}, packages/{contracts,ui,config}, docs/{requirements,sdd,architecture,api,testing,deployment}, infra/.
+- Dua frontend memakai dua project Vercel terpisah: Attendance Portal dan HR Portal. Seluruh backend, MySQL, dan MinIO AIStor Free berjalan di VPS Ubuntu; DNS Cloudflare, domain dibeli di Hostinger.
+- Satu repository GitHub berbentuk monorepo: apps/{attendance-web,hr-web,api-gateway,auth-service,employee-service,attendance-service,media-service}, packages/{contracts,ui,config}, docs/{requirements,sdd,architecture,api,testing,deployment}, infra/.
+- Topologi repository/deployment disetujui: satu repo, dua project Vercel, backend/MySQL/storage di VPS. Detail: [ADR-003](../architecture/adr-003-repository-and-deployment.md).
 - Branch dev untuk development, main untuk production. Git lokal diinisialisasi pada dev; repository GitHub ditentukan pengguna nanti. Commit lokal tetap dilakukan, push menunggu remote.
 - Instruksi pengguna: setiap perubahan logis yang selesai dan sudah diverifikasi harus di-commit dan dipush ke GitHub pada branch dev, termasuk dokumentasi. Instruksi persisten ada pada AGENTS.md.
 - GitHub: kode, spesifikasi, migration, konfigurasi aman, .env.example. Lokal: .env, kredensial, backup, data/foto pribadi.

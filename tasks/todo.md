@@ -231,7 +231,7 @@ Status: belum dikerjakan. Semua path adalah target rencana, bukan file yang suda
 
 ## T30 — Artefak deploy dan runbook
 - [ ] Selesai
-- Acceptance: VPS/Vercel/Cloudflare, migration/seed, healthcheck, backup/restore dan rollback siap.
+- Acceptance: Satu repo GitHub, dua project Vercel terpisah, backend/MySQL/AIStor VPS Ubuntu, Cloudflare, migration/seed, healthcheck, backup/restore dan rollback siap; topologi mengikuti ADR-003.
 - Verification: Review konfigurasi tanpa secret; uji restore backup test.
 - Dependencies: 29
 - Target: infra/, docs/deployment/
