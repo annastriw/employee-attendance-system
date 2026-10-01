@@ -99,4 +99,4 @@ Base /api/v1; Swagger /docs; UUID; waktu response ISO8601 +07:00; pagination/fil
 - Akses Vercel/VPS/Cloudflare/GitHub dan kapasitas VPS sebelum deployment; kredensial tidak disimpan dalam dokumen.
 
 ## Tema visual frontend
-- Kedua portal dan seluruh halaman berikutnya memakai tema bersama modern, elegan, minimalis dan mudah dipahami. HeroUI dan custom component Atomic Design mengikuti [kontrak desain](../sdd/frontend-design-system.md); token serta shell bersama disimpan di packages/ui.
+- Kedua portal dan seluruh halaman berikutnya memakai tema monokrom putih/abu-abu netral, tombol charcoal, modern, elegan, minimalis dan mudah dipahami. Login satu form di tengah tanpa slogan/panel samping; HR sidebar ramping dan menu akun. HeroUI dan custom component Atomic Design mengikuti [kontrak desain](../sdd/frontend-design-system.md); token serta shell bersama disimpan di packages/ui.

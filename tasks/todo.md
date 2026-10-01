@@ -307,3 +307,9 @@ Catatan: bagian database development dari T07 selesai berdasarkan laporan penggu
 - Acceptance: Tema modern/elegan/minimalis bersama, shell autentikasi Atomic Design, HR login/password/ringkasan dan landing karyawan konsisten. Halaman berikutnya mengikuti kontrak desain.
 - Verification: Build/lint dua frontend, 11 test komponen, 2 E2E auth nyata, 8 pemeriksaan layout/tema pada 320/768/1024/1440 px; MCP HeroUI dan Chrome DevTools.
 - Target: packages/ui/, apps/{attendance-web,hr-web}/, docs/sdd/frontend-design-system.md
+
+## T09b — Penyederhanaan frontend monokrom
+- [x] Selesai
+- Acceptance: Login terpusat tanpa slogan/panel, charcoal, input password dan dropdown akun HeroUI; navigasi mobile buka/tutup; teks seperlunya.
+- Verification: Build/lint dua frontend, 11 component tests, 12 browser layout/interaction checks, 2 E2E autentikasi nyata.
+- Target: packages/ui/, apps/{attendance-web,hr-web}/, docs/sdd/frontend-design-system.md

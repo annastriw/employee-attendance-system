@@ -24,7 +24,7 @@ describe("HR portal authentication journey", () => {
     const api = client();
     const user = userEvent.setup();
     render(<App client={api} />);
-    await screen.findByRole("heading", { name: "Masuk ke portal HRD" });
+    await screen.findByRole("heading", { name: "Masuk" });
     await user.type(screen.getByLabelText("Email"), admin.email);
     await user.type(screen.getByLabelText("Password"), "Initial-Test-123456");
     await user.click(screen.getByRole("button", { name: "Masuk" }));
@@ -55,7 +55,7 @@ describe("HR portal authentication journey", () => {
       "Replacement-Test-123456",
     );
     await user.click(screen.getByRole("button", { name: "Simpan password" }));
-    await screen.findByRole("heading", { name: "Masuk ke portal HRD" });
+    await screen.findByRole("heading", { name: "Masuk" });
     expect(screen.getByRole("status")).toHaveTextContent(
       "Password berhasil diperbarui",
     );
@@ -73,8 +73,9 @@ describe("HR portal authentication journey", () => {
     expect(
       screen.getByText("Belum ada data yang ditampilkan"),
     ).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Keluar" }));
-    await screen.findByRole("heading", { name: "Masuk ke portal HRD" });
+    await user.click(screen.getByRole("button", { name: "Menu akun" }));
+    await user.click(await screen.findByRole("menuitem", { name: "Keluar" }));
+    await screen.findByRole("heading", { name: "Masuk" });
     expect(api.logout).toHaveBeenCalledTimes(1);
   });
   it("keeps the form usable after a failed login", async () => {
@@ -84,7 +85,7 @@ describe("HR portal authentication journey", () => {
     );
     const user = userEvent.setup();
     render(<App client={api} />);
-    await screen.findByRole("heading", { name: "Masuk ke portal HRD" });
+    await screen.findByRole("heading", { name: "Masuk" });
     await user.type(screen.getByLabelText("Email"), admin.email);
     await user.type(screen.getByLabelText("Password"), "Incorrect-Test-123456");
     await user.click(screen.getByRole("button", { name: "Masuk" }));
