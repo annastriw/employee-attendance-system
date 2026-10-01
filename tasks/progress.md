@@ -15,8 +15,8 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
   - bb3c6af feat(hr-web): H11 department list, form and status actions on real API (T10)
   - 20b53e0 fix(auth): give /auth/me its own rate limit for per-request service verification
   - d9738b1 test(hr-web): real-API department journey with Employee Service in the E2E stack
-- Commit T11: 85143ce (schema/migration/grants), 73293bc (Employee API + unit/MySQL), c4da4dd (Gateway allowlist/kontrak), 49e4eb7 (filter aktif untuk penugasan), 2f46086 (H12/shared UI/selector/polesan H11), fbc034a (HRD nyata + assertion refetch). Penutupan T11: 0d33caf. Persetujuan T09c: b31ccc5. Kebijakan testing cepat disetujui 2026-10-02 dan dicatat pada commit docs berikutnya; baca git log sebagai sumber HEAD.
-- Branch: dev. Remote belum ada; push menunggu repository pilihan pengguna.
+- Commit T11: 85143ce (schema/migration/grants), 73293bc (Employee API + unit/MySQL), c4da4dd (Gateway allowlist/kontrak), 49e4eb7 (filter aktif untuk penugasan), 2f46086 (H12/shared UI/selector/polesan H11), fbc034a (HRD nyata + assertion refetch). Penutupan T11: 0d33caf. Persetujuan T09c: b31ccc5. Kebijakan testing cepat: 7cd397f; baca git log sebagai sumber HEAD.
+- Branch: dev, tracking origin/dev. Repository private [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system) dipilih pengguna pada 2026-10-02. Push awal terverifikasi: lokal dan remote dev sama pada 7cd397f. Commit berikut dipush setelah verifikasi; deployment tetap tahap terakhir.
 - Database lokal (Docker MySQL 127.0.0.1:3307): migration `20261001160000_employee_master_departments` dan `20261002080000_employee_master_positions` DITERAPKAN ke attendance_dev dan attendance_test. Akun `attendance_employee`/`attendance_employee_test` dibuat via `pnpm db:grants`; kredensial ada di `.env.database` (ignored).
 - Host memory sering CRITICAL (1-2 GB). Jalankan suite berat satu per satu; Playwright 1 worker terbukti stabil.
 - Semua port aplikasi/test 3000/3001/3002, 15173/15174/15175 dan 15300/15301/15302 diperiksa tertutup. Stack E2E dimatikan setelah test; Docker MySQL tetap berjalan di 3307.
@@ -57,7 +57,7 @@ Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .w
 Catatan: E2E memakai service dari `dist`; jalankan `pnpm --dir apps/<service> run build` setelah mengubah backend. employee-service bind 127.0.0.1; hanya Gateway publik.
 ## Kendala dan kebutuhan eksternal
 
-- Remote GitHub belum ditentukan.
+- Remote GitHub sudah tersedia; akses Vercel/VPS/Cloudflare dan tahap deployment masih menyusul.
 - Tool resource_status tidak tersedia pada sesi ini; RAM diperiksa via OS (sekitar 0,57–1,64 GiB tersedia). Playwright/Vitest memakai satu worker.
 - Build HR lulus dengan warning ukuran chunk JS sekitar 650 kB; tidak menurunkan batas warning atau menambah tooling.
 - Akses Vercel/VPS/Cloudflare dan instruksi promosi main belum tersedia pada snapshot; siapkan artefak independen dahulu.

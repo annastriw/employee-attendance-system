@@ -21,7 +21,7 @@ Setelah inventaris awal, gunakan context engineering untuk memuat bagian spec/so
 - Token/theme/AuthShell ada di packages/ui; pnpm workspace dan Atomic Design dipertahankan.
 - MySQL dev/test masih schema terpisah pada satu instance; container testing khusus belum tersedia. AIStor Compose ada; verifikasi layanan yang benar-benar aktif.
 - T08/T09 selesai; beberapa induk fondasi belum ditutup. Audit bukti source/test sebelum mencentang.
-- Branch dev; belum ada remote saat penulisan. Pengguna menentukan GitHub kemudian; jangan membuat/memilih remote sendiri.
+- Branch dev; origin: [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system) (private, dipilih pengguna 2026-10-02). Push commit terverifikasi ke dev; deployment tetap tahap terakhir. Jangan membuat/memilih repository lain sendiri.
 - Tabel status awal adalah snapshot, bukan asumsi permanen. Status terbaru dibaca dari Git, todo dan progress.
 
 ## Pelaksanaan serial sesuai dependensi
