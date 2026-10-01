@@ -262,3 +262,10 @@ Catatan: ini bagian storage dari T07; T07 keseluruhan belum selesai. Status terp
 - [ ] Instance MySQL testing terpisah dan harness testing aplikasi.
 - [ ] Akun database dengan hak akses per service.
 Catatan: bagian database development dari T07 selesai berdasarkan laporan pengguna; T07 keseluruhan belum selesai. Panduan: docs/deployment/mysql-local.md.
+
+## T07a — Konfigurasi koneksi database lokal
+- [x] Konfigurasi Prisma 7 standar, akun migrasi dan kredensial lokal terpisah.
+- [x] Schema dev/test/shadow terpisah pada satu instance MySQL lokal.
+- [x] Setup lokal berhasil, prisma validate lulus.
+- [ ] Migration domain dan verifikasi runtime dilanjutkan pada T07b.
+- Batas: T07 keseluruhan belum selesai; instance test khusus dan harness frontend belum tersedia.
