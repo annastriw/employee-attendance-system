@@ -8,6 +8,9 @@ Daftar pekerjaan: todo.md. Checklist belum dicentang berarti belum dikerjakan.
 ## Pendekatan
 Monorepo, lima service dengan kepemilikan tabel, dua frontend. Selesaikan jalur pengguna bertahap; bukan seluruh backend lalu seluruh frontend. Setiap perubahan menggunakan spec terkait, test relevan, review dan dokumentasi.
 
+## Tooling disetujui
+pnpm workspace, Prisma dengan migration terpusat untuk satu database, HTTP internal + transactional outbox/worker. Detail pada ../docs/architecture/adr-002-project-tooling.md. Kompatibilitas versi dan spesifikasi worker masih bagian task fondasi; dependency belum dipasang.
+
 ## Urutan dan checkpoint
 1. Dokumen module SDD dan aturan context; keputusan tooling kompatibel; kesiapan lingkungan.
 2. Kerangka monorepo, test tooling, MySQL/MinIO AIStor Free development, healthcheck.

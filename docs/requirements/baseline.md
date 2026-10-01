@@ -87,8 +87,11 @@ Base /api/v1; Swagger /docs; UUID; waktu response ISO8601 +07:00; pagination/fil
 - employeeId berasal dari sesi. Idempotency-Key wajib; jika ambang waktu terlewati dan alasan belum ada, service meminta alasan sebelum menerima.
 - Response sukses data+meta; error error{code,message,details}+meta. HTTP 400/401/403/404/409/422/503 sesuai kontrak.
 
+## Tooling yang disetujui
+- pnpm workspace; Prisma dengan satu pengelola schema/migration untuk satu database; HTTP internal + transactional outbox dan worker retry/idempotent. Tanpa RabbitMQ pada tahap awal. Detail: docs/architecture/adr-002-project-tooling.md.
+
 ## Detail yang diselesaikan sebelum implementasi terkait
-- Versi dependency, package manager, ORM, transport dan mekanisme outbox; cek dokumentasi resmi dan kompatibilitas.
+- Versi dependency dan kompatibilitas pnpm/Node/Prisma/NestJS; lokasi pengelola migration, kontrak HTTP internal serta retry/ordering/deduplikasi outbox.
 - Kriteria confidence/posisi, batas ukuran/tipe foto, kesegaran lokasi dan toleransi jam perangkat.
 - Presisi ambang 08.00 dan 23.59.59, eligibility tanggal aktivasi/nonaktif, rekap hari dengan event campuran setelah perubahan kalender.
 - TTL token/signed URL, kebijakan password, retensi foto/data/audit.
