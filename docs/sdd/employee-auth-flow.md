@@ -17,7 +17,7 @@ Panel login karyawan sendiri di **Attendance Portal** (`apps/attendance-web`): l
 - `/me`, `/change-password`, `/logout` tetap tersedia saat `mustChangePassword=true`. Guard bisnis menolak restricted session sampai password diganti.
 - Ganti password: wajib password lama, baru 12–72 byte, berbeda dari lama; mencabut seluruh sesi dan meminta login ulang.
 
-> Yang perlu dicek saat implementasi: apakah `employee/login` sudah menerbitkan cookie refresh ber-nama/panel `employee` yang berbeda dari admin. Jika Auth belum memisahkan nama cookie admin vs employee, itu satu-satunya kemungkinan perubahan backend kecil pada T13 (bukan schema).
+> Terverifikasi di source (`apps/auth-service/src/auth/auth.controller.ts`): cookie refresh **sudah terpisah per peran** — `cookieName(role)` menghasilkan `auth_refresh_admin` vs `auth_refresh_employee` (prefiks `__Host-` pada production; path `/api/v1/auth` pada dev). `employee/login` mengembalikan HTTP 200, dan `RefreshDto` memvalidasi `panel: 'admin' | 'employee'`. **Kesimpulan: T13 tidak perlu perubahan backend sama sekali** — murni frontend `apps/attendance-web`.
 
 ## Frontend — yang dibangun vs dipakai ulang
 Dipakai ulang dari `packages/ui`: `theme.css` (token zinc/emerald, terang/gelap), `AuthShell`, `PortalBrand`, komponen HeroUI. Pola klien disalin dari `apps/hr-web/src/lib/auth-client.ts`.
