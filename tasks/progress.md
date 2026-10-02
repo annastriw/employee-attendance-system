@@ -26,7 +26,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| Penutupan T13 | Codex, 2026-10-02 | tasks/{todo,progress}.md, docs/sdd/employee-auth-flow.md, runbook lokal | Pengguna melaporkan langkah manual 1–5 lulus | Pengguna menjalankan stack untuk uji manual; proses belum diaudit ulang | T13 dan checkpoint ditutup; T14 siap, implementasi belum dimulai |
+| Revisi kebijakan percepatan | Codex, 2026-10-02 | AGENTS.md, tasks/{plan,progress}.md, baseline/design system/implementation-workflow | Persetujuan pengguna setelah penutupan T13 (9245c09) | Tidak memulai proses aplikasi/test berat | Kebijakan diselaraskan; T14 siap, implementasi belum dimulai |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 
@@ -35,6 +35,8 @@ Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increme
 Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .windsurf/ dan skills-lock.json adalah berkas lokal; jangan di-stage, dihapus atau diubah tanpa scope jelas. Rahasia dan data pribadi tetap ignored.
 
 ## Bukti pemeriksaan
+
+- Revisi percepatan setelah T13 (2026-10-02): pengguna menyetujui E2E browser manual per fitur selama development, regresi browser otomatis sebelum rilis saat resource tersedia, test perilaku terfokus, visual hanya halaman berubah, suite repo hanya checkpoint relevan/rilis, satu commit per perubahan logis, serta dokumentasi ringkas/reuse tanpa refactor dini. Test lama dan bukti bisnis/keamanan/data nyata tetap wajib. Perubahan hanya dokumentasi; periksa isi/tautan/diff, tanpa mengulang test aplikasi.
 
 - T13 frontend: Attendance typecheck/lint/build lulus; enam unit Auth client, tiga komponen E01, dan tiga alur App lulus. Playwright visual 12/12 lulus (E01/E02/home, 320/1440 px, terang/gelap, satu worker, sesi tiruan); screenshot ditinjau. Pengguna melaporkan browser API nyata langkah 1–5 lulus pada 2026-10-02: wajib ganti password, login ulang, reload/logout, role dan pemisahan sesi; lihat [Attendance lokal](../docs/deployment/attendance-local.md). T13 dan checkpoint ditutup. E2E otomatis dan seluruh suite monorepo tidak diulang karena RAM terbatas.
 
@@ -64,7 +66,7 @@ Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .w
 
 ## Langkah berikut
 
-1. **T14 perubahan dan lifecycle karyawan.** T13 beserta checkpoint selesai setelah pengguna melaporkan langkah browser manual 1–5 lulus. Baca baseline, todo, dan kontrak provisioning sebelum implementasi edit/email/nonaktif/arsip/restore, history dan revokasi. Pengguna sedang meminta saran penghematan proses; kebijakan test belum diubah. Spec Playwright T12 otomatis tetap belum dijalankan karena RAM terbatas.
+1. **T14 perubahan dan lifecycle karyawan.** T13 beserta checkpoint selesai setelah pengguna melaporkan langkah browser manual 1–5 lulus. Baca baseline, todo, dan kontrak provisioning sebelum implementasi edit/email/nonaktif/arsip/restore, history dan revokasi. Revisi percepatan disetujui pengguna dan diterapkan: E2E browser manual saat development, pemeriksaan terfokus, regresi otomatis sebelum rilis saat resource tersedia; lihat tier test plan. Spec Playwright T12 otomatis tetap belum dijalankan karena RAM terbatas.
 2. Limit 429 E2E Auth tetap menunggu keputusan pengguna: refresh limit sendiri atau run per spec. Jangan longgarkan limit login. Run T11 per spec terpisah lulus; konfigurasi Auth tidak diubah.
 3. T09c selesai dan menjadi acuan wajib semua halaman berikutnya: gunakan token/komponen packages/ui, HeroUI, zinc–emerald, Geist, Phosphor dan mode terang/gelap. Kontrak mencakup E01–E09/H01–H14, seluruh state/dialog/mobile; jangan kembali ke T09b monokrom.
 4. Polesan H11 selesai bersama H12: (a) shared MasterDataPage menampilkan skeleton selama refetch sehingga baris lama tidak tampil bersama pesan sukses; test komponen dan E2E desktop/mobile menunggu baris hilang sesudah aktifkan pada filter Nonaktif. (b) pager tidak lagi memakai kelas monospace, diverifikasi computed font pada test visual. (c) status memakai satu ToggleButtonGroup berbatas dan separator HeroUI, screenshot terang/gelap ditinjau.

@@ -6,7 +6,7 @@
 - Perbarui spesifikasi jika keputusan pengguna berubah.
 
 ## Commit dan push — instruksi pengguna
-- Setelah setiap perubahan logis selesai dan verifikasi relevan lulus, buat commit dan push ke repository GitHub proyek.
+- Setelah setiap perubahan logis lengkap dan verifikasi relevan lulus, buat satu commit dan push ke repository GitHub proyek. Gabungkan berkas kode/test/dokumentasi yang berkaitan dalam perubahan tersebut; hindari commit per berkas/potongan kecil.
 - Aturan mencakup kode, dokumentasi, konfigurasi, dan pengujian; jangan menumpuk perubahan yang tidak berkaitan.
 - Kerjakan development di branch dev. Branch main digunakan untuk production; jangan push hasil development langsung ke main.
 - Gunakan pesan commit jelas dengan prefix feat, fix, docs, test, refactor, atau chore.
@@ -30,7 +30,7 @@ Struktur tetap: satu monorepo, lima service NestJS (API Gateway, Auth, Employee,
 - Selesaikan satu fitur ujung ke ujung: schema/kontrak → API → UI → test → review → commit.
 - Pakai pola bersama untuk form, daftar, detail dan konfirmasi; pisah komponen Atomic Design hanya atas tanggung jawab atau reuse nyata. Tunda abstraksi generik.
 - Gunakan controller/DTO/service dan Prisma sesuai kepemilikan data; batasi outbox/retry pada alur konsistensi lintas service, tetap penuhi idempotensi/kompensasi/pemulihan baseline.
-- Ikuti [tier test yang disetujui 2026-10-02](tasks/plan.md#tier-test-biaya-vs-nilai--disetujui-2026-10-02): typecheck/lint package terkait + unit/komponen terfokus per perubahan kode; dokumentasi saja cukup isi/tautan/diff. Visual hanya saat layout/CSS berubah, halaman terdampak pada 320/1440 px terang/gelap; tambah 768/1024 px jika breakpoint berubah atau pada checkpoint. API MySQL/E2E nyata setelah fitur lengkap; suite lengkap pada checkpoint integrasi dan sebelum main. Jangan ulang pemeriksaan lulus tanpa perubahan terkait; jangan menghapus test. Bukti bisnis/otorisasi/revokasi/unik/lokasi/foto/idempotensi/pemulihan tetap wajib. Suite berat serial, Playwright 1 worker; build dist backend sebelum E2E. Ringkas dokumentasi menjadi module spec + acceptance.
+- Ikuti [tier test revisi percepatan 2026-10-02](tasks/plan.md#tier-test-biaya-vs-nilai--disetujui-2026-10-02): typecheck/lint package terkait dan test perilaku terfokus. Hindari test baru yang hanya memeriksa teks/ikon/markup statis. Visual hanya halaman berubah pada 320/1440 px terang/gelap; tambah 768/1024 px jika breakpoint berubah. Selama development, E2E browser memakai checklist manual per fitur melalui backend nyata; E2E browser otomatis ditunda ke regresi sebelum rilis saat resource tersedia. Test integrasi MySQL/AIStor untuk bisnis, otorisasi/revokasi, constraint, idempotensi dan pemulihan tetap wajib. Build/test seluruh repo hanya pada checkpoint lintas package yang relevan dan sebelum main. Jangan ulang pemeriksaan lulus tanpa perubahan/risiko baru; simpan test lama. Suite berat serial, Playwright 1 worker; build dist backend yang berubah sebelum test memakai dist. Dokumentasi cukup module spec + acceptance dan progress; runbook diperbarui jika setup berubah.
 - Gunakan tooling yang ada; tunda broker/cache/orchestration/build system tanpa kebutuhan nyata.
 
 ## Object storage
