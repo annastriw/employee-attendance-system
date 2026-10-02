@@ -25,6 +25,7 @@ function upstream(name: string, fallback: string) {
 export class GatewayConfig {
   readonly authUrl: string;
   readonly employeeUrl: string;
+  readonly attendanceUrl: string;
   readonly origins: string[];
   readonly port: number;
   readonly timeoutMs = 5000;
@@ -40,6 +41,7 @@ export class GatewayConfig {
     }
     this.authUrl = upstream('AUTH_SERVICE_URL', 'http://127.0.0.1:3001');
     this.employeeUrl = upstream('EMPLOYEE_SERVICE_URL', 'http://127.0.0.1:3002');
+    this.attendanceUrl = upstream('ATTENDANCE_SERVICE_URL', 'http://127.0.0.1:3003');
     this.origins = (
       process.env.GATEWAY_ALLOWED_ORIGINS ??
       (process.env.NODE_ENV === 'production'

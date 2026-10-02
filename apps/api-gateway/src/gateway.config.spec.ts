@@ -6,6 +6,7 @@ describe('GatewayConfig', () => {
     process.env.NODE_ENV = 'production';
     process.env.AUTH_SERVICE_URL = 'http://127.0.0.1:3001';
     process.env.EMPLOYEE_SERVICE_URL = 'http://127.0.0.1:3002';
+    process.env.ATTENDANCE_SERVICE_URL = 'http://127.0.0.1:3003';
     process.env.GATEWAY_ALLOWED_ORIGINS = 'https://hr.example.test';
     process.env.PORT = '3000';
   });
@@ -19,6 +20,14 @@ describe('GatewayConfig', () => {
     expect(() => new GatewayConfig()).toThrow('EMPLOYEE_SERVICE_URL');
     process.env.EMPLOYEE_SERVICE_URL = 'http://127.0.0.1:3002';
     expect(new GatewayConfig().employeeUrl).toBe('http://127.0.0.1:3002');
+  });
+  it('requires an explicit, credential-free Attendance upstream in production', () => {
+    delete process.env.ATTENDANCE_SERVICE_URL;
+    expect(() => new GatewayConfig()).toThrow('ATTENDANCE_SERVICE_URL wajib');
+    process.env.ATTENDANCE_SERVICE_URL = 'http://user:pw@127.0.0.1:3003';
+    expect(() => new GatewayConfig()).toThrow('ATTENDANCE_SERVICE_URL');
+    process.env.ATTENDANCE_SERVICE_URL = 'http://127.0.0.1:3003';
+    expect(new GatewayConfig().attendanceUrl).toBe('http://127.0.0.1:3003');
   });
   it('requires explicit production upstream and browser origins', () => {
     delete process.env.AUTH_SERVICE_URL;

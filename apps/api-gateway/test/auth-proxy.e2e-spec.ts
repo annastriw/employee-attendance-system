@@ -60,6 +60,7 @@ describe('Auth Gateway HTTP contract', () => {
     const config = {
       authUrl: `http://127.0.0.1:${(upstream.address() as AddressInfo).port}`,
       employeeUrl: `http://127.0.0.1:${(upstream.address() as AddressInfo).port}`,
+      attendanceUrl: `http://127.0.0.1:${(upstream.address() as AddressInfo).port}`,
       origins: ['http://localhost:5174'],
       timeoutMs: 100,
       port: 3000,
@@ -115,6 +116,50 @@ describe('Auth Gateway HTTP contract', () => {
       mode = 'slow';
       const result = await request(app.getHttpServer()).get(`/api/v1/${resource}`).expect(503);
       expect(result.body.message).toBe('Layanan data karyawan sementara tidak tersedia.');
+    });
+  });
+
+  describe('holidays routes', () => {
+    const id = '0b7c2f4e-3d1a-4c8b-9e6f-2a5d7c9e1b3f';
+    it.each([
+      ['get', '/api/v1/holidays?year=2026&month=10&search=raya&page=1&pageSize=10', 'GET'],
+      ['post', '/api/v1/holidays', 'POST'],
+      ['get', `/api/v1/holidays/${id}`, 'GET'],
+      ['patch', `/api/v1/holidays/${id}`, 'PATCH'],
+      ['delete', `/api/v1/holidays/${id}`, 'DELETE'],
+    ] as const)('forwards %s %s to Attendance Service', async (verb, path, method) => {
+      const call = request(app.getHttpServer())[verb](path)
+        .set('Authorization', 'Bearer token')
+        .set('Cookie', 'auth_refresh_admin=secret')
+        .set('X-Forwarded-For', '203.0.113.9');
+      await (method === 'GET' || method === 'DELETE'
+        ? call
+        : call.send({ description: 'Libur' })
+      ).expect(200);
+      expect(received.method).toBe(method);
+      expect(received.url).toBe(path);
+      expect(received.headers.authorization).toBe('Bearer token');
+      expect(received.headers.cookie).toBeUndefined();
+      expect(received.headers['x-forwarded-for']).toBeUndefined();
+      if (method === 'POST' || method === 'PATCH') {
+        expect(JSON.parse(received.body)).toEqual({ description: 'Libur' });
+      }
+    });
+
+    it.each([
+      '/api/v1/holidays/not-a-uuid',
+      '/api/v1/holidays?admin=true',
+      '/api/v1/holidays?page=1&page=2',
+    ])('refuses %s without calling the upstream', async (path) => {
+      received = { headers: {}, body: '' };
+      await request(app.getHttpServer()).get(path).expect(400);
+      expect(received.url).toBeUndefined();
+    });
+
+    it('reports an Attendance outage with its own message', async () => {
+      mode = 'slow';
+      const result = await request(app.getHttpServer()).get('/api/v1/holidays').expect(503);
+      expect(result.body.message).toBe('Layanan absensi sementara tidak tersedia.');
     });
   });
   describe('Employee provisioning allowlist', () => {

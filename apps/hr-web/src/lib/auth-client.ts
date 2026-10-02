@@ -132,7 +132,7 @@ export function createAuthClient(
   }
   async function api<T>(
     path: string,
-    init: { method?: "GET" | "POST" | "PATCH"; body?: unknown; idempotencyKey?: string } = {},
+    init: { method?: "GET" | "POST" | "PATCH" | "DELETE"; body?: unknown; idempotencyKey?: string } = {},
   ): Promise<T> {
     await ensureSession();
     const method = init.method ?? "GET";

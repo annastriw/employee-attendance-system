@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
-export type View = "ringkasan" | "departemen" | "jabatan" | "karyawan";
-const VIEWS: View[] = ["ringkasan", "departemen", "jabatan", "karyawan"];
+export type View = "ringkasan" | "departemen" | "jabatan" | "karyawan" | "hari-libur";
+const VIEWS: View[] = ["ringkasan", "departemen", "jabatan", "karyawan", "hari-libur"];
 
 function read() {
   const [rawView, rawQuery = ""] = window.location.hash.replace(/^#/, "").split("?");

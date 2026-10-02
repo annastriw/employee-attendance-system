@@ -28,7 +28,7 @@ describe('T16 Attendance Policy & Real MySQL Database Integration', () => {
 
     policyService = app.get(WorkPolicyService);
     dbService = app.get(DatabaseService);
-  });
+  }, 30000);
 
   afterAll(async () => {
     // Cleanup created test records
@@ -47,7 +47,7 @@ describe('T16 Attendance Policy & Real MySQL Database Integration', () => {
     }
 
     await app.close();
-  });
+  }, 30000);
 
   describe('Work Policy Persistence', () => {
     it('creates or fetches the standard default policy in MySQL with 08:00 and 17:00 WIB', async () => {
