@@ -127,7 +127,10 @@ h1:focus { outline: none; }
 a { color: inherit; }
 
 a:focus-visible,
-button:focus-visible {
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
@@ -253,12 +256,12 @@ button:focus-visible {
 .form-field { display: flex; flex-direction: column; gap: 0.375rem; }
 .form-field .label { font-size: 0.8125rem; font-weight: 500; }
 .form-field > .input,
-.form-field > .input-group { width: 100%; min-height: 2.5rem; }
+.form-field > .input-group { width: 100%; min-height: 2.75rem; }
 .form-field .description { font-size: 0.75rem; color: var(--muted); padding: 0; }
 
 .password-toggle {
-  min-width: 2.5rem;
-  min-height: 2.5rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
   padding: 0;
   color: var(--muted);
 }
@@ -266,7 +269,7 @@ button:focus-visible {
 
 .primary-button {
   width: 100%;
-  min-height: 2.5rem;
+  min-height: 2.75rem;
   margin-top: 0.25rem;
   font-weight: 500;
 }
