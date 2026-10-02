@@ -1,5 +1,7 @@
 # T20 — Capture portal karyawan
 
+Status manual: diterima pengguna pada 2026-10-03 (Asia/Jakarta). Pengguna mengonfirmasi seluruh pengujian manual sampai T24 aman; checklist tujuh langkah di bawah dicentang berdasarkan laporan tersebut, bukan pengujian ulang agen atau hasil Playwright. Rincian perangkat/browser dan angka benchmark tidak diberikan. T20 ditutup penuh; catatan pending pada checkpoint lama merupakan status historis sebelum penerimaan ini.
+
 ## Lingkup
 
 E04/E05 memakai mesin T18 yang dipromosikan ke features/capture, bukan salinan. Halaman lazy #foto-checkin hanya untuk sesi karyawan yang telah mengganti password awal. Model/kamera/lokasi dimulai oleh tombol Buka kamera, bukan saat login atau membuka halaman.
@@ -35,17 +37,17 @@ Submit guard ref mencegah klik paralel. Busy menonaktifkan retake/kembali; route
 - [x] Komponen produksi: preview/retake, lokasi denied/stale, submit lock/retry, lokasi refresh tanpa reupload, callback lama/unmount.
 - [x] Typecheck/lint/build portal; login tidak membawa chunk MediaPipe.
 - [x] Visual halaman berubah 320/1440 terang/gelap, fokus dan overflow.
-- [ ] Checklist pengguna dengan kamera/lokasi nyata dan backend T19; hasil sintetis dipisahkan dari penerimaan perangkat.
+- [x] Checklist pengguna dengan kamera/lokasi nyata dan backend T19; hasil sintetis dipisahkan dari penerimaan perangkat. Diterima pengguna 2026-10-03.
 
 ## Checklist manual pengguna
 
-1. Login akun karyawan siap, pilih Check-in; kamera belum diminta sebelum Buka kamera.
-2. Izinkan kamera/lokasi. Nol/dua wajah memblokir Ambil foto; satu wajah jelas dan stabil memungkinkan manual. Kedipan open–closed–open mengambil satu foto.
-3. Preview: kamera berhenti; Ambil ulang mencabut foto lama dan memulai flow baru.
-4. Tolak/timeout/nonaktifkan lokasi: capture/pengiriman terblokir. Tombol Perbarui memulihkan tanpa input koordinat.
-5. Pada T21, Kirim check-in mengunggah multipart menjadi READY lalu mencatat absensi lewat Attendance. Isi alasan jika diperlukan; hasil sukses harus memuat waktu resmi. Setelah >60 detik perbarui lokasi; foto READY yang sama tidak diupload ulang. Lanjutkan [checklist check-in](attendance-checkin.md#checklist-manual).
-6. Putus koneksi saat upload: hasil belum dipastikan; retry memakai key sama. Navigasi/logout/tab ditinggalkan melepas kamera dan tidak memasang hasil sesi lama.
-7. Uji desktop/ponsel pada HTTPS/localhost, terang/gelap; kontrol bisa dibaca/ditekan pada 320 px, tanpa geser horizontal.
+- [x] 1. Login akun karyawan siap, pilih Check-in; kamera belum diminta sebelum Buka kamera.
+- [x] 2. Izinkan kamera/lokasi. Nol/dua wajah memblokir Ambil foto; satu wajah jelas dan stabil memungkinkan manual. Kedipan open–closed–open mengambil satu foto.
+- [x] 3. Preview: kamera berhenti; Ambil ulang mencabut foto lama dan memulai flow baru.
+- [x] 4. Tolak/timeout/nonaktifkan lokasi: capture/pengiriman terblokir. Tombol Perbarui memulihkan tanpa input koordinat.
+- [x] 5. Pada T21, Kirim check-in mengunggah multipart menjadi READY lalu mencatat absensi lewat Attendance. Isi alasan jika diperlukan; hasil sukses harus memuat waktu resmi. Setelah >60 detik perbarui lokasi; foto READY yang sama tidak diupload ulang. Lanjutkan [checklist check-in](attendance-checkin.md#checklist-manual).
+- [x] 6. Putus koneksi saat upload: hasil belum dipastikan; retry memakai key sama. Navigasi/logout/tab ditinggalkan melepas kamera dan tidak memasang hasil sesi lama.
+- [x] 7. Uji desktop/ponsel pada HTTPS/localhost, terang/gelap; kontrol bisa dibaca/ditekan pada 320 px, tanpa geser horizontal.
 
 Acuan: [UI/UX](frontend-ui-ux.md), [tema](frontend-design-system.md), [spike](../architecture/camera-location-spike.md), [Media](media-photos.md).
 

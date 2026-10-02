@@ -15,7 +15,8 @@ describe('Attendance Gateway boundary', () => {
   };
   const req = (path: string) =>
     ({
-      originalUrl: '/api/v1/me/attendance/' + path,
+      originalUrl:
+        '/api/v1/me/attendance' + (path.startsWith('?') ? '' : '/') + path,
       body: { photoObjectId: key },
       headers: {
         authorization: 'Bearer test',
@@ -66,6 +67,45 @@ describe('Attendance Gateway boundary', () => {
     ).rejects.toBeInstanceOf(BadRequestException);
     expect(forward).not.toHaveBeenCalled();
   });
+  it('forwards own history filters and scoped photo reads without employee/internal headers', async () => {
+    await controller.list(
+      {
+        ...req(''),
+        originalUrl: '/api/v1/me/attendance?startDate=2026-10-01&page=2',
+      } as Request,
+      response() as unknown as Response,
+    );
+    expect(forward.mock.calls[0]).toEqual([
+      '/api/v1/me/attendance?startDate=2026-10-01&page=2',
+      'GET',
+      { authorization: 'Bearer test', 'X-Request-ID': key },
+      undefined,
+      'attendance',
+    ]);
+    await controller.photo(
+      req(key + '/events/' + key + '/photo'),
+      response() as unknown as Response,
+    );
+    expect(forward.mock.calls[1][0]).toBe(
+      '/api/v1/me/attendance/' + key + '/events/' + key + '/photo',
+    );
+    expect(forward.mock.calls[1][2]).not.toHaveProperty('Idempotency-Key');
+  });
+  it.each([
+    '?employeeId=' + key,
+    '?page=1&page=2',
+    key + '?page=1',
+    key + '/events/not-uuid/photo',
+    key + '/events/' + key + '/photo?purpose=CHECK_IN',
+  ])(
+    'rejects unsafe history/photo request %s before contacting a service',
+    async (path) => {
+      await expect(
+        controller.list(req(path), response() as unknown as Response),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      expect(forward).not.toHaveBeenCalled();
+    },
+  );
   it('forwards a valid scoped reconciliation read without a body', async () => {
     await controller.operation(
       req('requests/' + key),

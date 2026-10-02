@@ -206,3 +206,54 @@ for (const scheme of ["light", "dark"] as const) {
     });
   }
 }
+// T23 visual states only: business E2E remains manual during development.
+const attendanceFixture = {
+ id: '11111111-1111-4111-8111-111111111111', employeeId: '22222222-2222-4222-8222-222222222222',
+ employee: { id: '22222222-2222-4222-8222-222222222222', name: 'Sari Wijaya', status: 'ARCHIVED' },
+ attendanceDate: '2026-10-02', version: '2026-10-03T00:00:00.000Z',
+ department: 'Keuangan', position: 'Analis', deletedAt: null, deleteReason: null, deletedByAccountId: null,
+ checkIn: { id: 'in', eventTime: '2026-10-02T08:02:00.000+07:00', reason: 'Koneksi internet terputus.', isLate: true, isEarlyDeparture: false, isOutsideSchedule: false },
+ checkOut: { id: 'out', eventTime: '2026-10-02T16:45:00.000+07:00', reason: 'Keperluan keluarga.', isLate: false, isEarlyDeparture: true, isOutsideSchedule: false },
+ history: [],
+};
+for (const scheme of ['light', 'dark'] as const) for (const width of [320, 1440]) for (const state of ['list', 'delete', 'restore']) {
+ test('T23 ' + state + ' ' + scheme + ' ' + width, async ({ page }, info) => {
+   const errors: string[] = [];
+   page.on('pageerror', e => errors.push(e.message));
+   await page.emulateMedia({ colorScheme: scheme });
+   await page.setViewportSize({ width, height: 900 });
+   await page.route('**/api/v1/auth/refresh', route => route.fulfill({ json: {
+     accessToken: 'visual-test-only', expiresIn: 3600, user: { id: 'test', email: 'admin@example.test', role: 'ADMIN_HRD', employeeId: null, mustChangePassword: false },
+   } }));
+   const record = state === 'restore' ? { ...attendanceFixture,
+     deletedAt: '2026-10-03T08:00:00.000+07:00', deleteReason: 'Bukti perlu diperiksa.', deletedByAccountId: 'admin',
+     history: [{ id: 'audit', action: 'ATTENDANCE_DELETED', actorAccountId: 'admin', occurredAt: '2026-10-03T08:00:00.000+07:00', reason: 'Bukti perlu diperiksa.' }],
+   } : attendanceFixture;
+   await page.route('**/api/v1/attendance?*', route => route.fulfill({ json: { data: [record], meta: { total: 1, page: 1, pageSize: 20 } } }));
+   await page.route('**/api/v1/attendance/**', route => route.fulfill({ json: { data: record } }));
+   const view = state === 'restore' ? 'absensi-dihapus' : 'absensi';
+   await page.goto('http://127.0.0.1:15175/#' + view + (state === 'list' ? '' : '?id=' + record.id));
+   if (state === 'list') await expect(page.getByRole('grid', { name: 'Daftar absensi' })).toBeVisible();
+   else {
+     await expect(page.getByText('Sari Wijaya', { exact: true })).toBeVisible();
+     await page.screenshot({ path: info.outputPath('detail-' + state + '-' + scheme + '-' + width + '.png'), fullPage: true });
+     await page.getByRole('button', { name: state === 'restore' ? 'Pulihkan absensi' : 'Hapus absensi', exact: true }).click();
+     await expect(page.getByRole('dialog')).toBeVisible();
+     if (state === 'delete') {
+       await page.getByLabel('Alasan penghapusan').fill('Bukti perlu diperiksa.');
+       await expect(page.getByLabel('Alasan penghapusan')).toBeFocused();
+     }
+   }
+   expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
+   const scope = state === 'list' ? page.locator('.attendance-page') : page.getByRole('dialog');
+   const buttons = await scope.getByRole('button').all();
+   for (const button of buttons) {
+     if (!(await button.isVisible()) || await button.isDisabled()) continue;
+     const box = await button.boundingBox();
+     // Clear/search primitives and name links may be smaller; consequential actions are >=44 px.
+     if (['Terapkan', 'Hapus satu hari', 'Pulihkan', 'Batal'].includes((await button.innerText()).trim())) expect(box?.height).toBeGreaterThanOrEqual(44);
+   }
+   await page.screenshot({ path: info.outputPath('t23-' + state + '-' + scheme + '-' + width + '.png'), fullPage: true });
+   expect(errors).toEqual([]);
+ });
+}

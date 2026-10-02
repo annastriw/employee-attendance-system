@@ -1,5 +1,7 @@
 # T21 — Check-in ujung ke ujung
 
+Status manual: diterima pengguna pada 2026-10-03 (Asia/Jakarta). Pengguna mengonfirmasi seluruh pengujian manual sampai T24 aman; checklist tujuh langkah di bawah dicentang berdasarkan laporan tersebut, bukan pengujian ulang agen atau hasil Playwright. Rincian perangkat/browser dan angka benchmark tidak diberikan. T21 ditutup penuh; catatan pending pada checkpoint lama merupakan status historis sebelum penerimaan ini.
+
 ## Lingkup dan kontrak
 
 Menghubungkan capture T20 ke check-in resmi, GET /api/v1/me/attendance/today, POST /api/v1/me/attendance/check-in, GET /api/v1/me/attendance/requests/:key untuk pemulihan. Endpoint employee-only, forced password change ditolak; Auth memverifikasi sesi/revokasi setiap request. employeeId dari sesi, profil eligible diverifikasi lewat Employee internal, tanpa query lintas tabel.
@@ -34,17 +36,17 @@ Sukses menampilkan waktu resmi WIB dan kembali ke Hari ini yang direfetch. Doubl
 - [x] Frontend reason boundary, mutation lock, uncertain reconciliation, sukses resmi/refetch, stale location.
 - [x] Typecheck/lint/build package terdampak; migration dev/test/schema diff/grants.
 - [x] Visual halaman berubah 320/1440 terang/gelap.
-- [ ] Checklist browser perangkat/API nyata, terpisah dari mock/synthetic.
+- [x] Checklist browser perangkat/API nyata, terpisah dari mock/synthetic. Diterima pengguna 2026-10-03.
 
 ## Checklist manual
 
-1. Login karyawan siap. Hari ini menampilkan tanggal/jadwal dari API. Buka Check-in; izin perangkat hanya setelah Buka kamera.
-2. Satu wajah dan lokasi aktif, kedip/manual → preview. Bila terlambat, isi alasan; blank ditolak. Ambil ulang masih tersedia sebelum submit.
-3. Kirim check-in: sukses berisi waktu resmi + status terlambat/di luar jadwal sesuai server; kembali Hari ini menampilkan event yang sama.
-4. Coba submit ulang/reload: tidak membuat event kedua. Lokasi ditolak/stale memblokir; perbarui lokasi setelah penolakan definitif.
-5. Putus koneksi saat submit; cek hasil atau retry dengan key sama. Jangan membuat foto/payload baru selama status ambigu. Setelah reconnect hasil server tunggal.
-6. Nonaktif/reset akun HRD lalu gunakan sesi lama: ditolak. Departemen/kalender yang diubah setelah check-in tidak mengubah snapshot event lama.
-7. Desktop/ponsel HTTPS/localhost, 320/1440 terang/gelap; seluruh kontrol/fokus/error dapat dipakai.
+- [x] 1. Login karyawan siap. Hari ini menampilkan tanggal/jadwal dari API. Buka Check-in; izin perangkat hanya setelah Buka kamera.
+- [x] 2. Satu wajah dan lokasi aktif, kedip/manual → preview. Bila terlambat, isi alasan; blank ditolak. Ambil ulang masih tersedia sebelum submit.
+- [x] 3. Kirim check-in: sukses berisi waktu resmi + status terlambat/di luar jadwal sesuai server; kembali Hari ini menampilkan event yang sama.
+- [x] 4. Coba submit ulang/reload: tidak membuat event kedua. Lokasi ditolak/stale memblokir; perbarui lokasi setelah penolakan definitif.
+- [x] 5. Putus koneksi saat submit; cek hasil atau retry dengan key sama. Jangan membuat foto/payload baru selama status ambigu. Setelah reconnect hasil server tunggal.
+- [x] 6. Nonaktif/reset akun HRD lalu gunakan sesi lama: ditolak. Departemen/kalender yang diubah setelah check-in tidak mengubah snapshot event lama.
+- [x] 7. Desktop/ponsel HTTPS/localhost, 320/1440 terang/gelap; seluruh kontrol/fokus/error dapat dipakai.
 
 Acuan: [baseline](../requirements/baseline.md), [T16](attendance-policies-eligibility.md), [T20](attendance-capture.md), [T19](media-photos.md), [UI/UX](frontend-ui-ux.md).
 

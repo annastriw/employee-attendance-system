@@ -37,7 +37,8 @@ export class AuthProxyService {
           : upstream === 'attendance'
             ? this.config.attendanceUrl
             : this.config.mediaUrl;
-    const withBody = method !== 'GET' && method !== 'DELETE';
+    const withBody =
+      method !== 'GET' && (method !== 'DELETE' || body !== undefined);
     const multipart = body instanceof FormData;
     try {
       const response = await fetch(`${base}${path}`, {

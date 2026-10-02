@@ -57,6 +57,7 @@ export function recordResponse(row: Daily) {
     id: row.id,
     attendanceDate: row.attendanceDate.toISOString().slice(0, 10),
     deletedAt: row.deletedAt ? wib(row.deletedAt) : null,
+    deleteReason: row.deleteReason,
     checkIn: checkIn ? eventResponse(checkIn, !!row.deletedAt) : null,
     checkOut: row.events.find((e) => e.eventType === 'CHECK_OUT')
       ? eventResponse(
@@ -336,11 +337,11 @@ export class CheckInService {
           if (purpose === 'CHECK_OUT') {
             const targetId = (input as CheckOutInput).dailyRecordId;
             // Lock the owned row to serialize checkout with checkout/delete/restore.
-            const locked = await tx.attDailyRecord.updateMany({
-              where: { id: targetId, employeeId: actor.employeeId },
-              data: { updatedAt: at },
-            });
-            if (!locked.count)
+            const locked =
+              await tx.$executeRaw(Prisma.sql`UPDATE att_daily_records SET updated_at = GREATEST(${at},
+                DATE_ADD(updated_at, INTERVAL 1000 MICROSECOND))
+                WHERE id = ${targetId} AND employee_id = ${actor.employeeId!}`);
+            if (!locked)
               throw rejection(
                 'CHECK_IN_REQUIRED',
                 'Catatan check-in milik Anda tidak ditemukan.',

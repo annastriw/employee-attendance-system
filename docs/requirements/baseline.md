@@ -58,7 +58,7 @@ Dokumen ini merekam keputusan pengguna dalam sesi perencanaan. Dokumen rancangan
 - Karyawan semua riwayat sendiri, filter tanggal/pagination. Catatan terhapus berlabel dihapus HRD, waktu+alasan terlihat, foto disembunyikan, bukan rekap aktif.
 - HRD riwayat karyawan arsip. Tidak bisa edit waktu/foto atau absen atas nama karyawan.
 - Soft delete absensi seluruh hari, konfirmasi nama/tanggal, alasan wajib, audit actor+waktu+alasan. Menu absensi dihapus dan restore.
-- Restore menolak konflik aktif tanggal yang sama. Penghapusan tidak membuka absen ulang.
+- Restore menolak konflik aktif tanggal yang sama. Penghapusan tidak membuka absen ulang. Kontrak versi, transaksi dan pemulihan mengikuti [lifecycle absensi T23](../sdd/attendance-lifecycle.md).
 - Tanpa hard delete di UI. Retensi permanen belum ditentukan.
 
 ## Rancangan database yang disetujui

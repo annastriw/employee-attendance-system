@@ -1,6 +1,6 @@
 # Attendance Portal lokal
 
-## Persiapan absensi T21/T22
+## Persiapan absensi T21–T23
 
 Dari root proyek di PowerShell, gunakan konfigurasi MySQL, Auth, Employee dan AIStor/Media yang sudah dibuat. Ikuti [MySQL](mysql-local.md), [Auth](auth-local.md), [HR/Employee](hr-local.md), [Media](media-local.md) dan [Gateway](gateway-local.md). Jangan salin kredensial ke dokumentasi atau Git.
 
@@ -64,6 +64,16 @@ Setelah check-in, Hari ini menawarkan Checkout. Capture memakai foto baru dengan
 
 Jangan kirim foto, koordinat, password, token, secret, atau berkas lisensi ke repo/laporan. Catat nomor langkah lulus/gagal dan pesan aman. Hasil sintetis otomatis tidak menggantikan penerimaan kamera/GPS pada perangkat nyata.
 
+Untuk HRD, buka Absensi atau Absensi dihapus pada HR Portal; dari profil karyawan tersedia Lihat absensi. Detail → Hapus absensi → alasan wajib → konfirmasi satu hari. Pemulihan mengembalikan data asli. Jika hasil belum pasti atau versi berubah, Muat data terbaru sebelum membuat konfirmasi baru. Ikuti [checklist T23](../sdd/attendance-lifecycle.md#checklist-manual-pengguna); kamera/GPS/checkout manual T20–T22 diterima pengguna pada 2026-10-03.
+
+## Riwayat pribadi T24
+
+Pada Attendance Portal, pilih Riwayat absensi dari Hari ini. Gunakan periode tanggal dan pagination, lalu buka satu hari. Kembali ke riwayat mempertahankan filter. Detail memuat waktu WIB, snapshot departemen/jabatan, alasan dan lokasi kedua event. Lihat foto meminta URL privat per event; foto hilang dari halaman setelah masa akses 60 detik dan dapat dimuat kembali. Tidak ada foto yang tersimpan dalam browser storage.
+
+Catatan yang dihapus HRD tetap terlihat dengan waktu asli serta alasan/waktu penghapusan, tanpa foto atau tombol foto. Setelah HRD memulihkan catatan, muat ulang detail untuk melihat bukti asli. Ikuti [checklist T24](../sdd/attendance-history.md#checklist-manual-pengguna); uji perangkat T20 dan alur T21–T23 tetap dicatat terpisah. Tidak ada konfigurasi, migrasi atau dependency baru untuk T24.
+
 ## Bukti
 
-T13 login/password/logout diterima pengguna pada 2026-10-02; [spesifikasi login](../sdd/employee-auth-flow.md). T20 capture lulus pemeriksaan teknis dengan checklist perangkat masih pending. T21 bukti API/MySQL/AIStor, frontend, visual dan status manual ada di [check-in](../sdd/attendance-checkin.md).
+T13 login/password/logout diterima pengguna pada 2026-10-02; [spesifikasi login](../sdd/employee-auth-flow.md). T20–T24 diterima manual oleh pengguna pada 2026-10-03 setelah konfirmasi seluruh alur aman; checklist pada masing-masing module spec sudah dicentang. Tidak ada hasil Playwright atau tes perangkat baru yang diklaim pada pembaruan dokumentasi ini. T21 bukti API/MySQL/AIStor, frontend, visual dan status manual ada di [check-in](../sdd/attendance-checkin.md).
+
+Ringkasan penerimaan dan bagian yang belum selesai tersedia pada [checklist sampai T24](../../tasks/todo.md#penerimaan-manual-sampai-t24--2026-10-03). T25 monitoring/rekap dan T26 peta Leaflet belum tersedia; gunakan checklist masing-masing tahap setelah implementasinya selesai.

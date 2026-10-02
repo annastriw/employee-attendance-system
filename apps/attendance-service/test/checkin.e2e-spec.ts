@@ -843,7 +843,7 @@ describe('T21 real Gateway–Attendance–Employee–Media–Auth–MySQL–AISt
       checkout(body, key),
       checkout({ ...payload(other, 'Urusan keluarga'), dailyRecordId: row.id }),
     ]);
-    expect(res.map((r) => r.status).sort((a,b) => a-b)).toEqual([201, 409]);
+    expect(res.map((r) => r.status).sort((a, b) => a - b)).toEqual([201, 409]);
     const stored = await db.attEvent.findFirstOrThrow({
       where: { dailyRecordId: row.id, eventType: 'CHECK_OUT' },
     });
@@ -1037,6 +1037,434 @@ describe('T21 real Gateway–Attendance–Employee–Media–Auth–MySQL–AISt
     });
   });
 
+  const adminGet = (path: string, token = tokens[3]) =>
+    request(gateway.getHttpServer())
+      .get('/api/v1/attendance' + path)
+      .set('Authorization', 'Bearer ' + token);
+  const adminChange = (
+    id: string,
+    version: string,
+    reason?: string,
+    token = tokens[3],
+  ) =>
+    (reason === undefined
+      ? request(gateway.getHttpServer()).post(
+          '/api/v1/attendance/' + id + '/restore',
+        )
+      : request(gateway.getHttpServer()).delete('/api/v1/attendance/' + id)
+    )
+      .set('Authorization', 'Bearer ' + token)
+      .send({ version, ...(reason !== undefined ? { reason } : {}) });
+
+  const historyGet = (path = '', token = tokens[0]) =>
+    request(gateway.getHttpServer())
+      .get('/api/v1/me/attendance' + path)
+      .set('Authorization', 'Bearer ' + token);
+
+  it('T24 isolates owner history/detail and private photos through real Media/AIStor', async () => {
+    const row = await startDay('2026-12-23');
+    time = new Date('2026-12-23T10:00:00Z');
+    const outPhoto = await upload(0, 'CHECK_OUT');
+    await checkout({ ...payload(outPhoto), dailyRecordId: row.id }).expect(201);
+    const otherPhoto = await upload(1);
+    const otherRow = (
+      await checkIn(
+        payload(otherPhoto, 'Pengujian terlambat'),
+        randomUUID(),
+        tokens[1],
+        gateway,
+      ).expect(201)
+    ).body.data;
+    const detail = (await historyGet('/' + row.id).expect(200)).body.data;
+    const stored = await db.attDailyRecord.findUniqueOrThrow({
+      where: { id: row.id },
+    });
+    expect(detail.department).toBe(stored.departmentNameSnapshot);
+    expect(detail.checkIn.eventTime).toBe(row.checkIn.eventTime);
+    expect(detail.checkOut.eventTime).toBe('2026-12-23T17:00:00.000+07:00');
+    const list = (
+      await historyGet('?startDate=2026-12-23&endDate=2026-12-23').expect(200)
+    ).body;
+    expect(list.data.map((r: { id: string }) => r.id)).toEqual([row.id]);
+    expect(list.meta).toMatchObject({ total: 1, page: 1, pageSize: 20 });
+    expect(JSON.stringify(list)).not.toContain('photoObjectId');
+    expect(JSON.stringify(list)).not.toContain('url');
+    await historyGet('/' + row.id, tokens[1]).expect(404);
+    await historyGet('/' + otherRow.id).expect(404);
+    await historyGet('?employeeId=' + employeeIds[1]).expect(400);
+    await historyGet('?startDate=2026-02-30').expect(400);
+    await historyGet('?startDate=2026-12-31&endDate=2026-12-01').expect(400);
+    await historyGet('?pageSize=21').expect(400);
+    await historyGet('?page=1&page=2').expect(400);
+    await historyGet('/' + row.id + '?employeeId=' + employeeIds[1]).expect(
+      400,
+    );
+    await historyGet('/not-uuid').expect(400);
+    for (const token of [tokens[2], tokens[3]]) {
+      await historyGet('', token).expect(403);
+      await historyGet('/' + row.id, token).expect(403);
+    }
+    await request(gateway.getHttpServer())
+      .get('/api/v1/me/attendance')
+      .expect(401);
+    await attendance.get(MediaOutboxWorker).drain();
+    for (const event of [detail.checkIn, detail.checkOut]) {
+      const photo = (
+        await historyGet(
+          '/' + row.id + '/events/' + event.id + '/photo',
+        ).expect(200)
+      ).body.data;
+      expect(photo.expiresInSeconds).toBe(60);
+      const target = new URL(photo.url);
+      expect(['localhost', '127.0.0.1']).toContain(target.hostname);
+      expect(target.port).toBe('9000');
+      const response = await fetch(photo.url);
+      expect(response.status).toBe(200);
+      expect(response.headers.get('content-type')).toMatch(/image\/jpeg/);
+      expect((await response.arrayBuffer()).byteLength).toBeGreaterThan(0);
+    }
+    await historyGet(
+      '/' + row.id + '/events/' + detail.checkIn.id + '/photo',
+      tokens[1],
+    ).expect(404);
+    await historyGet(
+      '/' + row.id + '/events/' + otherRow.checkIn.id + '/photo',
+    ).expect(404);
+    await historyGet(
+      '/' +
+        row.id +
+        '/events/' +
+        detail.checkIn.id +
+        '/photo?purpose=CHECK_OUT',
+    ).expect(400);
+  });
+
+  it('T24 paginates all owner states and hides deleted photos while preserving evidence snapshots', async () => {
+    const row = await startDay('2026-12-24');
+    await startDay('2026-12-25');
+    const before = (await adminGet('/' + row.id).expect(200)).body.data;
+    const deleted = (
+      await adminChange(row.id, before.version, 'Bukti diperiksa').expect(200)
+    ).body.data;
+    const page1 = (
+      await historyGet(
+        '?startDate=2026-12-24&endDate=2026-12-25&pageSize=1&page=1',
+      ).expect(200)
+    ).body;
+    const page2 = (
+      await historyGet(
+        '?startDate=2026-12-24&endDate=2026-12-25&pageSize=1&page=2',
+      ).expect(200)
+    ).body;
+    expect(page1.data[0].attendanceDate).toBe('2026-12-25');
+    expect(page2.data[0].id).toBe(row.id);
+    expect(page2.meta.total).toBe(2);
+    const detail = (await historyGet('/' + row.id).expect(200)).body.data;
+    expect(detail.deletedAt).toBe(deleted.deletedAt);
+    expect(detail.deleteReason).toBe('Bukti diperiksa');
+    expect(detail.checkIn.eventTime).toBe(before.checkIn.eventTime);
+    expect(JSON.stringify(detail)).not.toContain('photoObjectId');
+    await historyGet(
+      '/' + row.id + '/events/' + detail.checkIn.id + '/photo',
+    ).expect(409);
+    const runtime = attendance.get(AttendanceUpstreamClient);
+    const original = runtime.photo.bind(runtime);
+    const spy = jest
+      .spyOn(runtime, 'photo')
+      .mockImplementationOnce(
+        async (...args: Parameters<typeof runtime.photo>) => {
+          const issued = await original(...args);
+          const latest = (await adminGet('/' + row.id).expect(200)).body.data;
+          await adminChange(
+            row.id,
+            latest.version,
+            'Dihapus ketika foto diminta',
+          ).expect(200);
+          return issued;
+        },
+      );
+    await adminChange(row.id, deleted.version).expect(200);
+    try {
+      await historyGet(
+        '/' + row.id + '/events/' + detail.checkIn.id + '/photo',
+      ).expect(409);
+    } finally {
+      spy.mockRestore();
+    }
+    const newest = (await adminGet('/' + row.id).expect(200)).body.data;
+    await adminChange(row.id, newest.version).expect(200);
+    expect(
+      (await historyGet('/' + row.id).expect(200)).body.data.department,
+    ).toBe(before.department);
+  });
+
+  it('T23 protects all HRD reads/mutations, validates reasons, dates and versions', async () => {
+    const row = await startDay('2026-12-16');
+    const detail = (await adminGet('/' + row.id).expect(200)).body.data;
+    for (const token of [tokens[0], tokens[2]]) {
+      await adminGet('', token).expect(403);
+      await adminGet('/' + row.id, token).expect(403);
+      await adminChange(row.id, detail.version, 'Koreksi', token).expect(403);
+      await adminChange(row.id, detail.version, undefined, token).expect(403);
+    }
+    await request(gateway.getHttpServer())
+      .get('/api/v1/attendance')
+      .expect(401);
+    await db.authAccount.update({
+      where: { id: accountIds[3] },
+      data: { mustChangePassword: true },
+    });
+    try {
+      await adminGet('').expect(403);
+      await adminChange(row.id, detail.version, 'Koreksi').expect(403);
+    } finally {
+      await db.authAccount.update({
+        where: { id: accountIds[3] },
+        data: { mustChangePassword: false },
+      });
+    }
+    await adminChange(row.id, detail.version, '   ').expect(400);
+    await adminChange(row.id, detail.version, 'a'.repeat(501)).expect(400);
+    await adminChange(row.id, 'not-a-version', 'Koreksi').expect(400);
+    await adminGet('?startDate=2026-02-30').expect(400);
+    await adminGet('?startDate=2026-12-31&endDate=2026-12-01').expect(400);
+    await adminGet('?pageSize=21').expect(400);
+    await adminGet('?internal=true').expect(400);
+    await adminGet('/' + row.id + '?status=DELETED').expect(400);
+    await adminGet('/' + randomUUID()).expect(404);
+    await adminChange(row.id, detail.version).expect(409);
+    expect(
+      await db.attAuditLog.count({
+        where: { entityId: row.id, action: { startsWith: 'ATTENDANCE_' } },
+      }),
+    ).toBe(0);
+  });
+
+  it('T23 deletes the whole day, keeps unique reservations and restores the exact original evidence once', async () => {
+    const row = await startDay('2026-12-17');
+    time = new Date('2026-12-17T10:00:00Z');
+    const photo = await upload(0, 'CHECK_OUT');
+    await checkout({ ...payload(photo), dailyRecordId: row.id }).expect(201);
+    const before = await db.attDailyRecord.findUniqueOrThrow({
+      where: { id: row.id },
+      include: { events: { orderBy: { id: 'asc' } } },
+    });
+    const original = (await adminGet('/' + row.id).expect(200)).body.data;
+    const removed = (
+      await adminChange(
+        row.id,
+        original.version,
+        '  Bukti perlu diperiksa  ',
+      ).expect(200)
+    ).body.data;
+    expect(removed.deletedAt).toMatch(/\+07:00$/);
+    expect(removed.deleteReason).toBe('Bukti perlu diperiksa');
+    expect(removed.deletedByAccountId).toBe(accountIds[3]);
+    expect(removed.checkIn.photoObjectId).toBeUndefined();
+    expect(removed.checkOut.photoObjectId).toBeUndefined();
+    await adminChange(row.id, original.version, 'Bukti perlu diperiksa').expect(
+      409,
+    );
+    const activeList = (
+      await adminGet(
+        '?employeeId=' +
+          employeeIds[0] +
+          '&startDate=2026-12-17&endDate=2026-12-17',
+      ).expect(200)
+    ).body;
+    expect(activeList.data).toEqual([]);
+    const trash = (
+      await adminGet('?status=DELETED&employeeId=' + employeeIds[0]).expect(200)
+    ).body;
+    expect(trash.data.map((d: { id: string }) => d.id)).toContain(row.id);
+    expect(trash.meta.total).toBeGreaterThan(0);
+    const today = await request(gateway.getHttpServer())
+      .get('/api/v1/me/attendance/today')
+      .set('Authorization', 'Bearer ' + tokens[0])
+      .expect(200);
+    expect(today.body.data.status).toBe('DELETED');
+    const freshIn = await upload();
+    await checkIn(
+      payload(freshIn, 'Koreksi'),
+      randomUUID(),
+      tokens[0],
+      gateway,
+    ).expect(409);
+    const freshOut = await upload(0, 'CHECK_OUT');
+    await checkout({ ...payload(freshOut), dailyRecordId: row.id }).expect(409);
+    const restored = (await adminChange(row.id, removed.version).expect(200))
+      .body.data;
+    expect(restored.deletedAt).toBeNull();
+    expect(restored.checkIn.photoObjectId).toBe(original.checkIn.photoObjectId);
+    expect(restored.checkOut.photoObjectId).toBe(photo);
+    const after = await db.attDailyRecord.findUniqueOrThrow({
+      where: { id: row.id },
+      include: { events: { orderBy: { id: 'asc' } } },
+    });
+    expect(after.events).toEqual(before.events);
+    expect(after.departmentNameSnapshot).toBe(before.departmentNameSnapshot);
+    expect(after.positionNameSnapshot).toBe(before.positionNameSnapshot);
+    const objects = await db.mediaObject.findMany({
+      where: { id: { in: before.events.map((e) => e.photoObjectId) } },
+    });
+    expect(objects).toHaveLength(2);
+    for (const object of objects)
+      expect(
+        await storage.matches(object.objectKey, object.checksumSha256),
+      ).toBe(true);
+    await adminChange(row.id, removed.version).expect(409);
+    await adminChange(row.id, original.version, 'Konfirmasi lama').expect(409);
+    const audit = await db.attAuditLog.findMany({
+      where: { entityId: row.id, action: { startsWith: 'ATTENDANCE_' } },
+      orderBy: { createdAt: 'asc' },
+    });
+    expect(audit.map((a) => a.action)).toEqual([
+      'ATTENDANCE_DELETED',
+      'ATTENDANCE_RESTORED',
+    ]);
+    expect(
+      audit.every((a) => a.actorAccountId === accountIds[3] && a.requestId),
+    ).toBe(true);
+    expect(audit[0].reason).toBe('Bukti perlu diperiksa');
+  });
+
+  it('T23 serializes competing deletion, restoration and checkout without losing evidence', async () => {
+    const row = await startDay('2026-12-18');
+    time = new Date('2026-12-18T10:00:00Z');
+    const original = (await adminGet('/' + row.id).expect(200)).body.data;
+    const photo = await upload(0, 'CHECK_OUT');
+    const results = await Promise.all([
+      adminChange(row.id, original.version, 'Periksa bukti'),
+      adminChange(row.id, original.version, 'Periksa ulang'),
+      checkout({ ...payload(photo), dailyRecordId: row.id }),
+    ]);
+    const deletions = results.slice(0, 2);
+    // If checkout wins the lock, both stale confirmations fail; reload then delete.
+    expect(
+      deletions.filter((r) => r.status === 200).length,
+    ).toBeLessThanOrEqual(1);
+    expect(results[2].status === 201 || results[2].status === 409).toBe(true);
+    for (const result of deletions) expect([200, 409]).toContain(result.status);
+    let latest = (await adminGet('/' + row.id).expect(200)).body.data;
+    if (!latest.deletedAt)
+      latest = (
+        await adminChange(row.id, latest.version, 'Periksa bukti').expect(200)
+      ).body.data;
+    const restored = await Promise.all([
+      adminChange(row.id, latest.version),
+      adminChange(row.id, latest.version),
+    ]);
+    expect(restored.map((r) => r.status).sort((a, b) => a - b)).toEqual([
+      200, 409,
+    ]);
+    const events = await db.attEvent.findMany({
+      where: { dailyRecordId: row.id },
+    });
+    expect(events.filter((e) => e.eventType === 'CHECK_IN')).toHaveLength(1);
+    expect(events.filter((e) => e.eventType === 'CHECK_OUT')).toHaveLength(
+      results[2].status === 201 ? 1 : 0,
+    );
+    expect(
+      await db.attAuditLog.count({
+        where: { entityId: row.id, action: { startsWith: 'ATTENDANCE_' } },
+      }),
+    ).toBe(2);
+  });
+
+  it('T23 rolls back deletion when the audit insert fails', async () => {
+    const row = await startDay('2026-12-22');
+    const before = (await adminGet('/' + row.id).expect(200)).body.data;
+    const runtime = attendance.get(DatabaseService).client;
+    const transaction = runtime.$transaction.bind(runtime);
+    const spy = jest
+      .spyOn(runtime, '$transaction')
+      .mockImplementationOnce(async (callback: unknown, options: unknown) =>
+        transaction(async (tx: unknown) => {
+          const proxy = new Proxy(tx as object, {
+            get(target, key) {
+              if (key === 'attAuditLog')
+                return {
+                  create: async () => {
+                    throw new Error('Synthetic audit insert failure');
+                  },
+                };
+              return Reflect.get(target, key);
+            },
+          });
+          return (callback as (client: unknown) => Promise<unknown>)(proxy);
+        }, options as never),
+      );
+    try {
+      await adminChange(row.id, before.version, 'Audit unavailable').expect(
+        503,
+      );
+    } finally {
+      spy.mockRestore();
+    }
+    const after = (await adminGet('/' + row.id).expect(200)).body.data;
+    expect(after.version).toBe(before.version);
+    expect(after.deletedAt).toBeNull();
+    expect(after.checkIn).toEqual(before.checkIn);
+    expect(after.history).toEqual([]);
+  });
+
+  it('T23 reconciles a lost mutation response and reads archived employee history without restoring the employee', async () => {
+    const row = await startDay('2026-12-21');
+    const before = (await adminGet('/' + row.id).expect(200)).body.data;
+    const runtime = attendance.get(DatabaseService).client;
+    const transaction = runtime.$transaction.bind(runtime);
+    const spy = jest
+      .spyOn(runtime, '$transaction')
+      .mockImplementationOnce(
+        async (...args: Parameters<typeof runtime.$transaction>) => {
+          const result = await transaction(...args);
+          throw new Error(
+            'Synthetic lifecycle response lost after commit: ' +
+              Boolean(result),
+          );
+        },
+      );
+    try {
+      await adminChange(row.id, before.version, 'Respons hilang').expect(503);
+    } finally {
+      spy.mockRestore();
+    }
+    const latest = (await adminGet('/' + row.id).expect(200)).body.data;
+    expect(latest.deleteReason).toBe('Respons hilang');
+    await adminChange(row.id, before.version, 'Respons hilang').expect(409);
+    const current = await db.empEmployee.findUniqueOrThrow({
+      where: { id: employeeIds[0] },
+    });
+    try {
+      await db.empEmployee.update({
+        where: { id: employeeIds[0] },
+        data: { status: 'ARCHIVED' },
+      });
+      expect(
+        (await adminGet('/' + row.id).expect(200)).body.data.employee.status,
+      ).toBe('ARCHIVED');
+      await adminChange(row.id, latest.version).expect(200);
+      expect(
+        (
+          await db.empEmployee.findUniqueOrThrow({
+            where: { id: employeeIds[0] },
+          })
+        ).status,
+      ).toBe('ARCHIVED');
+    } finally {
+      await db.empEmployee.update({
+        where: { id: employeeIds[0] },
+        data: { status: current.status },
+      });
+    }
+    await db.authSession.updateMany({
+      where: { accountId: accountIds[3] },
+      data: { revokedAt: new Date() },
+    });
+    await adminGet('').expect(401);
+    await adminChange(row.id, latest.version, 'Sesi dicabut').expect(401);
+  });
+
   it('rejects a used photo on a later day and revalidates session revocation for successful retries', async () => {
     time = new Date('2026-11-11T00:00:00Z');
     const successful = await db.attIdempotencyRequest.findFirstOrThrow({
@@ -1067,5 +1495,9 @@ describe('T21 real Gateway–Attendance–Employee–Media–Auth–MySQL–AISt
       .get('/api/v1/me/attendance/requests/' + successful.id)
       .set('Authorization', 'Bearer ' + tokens[0])
       .expect(401);
+    await historyGet('').expect(401);
+    await historyGet(
+      '/' + event.dailyRecordId + '/events/' + event.id + '/photo',
+    ).expect(401);
   });
 });

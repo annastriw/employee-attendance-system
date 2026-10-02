@@ -158,44 +158,46 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 - Target: apps/media-service/
 
 ## T20 — Capture frontend
-- [ ] Selesai
+- [x] Selesai (2026-10-03; checklist manual diterima berdasarkan konfirmasi pengguna sampai T24)
 - Acceptance: Satu wajah, blink, manual fallback, preview/retake, lokasi wajib.
 - Verification: Component test error izin dan uji manual mobile/kamera.
-- Implementasi/verifikasi teknis 2026-10-02: [capture portal](../docs/sdd/attendance-capture.md), 54 tes terfokus + 8 visual, typecheck/lint/build lulus. Checklist perangkat/API nyata masih pending; belum ditutup penuh.
+- Implementasi/verifikasi teknis 2026-10-02: [capture portal](../docs/sdd/attendance-capture.md), 54 tes terfokus + 8 visual, typecheck/lint/build lulus. Checklist perangkat/API nyata diterima pengguna 2026-10-03; T20 ditutup penuh.
 - Dependencies: 18,19
 - Target: apps/attendance-web/
 
 ## T21 — Check-in ujung ke ujung
-- [ ] Selesai
+- [x] Selesai (2026-10-03; checklist manual diterima berdasarkan konfirmasi pengguna sampai T24)
 - Acceptance: Foto+lokasi wajib, waktu server, alasan late, snapshot, idempotency dan unique.
 - Verification: TDD/Supertest konkurensi, integrasi MySQL/AIStor; visual browser dan checklist manual per fitur sesuai tier test (E2E otomatis sebelum rilis).
-- Implementasi/verifikasi teknis 2026-10-02: [check-in](../docs/sdd/attendance-checkin.md), 14 integrasi nyata + 22 unit Attendance + 6 unit/66 kontrak Gateway + 41 frontend + 8 visual lulus; schema/typecheck/lint/build terkait lulus. Checklist kamera/GPS/API browser nyata masih pending; belum ditutup penuh.
+- Implementasi/verifikasi teknis 2026-10-02: [check-in](../docs/sdd/attendance-checkin.md), 14 integrasi nyata + 22 unit Attendance + 6 unit/66 kontrak Gateway + 41 frontend + 8 visual lulus; schema/typecheck/lint/build terkait lulus. Checklist kamera/GPS/API browser nyata diterima pengguna 2026-10-03; T21 ditutup penuh.
 - Dependencies: 16,17,20
 - Target: apps/attendance-service/, apps/attendance-web/
 
 ### Checkpoint setelah T21
-- [ ] Test relevan dan build/lint lulus.
-- [ ] Alur fase diverifikasi, batasan dicatat dan ditinjau.
+- [x] Test relevan dan build/lint lulus (bukti teknis existing pada module specs T20/T21).
+- [x] Alur fase diverifikasi, batasan dicatat dan ditinjau (manual pengguna diterima 2026-10-03).
 
 ## T22 — Check-out ujung ke ujung
-- [ ] Selesai
+- [x] Selesai (2026-10-03; checklist manual diterima berdasarkan konfirmasi pengguna sampai T24)
 - Acceptance: Butuh check-in, alasan early, hari sama/cutoff, off-day tanpa late/early.
 - Verification: TDD boundary/hash, integrasi MySQL/AIStor, frontend terfokus; visual dan checklist browser manual sesuai tier test.
-- Implementasi/verifikasi teknis 2026-10-02: [checkout](../docs/sdd/attendance-checkout.md), 21 integrasi termasuk tujuh checkout, enam unit policy/hash, tujuh unit Gateway dan 32 frontend lulus. Typecheck/lint/build terkait lulus; visual awal 12 lulus, lalu delapan verifikasi ulang beranda lulus setelah target sentuh disesuaikan menjadi 44 px. Manual kamera/GPS/API browser masih pending; belum ditutup penuh.
+- Implementasi/verifikasi teknis 2026-10-02: [checkout](../docs/sdd/attendance-checkout.md), 21 integrasi termasuk tujuh checkout, enam unit policy/hash, tujuh unit Gateway dan 32 frontend lulus. Typecheck/lint/build terkait lulus; visual awal 12 lulus, lalu delapan verifikasi ulang beranda lulus setelah target sentuh disesuaikan menjadi 44 px. Manual kamera/GPS/API browser diterima pengguna 2026-10-03; T22 ditutup penuh.
 - Dependencies: 21
 - Target: apps/attendance-service/, apps/attendance-web/
 
 ## T23 — Soft delete dan restore absensi
-- [ ] Selesai
+- [x] Selesai (2026-10-03; checklist manual diterima berdasarkan konfirmasi pengguna sampai T24)
 - Acceptance: Alasan/audit wajib, seluruh hari, tidak bisa absen ulang, restore data asli.
 - Verification: Integration test delete/retry/restore/concurrency dan UI HRD.
+- Implementasi/verifikasi teknis 2026-10-03: [lifecycle absensi](../docs/sdd/attendance-lifecycle.md), 21 regresi check-in/checkout dan lima skenario T23 terverifikasi dalam run serial; delapan unit Gateway, 28 frontend terkait dan 12 visual lulus. Typecheck/lint/build package terkait lulus. Checklist manual HRD/backend browser diterima pengguna 2026-10-03; T23 ditutup penuh.
 - Dependencies: 22
 - Target: apps/attendance-service/, apps/hr-web/
 
 ## T24 — Riwayat pribadi
-- [ ] Selesai
+- [x] Selesai (2026-10-03; checklist manual diterima berdasarkan konfirmasi pengguna sampai T24)
 - Acceptance: Pagination/filter; hanya milik sendiri, deleted label tanpa foto, waktu+alasan terlihat.
-- Verification: API authorization dan component/Playwright riwayat.
+- Verification: Otorisasi/integrasi MySQL/AIStor nyata, component test dan visual; alur browser backend nyata memakai checklist manual sesuai tier test.
+- Implementasi/verifikasi teknis 2026-10-03: [riwayat pribadi](../docs/sdd/attendance-history.md), 28 integrasi gabungan termasuk dua skenario T24, 13 unit Gateway, 87 frontend dan tujuh tes riwayat ulang setelah penyesuaian urutan bukti lulus. Empat visual Home dan 12 riwayat 320/1440 terang/gelap serta typecheck/lint/build terkait lulus. Foto privat lazy 60 detik, data terhapus tanpa foto dan filter/kembali tersedia. Kendala CORS DELETE HRD diperbaiki pada commit terpisah. Manual T20–T24 diterima pengguna 2026-10-03; T24 ditutup penuh.
 - Dependencies: 23
 - Target: apps/attendance-service/, apps/attendance-web/
 
@@ -355,14 +357,14 @@ Catatan: bagian database development dari T07 selesai berdasarkan laporan penggu
 - Target: packages/ui/, kedua frontend; pecah per keluarga layar.
 
 ### UX03 — Master, akun dan lifecycle
-- [ ] Selesai
+- [x] Selesai (rekonsiliasi 2026-10-03 berdasarkan acceptance task terkait; bukan backlog tambahan)
 - Acceptance: E01/E02/E09 dan H01/H06–H12/H14 terintegrasi sesuai T10–T15: master aktif/nonaktif, profil+akun konsisten, password tampil sekali, restore Nonaktif, revokasi.
 - Verification: API/MySQL test, component tests dan E2E HR membuat karyawan hingga login/ganti password serta lifecycle/reset.
 - Dependencies: UX01/UX02; T10–T15 berurutan.
 - Target: Employee/Auth/Gateway, kedua frontend, spec/tests.
 
 ### UX04 — Absensi dan capture
-- [ ] Selesai
+- [x] Selesai (rekonsiliasi 2026-10-03 berdasarkan acceptance task terkait; bukan backlog tambahan)
 - Acceptance: E03–E06/H13 sesuai T16–T22; satu wajah, blink/manual fallback, lokasi wajib, preview, alasan, waktu resmi dan pengiriman idempotent.
 - Verification: Boundary/API tests, browser core journey, izin/gagal/retry, perangkat nyata; threshold/hasil dicatat.
 - Dependencies: UX03; T16–T22 sesuai graph.
@@ -370,6 +372,7 @@ Catatan: bagian database development dari T07 selesai berdasarkan laporan penggu
 
 ### UX05 — Riwayat, monitoring dan pemulihan
 - [ ] Selesai
+- T23/T24 diterima manual 2026-10-03; T25/T26 belum diimplementasikan sehingga pemetaan ini belum ditutup.
 - Acceptance: E07/E08/H02–H05 sesuai T23–T26; filter/pagination, foto terotorisasi, Leaflet kedua lokasi, soft delete/restore seluruh hari, deleted bukan missing.
 - Verification: API authorization/history, integration/MySQL/AIStor dan browser detail/filter/restore.
 - Dependencies: UX04; T23–T26.
@@ -394,3 +397,20 @@ Catatan: bagian database development dari T07 selesai berdasarkan laporan penggu
 - [x] [Checkpoint bersama](progress.md) disediakan; setiap sesi memperbarui task aktif, scope file, proses/port, bukti dan langkah berikut.
 - Backlog utama tetap T01–T31. UX01–UX07 hanya checklist layar/UX, bukan instruksi bekerja pada frontend saja.
 - Kerjakan satu task/increment serial sesuai dependensi. Completion tetap membutuhkan acceptance/verification; sebelum sesi berganti update progress dan berikan trigger singkat.
+
+## Penerimaan manual sampai T24 — 2026-10-03
+
+Penguji: pengguna. Konfirmasi: seluruh pengujian manual sampai T24 aman. T20–T24 dan checkpoint T21 ditutup berdasarkan laporan pengguna, dengan bukti teknis existing tetap terpisah. Tidak menjalankan ulang test aplikasi pada perubahan dokumentasi ini, tidak mengarang perangkat/browser, benchmark atau hasil Playwright baru.
+
+- [x] T08/T09/T13: login terpisah HRD/karyawan, ganti password awal, sesi/reload/logout dan pembatasan role.
+- [x] T10–T12: master departemen/jabatan, aktif/nonaktif, profil+akun karyawan, validasi unik dan password sementara sekali tampil.
+- [x] T14/T15: edit profil/email, nonaktif/arsip/restore menjadi nonaktif, aktivasi terpisah, reset password dan revokasi sesi lama.
+- [x] T16/T17: jam WIB, aturan 08.00–17.00 Senin–Jumat, kalender libur, eligibility dan snapshot historis sesuai bukti task.
+- [x] T18–T20: satu wajah, kedip/manual, preview/retake, kamera/lokasi wajib, lokasi kedaluwarsa, foto privat dan pembatalan/izin/retry.
+- [x] T21: check-in foto+lokasi, alasan terlambat, waktu resmi server, anti-duplikasi dan pemulihan koneksi.
+- [x] T22: checkout memerlukan check-in, foto/lokasi baru, alasan pulang awal, batas tanggal sama dan anti-duplikasi.
+- [x] T23: hapus satu hari dengan alasan/audit, konfirmasi/batal/konflik, tidak membuka absen ulang, restore bukti asli.
+- [x] T24: riwayat milik sendiri, filter/pagination/kembali, kedua waktu/lokasi/alasan, foto privat 60 detik, terhapus tanpa foto.
+- [x] Tampilan halaman tersedia: mobile/desktop, terang/gelap, keyboard, loading/error/kosong dan sesi berakhir sesuai checklist task.
+
+T01–T07 dan UX01/UX02 masih membutuhkan rekonsiliasi acceptance fondasi; konfirmasi manual fitur tidak menggantikan audit spesifikasi/tooling/isolation testing. MySQL test sekarang terpisah schema pada instance lokal yang sama; pemisahan instance/volume untuk lingkungan rilis tetap perlu diverifikasi. T25–T31 belum selesai: monitoring/rekap, detail Leaflet, recovery, review UI menyeluruh, CI/regresi, artefak deploy dan verifikasi live. Tidak ada feature check baru yang wajib diulang pengguna sampai T24; checklist tahap selanjutnya dipakai setelah implementasi tersedia.

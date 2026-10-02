@@ -1,11 +1,30 @@
 import { useCallback, useEffect, useState } from "react";
 
-export type View = "ringkasan" | "departemen" | "jabatan" | "karyawan" | "hari-libur";
-const VIEWS: View[] = ["ringkasan", "departemen", "jabatan", "karyawan", "hari-libur"];
+export type View =
+  | "ringkasan"
+  | "departemen"
+  | "jabatan"
+  | "karyawan"
+  | "hari-libur"
+  | "absensi"
+  | "absensi-dihapus";
+const VIEWS: View[] = [
+  "ringkasan",
+  "departemen",
+  "jabatan",
+  "karyawan",
+  "hari-libur",
+  "absensi",
+  "absensi-dihapus",
+];
 
 function read() {
-  const [rawView, rawQuery = ""] = window.location.hash.replace(/^#/, "").split("?");
-  const view = (VIEWS as string[]).includes(rawView) ? (rawView as View) : "ringkasan";
+  const [rawView, rawQuery = ""] = window.location.hash
+    .replace(/^#/, "")
+    .split("?");
+  const view = (VIEWS as string[]).includes(rawView)
+    ? (rawView as View)
+    : "ringkasan";
   return { view, params: new URLSearchParams(rawQuery) };
 }
 
@@ -17,12 +36,17 @@ export function useHashRoute() {
     window.addEventListener("hashchange", update);
     return () => window.removeEventListener("hashchange", update);
   }, []);
-  const navigate = useCallback((view: View, params?: Record<string, string | undefined>) => {
-    const query = new URLSearchParams();
-    for (const [key, value] of Object.entries(params ?? {})) if (value) query.set(key, value);
-    const hash = `#${view}${query.size ? "?" + query : ""}`;
-    if (window.location.hash !== hash) window.history.replaceState(null, "", hash);
-    setRoute(read());
-  }, []);
+  const navigate = useCallback(
+    (view: View, params?: Record<string, string | undefined>) => {
+      const query = new URLSearchParams();
+      for (const [key, value] of Object.entries(params ?? {}))
+        if (value) query.set(key, value);
+      const hash = `#${view}${query.size ? "?" + query : ""}`;
+      if (window.location.hash !== hash)
+        window.history.replaceState(null, "", hash);
+      setRoute(read());
+    },
+    [],
+  );
   return { ...route, navigate };
 }
