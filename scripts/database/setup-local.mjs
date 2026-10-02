@@ -92,7 +92,7 @@ if (process.argv.includes("--grants")) {
   for (const [db, user] of [["attendance_dev", "attendance_employee"], ["attendance_test", "attendance_employee_test"]]) {
     sql += `GRANT SELECT, INSERT, UPDATE ON \`${db}\`.emp_departments TO '${user}'@'%';\n`;
     sql += `GRANT SELECT, INSERT, UPDATE ON \`${db}\`.emp_positions TO '${user}'@'%';\n`;
-    for (const table of ["emp_employees", "emp_provisioning", "emp_email_changes"]) {
+    for (const table of ["emp_employees", "emp_provisioning", "emp_email_changes", "emp_lifecycle_changes"]) {
       sql += `GRANT SELECT, INSERT, UPDATE ON \`${db}\`.\`${table}\` TO '${user}'@'%';\n`;
     }
     sql += `GRANT SELECT, INSERT ON \`${db}\`.emp_audit_logs TO '${user}'@'%';\n`;
