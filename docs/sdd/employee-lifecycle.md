@@ -22,7 +22,7 @@ Employee memvalidasi receipt lalu memperbarui proyeksi+COMPLETED+audit dalam tra
 
 ## Putaran B — kontrak lifecycle, history dan revokasi
 
-Putaran B menambahkan transisi status karyawan dan konsistensinya lintas Employee–Auth. Tidak ada tabel baru: schema sudah memiliki `EmpEmployee.status` (ACTIVE/INACTIVE/ARCHIVED) + `archivedAt`, `AuthAccount.status` (sama) + `archivedAt`, `AuthSession.revokedAt`, `EmpEmployeeHistory` (before/after Json), serta `EmpAuditLog`/`AuthAuditLog`. B memakai ulang pola durable-op lintas service dari putaran A (`EmpEmailChange` → signed `POST /internal/...` → transaksi Auth yang me-revoke sesi + menulis receipt + audit → Employee memperbarui proyeksi), bukan menambah broker/cache.
+Putaran B menambahkan transisi status karyawan dan konsistensinya lintas Employee–Auth. Schema sudah memiliki `EmpEmployee.status` (ACTIVE/INACTIVE/ARCHIVED) + `archivedAt`, `AuthAccount.status` (sama) + `archivedAt`, `AuthSession.revokedAt`, `EmpEmployeeHistory` (before/after Json), serta `EmpAuditLog`/`AuthAuditLog`. B menambahkan **satu** tabel durable-op `EmpLifecycleChange` (mirror `EmpEmailChange`: id operasi stabil, expected/target status, payloadHash, lease/backoff) agar transisi dapat dipulihkan setelah respons Auth hilang atau worker restart; tidak ada tabel receipt baru di Auth karena transisi lifecycle idempoten terhadap status akun. B memakai ulang pola durable-op lintas service dari putaran A (`EmpEmailChange` → signed `POST /internal/...` → transaksi Auth yang me-revoke sesi + menulis audit → Employee memperbarui proyeksi), bukan menambah broker/cache.
 
 ### Mesin status
 

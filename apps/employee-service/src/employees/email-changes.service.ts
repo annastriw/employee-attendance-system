@@ -52,6 +52,8 @@ export class EmployeeEmailChangesService implements OnModuleInit, OnModuleDestro
         if ((employee.accountEmail ?? employee.provisioning.email) !== input.expectedEmail) throw new ConflictException('Email berubah. Muat ulang sebelum mengubah email.');
         const pending = await tx.empEmailChange.findFirst({ where: { employeeId, status: 'PENDING' } });
         if (pending) throw new ConflictException('Perubahan email sebelumnya masih diproses. Lanjutkan operasi yang sama.');
+        const pendingLifecycle = await tx.empLifecycleChange.findFirst({ where: { employeeId, status: 'PENDING' } });
+        if (pendingLifecycle) throw new ConflictException('Selesaikan atau pulihkan perubahan status yang masih diproses.');
         const row = await tx.empEmailChange.create({ data: { id, employeeId, actorAccountId: actor.accountId, expectedEmail: input.expectedEmail, email: input.email, payloadHash, requestId: actor.requestId } });
         await this.audit(tx, row, 'EMPLOYEE_EMAIL_CHANGE_REQUESTED');
       });

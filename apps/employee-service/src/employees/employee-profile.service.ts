@@ -1,8 +1,9 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, type EmpEmployee } from '@attendance/database';
 import { DatabaseService } from '../database/database.module';
-import type { UpdateEmployeeDto } from './employees.dto';
+import type { UpdateEmployeeDto, ListEmployeesQuery } from './employees.dto';
 import { emailChangeView } from './email-changes.service';
+import { lifecycleView } from './lifecycle.service';
 type Actor = { accountId: string; requestId?: string };
 const snapshot = (row: EmpEmployee) => ({
   nik: row.nik, name: row.name, phone: row.phone, departmentId: row.departmentId,
@@ -14,15 +15,32 @@ export class EmployeeProfileService {
   constructor(private readonly database: DatabaseService) {}
   async detail(id: string) {
     const row = await this.database.client.empEmployee.findUnique({
-      where: { id }, include: { department: true, position: true, provisioning: true, emailChanges: { orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], take: 1 } },
+      where: { id }, include: { department: true, position: true, provisioning: true, emailChanges: { orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], take: 1 }, lifecycleChanges: { orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], take: 1 } },
     });
     if (!row || !row.ready || row.provisioning?.status !== 'COMPLETED') throw new NotFoundException('Karyawan tidak ditemukan.');
+    const emailPending = row.emailChanges[0]?.status === 'PENDING';
+    const lifecyclePending = row.lifecycleChanges[0]?.status === 'PENDING';
     return { id: row.id, ...snapshot(row), email: row.accountEmail ?? row.provisioning.email,
       department: row.department, position: row.position, updatedAt: row.updatedAt.toISOString(),
-      emailChange: row.emailChanges[0] ? emailChangeView(row.emailChanges[0]) : null };
+      archivedAt: row.archivedAt ? row.archivedAt.toISOString() : null,
+      emailChange: row.emailChanges[0] ? emailChangeView(row.emailChanges[0]) : null,
+      lifecycleChange: row.lifecycleChanges[0] ? lifecycleView(row.lifecycleChanges[0]) : null,
+      hasPendingOperation: emailPending || lifecyclePending };
   }
-  async update(id: string, input: UpdateEmployeeDto, actor: Actor) {
-    try {
+  async history(id: string, query: ListEmployeesQuery) {
+    const employee = await this.database.client.empEmployee.findUnique({ where: { id } });
+    if (!employee || !employee.ready) throw new NotFoundException('Karyawan tidak ditemukan.');
+    const where = { employeeId: id };
+    const [items, total] = await this.database.client.$transaction([
+      this.database.client.empEmployeeHistory.findMany({ where, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], skip: (query.page - 1) * query.pageSize, take: query.pageSize }),
+      this.database.client.empEmployeeHistory.count({ where }),
+    ]);
+    return {
+      items: items.map(row => ({ id: row.id, action: row.action, before: row.before, after: row.after, actorAccountId: row.actorAccountId, createdAt: row.createdAt.toISOString() })),
+      total, page: query.page, pageSize: query.pageSize,
+    };
+  }
+  async update(id: string, input: UpdateEmployeeDto, actor: Actor) {    try {
       await this.database.client.$transaction(async tx => {
         await tx.$queryRaw`SELECT id FROM emp_employees WHERE id = ${id} FOR UPDATE`;
         const row = await tx.empEmployee.findUnique({ where: { id }, include: { provisioning: true } });

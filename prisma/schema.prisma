@@ -153,6 +153,7 @@ model EmpEmployee {
   position     EmpPosition       @relation(fields: [positionId], references: [id], onDelete: Restrict, onUpdate: Restrict)
   provisioning EmpProvisioning?
   emailChanges EmpEmailChange[]
+  lifecycleChanges EmpLifecycleChange[]
   history      EmpEmployeeHistory[]
 
   @@index([status, name])
@@ -236,6 +237,29 @@ model EmpEmailChange {
   @@index([status, nextAttemptAt, leaseUntil])
   @@index([employeeId, createdAt])
   @@map("emp_email_changes")
+}
+
+model EmpLifecycleChange {
+  id             String                @id @db.Char(36)
+  employeeId     String                @map("employee_id") @db.Char(36)
+  actorAccountId String                @map("actor_account_id") @db.Char(36)
+  expectedStatus EmpEmployeeStatus     @map("expected_status")
+  targetStatus   EmpEmployeeStatus     @map("target_status")
+  payloadHash    String                @map("payload_hash") @db.Char(64)
+  status         EmpProvisioningStatus @default(PENDING)
+  attempts       Int                   @default(0)
+  nextAttemptAt  DateTime              @default(now()) @map("next_attempt_at") @db.DateTime(3)
+  leaseUntil     DateTime?             @map("lease_until") @db.DateTime(3)
+  leaseToken     String?               @map("lease_token") @db.Char(36)
+  errorCode      String?               @map("error_code") @db.VarChar(40)
+  requestId      String?               @map("request_id") @db.Char(36)
+  createdAt      DateTime              @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt      DateTime              @updatedAt @map("updated_at") @db.DateTime(3)
+  employee       EmpEmployee           @relation(fields: [employeeId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([status, nextAttemptAt, leaseUntil])
+  @@index([employeeId, createdAt])
+  @@map("emp_lifecycle_changes")
 }
 
 model AuthEmailChange {
