@@ -17,7 +17,8 @@
     "db:generate": "prisma generate && pnpm --filter @attendance/database build",
     "db:verify": "tsx scripts/database/verify.ts",
     "db:migrate:test": "prisma migrate deploy --config prisma.test.config.ts",
-    "db:typecheck": "pnpm --dir apps/auth-service exec tsc --ignoreConfig --noEmit --strict --skipLibCheck --esModuleInterop --target ES2023 --module NodeNext --moduleResolution NodeNext ../../scripts/database/verify.ts"
+    "db:typecheck": "pnpm --dir apps/auth-service exec tsc --ignoreConfig --noEmit --strict --skipLibCheck --esModuleInterop --target ES2023 --module NodeNext --moduleResolution NodeNext ../../scripts/database/verify.ts",
+    "provisioning:setup": "node scripts/database/setup-provisioning-local.mjs"
   },
   "devDependencies": {
     "dotenv": "^18.0.4",

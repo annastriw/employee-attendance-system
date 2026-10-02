@@ -206,3 +206,22 @@
   .col-code { display: none; }
   .data-table td, .data-table th { padding-inline: 0.5rem; }
 }
+
+/* Employee creation uses the shared fields, list toolbar and dialog tokens. */
+.employee-form { display: grid; gap: 1.5rem; max-width: 48rem; }
+.employee-form-heading h2 { font-size: 1.125rem; font-weight: 600; }
+.form-section { display: grid; gap: 1rem; padding: 1.25rem; border: 1px solid var(--border); border-radius: .75rem; background: var(--surface); }
+.form-section h2 { font-size: .875rem; font-weight: 600; }
+.employee-form-grid { display: grid; gap: 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.form-label { font-size: .8125rem; font-weight: 500; margin-bottom: .375rem; }
+.form-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .5rem; }
+.employee-status { display: grid; justify-items: start; }
+.field-validation { color: var(--danger); font-size: .8125rem; margin-top: .375rem; }
+.employee-secondary { display: block; font-size: .75rem; color: var(--muted); margin-top: .25rem; overflow-wrap: anywhere; }
+.employee-table-content { width: 100%; table-layout: fixed; }
+.employee-table td { overflow-wrap: anywhere; vertical-align: top; }
+.employee-table th:last-child { width: 5.5rem; }
+.temporary-password { font-family: var(--font-mono); font-size: .8125rem; }
+.provisioning-result { display: grid; gap: .5rem; padding: 1rem; border: 1px solid var(--border); border-radius: .75rem; background: var(--surface); }
+@media (max-width: 767px) { .employee-form-grid { grid-template-columns: minmax(0,1fr); } .form-section { padding: 1rem; } }
+@media (max-width: 639px) { .employee-extra { display: none; } .employee-table th:last-child { width: 4.75rem; } }

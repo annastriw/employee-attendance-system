@@ -1,3 +1,4 @@
+import { Users } from '@phosphor-icons/react';
 import { useRef, useState, type ReactNode } from "react";
 import { Button } from "@heroui/react";
 import { Briefcase, Buildings, List, SquaresFour } from "@phosphor-icons/react";
@@ -8,6 +9,7 @@ import type { View } from "../../lib/use-hash-route";
 // Only destinations that exist in this increment are listed (spec: no dead links).
 const NAV: { view: View; label: string; icon: ReactNode }[] = [
   { view: "ringkasan", label: "Ringkasan", icon: <SquaresFour size={18} aria-hidden="true" /> },
+  { view: "karyawan", label: "Karyawan", icon: <Users size={18} aria-hidden="true" /> },
   { view: "departemen", label: "Departemen", icon: <Buildings size={18} aria-hidden="true" /> },
   { view: "jabatan", label: "Jabatan", icon: <Briefcase size={18} aria-hidden="true" /> },
 ];

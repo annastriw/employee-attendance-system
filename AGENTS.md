@@ -16,7 +16,7 @@
 - Jangan force push atau menghapus perubahan pengguna.
 - Jika remote, autentikasi, atau Git belum tersedia, laporkan penghalangnya secara akurat. Jangan mengklaim commit/push berhasil.
 - Persetujuan commit dan push ke dev telah diberikan pengguna; tidak perlu meminta izin ulang untuk setiap perubahan.
-- Pengguna menunda penentuan repository GitHub. Pengembangan dan commit lokal di dev tetap berjalan; push ditunda sampai pengguna menentukan remote. Jangan membuat atau memilih repository GitHub sendiri.
+- Pengguna menentukan repository public [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system) pada 2026-10-02; origin memakai https://github.com/annastriw/employee-attendance-system.git. Setelah perubahan logis diverifikasi dan di-commit, push ke dev. Jangan membuat/memilih repository lain sendiri. Deployment dikerjakan terakhir sesuai tahap rilis, bukan setelah setiap push.
 - Promosi ke main mengikuti tahap rilis, verifikasi, dan instruksi pengguna.
 
 ## Cara kerja
@@ -30,7 +30,7 @@ Struktur tetap: satu monorepo, lima service NestJS (API Gateway, Auth, Employee,
 - Selesaikan satu fitur ujung ke ujung: schema/kontrak → API → UI → test → review → commit.
 - Pakai pola bersama untuk form, daftar, detail dan konfirmasi; pisah komponen Atomic Design hanya atas tanggung jawab atau reuse nyata. Tunda abstraksi generik.
 - Gunakan controller/DTO/service dan Prisma sesuai kepemilikan data; batasi outbox/retry pada alur konsistensi lintas service, tetap penuhi idempotensi/kompensasi/pemulihan baseline.
-- Test terfokus per perubahan; suite lengkap pada checkpoint integrasi. Ikuti tier test (biaya vs nilai) di tasks/plan.md: Tier 1 statis (tsc/lint) wajib tiap perubahan; Tier 2 unit/komponen terfokus saat menyentuh logika/komponen; Tier 3 visual/design (test:ui) hanya saat mengubah layout/CSS; Tier 4 E2E nyata (test:e2e, API+MySQL+AIStor) di checkpoint integrasi dan sebelum promosi ke main, bukan gate per commit. Bukti aturan bisnis/otorisasi/revokasi/lokasi/idempotensi/pemulihan tetap wajib. Ringkas dokumentasi menjadi module spec + acceptance; hindari dokumen berulang untuk CRUD kecil.
+- Ikuti [tier test yang disetujui 2026-10-02](tasks/plan.md#tier-test-biaya-vs-nilai--disetujui-2026-10-02): typecheck/lint package terkait + unit/komponen terfokus per perubahan kode; dokumentasi saja cukup isi/tautan/diff. Visual hanya saat layout/CSS berubah, halaman terdampak pada 320/1440 px terang/gelap; tambah 768/1024 px jika breakpoint berubah atau pada checkpoint. API MySQL/E2E nyata setelah fitur lengkap; suite lengkap pada checkpoint integrasi dan sebelum main. Jangan ulang pemeriksaan lulus tanpa perubahan terkait; jangan menghapus test. Bukti bisnis/otorisasi/revokasi/unik/lokasi/foto/idempotensi/pemulihan tetap wajib. Suite berat serial, Playwright 1 worker; build dist backend sebelum E2E. Ringkas dokumentasi menjadi module spec + acceptance.
 - Gunakan tooling yang ada; tunda broker/cache/orchestration/build system tanpa kebutuhan nyata.
 
 ## Object storage

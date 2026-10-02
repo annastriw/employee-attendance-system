@@ -117,6 +117,23 @@ describe('Auth Gateway HTTP contract', () => {
       expect(result.body.message).toBe('Layanan data karyawan sementara tidak tersedia.');
     });
   });
+  describe('Employee provisioning allowlist', () => {
+    const id = '0b7c2f4e-3d1a-4c8b-9e6f-2a5d7c9e1b3f';
+    it('forwards only authorization, request ID and creation idempotency key', async () => {
+      await request(app.getHttpServer()).post('/api/v1/employees').set('Authorization', 'Bearer admin').set('Idempotency-Key', id).set('Cookie', 'secret=value').set('X-Service-Signature', 'forged').send({ name: 'Test Employee' }).expect(200);
+      expect(received.headers['idempotency-key']).toBe(id); expect(received.headers.authorization).toBe('Bearer admin'); expect(received.headers.cookie).toBeUndefined(); expect(received.headers['x-service-signature']).toBeUndefined();
+    });
+    it.each([['get', '/api/v1/employees?search=test&page=1'], ['get', '/api/v1/employee-provisioning/' + id], ['post', '/api/v1/employee-provisioning/' + id + '/retry'], ['post', '/api/v1/employee-provisioning/' + id + '/credentials']] as const)('forwards approved %s %s', async (method, path) => {
+      await request(app.getHttpServer())[method](path).send(method === 'post' ? {} : undefined).expect(200); expect(received.url).toBe(path);
+    });
+    it.each(['/api/v1/employee-provisioning/' + id + '/prepare', '/api/v1/employee-provisioning/' + id + '/finalize', '/api/v1/employee-provisioning/not-a-uuid/credentials'])('rejects internal or invalid action %s', async path => { received = { headers: {}, body: '' }; await request(app.getHttpServer()).post(path).send({}).expect(400); expect(received.url).toBeUndefined(); });
+    it('rejects absent idempotency key, duplicate/unknown query and internal Auth path', async () => {
+      await request(app.getHttpServer()).post('/api/v1/employees').send({}).expect(400);
+      await request(app.getHttpServer()).get('/api/v1/employees?page=1&page=2').expect(400);
+      await request(app.getHttpServer()).get('/api/v1/employees?secret=true').expect(400);
+      await request(app.getHttpServer()).post('/api/v1/internal/provisioning/' + id + '/prepare').send({}).expect(404);
+    });
+  });
   it.each([
     'admin/login',
     'employee/login',

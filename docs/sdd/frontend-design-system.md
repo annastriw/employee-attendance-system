@@ -1,5 +1,5 @@
 # Tema bersama Attendance Portal dan HR Portal
-Status: disetujui pengguna; revisi visual 2026-10-01 (arah "produk modern ala Linear", menggantikan tema monokrom charcoal). Berlaku untuk semua frontend sekarang dan berikutnya.
+Status: disetujui pengguna; revisi visual 2026-10-01 (arah "produk modern ala Linear", menggantikan tema monokrom charcoal). Berlaku untuk semua frontend sekarang dan berikutnya. Persetujuan T09c ditegaskan pengguna pada 2026-10-02.
 
 ## Kontrak desain
 Modern, tegas dan teknis, tetap mudah dipahami. Netral zinc dengan satu aksen emerald yang dipakai konsisten untuk tindakan utama, fokus, tautan dan penanda aktif. Mode terang dan gelap mengikuti prefers-color-scheme sistem. Warna merah/kuning hanya untuk status bermakna. Hindari slogan jualan, statistik palsu, gambar dekoratif buatan tangan, gradien ungu/glow dan em-dash pada teks tampilan.
@@ -30,15 +30,19 @@ Token berada di packages/ui/src/theme.css dan menimpa variabel HeroUI v3 (--acce
 - Halaman berikutnya wajib memakai token dan komponen bersama, tanpa palet baru atau menyalin tema ke aplikasi.
 
 ## Verifikasi
-Build/lint kedua frontend, test komponen auth/menu akun, E2E autentikasi dengan API/MySQL test nyata; layout dua portal pada 320/768/1024/1440 px. Periksa navigasi mobile, keyboard, menu akun, overflow dan screenshot.
-- pnpm --dir apps/hr-web run test:ui: layout tanpa database (sesi HR dimock sebagai belum login).
+Ikuti [tier test disetujui 2026-10-02](../../tasks/plan.md#tier-test-biaya-vs-nilai--disetujui-2026-10-02): typecheck/lint dan komponen terfokus pada package terdampak. Saat layout/CSS berubah, periksa halaman terdampak pada 320/1440 px terang/gelap; tambah 768/1024 px bila breakpoint berubah. Perubahan token/shell bersama mencakup pemakai yang relevan. Pada checkpoint integrasi, periksa kedua portal pada seluruh viewport tersebut; E2E API/MySQL nyata setelah fitur lengkap. Periksa navigasi mobile, keyboard, menu akun, overflow dan screenshot sesuai perubahan.
+- pnpm --dir apps/hr-web run test:ui: layout tanpa database (sesi dimock untuk login, workspace serta master data).
 - pnpm --dir apps/hr-web run test:e2e: alur API nyata.
 - MCP Chrome DevTools untuk screenshot/accessibility tree; ukuran 320 px diuji melalui Playwright.
+
+Bukti terakhir (T11, 2026-10-02): 36 pemeriksaan visual kedua portal serta H11/H12 terang/gelap pada 320/768/1024/1440 px lulus dan screenshot ditinjau; 38 test komponen HR, build HR/backend, serta E2E jabatan/departemen desktop/mobile lulus. Bukti rinci di [modul jabatan](employee-positions.md) dan [progress](../../tasks/progress.md).
 
 ## Sumber
 MCP HeroUI: Button, Dropdown, InputGroup, Input dan Label. [Theming](https://heroui.com/docs/react/getting-started/theming), [Dropdown](https://heroui.com/docs/react/components/dropdown), [InputGroup](https://heroui.com/docs/react/components/input-group).
 
 ## Konsep dan penerapan seluruh halaman
+
+T09c adalah tema wajib seluruh layar E01–E09/H01–H14, termasuk form, dialog, daftar, detail, capture, loading, empty/error state dan tampilan mobile. Halaman yang belum diimplementasikan menerapkan tema ini saat task terkait dikerjakan. T09b monokrom hanya catatan historis, bukan acuan implementasi aktif.
 Kontrak visual ini dipakai bersama [spesifikasi UI/UX](frontend-ui-ux.md). Spesifikasi tersebut memetakan E01–E09 dan H01–H14, navigasi, keluarga layar, capture, lifecycle, states, responsivitas dan acceptance. Tema yang sama tidak mewajibkan susunan kartu yang sama: halaman karyawan berpusat pada tindakan, HR berpusat pada daftar/detail.
 
 Susunan daftar: judul → toolbar → tabel/daftar → pagination. Detail: identitas/status → bukti check-in/checkout → tindakan kontekstual. Form: kelompok field → validasi → satu tindakan utama. Seluruh halaman memakai token packages/ui; tidak menambah palet/teks dekoratif.

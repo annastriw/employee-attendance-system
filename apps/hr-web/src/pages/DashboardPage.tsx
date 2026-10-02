@@ -1,3 +1,4 @@
+import { EmployeesPage } from './EmployeesPage';
 import { ChartBar } from "@phosphor-icons/react";
 import { Notice } from "../components/molecules/Notice";
 import { WorkspaceLayout } from "../components/templates/WorkspaceLayout";
@@ -7,7 +8,7 @@ import { DepartmentsPage } from "./DepartmentsPage";
 
 import { PositionsPage } from "./PositionsPage";
 
-const TITLES = { ringkasan: "Ringkasan", departemen: "Departemen", jabatan: "Jabatan" } as const;
+const TITLES = { ringkasan: "Ringkasan", departemen: "Departemen", jabatan: "Jabatan", karyawan: "Karyawan" } as const;
 
 export function DashboardPage({ user, client, busy, error, onLogout, onSessionExpired }: {
   user: AdminUser;
@@ -21,7 +22,9 @@ export function DashboardPage({ user, client, busy, error, onLogout, onSessionEx
   return (
     <WorkspaceLayout view={view} title={TITLES[view]} email={user.email} busy={busy} onLogout={onLogout}>
       {error && <Notice message={error} />}
-      {view === "departemen" ? (
+      {view === "karyawan" ? (
+        <EmployeesPage client={client} params={params} onSessionExpired={onSessionExpired} onParamsChange={next => navigate("karyawan", next)} />
+      ) : view === "departemen" ? (
         <DepartmentsPage client={client} params={params} onSessionExpired={onSessionExpired}
           onParamsChange={(next) => navigate("departemen", next)} />
       ) : view === "jabatan" ? (

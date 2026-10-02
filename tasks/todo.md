@@ -86,7 +86,8 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 - Target: apps/employee-service/, apps/hr-web/
 
 ## T12 — Pembuatan akun karyawan
-- [ ] Selesai
+- [x] Selesai (2026-10-02; browser manual desktop/mobile lulus menurut laporan pengguna, bukti backend MySQL pada kontrak)
+- Kontrak dan bukti: [employee-provisioning](../docs/sdd/employee-provisioning.md). Spec Playwright ditambahkan; run otomatis ditunda karena RAM host.
 - Acceptance: Profil+akun dibuat terkoordinasi; password sementara tampil sekali; NIK/email unik.
 - Verification: Integration test konflik unik, kegagalan antarservice, retry dan sanitasi log.
 - Dependencies: 11
@@ -311,15 +312,16 @@ Catatan: bagian database development dari T07 selesai berdasarkan laporan penggu
 - Target: packages/ui/, apps/{attendance-web,hr-web}/, docs/sdd/frontend-design-system.md
 
 ## T09b — Penyederhanaan frontend monokrom
+- Catatan historis: digantikan T09c; jangan gunakan tema monokrom untuk halaman baru.
 - [x] Selesai
 - Acceptance: Login terpusat tanpa slogan/panel, charcoal, input password dan dropdown akun HeroUI; navigasi mobile buka/tutup; teks seperlunya.
 - Verification: Build/lint dua frontend, 11 component tests, 12 browser layout/interaction checks, 2 E2E autentikasi nyata.
 - Target: packages/ui/, apps/{attendance-web,hr-web}/, docs/sdd/frontend-design-system.md
 
 ## T09c — Redesign visual ala Linear (menggantikan tema monokrom T09b)
-- [ ] Selesai
-- Acceptance: Token zinc + satu aksen emerald, mode terang/gelap mengikuti sistem, font Geist self-hosted, ikon Phosphor; radius tombol/field 8 px, panel 12 px. Login HR split-screen (form + panel kemampuan produk) >= 1024 px dan satu kolom di bawahnya; login Attendance satu kolom; workspace HR sidebar ikon, header, tombol akun inisial, empty state berikon. Alur auth, label, fokus keyboard, aria dan pesan tetap.
-- Verification: tsc kedua frontend, Vitest auth hr-web, Playwright design (test:ui) terang dan gelap pada 320/768/1024/1440 px, screenshot ditinjau. E2E nyata di checkpoint integrasi berikutnya.
+- [x] Selesai (persetujuan pengguna 2026-10-02; bukti terakhir T11 di docs/sdd/employee-positions.md)
+- Acceptance: Wajib untuk seluruh halaman yang tersedia maupun berikutnya (E01–E09/H01–H14), termasuk state/dialog. Token zinc + satu aksen emerald, mode terang/gelap mengikuti sistem, font Geist self-hosted, ikon Phosphor; radius tombol/field 8 px, panel 12 px. Login HR split-screen (form + panel kemampuan produk) >= 1024 px dan satu kolom di bawahnya; login Attendance satu kolom; workspace HR sidebar ikon, header, tombol akun inisial, empty state berikon. Alur auth, label, fokus keyboard, aria dan pesan tetap.
+- Verification: tsc kedua frontend, Vitest auth hr-web, Playwright design (test:ui) terang dan gelap pada 320/768/1024/1440 px, screenshot ditinjau. Checkpoint nyata terpenuhi: E2E Auth dari sesi sebelumnya serta jabatan/departemen desktop/mobile pada T11 (run per spec terpisah).
 - Target: packages/ui/, apps/{attendance-web,hr-web}/, docs/sdd/frontend-design-system.md, docs/sdd/frontend-ui-ux.md
 
 ## Keterlacakan desain UI/UX dalam implementasi proyek

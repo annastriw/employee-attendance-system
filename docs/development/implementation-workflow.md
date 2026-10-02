@@ -21,7 +21,7 @@ Setelah inventaris awal, gunakan context engineering untuk memuat bagian spec/so
 - Token/theme/AuthShell ada di packages/ui; pnpm workspace dan Atomic Design dipertahankan.
 - MySQL dev/test masih schema terpisah pada satu instance; container testing khusus belum tersedia. AIStor Compose ada; verifikasi layanan yang benar-benar aktif.
 - T08/T09 selesai; beberapa induk fondasi belum ditutup. Audit bukti source/test sebelum mencentang.
-- Branch dev; belum ada remote saat penulisan. Pengguna menentukan GitHub kemudian; jangan membuat/memilih remote sendiri.
+- Branch dev; origin: [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system) (public, dipilih pengguna 2026-10-02). Push commit terverifikasi ke dev; deployment tetap tahap terakhir. Jangan membuat/memilih repository lain sendiri.
 - Tabel status awal adalah snapshot, bukan asumsi permanen. Status terbaru dibaca dari Git, todo dan progress.
 
 ## Pelaksanaan serial sesuai dependensi
@@ -67,23 +67,37 @@ Checkpoint/trigger tidak memuat rahasia, signed URL atau data/foto pribadi. Tida
 
 ## Verifikasi
 
-Dari root repo, periksa package.json dan runbook sebelum menjalankan. Jangan menampilkan kredensial.
+Ikuti [tier test disetujui 2026-10-02](../../tasks/plan.md#tier-test-biaya-vs-nilai--disetujui-2026-10-02). Periksa package.json dan runbook sebelum menjalankan; jangan menampilkan kredensial.
+
+- Per increment kode: typecheck/lint package terkait dan unit/komponen/kontrak HTTP terfokus pada perubahan. Dokumentasi saja: isi, tautan dan diff; tidak perlu mengulang test aplikasi.
+- Layout/CSS: filter test:ui ke halaman terdampak, 320/1440 px terang/gelap. Tambahkan 768/1024 px bila breakpoint berubah; shell/token bersama juga memerlukan pemeriksaan pemakai terkait.
+- Setelah fitur lengkap: API MySQL dan minimal satu perjalanan E2E nyata. Jalankan per spec, satu worker, suite berat bergantian setelah memeriksa RAM. Build dist service backend terbaru terlebih dahulu.
+- Jangan mengulang pemeriksaan lulus tanpa perubahan source/dependensi/config/lingkungan terkait; catat scope bukti di progress/module spec. Suite lengkap pada checkpoint integrasi dan sebelum promosi main.
+
+Contoh filter fitur yang sudah tersedia (sesuaikan dengan modul yang diubah):
+
+~~~powershell
+pnpm --dir apps/employee-service run test --runInBand positions.service.spec.ts
+pnpm --dir apps/hr-web run test src/pages/PositionsPage.test.tsx
+pnpm --dir apps/hr-web run test:e2e hr-positions.spec.ts --workers=1
+~~~
+
+Pada checkpoint integrasi/rilis, jalankan pemeriksaan menyeluruh berikut beserta suite khusus yang tidak tercakup script root:
 
 ~~~powershell
 pnpm run build
 pnpm run lint
 pnpm run test
+pnpm --dir apps/hr-web run test:ui --workers=1
 ~~~
 
-Perintah root menjalankan script yang tersedia; tidak membuktikan package tanpa test sudah diuji. Jalankan pemeriksaan terfokus dan E2E yang tidak termasuk script root:
+Script root hanya memeriksa package yang mempunyai script terkait. E2E nyata dijalankan per spec sesuai runbook; jangan melonggarkan limit Auth agar suite gabungan lulus. Pemeriksaan schema/migration/grants dijalankan saat schema berubah, termasuk diff migrations→schema exit 0 dan penerapan dev/test:
 
 ~~~powershell
 pnpm db:validate
 pnpm db:generate
 pnpm db:migrate:test
 pnpm db:verify
-pnpm --dir apps/hr-web run test:ui
-pnpm --dir apps/hr-web run test:e2e
 ~~~
 
 - Siapkan MySQL/AIStor test dan build service sesuai runbook sebelum integration/E2E. Jangan menerapkan destructive fixture pada dev/production.

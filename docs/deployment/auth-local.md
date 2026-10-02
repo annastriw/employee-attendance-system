@@ -5,6 +5,7 @@ Dari root proyek, Docker Desktop dan MySQL harus aktif:
 ```powershell
 pnpm db:generate
 node scripts/database/setup-auth-local.mjs
+pnpm provisioning:setup
 pnpm --dir apps/auth-service build
 pnpm --dir apps/auth-service seed:admin
 pnpm --dir apps/auth-service start:dev
@@ -50,7 +51,7 @@ Reset password oleh HRD belum tersedia pada tahap ini.
 
 Login dan refresh dibatasi 10 request/menit/IP per endpoint pada satu instance.
 Sebelum menambah instance, siapkan rate-limit store bersama dan konfigurasi proxy tepercaya.
-Gateway belum dihubungkan; nanti harus meneruskan Origin, Cookie, Set-Cookie,
+Gateway sudah terhubung dan meneruskan Origin, Cookie, Set-Cookie,
 Authorization dan X-Request-ID tanpa membocorkan token ke log.
 
 ## Pengujian
@@ -71,6 +72,11 @@ me dan logout. Smoke memakai port sementara 13001 lalu prosesnya dihentikan.
 Audit production: tidak ada advisory yang diketahui setelah override dependency ditinjau.
 
 ## Batas
-Frontend dan Gateway belum terintegrasi; tidak ada layar login siap pakai.
-Akun karyawan belum dapat dibuat melalui UI/API. Seed yang tersedia hanya HRD.
-Master data, provisioning, reset password, outbox, serta absensi merupakan task berikutnya.
+Portal HRD dan Gateway sudah terintegrasi. HRD dapat membuat akun karyawan melalui H07/H10.
+Portal login karyawan dikerjakan pada T13; lifecycle akun pada T14 dan reset password umum pada T15.
+Fitur absensi menyusul pada task berikutnya.
+
+## Provisioning T12
+Endpoint `/api/v1/internal/provisioning/:id/{prepare,finalize,credentials}` hanya dipakai Employee melalui signature service khusus; Gateway tidak mengizinkan path internal. Prepare akun INACTIVE bersifat idempotent; finalize sesudah profil siap. Key service harus sama pada Auth/Employee, sedangkan key enkripsi receipt hanya berada di Auth. `pnpm provisioning:setup` membuat key lokal secara aman tanpa mencetak atau mengganti key yang sudah ada. Jangan menyalin key ke VITE_ atau Git.
+
+Password sementara terenkripsi sampai dikonsumsi sekali. Recovery khusus operasi membuat password pengganti dan mencabut password/sesi lama selama password awal belum diganti; lifecycle dikerjakan pada T14 dan reset umum pada T15. Detail: [kontrak provisioning](../sdd/employee-provisioning.md).

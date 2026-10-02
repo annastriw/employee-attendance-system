@@ -32,6 +32,7 @@ model AuthAccount {
   createdAt          DateTime          @default(now()) @map("created_at") @db.DateTime(3)
   updatedAt          DateTime          @updatedAt @map("updated_at") @db.DateTime(3)
   sessions           AuthSession[]
+  provisioning       AuthProvisioning?
 
   @@index([role, status])
   @@map("auth_accounts")
@@ -78,6 +79,8 @@ model EmpDepartment {
   createdAt DateTime        @default(now()) @map("created_at") @db.DateTime(3)
   updatedAt DateTime        @updatedAt @map("updated_at") @db.DateTime(3)
 
+  employees EmpEmployee[]
+
   @@unique([name])
   @@index([status, name])
   @@map("emp_departments")
@@ -90,6 +93,8 @@ model EmpPosition {
   status    EmpMasterStatus @default(ACTIVE)
   createdAt DateTime        @default(now()) @map("created_at") @db.DateTime(3)
   updatedAt DateTime        @updatedAt @map("updated_at") @db.DateTime(3)
+
+  employees EmpEmployee[]
 
   @@unique([name])
   @@index([status, name])
@@ -109,4 +114,84 @@ model EmpAuditLog {
   @@index([entityType, entityId, createdAt])
   @@index([actorAccountId, createdAt])
   @@map("emp_audit_logs")
+}
+
+enum EmpEmployeeStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum EmpProvisioningStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum EmpProvisioningPhase {
+  PREPARE
+  PUBLISH
+  FINALIZE
+}
+
+model EmpEmployee {
+  id           String            @id @default(uuid()) @db.Char(36)
+  nik          String            @unique @db.VarChar(40)
+  name         String            @db.VarChar(120)
+  phone        String?           @db.VarChar(30)
+  departmentId String            @map("department_id") @db.Char(36)
+  positionId   String            @map("position_id") @db.Char(36)
+  startDate    DateTime          @map("start_date") @db.Date
+  status       EmpEmployeeStatus @default(INACTIVE)
+  ready        Boolean           @default(false)
+  archivedAt   DateTime?         @map("archived_at") @db.DateTime(3)
+  createdAt    DateTime          @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt    DateTime          @updatedAt @map("updated_at") @db.DateTime(3)
+  department   EmpDepartment     @relation(fields: [departmentId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  position     EmpPosition       @relation(fields: [positionId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  provisioning EmpProvisioning?
+
+  @@index([status, name])
+  @@map("emp_employees")
+}
+
+// Durable operation doubles as the transactional outbox for this one workflow.
+model EmpProvisioning {
+  id             String                @id @db.Char(36)
+  employeeId     String                @unique @map("employee_id") @db.Char(36)
+  actorAccountId String                @map("actor_account_id") @db.Char(36)
+  requestId      String?               @map("request_id") @db.Char(36)
+  payloadHash    String                @map("payload_hash") @db.Char(64)
+  email          String                @db.VarChar(254)
+  desiredStatus  EmpEmployeeStatus     @map("desired_status")
+  status         EmpProvisioningStatus @default(PENDING)
+  phase          EmpProvisioningPhase  @default(PREPARE)
+  authAccountId  String?               @map("auth_account_id") @db.Char(36)
+  attempts       Int                   @default(0)
+  nextAttemptAt  DateTime              @default(now()) @map("next_attempt_at") @db.DateTime(3)
+  leaseUntil     DateTime?             @map("lease_until") @db.DateTime(3)
+  leaseToken     String?               @map("lease_token") @db.Char(36)
+  errorCode      String?               @map("error_code") @db.VarChar(40)
+  createdAt      DateTime              @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt      DateTime              @updatedAt @map("updated_at") @db.DateTime(3)
+  employee       EmpEmployee           @relation(fields: [employeeId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([status, nextAttemptAt, leaseUntil])
+  @@index([actorAccountId, createdAt])
+  @@map("emp_provisioning")
+}
+
+model AuthProvisioning {
+  id                  String      @id @db.Char(36)
+  accountId           String      @unique @map("account_id") @db.Char(36)
+  actorAccountId      String      @map("actor_account_id") @db.Char(36)
+  payloadHash         String      @map("payload_hash") @db.Char(64)
+  finalized           Boolean     @default(false)
+  credentialEnvelope  String?     @map("credential_envelope") @db.VarChar(512)
+  credentialClaimedAt DateTime?   @map("credential_claimed_at") @db.DateTime(3)
+  createdAt           DateTime    @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt           DateTime    @updatedAt @map("updated_at") @db.DateTime(3)
+  account             AuthAccount @relation(fields: [accountId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@map("auth_provisioning")
 }

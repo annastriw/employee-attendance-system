@@ -132,7 +132,7 @@ export function createAuthClient(
   }
   async function api<T>(
     path: string,
-    init: { method?: "GET" | "POST" | "PATCH"; body?: unknown } = {},
+    init: { method?: "GET" | "POST" | "PATCH"; body?: unknown; idempotencyKey?: string } = {},
   ): Promise<T> {
     await ensureSession();
     const method = init.method ?? "GET";
@@ -143,6 +143,7 @@ export function createAuthClient(
         credentials: "include",
         headers: {
           Authorization: `Bearer ${token}`,
+          ...(init.idempotencyKey ? { "Idempotency-Key": init.idempotencyKey } : {}),
           ...(method !== "GET" ? { "Content-Type": "application/json" } : {}),
         },
         ...(method !== "GET" ? { body: JSON.stringify(init.body ?? {}) } : {}),
