@@ -1,6 +1,6 @@
 # Perubahan dan lifecycle karyawan — T14
 
-Status: putaran A sudah diimplementasikan dan pemeriksaan terfokus lulus; browser API nyata menunggu checklist manual pengguna. Putaran B belum dimulai. Acuan: [baseline](../requirements/baseline.md), [provisioning T12](employee-provisioning.md), [UI/UX H08](frontend-ui-ux.md), [tier test](../../tasks/plan.md#tier-test-biaya-vs-nilai--disetujui-2026-10-02).
+Status: putaran A selesai; pemeriksaan terfokus dan checklist browser API nyata manual pengguna lulus pada 2026-10-02. Putaran B belum dimulai. Acuan: [baseline](../requirements/baseline.md), [provisioning T12](employee-provisioning.md), [UI/UX H08](frontend-ui-ux.md), [tier test](../../tasks/plan.md#tier-test-biaya-vs-nilai--disetujui-2026-10-02).
 
 ## Putaran A — profil dan email
 
@@ -39,7 +39,7 @@ Aktif/nonaktif/arsip/restore, timeline history dan revokasi konsisten lintas Emp
 - Unit terfokus: Auth 3, Employee 9 (provisioning + email); kontrak HTTP Gateway 51. HR: Employees 7, Detail 4, selector 3 lulus. Hasil HR dikonfirmasi dari cache hasil Vitest karena output terminal akhir tidak tersimpan.
 - MySQL nyata: lima skenario lulus pada run awal; satu skenario gagal karena port Supertest fixture ditutup oleh nested request. Fixture diperbaiki dan hanya skenario itu diulang, lulus. Enam skenario mempunyai bukti lulus: guard/lost update/history, constraint NIK/master/arsip, email concurrent/idempotensi/revokasi/login, konflik/ownership, response hilang/restart, signature/grants. Ini bukan klaim enam lulus dalam satu run bersih.
 - Visual HR saja, API tiruan: 4/4 lulus pada 320/1440 px terang/gelap, satu worker. Screenshot form dan dialog ditinjau; animasi dinonaktifkan saat screenshot agar dialog tertangkap stabil. Tidak ada overflow/page error pada skenario.
-- Browser dengan API nyata belum dijalankan; pengguna memilih checklist manual karena RAM. Suite seluruh repo tidak diulang.
+- Pengguna melaporkan checklist browser dengan API nyata lulus pada 2026-10-02: edit/persistensi, validasi/konflik, ubah email, revokasi/login ulang dan tampilan mobile/tema. Ini bukti manual pengguna, bukan hasil Playwright API nyata. Fixture integrasi T14 tersisa 0 profil/akun/operasi/history. Suite seluruh repo tidak diulang.
 
 ## Checklist browser manual A
 
@@ -51,4 +51,4 @@ Gunakan karyawan uji T12/T13 dengan password yang sudah diganti. Jalankan stack 
 4. Sebelum langkah 3 yang berhasil, masuk sebagai karyawan di Attendance. Sesudah email berubah, reload/akses sesi lama harus ditolak. Email lama gagal login; email baru + password yang sama berhasil. Akun HR tetap aktif.
 5. Periksa form/dialog pada lebar 320 px dan tema terang/gelap: tombol terbaca dan dapat dipakai, tanpa scroll horizontal. Jika gangguan jaringan menampilkan operasi pending, reload lalu lanjutkan operasi yang sama; jangan membuat permintaan kedua. Recovery timeout/restart sudah dibuktikan pada integrasi MySQL.
 
-Laporkan nomor yang lulus/gagal. Putaran A dicentang setelah hasil browser nyata diterima, lalu lanjut putaran B.
+Hasil diterima: pengguna menyatakan sudah lolos pada 2026-10-02. Putaran A dicentang; agen berikut melanjutkan putaran B.

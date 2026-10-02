@@ -5,7 +5,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 ## Snapshot terakhir
 
 - Tanggal: 2026-10-02 (Asia/Jakarta). HEAD diverifikasi dengan `git log`; jangan anggap hash di sini sebagai HEAD.
-- Tahap: T08-T13 selesai. T12 dan T13 browser manual pengguna lulus pada 2026-10-02. T13 unit/komponen, build/lint/typecheck dan visual lulus; batas suite otomatis dicatat. T14 adalah task berikutnya. T09c tetap menjadi acuan tema.
+- Tahap: T08-T13 selesai. T12 dan T13 browser manual pengguna lulus pada 2026-10-02. T13 unit/komponen, build/lint/typecheck dan visual lulus; batas suite otomatis dicatat. T14 A selesai dengan browser manual pengguna lulus; T14 B menjadi pekerjaan berikutnya. T09c tetap menjadi acuan tema.
 - Commit sesi ini pada dev (lama ke baru): 93488ae, f423e47, aa34d48, 1b7b05d, e4a6782, 83537f1, 112d7fa, a485480 (lihat git log), lalu:
   - c2f98fe docs: switch frontend theme to Linear-style zinc + emerald, Geist, Phosphor, light/dark
   - 36a24e4 feat(ui): Linear-style redesign with zinc + emerald, Geist, Phosphor and light/dark
@@ -18,15 +18,15 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 - Commit T13 pada dev: a51ddc2 (Auth client employee), 51bb3cb (HeroUI/test setup), 56f6a2a (E01), c5a8a2d (E02/home/guard dan tes alur), eb931ba (tes visual). Semua dipush ke origin/dev; baca git log untuk HEAD.
 - Commit T11: 85143ce (schema/migration/grants), 73293bc (Employee API + unit/MySQL), c4da4dd (Gateway allowlist/kontrak), 49e4eb7 (filter aktif untuk penugasan), 2f46086 (H12/shared UI/selector/polesan H11), fbc034a (HRD nyata + assertion refetch). Penutupan T11: 0d33caf. Persetujuan T09c: b31ccc5. Kebijakan testing cepat: 7cd397f; baca git log sebagai sumber HEAD.
 - Branch: dev, tracking origin/dev. Repository public [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system) dipilih pengguna pada 2026-10-02. Push awal terverifikasi: lokal dan remote dev sama pada 7cd397f. Visibilitas PUBLIC diverifikasi melalui GitHub setelah instruksi pengguna; commit berikut dipush setelah verifikasi, deployment tetap tahap terakhir.
-- Database lokal (Docker MySQL 127.0.0.1:3307): migration `20261001160000_employee_master_departments` dan `20261002080000_employee_master_positions` DITERAPKAN ke attendance_dev dan attendance_test. Akun `attendance_employee`/`attendance_employee_test` dibuat via `pnpm db:grants`; kredensial ada di `.env.database` (ignored).
+- Database lokal (Docker MySQL 127.0.0.1:3307): migration sampai `20261002190000_employee_profile_email_changes` DITERAPKAN ke attendance_dev dan attendance_test. Akun `attendance_employee`/`attendance_employee_test` dibuat via `pnpm db:grants`; kredensial ada di `.env.database` (ignored).
 - Host memory sering CRITICAL (1-2 GB). Jalankan suite berat satu per satu; Playwright 1 worker terbukti stabil.
-- Pengguna melaporkan MySQL dan Auth/Employee/Gateway/HR web lokal berjalan untuk uji manual T12. Pemeriksaan terbaru tidak menemukan listener pada 3000/3001/3002/5173/5174; jalankan ulang bila menguji T13. Port proyek: MySQL 3307, Gateway 3000, Auth 3001, Employee 3002, Attendance 5173, HR 5174.
+- Pemeriksaan handoff 2026-10-02: hanya MySQL 127.0.0.1:3307 (PID 6672) ditemukan; tidak ada listener pada 3000/3001/3002/3003/3004/5173/5174. Tidak ada proses aplikasi yang dihentikan oleh agen. Port proyek: MySQL 3307, Gateway 3000, Auth 3001, Employee 3002, Attendance 5173, HR 5174.
 
 ## Satu pekerjaan aktif
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T14 A — edit profil/email | Codex, 2026-10-02 | prisma/schema+migration, Auth/Employee/Gateway API, HR detail/form, test terkait, docs/sdd/employee-lifecycle.md | T13 selesai; pola T12 digunakan ulang | MySQL 3307 aktif; tidak ada listener aplikasi 3000/3001/3002/5173/5174 pada pemeriksaan akhir | API/UI dan pemeriksaan terfokus lulus; menunggu browser manual A sebelum B |
+| T14 B — lifecycle/history/revokasi | Agen berikut, belum mulai | docs/sdd/employee-lifecycle.md lalu schema/Auth/Employee/Gateway/HR dan test terkait sesuai kontrak | T14 A selesai dan manual pengguna lulus | MySQL 3307 aktif; tidak ada service/frontend listener pada pemeriksaan handoff | Handoff pengguna; tulis kontrak B dari baseline/source, lalu satu putaran API+UI+test |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 
@@ -36,7 +36,7 @@ Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .w
 
 ## Bukti pemeriksaan
 
-- T14 A: edit profil dan email terpisah, history/audit profil atomik, email durable + receipt/revokasi/recovery diimplementasikan. Migration dev/test/grants dan diff schema exit 0; typecheck/lint/build package terdampak lulus. Auth 3 unit, Employee 9 unit, Gateway 51 kontrak, HR 14 komponen lulus. MySQL: 5 skenario lulus awal + 1 lulus rerun setelah perbaikan fixture port; visual 4/4 lulus dan screenshot ditinjau. Rincian/batas bukti dan checklist browser ada di [module spec T14](../docs/sdd/employee-lifecycle.md). Browser API nyata belum diklaim lulus; A/B tetap terbuka.
+- T14 A: edit profil dan email terpisah, history/audit profil atomik, email durable + receipt/revokasi/recovery diimplementasikan. Migration dev/test/grants dan diff schema exit 0; typecheck/lint/build package terdampak lulus. Auth 3 unit, Employee 9 unit, Gateway 51 kontrak, HR 14 komponen lulus. MySQL: 5 skenario lulus awal + 1 lulus rerun setelah perbaikan fixture port; visual 4/4 lulus dan screenshot ditinjau. Rincian/batas bukti dan checklist browser ada di [module spec T14](../docs/sdd/employee-lifecycle.md). Pengguna melaporkan checklist browser API nyata lulus pada 2026-10-02; A ditutup, B dan T14 keseluruhan tetap terbuka.
 
 - Pelaksanaan per putaran disetujui pengguna (2026-10-02): fitur lengkap API+UI+test/dokumentasi dalam satu putaran, reuse T10–T13, polesan tambahan pada T28, baca konteks terkait saja, checklist browser sekali sesudah putaran lengkap, dan service seperlunya. T14 dibagi A edit profil/email, B lifecycle/history/revokasi. Perubahan dokumentasi diperiksa isi, tautan dan diff; test aplikasi tidak diulang.
 
@@ -70,7 +70,7 @@ Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .w
 
 ## Langkah berikut
 
-1. **T14 A menunggu checklist browser manual.** API/UI dan pemeriksaan terkait selesai; jalankan lima langkah pada [module spec](../docs/sdd/employee-lifecycle.md#checklist-browser-manual-a), terima hasil pengguna lalu tutup A dan lanjut B lifecycle/history/revokasi. T14 tetap terbuka; spec Playwright T12 otomatis masih belum dijalankan karena RAM terbatas.
+1. **Lanjut T14 B lifecycle/history/revokasi.** A selesai dan pengguna melaporkan checklist manual lulus. Baca AGENTS, tier plan, todo T14, baseline lifecycle dan [module spec](../docs/sdd/employee-lifecycle.md). Tulis kontrak B sebelum coding: aktif/nonaktif/arsip/restore INACTIVE, history, NIK/email tetap dicadangkan, revokasi/login dan pemulihan lintas service; tentukan interaksi dengan email PENDING. Reuse implementasi A/T12, satu agen aktif, test terfokus; browser nyata manual sekali sesudah putaran lengkap.
 2. Limit 429 E2E Auth tetap menunggu keputusan pengguna: refresh limit sendiri atau run per spec. Jangan longgarkan limit login. Run T11 per spec terpisah lulus; konfigurasi Auth tidak diubah.
 3. T09c selesai dan menjadi acuan wajib semua halaman berikutnya: gunakan token/komponen packages/ui, HeroUI, zinc–emerald, Geist, Phosphor dan mode terang/gelap. Kontrak mencakup E01–E09/H01–H14, seluruh state/dialog/mobile; jangan kembali ke T09b monokrom.
 4. Polesan H11 selesai bersama H12: (a) shared MasterDataPage menampilkan skeleton selama refetch sehingga baris lama tidak tampil bersama pesan sukses; test komponen dan E2E desktop/mobile menunggu baris hilang sesudah aktifkan pada filter Nonaktif. (b) pager tidak lagi memakai kelas monospace, diverifikasi computed font pada test visual. (c) status memakai satu ToggleButtonGroup berbatas dan separator HeroUI, screenshot terang/gelap ditinjau.
@@ -97,3 +97,12 @@ Catatan: E2E memakai service dari `dist`; jalankan `pnpm --dir apps/<service> ru
 - Kendala nyata:
 - Langkah berikut + dependency:
 - Trigger pergantian bila sesi mendekati batas:
+
+## Handoff pengguna — 2026-10-02
+
+- Pengguna meminta pindah agen karena token hampir habis; kapasitas token aktual tidak dibaca/diarang. T14 B belum diimplementasikan.
+- Implementasi A: a7eec12, sudah dipush ke origin/dev. Penutupan manual A dicatat pada commit docs setelah ini; gunakan git log sebagai sumber HEAD.
+- Diff sebelum handoff hanya dokumentasi penutupan A; setelah commit tidak ada perubahan proyek tertunda. Tooling lokal untracked tetap dibiarkan dan tidak di-stage.
+- Backend dist/database generated current untuk A; rebuild backend yang berubah sebelum test integrasi B. Migration A dev/test dan grants telah diterapkan.
+- Kebijakan percepatan tetap berlaku; jangan mengulang pemeriksaan A tanpa perubahan terkait. Limit refresh 429 tetap menunggu keputusan pengguna, jangan longgarkan login. Assertion placeholder Attendance pada suite visual HR lama perlu diselaraskan pada checkpoint regresi.
+- Kendala alat sesi ini: exec normal gagal sandbox helper dan apply_patch menolak reparse point. File ditulis lewat PowerShell UTF-8 tanpa BOM; perintah scoped require_escalated lolos automatic review. Jangan mengklaim kendala pasti berlaku pada sesi baru.
