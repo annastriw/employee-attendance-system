@@ -5,7 +5,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 ## Snapshot terakhir
 
 - Tanggal: 2026-10-02 (Asia/Jakarta). HEAD diverifikasi dengan `git log`; jangan anggap hash di sini sebagai HEAD.
-- Tahap: T08-T17 selesai. T15 (reset password karyawan) lulus manual peramban langkah 1–10 dan ditutup penuh pada 2026-10-02. T16 (aturan waktu dan eligibility absensi) selesai diimplementasikan end-to-end. T17 (kalender libur HRD) selesai diimplementasikan end-to-end; tes unit/kontrak, integrasi MySQL nyata, dan UI component tests 100% lulus; spesifikasi di docs/sdd/attendance-holidays.md. T18 (spike kamera dan lokasi) menjadi pekerjaan berikutnya. T09c tetap menjadi acuan tema.
+- Tahap: T08-T17 selesai. T15 (reset password karyawan) lulus manual peramban langkah 1–10 dan ditutup penuh pada 2026-10-02. T16 (aturan waktu dan eligibility absensi) selesai diimplementasikan end-to-end. T17 (kalender libur HRD) selesai diimplementasikan end-to-end; tes unit/kontrak, integrasi MySQL nyata, dan UI component tests 100% lulus; spesifikasi di docs/sdd/attendance-holidays.md. T18 prototipe kamera/lokasi tersedia dan terverifikasi otomatis/sintetis; uji perangkat nyata masih pending. T19 foto privat backend siap dikerjakan serial saat menunggu hasil uji T18. T09c tetap menjadi acuan tema.
 - Commit sesi ini pada dev (lama ke baru): 93488ae, f423e47, aa34d48, 1b7b05d, e4a6782, 83537f1, 112d7fa, a485480 (lihat git log), lalu:
   - c2f98fe docs: switch frontend theme to Linear-style zinc + emerald, Geist, Phosphor, light/dark
   - 36a24e4 feat(ui): Linear-style redesign with zinc + emerald, Geist, Phosphor and light/dark
@@ -29,7 +29,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T17 — Kalender libur HRD | Selesai (2026-10-02) | apps/attendance-service/, apps/api-gateway/, apps/hr-web/, docs/sdd/attendance-holidays.md | T16 selesai | MySQL 3307 aktif | CRUD hari ini/mendatang, past ditolak 400, duplicate 409, snapshot immutable, audit log att_audit_logs, Gateway proxy, H13 UI, 15 unit/MySQL E2E dan 8 UI tests lulus |
+| T18 — Spike kamera dan lokasi | Menunggu uji perangkat nyata (2026-10-02) | apps/attendance-web/src/spikes/capture/, spikes/capture.html, vite.capture.config.ts, docs/architecture/camera-location-spike.md | T07 siap, T17 selesai | Vite 5173 PID 12068/session 96015 dibiarkan aktif untuk uji pengguna; backend tidak dijalankan | Prototipe/21 test/build/lint/model aktual + kamera sintetis lulus; T18 belum selesai |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 
@@ -38,6 +38,8 @@ Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increme
 Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .windsurf/ dan skills-lock.json adalah berkas lokal; jangan di-stage, dihapus atau diubah tanpa scope jelas. Rahasia dan data pribadi tetap ignored.
 
 ## Bukti pemeriksaan
+
+- T18 increment prototipe: lihat [spike kamera/lokasi](../docs/architecture/camera-location-spike.md#bukti-increment-2026-10-02) untuk parameter, bukti dan checklist perangkat nyata. 21 test terfokus, build/typecheck dan lint lulus; MCP HeroUI dan Chrome DevTools berhasil. Portal produksi tidak membawa spike/MediaPipe. Server loopback http://localhost:5173/spikes/capture.html dibiarkan aktif untuk pengguna; periksa PID/listener aktual sebelum menghentikan atau memakai kembali. Jalur exec standar masih gagal helper setup; scoped require_escalated lolos automatic review, bukan bukti sandbox sudah pulih.
 
 - T17: kalender libur HRD (`apps/attendance-service`, `apps/api-gateway`, `apps/hr-web`). CRUD kalender libur hari ini/mendatang (`POST /api/v1/holidays`, `GET /api/v1/holidays`, `PATCH /api/v1/holidays/:id`, `DELETE /api/v1/holidays/:id`). Validasi tanggal lampau (`400 Bad Request` "Tanggal libur tidak boleh berupa tanggal lampau"), duplikasi tanggal (`409 Conflict`), otorisasi `ADMIN_HRD` via `AdminGuard` & `AuthClient` (401 unauthenticated, 403 non-admin/mustChangePassword). Immutabilitas snapshot: pembuatan hari libur pada siang/sore hari tidak mengubah `policySnapshot` absensi check-in pagi hari yang sudah tercatat. Audit logging atomik ke `att_audit_logs` (CREATE, UPDATE, DELETE). API Gateway upstream proxy `holidays-proxy.controller.ts` dengan allowlist path/query parameter & error mapping. UI HR Web layar H13 (`apps/hr-web`): tabel daftar kalender libur dengan badge status (Mendatang, Hari Ini, Lampau), filter pencarian nama & pagination, dialog form tambah/ubah dengan validasi `min={todayWIB}`, proteksi tombol aksi untuk tanggal lampau, dialog konfirmasi hapus. Unit tests 48/48 lulus, MySQL E2E 15/15 lulus (`test/holidays.e2e-spec.ts`), API Gateway 13 unit & 67 e2e kontrak lulus, HR Web Vitest 64/64 lulus (`HolidaysPage.test.tsx` 8/8), build dist & lint seluruh package terdampak exit 0. Spesifikasi di [attendance holidays](../docs/sdd/attendance-holidays.md).
 

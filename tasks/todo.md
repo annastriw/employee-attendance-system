@@ -143,6 +143,8 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 
 ## T18 — Spike kamera dan lokasi
 - [ ] Selesai
+- [x] Prototipe terisolasi, 21 test, build/lint dan smoke model/WASM aktual dengan perangkat sintetis; [bukti/parameter/checklist](../docs/architecture/camera-location-spike.md).
+- [ ] Pengujian kamera/kedip/lokasi perangkat nyata desktop/mobile HTTPS dan kalibrasi threshold.
 - Acceptance: Buktikan MediaPipe, blink/manual fallback, izin lokasi dan kamera pada desktop/mobile HTTPS.
 - Verification: Uji perangkat nyata dan catat threshold yang dipilih; belum dianggap fitur lengkap.
 - Dependencies: 7

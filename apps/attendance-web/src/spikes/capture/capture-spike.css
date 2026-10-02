@@ -1,0 +1,25 @@
+.capture-spike { width: min(100%, 640px); margin: 0 auto; padding: 32px 16px; }
+.capture-spike header { margin-bottom: 24px; }
+.capture-spike h1 { margin: 24px 0 8px; font-size: 24px; font-weight: 600; letter-spacing: -0.03em; }
+.capture-note { color: var(--muted); font-size: 13px; line-height: 1.6; margin: 8px 0; }
+.capture-view { position: relative; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; min-height: 200px; }
+.capture-view video, .capture-view img { display: block; width: 100%; height: auto; transform: scaleX(-1); }
+.capture-view video { min-height: 200px; }
+.capture-view[data-preview="true"] video { display: none; }
+.capture-placeholder { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--muted); }
+.capture-guide { position: absolute; left: 15%; top: 5%; width: 70%; height: 90%; border: 2px solid var(--border); border-radius: 40%; pointer-events: none; }
+.capture-view[data-valid="true"] .capture-guide { border-color: var(--accent); }
+.capture-hint { min-height: 44px; display: flex; align-items: center; font-size: 14px; }
+.capture-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.capture-actions .button { flex: 1; min-height: 44px; }
+.capture-error { color: var(--danger-ink); background: var(--danger-surface); padding: 12px; border-radius: 8px; font-size: 14px; line-height: 1.5; margin-bottom: 12px; }
+.capture-location { display: flex; align-items: flex-start; gap: 12px; margin-top: 24px; padding: 16px 0; border-top: 1px solid var(--border); font-size: 14px; }
+.capture-location > svg { flex-shrink: 0; color: var(--muted); }
+.capture-location p { margin: 0; line-height: 1.5; }
+.capture-location .button { margin-top: 8px; }
+.capture-diagnostics { margin-top: 16px; font-size: 13px; }
+.capture-diagnostics summary { color: var(--muted); cursor: pointer; padding: 8px 0; }
+.capture-diagnostics dl { margin-top: 8px; }
+.capture-diagnostics dl > div { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.capture-diagnostics dt { color: var(--muted); }
+.capture-diagnostics dd { margin: 0; font-family: var(--font-mono); }
