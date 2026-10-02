@@ -43,3 +43,7 @@ Gateway bind loopback; deploy membutuhkan reverse proxy VPS. Gateway membuat X-F
 - [NestJS body parser](https://docs.nestjs.com/faq/raw-body): parser JSON dengan limit khusus.
 - [Express behind proxies](https://expressjs.com/en/guide/behind-proxies/): proxy terpercaya dan alamat klien.
 - [Node.js fetch](https://nodejs.org/api/globals.html#fetch): HTTP upstream dengan timeout dan redirect manual.
+
+## Upload foto (T19)
+
+Gateway meneruskan POST /api/v1/media/attendance-photos secara multipart ke Media Service 3004. MEDIA_SERVICE_URL wajib pada production dan default loopback saat development. Auth diverifikasi sebelum menerima berkas; secret layanan/cookie klien tidak diteruskan ke Media. Setup dan kontrak: [Media lokal](media-local.md).

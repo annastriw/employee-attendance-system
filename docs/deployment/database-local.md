@@ -68,7 +68,7 @@ Driver verifikasi mengambil RSA public key untuk caching_sha2_password hanya pad
 loopback lokal yang divalidasi. Untuk VPS gunakan TLS terverifikasi; jangan menyalin
 allowPublicKeyRetrieval ke koneksi remote tanpa rancangan transport yang aman.
 
-Auth Service sudah terhubung ke database dan memiliki seed/login. Tabel Employee/Attendance/Media/outbox belum dibuat.
+Fondasi awal Auth sudah diperluas dengan tabel Employee, Attendance dan Media melalui migration terpusat. Script db:setup/db:grants menambahkan akun runtime masing-masing; Media memakai MEDIA_DATABASE_URL/MEDIA_TEST_DATABASE_URL. Status migrasi aktual dicatat di tasks/progress.md.
 Frontend belum memakai data database. Test database masih pada instance lokal yang sama.
 
 ## Referensi

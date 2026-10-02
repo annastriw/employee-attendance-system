@@ -46,6 +46,8 @@ const env = parse(readFileSync(envFile));
 // Employee runtime accounts were added after the initial setup (T10). Append
 // missing credentials to the existing ignored file; never replace or print them.
 const runtimeKeys = [
+  ["MEDIA_DATABASE_URL", "attendance_media", "attendance_dev"],
+  ["MEDIA_TEST_DATABASE_URL", "attendance_media_test", "attendance_test"],
   ["EMPLOYEE_DATABASE_URL", "attendance_employee", "attendance_dev"],
   ["EMPLOYEE_TEST_DATABASE_URL", "attendance_employee_test", "attendance_test"],
   ["ATTENDANCE_DATABASE_URL", "attendance_attendance", "attendance_dev"],
@@ -99,6 +101,11 @@ if (process.argv.includes("--grants")) {
     }
     sql += `GRANT SELECT, INSERT ON \`${db}\`.emp_audit_logs TO '${user}'@'%';\n`;
     sql += `GRANT SELECT, INSERT ON \`${db}\`.emp_employee_history TO '${user}'@'%';\n`;
+  }
+  // Media metadata is retained; its audit trail is append-only.
+  for (const [db, user] of [["attendance_dev", "attendance_media"], ["attendance_test", "attendance_media_test"]]) {
+    sql += "GRANT SELECT, INSERT, UPDATE ON " + db + ".media_objects TO '" + user + "'@'%';\n";
+    sql += "GRANT SELECT, INSERT ON " + db + ".media_audit_logs TO '" + user + "'@'%';\n";
   }
   // Attendance service tables
   for (const [db, user] of [["attendance_dev", "attendance_attendance"], ["attendance_test", "attendance_attendance_test"]]) {

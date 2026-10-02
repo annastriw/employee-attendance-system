@@ -399,3 +399,51 @@ model AttAuditLog {
   @@index([entityType, entityId, createdAt])
   @@map("att_audit_logs")
 }
+enum MediaPurpose {
+  CHECK_IN
+  CHECK_OUT
+}
+
+enum MediaStatus {
+  PENDING
+  READY
+  FAILED
+}
+
+model MediaObject {
+  id                String       @id @default(uuid()) @db.Char(36)
+  ownerEmployeeId   String       @map("owner_employee_id") @db.Char(36)
+  ownerAccountId    String       @map("owner_account_id") @db.Char(36)
+  purpose           MediaPurpose
+  status            MediaStatus  @default(PENDING)
+  idempotencyKey    String       @map("idempotency_key") @db.Char(36)
+  requestHash       String       @map("request_hash") @db.Char(64)
+  checksumSha256    String       @map("checksum_sha256") @db.Char(64)
+  bucket            String       @db.VarChar(63)
+  objectKey         String       @map("object_key") @db.VarChar(256)
+  byteSize          Int          @map("byte_size") @db.UnsignedInt
+  width             Int          @db.UnsignedInt
+  height            Int          @db.UnsignedInt
+  claimToken        String?      @map("claim_token") @db.Char(36)
+  leaseUntil        DateTime?    @map("lease_until") @db.DateTime(3)
+  readyAt           DateTime?    @map("ready_at") @db.DateTime(3)
+  createdAt         DateTime     @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt         DateTime     @updatedAt @map("updated_at") @db.DateTime(3)
+
+  @@unique([ownerEmployeeId, idempotencyKey])
+  @@unique([bucket, objectKey])
+  @@index([status, leaseUntil])
+  @@map("media_objects")
+}
+
+model MediaAuditLog {
+  id             String   @id @default(uuid()) @db.Char(36)
+  actorAccountId String?  @map("actor_account_id") @db.Char(36)
+  action         String   @db.VarChar(80)
+  entityId       String   @map("entity_id") @db.Char(36)
+  requestId      String   @map("request_id") @db.Char(36)
+  createdAt      DateTime @default(now()) @map("created_at") @db.DateTime(3)
+
+  @@index([entityId, createdAt])
+  @@map("media_audit_logs")
+}

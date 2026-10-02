@@ -1,4 +1,13 @@
-import { EmployeesProxyController, EmployeeProvisioningProxyController, EmployeeEmailChangesProxyController, EmployeeLifecycleProxyController } from './employee-provisioning-proxy.controller';
+import {
+  MediaProxyController,
+  MediaUploadGuard,
+} from './media-proxy.controller';
+import {
+  EmployeesProxyController,
+  EmployeeProvisioningProxyController,
+  EmployeeEmailChangesProxyController,
+  EmployeeLifecycleProxyController,
+} from './employee-provisioning-proxy.controller';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -18,7 +27,8 @@ import { HolidaysProxyController } from './holidays-proxy.controller';
     EmployeeEmailChangesProxyController,
     EmployeeLifecycleProxyController,
     HolidaysProxyController,
+    MediaProxyController,
   ],
-  providers: [AppService, GatewayConfig, AuthProxyService],
+  providers: [AppService, GatewayConfig, AuthProxyService, MediaUploadGuard],
 })
 export class AppModule {}

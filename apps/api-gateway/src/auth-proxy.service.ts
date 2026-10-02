@@ -1,9 +1,10 @@
 import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { GatewayConfig } from './gateway.config';
 
-export type Upstream = 'auth' | 'employee' | 'attendance';
+export type Upstream = 'auth' | 'employee' | 'attendance' | 'media';
 type Method = 'GET' | 'POST' | 'PATCH' | 'DELETE';
 const OUTAGE: Record<Upstream, string> = {
+  media: 'Layanan foto sementara tidak tersedia.',
   auth: 'Layanan autentikasi sementara tidak tersedia.',
   employee: 'Layanan data karyawan sementara tidak tersedia.',
   attendance: 'Layanan absensi sementara tidak tersedia.',
@@ -12,6 +13,15 @@ const OUTAGE: Record<Upstream, string> = {
 @Injectable()
 export class AuthProxyService {
   constructor(private readonly config: GatewayConfig) {}
+  async forwardMultipart(body: FormData, headers: Record<string, string>) {
+    return this.forward(
+      '/api/v1/media/attendance-photos',
+      'POST',
+      headers,
+      body,
+      'media',
+    );
+  }
   async forward(
     path: string,
     method: Method,
@@ -24,17 +34,26 @@ export class AuthProxyService {
         ? this.config.authUrl
         : upstream === 'employee'
           ? this.config.employeeUrl
-          : this.config.attendanceUrl;
+          : upstream === 'attendance'
+            ? this.config.attendanceUrl
+            : this.config.mediaUrl;
     const withBody = method !== 'GET' && method !== 'DELETE';
+    const multipart = body instanceof FormData;
     try {
       const response = await fetch(`${base}${path}`, {
         method,
         headers: {
           ...headers,
-          ...(withBody ? { 'Content-Type': 'application/json' } : {}),
+          ...(withBody && !multipart
+            ? { 'Content-Type': 'application/json' }
+            : {}),
         },
-        ...(withBody ? { body: JSON.stringify(body ?? {}) } : {}),
-        signal: AbortSignal.timeout(this.config.timeoutMs),
+        ...(withBody
+          ? { body: multipart ? body : JSON.stringify(body ?? {}) }
+          : {}),
+        signal: AbortSignal.timeout(
+          upstream === 'media' ? 15000 : this.config.timeoutMs,
+        ),
         redirect: 'manual',
       });
       if (response.status >= 300 && response.status < 400)

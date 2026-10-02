@@ -151,7 +151,7 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 - Target: docs/architecture/, prototipe terisolasi
 
 ## T19 — Foto privat backend
-- [ ] Selesai
+- [x] Selesai
 - Acceptance: Upload tervalidasi ke MinIO AIStor Free, READY, checksum, pemilik/purpose, akses terotorisasi.
 - Verification: Integration test MinIO AIStor Free dan penolakan akses foto pengguna lain.
 - Dependencies: 13
