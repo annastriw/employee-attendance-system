@@ -4,8 +4,8 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 ## Snapshot terakhir
 
-- Tanggal: 2026-10-02 (Asia/Jakarta). HEAD diverifikasi dengan `git log`; jangan anggap hash di sini sebagai HEAD.
-- Tahap: T08-T17 selesai. T15 (reset password karyawan) lulus manual peramban langkah 1–10 dan ditutup penuh pada 2026-10-02. T16 (aturan waktu dan eligibility absensi) selesai diimplementasikan end-to-end. T17 (kalender libur HRD) selesai diimplementasikan end-to-end; tes unit/kontrak, integrasi MySQL nyata, dan UI component tests 100% lulus; spesifikasi di docs/sdd/attendance-holidays.md. T18 diterima pengguna setelah konfirmasi semua alur uji berjalan pada 2026-10-02. T19 foto privat backend selesai; T20 capture produksi diimplementasikan dan lulus teknis, checklist perangkat/API nyata masih pending. T21 check-in diimplementasikan dan verifikasi teknis lulus; checklist browser/perangkat T20/T21 masih pending. Increment berikut T22 checkout sesuai dependency plan. T09c tetap menjadi acuan tema.
+- Tanggal: 2026-10-03 (Asia/Jakarta), akhir increment T22 yang dimulai 2026-10-02. HEAD diverifikasi dengan `git log`; jangan anggap hash di sini sebagai HEAD.
+- Tahap: T08-T17 selesai. T15 (reset password karyawan) lulus manual peramban langkah 1–10 dan ditutup penuh pada 2026-10-02. T16 (aturan waktu dan eligibility absensi) selesai diimplementasikan end-to-end. T17 (kalender libur HRD) selesai diimplementasikan end-to-end; tes unit/kontrak, integrasi MySQL nyata, dan UI component tests 100% lulus; spesifikasi di docs/sdd/attendance-holidays.md. T18 diterima pengguna setelah konfirmasi semua alur uji berjalan pada 2026-10-02. T19 foto privat backend selesai; T20 capture produksi diimplementasikan dan lulus teknis, checklist perangkat/API nyata masih pending. T21 check-in diimplementasikan dan verifikasi teknis lulus; checklist browser/perangkat T20/T21 masih pending. T22 checkout diimplementasikan dan lulus teknis; manual T20/T21/T22 tetap pending. Increment berikut T23 soft delete/restore absensi sesuai dependency plan. T09c tetap menjadi acuan tema.
 - Commit sesi ini pada dev (lama ke baru): 93488ae, f423e47, aa34d48, 1b7b05d, e4a6782, 83537f1, 112d7fa, a485480 (lihat git log), lalu:
   - c2f98fe docs: switch frontend theme to Linear-style zinc + emerald, Geist, Phosphor, light/dark
   - 36a24e4 feat(ui): Linear-style redesign with zinc + emerald, Geist, Phosphor and light/dark
@@ -23,19 +23,28 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 - Branch: dev, tracking origin/dev. Repository public [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system) dipilih pengguna pada 2026-10-02. Push awal terverifikasi: lokal dan remote dev sama pada 7cd397f. Visibilitas PUBLIC diverifikasi melalui GitHub setelah instruksi pengguna; commit berikut dipush setelah verifikasi, deployment tetap tahap terakhir.
 - Database lokal (Docker MySQL 127.0.0.1:3307): migration sampai `20261003020000_attendance_checkin` DITERAPKAN ke attendance_dev dan attendance_test. Grants Attendance dan Media dev/test diterapkan; kredensial runtime baru tersimpan dalam .env.database/.env.media ignored.
 - Host memory sering CRITICAL (1-2 GB). Jalankan suite berat satu per satu; Playwright 1 worker terbukti stabil.
-- Pemeriksaan handoff 2026-10-02: container Docker MySQL 127.0.0.1:3307 dan AIStor 127.0.0.1:9000-9001 aktif. Pemeriksaan akhir T21: kelima backend 3000–3004 dan kedua portal 5173/5174 aktif; health backend 200. Rincian proses terkini di checkpoint T21. Port proyek: MySQL 3307, Gateway 3000, Auth 3001, Employee 3002, Attendance 3003, Media 3004, Attendance Web 5173, HR Web 5174.
+- Pemeriksaan handoff 2026-10-02: container Docker MySQL 127.0.0.1:3307 dan AIStor 127.0.0.1:9000-9001 aktif. Pemeriksaan akhir T22: kelima backend 3000–3004 dan kedua portal 5173/5174 aktif; health backend 200. Rincian proses terkini di checkpoint T22; PID historis bukan acuan live. Port proyek: MySQL 3307, Gateway 3000, Auth 3001, Employee 3002, Attendance 3003, Media 3004, Attendance Web 5173, HR Web 5174.
 
 ## Satu pekerjaan aktif
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T21 — Check-in ujung ke ujung | Codex aktif | Attendance, Employee internal, Media binding, Gateway, attendance-web, Prisma, docs/sdd/attendance-checkin.md | T16/T17 dan implementasi T20 tersedia; manual T20 tetap pending | Backend 3000–3004; portal 5173/5174; MySQL 3307, AIStor 9000/9001 | Verifikasi teknis selesai; manual perangkat masih pending |
+| T22 — Checkout ujung ke ujung | Codex aktif | Attendance, Gateway, attendance-web, test, docs/sdd/attendance-checkout.md | T21 teknis tersedia; manual T20/T21 tetap pending | Backend 3000–3004; portal 5173/5174; MySQL 3307, AIStor 9000/9001 | Teknis selesai; manual perangkat/API browser masih pending |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 
 ## Perubahan yang belum di-commit
 
 Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .windsurf/ dan skills-lock.json adalah berkas lokal; jangan di-stage, dihapus atau diubah tanpa scope jelas. Rahasia dan data pribadi tetap ignored.
+
+## Checkpoint T22 — 2026-10-03
+
+- Implementasi: [checkout](../docs/sdd/attendance-checkout.md), reuse intent/outbox/capture T21. Checkout menargetkan dailyRecordId milik sesi, foto privat CHECK_OUT, GPS fresh, alasan early, waktu server dan cutoff tanggal sama. Event memakai kalender saat pengiriman sesuai baseline; snapshot check-in/profil harian tetap. Hash operasi/target berbeda; hash check-in lama tidak berubah. Transaksi mengunci catatan harian, unique event/foto dan audit/binding tetap idempotent.
+- Verifikasi: 21 integrasi MySQL/AIStor nyata (14 regresi T21 + tujuh T22), recovery lost commit/binding checkout diperiksa lagi terfokus; enam unit policy/hash, tujuh unit Gateway, 32 frontend lulus pada suite terkait. Typecheck/lint/build Attendance/Gateway/Attendance Web lulus. Tidak ada migrasi/dependency baru atau pengujian seluruh repo.
+- Visual: 12 pemeriksaan awal 320/1440 terang/gelap (siap checkout, capture idle, selesai) lulus. Review menemukan tombol beranda 40 px; diperbaiki ke 44 px dan delapan pemeriksaan ulang beranda lulus. HeroUI MCP dan browser MCP meninjau preview alasan pulang awal/sukses sintetis, tanpa overflow. MediaPipe tetap lazy; API/perangkat browser nyata tujuh langkah masih pending. Jangan menutup T20/T21/T22 penuh.
+- Scope Git: Attendance/checkin dan test, Gateway proxy/timeout, Attendance Web route/client/intent/capture/Hari ini dan CSS/visual, baseline/runbook/module spec/todo/progress. Perubahan logis T22 pada dev; lihat git log/remote untuk hash aktual. Tooling lokal untracked tetap dipertahankan; env/foto/log/build/generated/.local tidak di-stage.
+- Proses terkini setelah tes: Auth 3001 PID 4584, Employee 3002 PID 22696, Media 3004 PID 4040, Attendance 3003 PID 2120 (worker aktif), Gateway 3000 PID 21068. Backend dist terbaru yang berubah; proses background hidden, stdout/stderr lokal ignored di .local/runtime-t22. Attendance Web 5173 PID 12068 dipakai ulang; HR Web 5174 PID 18416. Health kelima backend 200, Swagger Attendance berisi today/requests/check-in/check-out, MySQL 3307 dan AIStor 9000/9001 aktif.
+- Server visual sementara 15174 dihentikan; browser MCP kembali ke localhost:5173. RAM sempat rendah sehingga server milik sesi dihentikan selama tes; kini dinyalakan kembali. Periksa PID/listener sebelum restart. Tidak ada subagen/pergantian otomatis, push main atau deployment. Berikut T23 sesuai plan, sambil tetap mencatat acceptance manual terpisah.
 
 ## Checkpoint T21 — 2026-10-02
 
@@ -103,7 +112,7 @@ Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .w
 
 ## Langkah berikut
 
-1. **T21 teknis selesai; berikut T22 checkout** sesuai dependency plan. Checklist manual T20/T21 tetap perlu penerimaan perangkat/API nyata dan tidak boleh dianggap lulus dari fixture sintetis. Reuse intent/outbox dan capture; bedakan operasi CHECK_IN/CHECK_OUT agar satu key tidak mereplay hasil operasi lain. Pertahankan replay T21 yang sudah tersimpan. Satu increment aktif, tanpa subagen.
+1. **T22 teknis selesai; berikut T23 soft delete/restore absensi** sesuai dependency plan. Checklist manual T20/T21/T22 tetap perlu penerimaan perangkat/API nyata; jangan menyamakan fixture sintetis dengan uji perangkat nyata. Reuse transaksi dan kunci catatan harian T22 agar checkout tidak berlomba dengan hapus/restore. Belum ada task coding lain aktif; satu increment, tanpa subagen.
 2. Limit 429 E2E Auth tetap menunggu keputusan pengguna: refresh limit sendiri atau run per spec. Jangan longgarkan limit login. Run T11 per spec terpisah lulus; konfigurasi Auth tidak diubah.
 3. T09c selesai dan menjadi acuan wajib semua halaman berikutnya: gunakan token/komponen packages/ui, HeroUI, zinc–emerald, Geist, Phosphor dan mode terang/gelap. Kontrak mencakup E01–E09/H01–H14, seluruh state/dialog/mobile; jangan kembali ke T09b monokrom.
 4. Polesan H11 selesai bersama H12: (a) shared MasterDataPage menampilkan skeleton selama refetch sehingga baris lama tidak tampil bersama pesan sukses; test komponen dan E2E desktop/mobile menunggu baris hilang sesudah aktifkan pada filter Nonaktif. (b) pager tidak lagi memakai kelas monospace, diverifikasi computed font pada test visual. (c) status memakai satu ToggleButtonGroup berbatas dan separator HeroUI, screenshot terang/gelap ditinjau.

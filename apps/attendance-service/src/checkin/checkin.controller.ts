@@ -15,7 +15,7 @@ import { isUUID } from 'class-validator';
 import type { Response } from 'express';
 import type { AttendanceRequest } from '../auth/admin.guard';
 import { EmployeeGuard } from '../auth/employee.guard';
-import { CheckInDto } from './checkin.dto';
+import { CheckInDto, CheckOutDto } from './checkin.dto';
 import { CheckInService } from './checkin.service';
 function key(value: string | undefined) {
   if (!value || !isUUID(value, '4'))
@@ -57,6 +57,28 @@ export class CheckInController {
   ) {
     this.noQuery(req);
     const result = await this.service.checkIn(
+      key(operationKey),
+      body,
+      req.actor!,
+      req.headers.authorization!,
+      req.requestId,
+    );
+    res.status(result.status).json(result.body);
+  }
+  @Post('check-out')
+  @ApiHeader({
+    name: 'Idempotency-Key',
+    required: true,
+    schema: { type: 'string', format: 'uuid' },
+  })
+  async checkOut(
+    @Headers('idempotency-key') operationKey: string | undefined,
+    @Body() body: CheckOutDto,
+    @Req() req: AttendanceRequest,
+    @Res() res: Response,
+  ) {
+    this.noQuery(req);
+    const result = await this.service.checkOut(
       key(operationKey),
       body,
       req.actor!,

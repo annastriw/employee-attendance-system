@@ -12,6 +12,19 @@ export interface CheckInInput {
   };
   reason?: string | null;
 }
+export interface CheckOutInput extends CheckInInput {
+  dailyRecordId: string;
+}
+export function checkoutPayloadHash(input: CheckOutInput): string {
+  return createHash('sha256')
+    .update(
+      'CHECK_OUT:' +
+        input.dailyRecordId.toLowerCase() +
+        ':' +
+        payloadHash(input),
+    )
+    .digest('hex');
+}
 export function rejection(code: string, message: string, status = 422) {
   return new HttpException({ code, message }, status);
 }
@@ -38,7 +51,7 @@ export function validateEvidence(input: CheckInInput, at: Date): void {
   if (!Number.isFinite(age) || age > 60000 || age < -5000)
     throw rejection(
       'LOCATION_STALE',
-      'Perbarui lokasi sebelum mengirim check-in.',
+      'Perbarui lokasi sebelum mengirim absensi.',
     );
   const photoTime = Date.parse(input.clientCapturedAt);
   if (!Number.isFinite(photoTime) || photoTime > at.getTime() + 5000)

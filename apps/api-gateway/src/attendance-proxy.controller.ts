@@ -23,7 +23,10 @@ export class AttendanceProxyController {
       method === 'GET'
         ? requestPath === '/api/v1/me/attendance/today' ||
           (!!operation && UUID_V4.test(operation[1]))
-        : requestPath === '/api/v1/me/attendance/check-in';
+        : [
+            '/api/v1/me/attendance/check-in',
+            '/api/v1/me/attendance/check-out',
+          ].includes(requestPath);
     if (!allowed || url.search)
       throw new BadRequestException('Request tidak valid.');
     const headers: Record<string, string> = {
@@ -49,6 +52,9 @@ export class AttendanceProxyController {
     return this.forward('GET', req, res);
   }
   @Post('check-in') checkIn(@Req() req: Request, @Res() res: Response) {
+    return this.forward('POST', req, res);
+  }
+  @Post('check-out') checkOut(@Req() req: Request, @Res() res: Response) {
     return this.forward('POST', req, res);
   }
 }

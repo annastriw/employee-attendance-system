@@ -55,7 +55,10 @@ export class AuthProxyService {
           upstream === 'media'
             ? 15000
             : upstream === 'attendance' &&
-                path === '/api/v1/me/attendance/check-in'
+                [
+                  '/api/v1/me/attendance/check-in',
+                  '/api/v1/me/attendance/check-out',
+                ].includes(path)
               ? 30000
               : this.config.timeoutMs,
         ),

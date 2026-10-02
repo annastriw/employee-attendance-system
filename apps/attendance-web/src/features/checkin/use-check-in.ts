@@ -3,22 +3,30 @@ import { AuthError, type AuthClient } from "../../lib/auth-client";
 import {
   getCheckInStatus,
   postCheckIn,
-  readRecord,
+  readOperationRecord,
+  type AttendancePurpose,
   type CheckInPayload,
   type CheckInRecord,
 } from "../../lib/attendance-client";
 interface Intent {
+  purpose: AttendancePurpose;
   key: string;
   payload: CheckInPayload;
 }
 const intents = new WeakMap<AuthClient, Intent>();
 export const hasPendingCheckIn = (client: AuthClient) => intents.has(client);
+export const pendingAttendancePurpose = (client: AuthClient) =>
+  intents.get(client)?.purpose;
 export const clearPendingCheckIn = (client: AuthClient) => {
   intents.delete(client);
 };
 const unknownMessage =
-  "Hasil check-in belum dapat dipastikan. Cek hasil sebelum mengubah foto atau lokasi.";
-export function useCheckIn(client: AuthClient, onSessionExpired: () => void) {
+  "Hasil absensi belum dapat dipastikan. Cek hasil sebelum mengubah foto atau lokasi.";
+export function useCheckIn(
+  client: AuthClient,
+  onSessionExpired: () => void,
+  purpose: AttendancePurpose = "CHECK_IN",
+) {
   const [pending, setPending] = useState<Intent | null>(
     () => intents.get(client) ?? null,
   );
@@ -73,6 +81,10 @@ export function useCheckIn(client: AuthClient, onSessionExpired: () => void) {
     onSessionExpired();
   }
   async function reconcile(c: AbortController) {
+    if (intents.get(client)?.purpose !== purpose) {
+      setError(unknownMessage);
+      return;
+    }
     try {
       const status = await getCheckInStatus(
         client,
@@ -80,14 +92,15 @@ export function useCheckIn(client: AuthClient, onSessionExpired: () => void) {
         c.signal,
       );
       if (!current(c)) return;
-      if (status.state === "SUCCEEDED") done(readRecord(status.response?.data));
+      if (status.state === "SUCCEEDED")
+        done(readOperationRecord(status.response?.data, purpose));
       else if (status.state === "REJECTED" || status.state === "RETRYABLE") {
         rejected(
           status.response?.error?.message ??
-            "Check-in belum tersimpan. Periksa data dan coba lagi.",
+            "Absensi belum tersimpan. Periksa data dan coba lagi.",
           status.response?.error?.code,
         );
-      } else setError("Check-in masih diproses. Cek hasil lagi sebentar.");
+      } else setError("Absensi masih diproses. Cek hasil lagi sebentar.");
     } catch (reason) {
       if (!current(c)) return;
       if (reason instanceof AuthError && reason.status === 401) expire();
@@ -112,9 +125,14 @@ export function useCheckIn(client: AuthClient, onSessionExpired: () => void) {
   async function submit(payload?: CheckInPayload) {
     await run(async (c) => {
       let intent = intents.get(client);
+      if (intent && intent.purpose !== purpose) {
+        setError("Periksa pengiriman sebelumnya dari Hari ini.");
+        return;
+      }
       if (!intent) {
         if (!payload) return;
         intent = {
+          purpose,
           key: crypto.randomUUID(),
           payload: structuredClone(payload),
         };
@@ -128,6 +146,7 @@ export function useCheckIn(client: AuthClient, onSessionExpired: () => void) {
           intent.payload,
           intent.key,
           c.signal,
+          purpose,
         );
         if (current(c)) done(row);
       } catch (reason) {

@@ -25,6 +25,7 @@ interface Props {
   client: AuthClient;
   purpose: PhotoPurpose;
   reasonRequired?: boolean;
+  dailyRecordId?: string;
   onBack: () => void;
   onSessionExpired: () => void;
 }
@@ -32,6 +33,7 @@ export function CapturePanel({
   client,
   purpose,
   reasonRequired = false,
+  dailyRecordId,
   onBack,
   onSessionExpired,
 }: Props) {
@@ -58,7 +60,9 @@ export function CapturePanel({
     onSessionExpired,
   );
 
-  const checkIn = useCheckIn(client, onSessionExpired);
+  const checkIn = useCheckIn(client, onSessionExpired, purpose);
+  const checkout = purpose === "CHECK_OUT";
+  const actionLabel = checkout ? "checkout" : "check-in";
   const [reason, setReason] = useState("");
   const [sending, setSending] = useState(false);
   const [submitError, setSubmitError] = useState("");
@@ -71,8 +75,14 @@ export function CapturePanel({
   async function send() {
     if (!photo || sendLock.current || checkIn.pending || checkIn.record) return;
     if (needsReason && !reason.trim()) {
-      setSubmitError("Isi alasan terlambat.");
+      setSubmitError(
+        checkout ? "Isi alasan pulang awal." : "Isi alasan terlambat.",
+      );
       reasonField.current?.focus();
+      return;
+    }
+    if (checkout && !dailyRecordId) {
+      setSubmitError("Catatan check-in belum tersedia. Kembali ke Hari ini.");
       return;
     }
     sendLock.current = true;
@@ -83,6 +93,7 @@ export function CapturePanel({
       if (!ready) return;
       const evidence = prepareEvidence(photo, ready);
       const payload = {
+        ...(checkout ? { dailyRecordId } : {}),
         photoObjectId: evidence.photoObjectId,
         clientCapturedAt: evidence.clientCapturedAt,
         captureMethod: evidence.captureMethod,
@@ -123,7 +134,10 @@ export function CapturePanel({
       : locationError ||
         (location ? "Lokasi perlu diperbarui." : "Lokasi belum tersedia.");
 
-  if (checkIn.record)
+  const resultEvent = checkout
+    ? checkIn.record?.checkOut
+    : checkIn.record?.checkIn;
+  if (checkIn.record && resultEvent)
     return (
       <main className="capture-page">
         <header className="capture-header">
@@ -134,16 +148,20 @@ export function CapturePanel({
         </header>
         <div className="capture-success" role="status">
           <CheckCircle size={32} aria-hidden="true" />
-          <h1>Check-in tercatat</h1>
+          <h1>{checkout ? "Checkout tercatat" : "Check-in tercatat"}</h1>
           <p className="capture-success-time">
-            {clockLabel(checkIn.record.checkIn.eventTime)} <span>WIB</span>
+            {clockLabel(resultEvent.eventTime)} <span>WIB</span>
           </p>
           <p>
-            {checkIn.record.checkIn.isOutsideSchedule
+            {resultEvent.isOutsideSchedule
               ? "Di luar jadwal"
-              : checkIn.record.checkIn.isLate
-                ? "Terlambat"
-                : "Tepat waktu"}
+              : checkout
+                ? checkIn.record.checkOut?.isEarlyDeparture
+                  ? "Pulang lebih awal"
+                  : "Sesuai jadwal"
+                : checkIn.record.checkIn.isLate
+                  ? "Terlambat"
+                  : "Tepat waktu"}
           </p>
         </div>
         <Button variant="primary" fullWidth onPress={onBack}>
@@ -175,7 +193,7 @@ export function CapturePanel({
       <div className="capture-title">
         <h1>
           {checkIn.pending
-            ? "Periksa check-in"
+            ? "Periksa " + actionLabel
             : purpose === "CHECK_IN"
               ? "Foto check-in"
               : "Foto checkout"}
@@ -263,7 +281,7 @@ export function CapturePanel({
       {photo && (needsReason || reason) && (
         <div className="capture-reason">
           <Label htmlFor="checkin-reason" isRequired={needsReason}>
-            Alasan terlambat
+            {checkout ? "Alasan pulang awal" : "Alasan terlambat"}
           </Label>
           <TextArea
             id="checkin-reason"
@@ -285,7 +303,7 @@ export function CapturePanel({
             <WarningCircle size={20} aria-hidden="true" />
           </Alert.Indicator>
           <Alert.Content>
-            <Alert.Title>Periksa check-in</Alert.Title>
+            <Alert.Title>Periksa {actionLabel}</Alert.Title>
             <Alert.Description>
               {checkIn.error || submitError}
             </Alert.Description>
@@ -313,7 +331,7 @@ export function CapturePanel({
             </strong>
             <p>
               {checkIn.pending
-                ? "Memeriksa hasil check-in."
+                ? "Memeriksa hasil " + actionLabel + "."
                 : "Siap dikirim bersama lokasi."}
             </p>
           </div>
@@ -368,7 +386,7 @@ export function CapturePanel({
                   <Spinner color="current" size="sm" /> Mengirim…
                 </>
               ) : (
-                "Kirim check-in"
+                "Kirim " + actionLabel
               )}
             </Button>
           </>
