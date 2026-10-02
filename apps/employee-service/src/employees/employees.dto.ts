@@ -1,5 +1,6 @@
+import { OmitType } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsEmail, IsIn, IsOptional, IsString, IsUUID, Matches, MaxLength, MinLength, ValidateBy } from 'class-validator';
+import { IsEmail, IsISO8601, IsIn, IsOptional, IsString, IsUUID, Matches, MaxLength, MinLength, ValidateBy } from 'class-validator';
 import { ListPositionsQuery } from '../positions/positions.dto';
 const clean = ({ value }: { value: unknown }) => typeof value === 'string' ? value.trim().replace(/\s+/g, ' ') : value;
 export function validCalendarDate(value: unknown) { return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) && Number(value.slice(0, 4)) >= 1900 && Number.isFinite(Date.parse(value + 'T00:00:00Z')) && new Date(value + 'T00:00:00Z').toISOString().slice(0, 10) === value; }
@@ -20,4 +21,18 @@ export class CredentialRequestDto { @IsOptional() @IsIn([true, false]) recover?:
 
 export class RetryEmployeeDto {
   @IsOptional() @Transform(({ value }: { value: unknown }) => typeof value === 'string' ? value.trim().toLowerCase() : value) @IsEmail() @MaxLength(254) email?: string;
+}
+
+export class UpdateEmployeeDto extends OmitType(CreateEmployeeDto, ['email', 'status'] as const) {
+  @IsISO8601({ strict: true }) expectedUpdatedAt!: string;
+}
+export class ChangeEmailDto {
+  @Transform(({ value }: { value: unknown }) => typeof value === 'string' ? value.trim().toLowerCase() : value)
+  @IsEmail() @MaxLength(254) expectedEmail!: string;
+  @Transform(({ value }: { value: unknown }) => typeof value === 'string' ? value.trim().toLowerCase() : value)
+  @IsEmail() @MaxLength(254) email!: string;
+}
+export class ChangeLifecycleDto {
+  @IsIn(['ACTIVE', 'INACTIVE', 'ARCHIVED']) expectedStatus!: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
+  @IsIn(['ACTIVE', 'INACTIVE', 'ARCHIVED']) targetStatus!: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
 }

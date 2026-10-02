@@ -38,7 +38,7 @@ Base URL default frontend: `http://localhost:3000/api/v1`. Untuk override, salin
 - Pemulihan sesi saat reload, pembaruan menjelang expiry, logout.
 - Ringkasan awal tanpa metrik/data contoh; rekap kehadiran menyusul.
 - Master departemen/jabatan (H11/H12), filter URL dan status aktif/nonaktif.
-- Karyawan: direktori minimal, H07 pembuatan profil+akun, H10 password sekali tampil; retry dan koreksi konflik email pada operasi yang sama. Edit/lifecycle/reset umum menyusul T14.
+- Karyawan: direktori minimal, H07 pembuatan profil+akun, H10 password sekali tampil; retry dan koreksi konflik email pada operasi yang sama. H08 edit profil dan ubah email dengan revokasi sesi tersedia (T14 A); lifecycle menyusul T14 B, reset umum T15.
 - HeroUI 3.2.6 dan komponen custom dengan Atomic Design.
 
 ## Pengujian
@@ -74,3 +74,5 @@ Database test memakai schema terpisah pada instance MySQL lokal yang sama; conta
 - MCP HeroUI timeout; komponen dibuat berdasarkan [dokumentasi resmi HeroUI](https://heroui.com/en/docs/react/getting-started/quick-start) dan API package terpasang. Review browser memakai Playwright; Chrome DevTools MCP juga tidak merespons.
 
 Spesifikasi: [alur HRD](../sdd/hr-auth-flow.md). Login karyawan T13 selesai dengan browser manual API nyata; lihat [panduan Attendance](attendance-local.md). Spesifikasi pembuatan akun: [Employee provisioning](../sdd/employee-provisioning.md).
+
+Checklist edit profil/email: [T14 A](../sdd/employee-lifecycle.md#checklist-browser-manual-a). Migration dan grants T14 sudah diterapkan lokal; restart Auth/Employee/Gateway sesudah perubahan backend, lalu jalankan HR dan Attendance untuk pemeriksaan sesi karyawan.

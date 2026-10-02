@@ -33,6 +33,7 @@ model AuthAccount {
   updatedAt          DateTime          @updatedAt @map("updated_at") @db.DateTime(3)
   sessions           AuthSession[]
   provisioning       AuthProvisioning?
+  emailChanges       AuthEmailChange[]
 
   @@index([role, status])
   @@map("auth_accounts")
@@ -143,6 +144,7 @@ model EmpEmployee {
   positionId   String            @map("position_id") @db.Char(36)
   startDate    DateTime          @map("start_date") @db.Date
   status       EmpEmployeeStatus @default(INACTIVE)
+  accountEmail String?           @map("account_email") @db.VarChar(254)
   ready        Boolean           @default(false)
   archivedAt   DateTime?         @map("archived_at") @db.DateTime(3)
   createdAt    DateTime          @default(now()) @map("created_at") @db.DateTime(3)
@@ -150,6 +152,9 @@ model EmpEmployee {
   department   EmpDepartment     @relation(fields: [departmentId], references: [id], onDelete: Restrict, onUpdate: Restrict)
   position     EmpPosition       @relation(fields: [positionId], references: [id], onDelete: Restrict, onUpdate: Restrict)
   provisioning EmpProvisioning?
+  emailChanges EmpEmailChange[]
+  lifecycleChanges EmpLifecycleChange[]
+  history      EmpEmployeeHistory[]
 
   @@index([status, name])
   @@map("emp_employees")
@@ -194,4 +199,78 @@ model AuthProvisioning {
   account             AuthAccount @relation(fields: [accountId], references: [id], onDelete: Restrict, onUpdate: Restrict)
 
   @@map("auth_provisioning")
+}
+
+model EmpEmployeeHistory {
+  id             String      @id @default(uuid()) @db.Char(36)
+  employeeId     String      @map("employee_id") @db.Char(36)
+  actorAccountId String      @map("actor_account_id") @db.Char(36)
+  action         String      @db.VarChar(80)
+  before         Json
+  after          Json
+  requestId      String?     @map("request_id") @db.Char(36)
+  createdAt      DateTime    @default(now()) @map("created_at") @db.DateTime(3)
+  employee       EmpEmployee @relation(fields: [employeeId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([employeeId, createdAt])
+  @@map("emp_employee_history")
+}
+
+model EmpEmailChange {
+  id             String                @id @db.Char(36)
+  employeeId     String                @map("employee_id") @db.Char(36)
+  actorAccountId String                @map("actor_account_id") @db.Char(36)
+  expectedEmail  String                @map("expected_email") @db.VarChar(254)
+  email          String                @db.VarChar(254)
+  payloadHash    String                @map("payload_hash") @db.Char(64)
+  status         EmpProvisioningStatus @default(PENDING)
+  attempts       Int                   @default(0)
+  nextAttemptAt  DateTime              @default(now()) @map("next_attempt_at") @db.DateTime(3)
+  leaseUntil     DateTime?             @map("lease_until") @db.DateTime(3)
+  leaseToken     String?               @map("lease_token") @db.Char(36)
+  errorCode      String?               @map("error_code") @db.VarChar(40)
+  requestId      String?               @map("request_id") @db.Char(36)
+  createdAt      DateTime              @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt      DateTime              @updatedAt @map("updated_at") @db.DateTime(3)
+  employee       EmpEmployee           @relation(fields: [employeeId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([status, nextAttemptAt, leaseUntil])
+  @@index([employeeId, createdAt])
+  @@map("emp_email_changes")
+}
+
+model EmpLifecycleChange {
+  id             String                @id @db.Char(36)
+  employeeId     String                @map("employee_id") @db.Char(36)
+  actorAccountId String                @map("actor_account_id") @db.Char(36)
+  expectedStatus EmpEmployeeStatus     @map("expected_status")
+  targetStatus   EmpEmployeeStatus     @map("target_status")
+  payloadHash    String                @map("payload_hash") @db.Char(64)
+  status         EmpProvisioningStatus @default(PENDING)
+  attempts       Int                   @default(0)
+  nextAttemptAt  DateTime              @default(now()) @map("next_attempt_at") @db.DateTime(3)
+  leaseUntil     DateTime?             @map("lease_until") @db.DateTime(3)
+  leaseToken     String?               @map("lease_token") @db.Char(36)
+  errorCode      String?               @map("error_code") @db.VarChar(40)
+  requestId      String?               @map("request_id") @db.Char(36)
+  createdAt      DateTime              @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt      DateTime              @updatedAt @map("updated_at") @db.DateTime(3)
+  employee       EmpEmployee           @relation(fields: [employeeId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([status, nextAttemptAt, leaseUntil])
+  @@index([employeeId, createdAt])
+  @@map("emp_lifecycle_changes")
+}
+
+model AuthEmailChange {
+  id             String      @id @db.Char(36)
+  accountId      String      @map("account_id") @db.Char(36)
+  actorAccountId String      @map("actor_account_id") @db.Char(36)
+  payloadHash    String      @map("payload_hash") @db.Char(64)
+  email          String      @db.VarChar(254)
+  createdAt      DateTime    @default(now()) @map("created_at") @db.DateTime(3)
+  account        AuthAccount @relation(fields: [accountId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([accountId, createdAt])
+  @@map("auth_email_changes")
 }

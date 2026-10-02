@@ -59,33 +59,49 @@ Pengguna menyetujui penyederhanaan pelaksanaan dengan syarat struktur proyek tet
 - Gunakan pola bersama untuk form, daftar, detail dan konfirmasi. Komponen Atomic Design dipisah hanya berdasarkan tanggung jawab atau penggunaan ulang nyata, bukan abstraksi dini.
 - Tunda abstraksi generik; gunakan controller/DTO/service dan Prisma sesuai kepemilikan data tiap service.
 - Outbox/retry dibatasi pada alur yang membutuhkan konsistensi lintas service (provisioning akun+profil, media READY→attendance). Idempotensi, kompensasi dan pemulihan yang diwajibkan baseline tetap dipenuhi.
-- Test terfokus per perubahan; suite lengkap pada checkpoint integrasi. Prioritas: aturan bisnis, otorisasi, revokasi, lokasi wajib, pemulihan.
+- Test terfokus per perubahan; browser manual per fitur selama development. Suite seluruh repo hanya checkpoint lintas package yang relevan/rilis; regresi browser otomatis sebelum rilis saat resource tersedia. Prioritas: aturan bisnis, otorisasi, revokasi, lokasi wajib, pemulihan.
 
 ### Tier test (biaya vs nilai) — disetujui 2026-10-02
-Tujuan: mempercepat pengembangan dengan memilih pemeriksaan berdasarkan perubahan dan risiko. Kebijakan ini berlaku untuk task berikutnya; test yang sudah ada tetap dipertahankan.
+Revisi percepatan disetujui pengguna pada 2026-10-02 setelah T13: RAM lokal terbatas dan pengulangan suite memperlambat development. Aturan berikut menjadi acuan; test yang sudah ada tetap disimpan.
 
 | Tier | Isi | Kapan dijalankan |
 | --- | --- | --- |
-| 1. Statis | Typecheck dan lint package/berkas terkait | Setiap perubahan kode/config yang relevan sebelum commit; tidak harus seluruh monorepo. Dokumentasi saja cukup diperiksa isi, tautan dan diff. |
-| 2. Unit/komponen terfokus | Jest, kontrak HTTP dengan dependency mock, atau Vitest/RTL untuk modul/komponen terdampak | Saat mengubah logika, API atau komponen; sertakan dependensi/pemakai yang berisiko terdampak. |
-| 3. Visual/design (test:ui) | Halaman terdampak pada 320 px dan 1440 px, masing-masing terang/gelap | Hanya saat layout/CSS berubah. Tambahkan 768/1024 px saat breakpoint berubah; seluruh viewport/portal pada checkpoint integrasi. Perubahan shell/token bersama mencakup halaman pemakainya yang relevan. |
-| 4. Integrasi/E2E nyata | API terhadap MySQL dan alur browser dengan backend nyata; AIStor bila fitur memakai storage | Setelah fitur ujung ke ujung lengkap, pada checkpoint integrasi, dan sebelum promosi ke main; bukan gate setiap commit. Minimal satu alur nyata per fitur. |
+| 1. Statis | Typecheck dan lint package/berkas terkait | Sebelum commit perubahan kode/config terkait. Dokumentasi saja cukup isi, tautan dan diff. |
+| 2. Test terfokus | Unit, komponen atau kontrak HTTP untuk logika dan interaksi terdampak | Saat mengubah perilaku; sertakan pemakai/dependensi yang berisiko. Test baru menguji validasi, transisi state dan aturan bisnis, bukan hanya teks, ikon atau markup statis. |
+| 3. Visual | Halaman yang berubah pada 320/1440 px, terang/gelap | Hanya saat layout/CSS berubah; tambah 768/1024 px jika breakpoint berubah. Gunakan test:ui terfilter atau pemeriksaan browser tercatat. Shell/token bersama mencakup pemakai terdampak. Seluruh portal tidak diulang pada setiap fitur/checkpoint. |
+| 4. Integrasi backend | API terhadap MySQL; AIStor bila digunakan | Setelah fitur lengkap atau saat perubahan memengaruhi constraint, transaksi, otorisasi, revokasi, idempotensi atau pemulihan. Bukti aturan bisnis dan data nyata tetap wajib. |
+| 5. Browser nyata | Checklist manual per fitur melalui backend nyata | Default selama development. Catat langkah, hasil, tanggal dan penguji; fitur ditutup setelah acceptance nyata lulus. E2E browser otomatis ditunda ke regresi sebelum rilis saat resource tersedia. |
 
-- Loop tiap increment: kode → statis + test terfokus → review → commit. Integrasi/E2E dijalankan setelah fitur lengkap; fitur belum dicentang selesai sebelum bukti nyata lulus.
-- Suite lengkap/build monorepo dijalankan pada checkpoint integrasi dan sebelum promosi ke main. Build package terkait dijalankan jika perubahan menyentuh bundling/startup; build dist backend terbaru wajib sebelum E2E.
-- Hindari mengulang pemeriksaan yang sudah lulus jika source, dependensi, konfigurasi dan lingkungan terkait tidak berubah. Catat scope dan hasil bukti; perubahan baru, kegagalan atau risiko yang belum terjawab menjadi alasan mengulang/memperluas pemeriksaan.
-- Periksa resource_status jika tersedia, atau RAM OS jika alat tidak tersedia. Jalankan suite berat satu per satu dengan Playwright 1 worker. E2E Auth/master dijalankan per spec untuk menghindari 429; kebijakan ini tidak mengubah limit login/refresh Auth.
-- Verifikasi migration/schema/constraint/grants tetap wajib ketika schema berubah, termasuk diff migrations→schema exit 0 dan penerapan ke dev/test sesuai runbook.
+- Loop development: selesaikan perubahan logis → typecheck/lint + test perilaku terdampak → review → commit/push ke dev. Satu commit per perubahan logis lengkap, bukan per berkas atau potongan kecil. Perubahan berkaitan boleh mencakup kode, test dan dokumentasi; jangan mencampur pekerjaan yang tidak berkaitan.
+- Integrasi backend dan checklist browser dijalankan setelah fitur lengkap; bukan gate setiap commit. Gunakan fixture terpisah untuk test otomatis. Akun development hanya untuk checklist manual yang disetujui; jangan menjalankan cleanup fixture destructive pada development.
+- Jangan membuat atau memperluas harness E2E browser setiap fitur selama development. Simpan suite yang ada; siapkan cakupan regresi core journeys sebelum rilis. Hasil manual tidak boleh ditulis sebagai hasil Playwright.
+- Build package terkait saat bundling/startup berubah. Build dist backend yang berubah sebelum pengujian memakai dist. Build/lint/test seluruh monorepo hanya pada checkpoint yang relevan terhadap integrasi lintas package dan sebelum promosi main.
+- Jangan mengulang pemeriksaan lulus tanpa perubahan source/dependensi/config/lingkungan terkait, kegagalan atau risiko baru. Reuse bukti yang masih berlaku dan catat scope hasil.
+- Suite berat serial. Periksa resource_status bila tersedia atau RAM OS; Playwright satu worker. Regresi E2E browser otomatis dijalankan sebelum rilis ketika resource memadai, per spec agar limit Auth tidak terkena gabungan suite. Limit login/refresh tidak dilonggarkan.
+- Ketika schema berubah, verifikasi migration/schema/constraint/grants tetap wajib: diff migrations→schema exit 0 dan penerapan dev/test sesuai runbook.
+- Dokumentasi cukup module spec + acceptance dan progress singkat. Perbarui runbook bila perintah/setup berubah; hindari dokumen per endpoint dan penyalinan bukti ke banyak tempat.
+- Reuse pola form/daftar/detail yang ada. Tunda abstraksi generik, refactor, polesan tambahan dan tooling baru yang tidak diperlukan acceptance fitur.
 
-Bukti kritis tetap wajib: aturan bisnis absensi (late/early/cutoff), otorisasi role, revokasi sesi, unik/konflik data, lokasi wajib, keamanan foto, idempotensi check-in/out/provisioning, pemulihan/kompensasi. Mock membantu unit/komponen, sedangkan penerimaan integrasi memakai MySQL/AIStor nyata sesuai fitur. Pengujian kamera/lokasi perangkat nyata tetap mengikuti acceptance. Jangan menghapus test atau menurunkan acceptance untuk mempercepat loop.
+Bukti kritis tetap wajib: aturan bisnis absensi (late/early/cutoff), otorisasi role, revokasi sesi, unik/konflik data, lokasi wajib, keamanan foto, idempotensi check-in/out/provisioning, pemulihan/kompensasi. Pertahankan test otomatis untuk aturan tersebut. Acceptance MySQL/AIStor dan kamera/lokasi memakai layanan/perangkat nyata sesuai fitur. Test lama tidak dihapus; frekuensi eksekusi dan test baru yang redundan dikurangi.
 
 - Gunakan tooling yang ada; tunda tambahan broker/cache/orchestration/build system tanpa kebutuhan nyata.
 - Spike kamera/lokasi (T18) dijadwalkan lebih awal secara serial setelah prasyarat T07 siap.
 
 Catatan struktur aktual: packages/contracts dan packages/config belum dibuat; dibuat saat task pertama yang membutuhkannya (kontrak Employee pada T10). packages/ui dan packages/database sudah ada.
 
+### Pelaksanaan per putaran — disetujui 2026-10-02
+
+- Satu putaran menyelesaikan perilaku yang dapat digunakan: kontrak/schema yang diperlukan, API, UI, test terkait, acceptance dan dokumentasi ringkas; kemudian satu commit/push. Hindari berhenti setelah setiap komponen kecil.
+- Setelah inventaris awal, baca hanya spec/source yang berkaitan dan diff terbaru. Muat ulang konteks umum jika keputusan/dependensi berubah atau ada bukti yang bertentangan.
+- Reuse form, daftar, dialog, error dan auth dari T10–T13. Implementasikan desain sesuai spesifikasi; kumpulkan polesan tambahan yang tidak memengaruhi acceptance untuk review UI T28.
+- Kumpulkan perjalanan browser ke satu checklist setelah putaran lengkap. Pemeriksaan otomatis bisnis/data tetap mengikuti tier test; jangan menunggu uji manual untuk menemukan kegagalan unit/integrasi yang sudah bisa diperiksa.
+- Jalankan hanya service yang diperlukan. T14 memakai MySQL, Auth, Employee, Gateway dan HR; Attendance web hanya ketika memeriksa login/revokasi karyawan. Media/Attendance service dan AIStor dijalankan saat fitur membutuhkannya. Hentikan hanya proses milik agen yang sudah tidak diperlukan; proses pengguna tidak dihentikan tanpa instruksi.
+- Pemecahan putaran didasarkan pada perilaku, dependensi dan risiko, bukan jumlah berkas. Putaran yang lebih besar tetap harus dapat ditinjau dan dipulihkan dengan aman.
+
+Pembagian T14 dicatat di [todo](todo.md): putaran A edit profil/email, lalu putaran B lifecycle/history/revokasi. Masing-masing mencakup API, UI, test bisnis/integrasi terkait dan satu checklist browser; T14 selesai setelah keduanya memenuhi acceptance.
+
 ## Cara menjalankan pekerjaan
-Task pada todo.md berukuran kecil. Jika implementasi perlu lebih dari sekitar lima file, pecah task sebelum bekerja dan catat dependensi. Checkpoint ditinjau sebelum fase berikutnya. Update spec dahulu bila keputusan berubah.
+Kerjakan putaran di todo.md secara serial sampai perilaku terkait lengkap. Pecah berdasarkan perilaku/dependensi/risiko yang dapat diverifikasi, bukan jumlah berkas. Checkpoint ditinjau sebelum fase berikutnya. Update spec dahulu bila keputusan berubah.
 
 ## Desain seluruh halaman dan kelanjutan proyek
 Rancangan seluruh halaman menjadi bagian dari kelanjutan seluruh proyek sesuai plan. [UI/UX](../docs/sdd/frontend-ui-ux.md) dan [design system](../docs/sdd/frontend-design-system.md) menjadi acuan frontend; [alur implementasi](../docs/development/implementation-workflow.md) menjelaskan read order, status awal, proses dan definisi selesai.

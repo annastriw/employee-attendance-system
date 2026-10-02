@@ -5,6 +5,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { AdminSeedService } from './auth/admin-seed.service';
 import { DatabaseModule } from './database/database.module';
 import { HealthController } from './health/health.controller';
+import { AccountEmailChangesModule } from './email-changes/email-changes.controller';
+import { AccountLifecycleModule } from './lifecycle/lifecycle.controller';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -13,7 +15,7 @@ import { AppService } from './app.service';
   imports: [
     DatabaseModule,
     AuthModule,
-    AccountProvisioningModule,
+    AccountProvisioningModule, AccountEmailChangesModule, AccountLifecycleModule,
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 10 }]),
   ],
   controllers: [AppController, HealthController],

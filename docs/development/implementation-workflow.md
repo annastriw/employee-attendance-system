@@ -12,7 +12,7 @@ Selesaikan seluruh proyek sesuai T01–T31: frontend Attendance/HR, lima service
 4. Spesifikasi/ADR terkait task; untuk frontend [UI/UX](../sdd/frontend-ui-ux.md) dan [design system](../sdd/frontend-design-system.md).
 5. Source/test/runbook: [Auth](../sdd/auth-service.md), [HR lokal](../deployment/hr-local.md), [tooling](../architecture/adr-002-project-tooling.md), [deployment](../architecture/adr-003-repository-and-deployment.md), [storage](../architecture/adr-001-object-storage.md).
 
-Setelah inventaris awal, gunakan context engineering untuk memuat bagian spec/source terkait increment. Jika module spec belum ada, lengkapi sesuai T01 sebelum perubahan perilaku terkait. Update spec ketika keputusan berubah.
+Setelah inventaris awal, baca hanya spec/source terkait putaran dan diff terbaru; ulangi konteks umum bila keputusan/dependensi berubah atau bukti bertentangan. Jika module spec belum ada, lengkapi sebelum perubahan perilaku terkait. Update spec ketika keputusan berubah.
 
 ## Keadaan awal yang perlu diperiksa ulang
 
@@ -26,7 +26,7 @@ Setelah inventaris awal, gunakan context engineering untuk memuat bagian spec/so
 
 ## Pelaksanaan serial sesuai dependensi
 
-T01–T31 adalah backlog utama; UX01–UX07 hanya keterlacakan layar. Pilih satu task siap dan satu increment konkret. Kerjakan kontrak/schema yang dibutuhkan → API → UI → test/integrasi → review/commit, lalu lanjutkan increment berikut. Tidak perlu menyelesaikan seluruh backend sebelum mulai frontend.
+T01–T31 adalah backlog utama; UX01–UX07 hanya keterlacakan layar. Ikuti [pelaksanaan per putaran](../../tasks/plan.md#pelaksanaan-per-putaran--disetujui-2026-10-02): selesaikan kontrak/schema → API → UI → test terkait → acceptance/dokumentasi → review/commit sebagai satu perilaku yang dapat digunakan. Reuse pola T10–T13, simpan polesan tambahan untuk T28, kumpulkan checklist browser setelah putaran lengkap, dan jalankan service seperlunya. Pemecahan berdasarkan perilaku/dependensi/risiko, bukan jumlah berkas.
 
 - Dua agen digunakan bergantian untuk mengatasi batas sesi. Jangan menjalankan keduanya bersamaan atau membuat subagen tambahan.
 - Pertahankan satu task/increment aktif; catat file, proses/port, dependency dan langkah berikut di tasks/progress.md.
@@ -61,37 +61,35 @@ Checkpoint/trigger tidak memuat rahasia, signed URL atau data/foto pribadi. Tida
 - Implementasikan vertical slice dengan API/MySQL/AIStor nyata. Mock hanya untuk component tests/prototipe dengan konteks jelas.
 - Selesaikan detail teknis terbuka melalui spike/docs/test dan catat keputusan. Tanyakan spesifik hanya jika perubahan kebutuhan/akses dibutuhkan; lanjutkan task independen.
 - Pertahankan scope baseline: tanpa export/cuti/geofence/face matching/hard delete/admin tambahan/edit fakta absensi.
-- Setiap perubahan logis: test relevan → review diff/stage file terkait → commit berprefix pada dev. Push ke remote pilihan pengguna jika tersedia; jika belum, commit lokal berjalan dan push tertunda.
-- Perbarui todo/progress/spec/runbook bersama slice. Jangan menghapus failing tests atau menurunkan acceptance agar tampak selesai.
+- Satu perubahan logis lengkap: pemeriksaan relevan → review diff/stage berkas kode/test/dokumentasi terkait → satu commit berprefix dan push ke dev. Hindari commit per berkas/potongan kecil; jangan mencampur pekerjaan tidak berkaitan. Reuse pola yang ada dan tunda abstraksi/refactor/polesan yang tidak dibutuhkan acceptance.
+- Catat acceptance di module spec dan update todo/progress secara ringkas. Update runbook hanya bila setup/perintah berubah; hindari dokumen per endpoint dan pengulangan bukti. Simpan test lama dan jangan menurunkan acceptance agar tampak selesai.
 - Teruskan task yang siap sampai seluruh plan terpenuhi. Kapasitas sesi habis ditangani dengan checkpoint, bukan perubahan scope menjadi frontend saja.
 
 ## Verifikasi
 
 Ikuti [tier test disetujui 2026-10-02](../../tasks/plan.md#tier-test-biaya-vs-nilai--disetujui-2026-10-02). Periksa package.json dan runbook sebelum menjalankan; jangan menampilkan kredensial.
 
-- Per increment kode: typecheck/lint package terkait dan unit/komponen/kontrak HTTP terfokus pada perubahan. Dokumentasi saja: isi, tautan dan diff; tidak perlu mengulang test aplikasi.
-- Layout/CSS: filter test:ui ke halaman terdampak, 320/1440 px terang/gelap. Tambahkan 768/1024 px bila breakpoint berubah; shell/token bersama juga memerlukan pemeriksaan pemakai terkait.
-- Setelah fitur lengkap: API MySQL dan minimal satu perjalanan E2E nyata. Jalankan per spec, satu worker, suite berat bergantian setelah memeriksa RAM. Build dist service backend terbaru terlebih dahulu.
-- Jangan mengulang pemeriksaan lulus tanpa perubahan source/dependensi/config/lingkungan terkait; catat scope bukti di progress/module spec. Suite lengkap pada checkpoint integrasi dan sebelum promosi main.
+- Per perubahan logis: typecheck/lint package terkait dan test unit/komponen/kontrak HTTP untuk perilaku terdampak. Test UI baru menguji validasi/interaksi, bukan sekadar teks/ikon/markup statis. Dokumentasi saja: isi, tautan dan diff.
+- Layout/CSS: hanya halaman terdampak pada 320/1440 px terang/gelap lewat test:ui terfilter atau browser manual tercatat. Tambahkan 768/1024 px bila breakpoint berubah; shell/token bersama mencakup pemakai terdampak. Jangan mengulang seluruh portal setiap fitur/checkpoint.
+- Setelah fitur lengkap: integrasi API MySQL/AIStor sesuai risiko dan checklist browser manual melalui backend nyata. Catat langkah, hasil, tanggal dan penguji tanpa rahasia. E2E browser otomatis serta pembuatan/perluasan harness ditunda ke regresi sebelum rilis saat resource tersedia. Simpan harness lama. Suite berat serial, Playwright satu worker; build dist backend yang berubah sebelum test memakai dist.
+- Jangan mengulang pemeriksaan lulus tanpa perubahan source/dependensi/config/lingkungan terkait, kegagalan atau risiko baru. Catat bukti sekali di module spec dan referensikan dari progress. Build/lint/test seluruh monorepo hanya pada checkpoint integrasi lintas package yang relevan dan sebelum promosi main; build package terkait saat bundling/startup berubah.
 
 Contoh filter fitur yang sudah tersedia (sesuaikan dengan modul yang diubah):
 
 ~~~powershell
 pnpm --dir apps/employee-service run test --runInBand positions.service.spec.ts
 pnpm --dir apps/hr-web run test src/pages/PositionsPage.test.tsx
-pnpm --dir apps/hr-web run test:e2e hr-positions.spec.ts --workers=1
 ~~~
 
-Pada checkpoint integrasi/rilis, jalankan pemeriksaan menyeluruh berikut beserta suite khusus yang tidak tercakup script root:
+Pada checkpoint lintas package yang relevan dan sebelum rilis, jalankan pemeriksaan menyeluruh berikut beserta suite khusus yang diperlukan. Regresi browser otomatis sebelum rilis dijalankan ketika resource memadai:
 
 ~~~powershell
 pnpm run build
 pnpm run lint
 pnpm run test
-pnpm --dir apps/hr-web run test:ui --workers=1
 ~~~
 
-Script root hanya memeriksa package yang mempunyai script terkait. E2E nyata dijalankan per spec sesuai runbook; jangan melonggarkan limit Auth agar suite gabungan lulus. Pemeriksaan schema/migration/grants dijalankan saat schema berubah, termasuk diff migrations→schema exit 0 dan penerapan dev/test:
+Script root hanya memeriksa package yang mempunyai script terkait. Selama development, checklist browser manual adalah bukti perjalanan nyata. Sebelum rilis, regresi Playwright dijalankan per spec sesuai runbook, satu worker dan resource memadai; jangan melonggarkan limit Auth agar suite gabungan lulus. Pemeriksaan schema/migration/grants dijalankan saat schema berubah, termasuk diff migrations→schema exit 0 dan penerapan dev/test:
 
 ~~~powershell
 pnpm db:validate
@@ -101,7 +99,7 @@ pnpm db:verify
 ~~~
 
 - Siapkan MySQL/AIStor test dan build service sesuai runbook sebelum integration/E2E. Jangan menerapkan destructive fixture pada dev/production.
-- Frontend: Vitest + RTL + Playwright; lengkapi harness Attendance yang belum tersedia.
+- Frontend: Vitest + RTL untuk perilaku, pemeriksaan visual terdampak, dan checklist browser manual per fitur. Playwright untuk regresi sebelum rilis; perluasan harness tidak menjadi pekerjaan rutin setiap fitur.
 - Backend: Jest + @nestjs/testing + Supertest; verifikasi waktu/eligibility, otorisasi, revokasi, idempotensi, snapshot, konflik dan pemulihan service.
 - Database/storage: migration/constraint/grants, upload READY, otorisasi foto, persistensi, outbox/deduplikasi dan cleanup orphan.
 - Core journeys: provisioning → forced password/login → check-in/out foto+lokasi → history/monitoring → delete/restore, lifecycle/reset dan kegagalan/retry.
