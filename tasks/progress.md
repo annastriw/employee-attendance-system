@@ -26,7 +26,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| Revisi kebijakan percepatan | Codex, 2026-10-02 | AGENTS.md, tasks/{plan,progress}.md, baseline/design system/implementation-workflow | Persetujuan pengguna setelah penutupan T13 (9245c09) | Tidak memulai proses aplikasi/test berat | Kebijakan diselaraskan; T14 siap, implementasi belum dimulai |
+| Pembagian putaran T14 dan eksekusi ringkas | Codex, 2026-10-02 | tasks/{plan,todo,progress}.md, docs/development/implementation-workflow.md | Persetujuan pengguna atas pelaksanaan per fitur lengkap | Tidak memulai proses aplikasi/test berat | Putaran A edit profil/email, kemudian B lifecycle/history/revokasi; implementasi belum dimulai |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 
@@ -35,6 +35,8 @@ Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increme
 Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .windsurf/ dan skills-lock.json adalah berkas lokal; jangan di-stage, dihapus atau diubah tanpa scope jelas. Rahasia dan data pribadi tetap ignored.
 
 ## Bukti pemeriksaan
+
+- Pelaksanaan per putaran disetujui pengguna (2026-10-02): fitur lengkap API+UI+test/dokumentasi dalam satu putaran, reuse T10–T13, polesan tambahan pada T28, baca konteks terkait saja, checklist browser sekali sesudah putaran lengkap, dan service seperlunya. T14 dibagi A edit profil/email, B lifecycle/history/revokasi. Perubahan dokumentasi diperiksa isi, tautan dan diff; test aplikasi tidak diulang.
 
 - Revisi percepatan setelah T13 (2026-10-02): pengguna menyetujui E2E browser manual per fitur selama development, regresi browser otomatis sebelum rilis saat resource tersedia, test perilaku terfokus, visual hanya halaman berubah, suite repo hanya checkpoint relevan/rilis, satu commit per perubahan logis, serta dokumentasi ringkas/reuse tanpa refactor dini. Test lama dan bukti bisnis/keamanan/data nyata tetap wajib. Perubahan hanya dokumentasi; periksa isi/tautan/diff, tanpa mengulang test aplikasi.
 
@@ -66,7 +68,7 @@ Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .w
 
 ## Langkah berikut
 
-1. **T14 perubahan dan lifecycle karyawan.** T13 beserta checkpoint selesai setelah pengguna melaporkan langkah browser manual 1–5 lulus. Baca baseline, todo, dan kontrak provisioning sebelum implementasi edit/email/nonaktif/arsip/restore, history dan revokasi. Revisi percepatan disetujui pengguna dan diterapkan: E2E browser manual saat development, pemeriksaan terfokus, regresi otomatis sebelum rilis saat resource tersedia; lihat tier test plan. Spec Playwright T12 otomatis tetap belum dijalankan karena RAM terbatas.
+1. **T14 perubahan dan lifecycle karyawan.** T13 beserta checkpoint selesai setelah pengguna melaporkan langkah browser manual 1–5 lulus. Mulai putaran A edit profil/email, lalu B lifecycle/history/revokasi sebagaimana todo. Baca baseline dan source/provisioning terkait sebelum menulis kontrak T14; selesaikan API+UI+test per putaran, checklist browser sesudah lengkap. Revisi percepatan disetujui pengguna dan diterapkan: E2E browser manual saat development, pemeriksaan terfokus, regresi otomatis sebelum rilis saat resource tersedia; lihat tier test plan. Spec Playwright T12 otomatis tetap belum dijalankan karena RAM terbatas.
 2. Limit 429 E2E Auth tetap menunggu keputusan pengguna: refresh limit sendiri atau run per spec. Jangan longgarkan limit login. Run T11 per spec terpisah lulus; konfigurasi Auth tidak diubah.
 3. T09c selesai dan menjadi acuan wajib semua halaman berikutnya: gunakan token/komponen packages/ui, HeroUI, zinc–emerald, Geist, Phosphor dan mode terang/gelap. Kontrak mencakup E01–E09/H01–H14, seluruh state/dialog/mobile; jangan kembali ke T09b monokrom.
 4. Polesan H11 selesai bersama H12: (a) shared MasterDataPage menampilkan skeleton selama refetch sehingga baris lama tidak tampil bersama pesan sukses; test komponen dan E2E desktop/mobile menunggu baris hilang sesudah aktifkan pada filter Nonaktif. (b) pager tidak lagi memakai kelas monospace, diverifikasi computed font pada test visual. (c) status memakai satu ToggleButtonGroup berbatas dan separator HeroUI, screenshot terang/gelap ditinjau.

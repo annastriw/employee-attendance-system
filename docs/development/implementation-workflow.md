@@ -12,7 +12,7 @@ Selesaikan seluruh proyek sesuai T01–T31: frontend Attendance/HR, lima service
 4. Spesifikasi/ADR terkait task; untuk frontend [UI/UX](../sdd/frontend-ui-ux.md) dan [design system](../sdd/frontend-design-system.md).
 5. Source/test/runbook: [Auth](../sdd/auth-service.md), [HR lokal](../deployment/hr-local.md), [tooling](../architecture/adr-002-project-tooling.md), [deployment](../architecture/adr-003-repository-and-deployment.md), [storage](../architecture/adr-001-object-storage.md).
 
-Setelah inventaris awal, gunakan context engineering untuk memuat bagian spec/source terkait increment. Jika module spec belum ada, lengkapi sesuai T01 sebelum perubahan perilaku terkait. Update spec ketika keputusan berubah.
+Setelah inventaris awal, baca hanya spec/source terkait putaran dan diff terbaru; ulangi konteks umum bila keputusan/dependensi berubah atau bukti bertentangan. Jika module spec belum ada, lengkapi sebelum perubahan perilaku terkait. Update spec ketika keputusan berubah.
 
 ## Keadaan awal yang perlu diperiksa ulang
 
@@ -26,7 +26,7 @@ Setelah inventaris awal, gunakan context engineering untuk memuat bagian spec/so
 
 ## Pelaksanaan serial sesuai dependensi
 
-T01–T31 adalah backlog utama; UX01–UX07 hanya keterlacakan layar. Pilih satu task siap dan satu increment konkret. Kerjakan kontrak/schema yang dibutuhkan → API → UI → test/integrasi → review/commit, lalu lanjutkan increment berikut. Tidak perlu menyelesaikan seluruh backend sebelum mulai frontend.
+T01–T31 adalah backlog utama; UX01–UX07 hanya keterlacakan layar. Ikuti [pelaksanaan per putaran](../../tasks/plan.md#pelaksanaan-per-putaran--disetujui-2026-10-02): selesaikan kontrak/schema → API → UI → test terkait → acceptance/dokumentasi → review/commit sebagai satu perilaku yang dapat digunakan. Reuse pola T10–T13, simpan polesan tambahan untuk T28, kumpulkan checklist browser setelah putaran lengkap, dan jalankan service seperlunya. Pemecahan berdasarkan perilaku/dependensi/risiko, bukan jumlah berkas.
 
 - Dua agen digunakan bergantian untuk mengatasi batas sesi. Jangan menjalankan keduanya bersamaan atau membuat subagen tambahan.
 - Pertahankan satu task/increment aktif; catat file, proses/port, dependency dan langkah berikut di tasks/progress.md.

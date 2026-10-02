@@ -89,8 +89,19 @@ Bukti kritis tetap wajib: aturan bisnis absensi (late/early/cutoff), otorisasi r
 
 Catatan struktur aktual: packages/contracts dan packages/config belum dibuat; dibuat saat task pertama yang membutuhkannya (kontrak Employee pada T10). packages/ui dan packages/database sudah ada.
 
+### Pelaksanaan per putaran — disetujui 2026-10-02
+
+- Satu putaran menyelesaikan perilaku yang dapat digunakan: kontrak/schema yang diperlukan, API, UI, test terkait, acceptance dan dokumentasi ringkas; kemudian satu commit/push. Hindari berhenti setelah setiap komponen kecil.
+- Setelah inventaris awal, baca hanya spec/source yang berkaitan dan diff terbaru. Muat ulang konteks umum jika keputusan/dependensi berubah atau ada bukti yang bertentangan.
+- Reuse form, daftar, dialog, error dan auth dari T10–T13. Implementasikan desain sesuai spesifikasi; kumpulkan polesan tambahan yang tidak memengaruhi acceptance untuk review UI T28.
+- Kumpulkan perjalanan browser ke satu checklist setelah putaran lengkap. Pemeriksaan otomatis bisnis/data tetap mengikuti tier test; jangan menunggu uji manual untuk menemukan kegagalan unit/integrasi yang sudah bisa diperiksa.
+- Jalankan hanya service yang diperlukan. T14 memakai MySQL, Auth, Employee, Gateway dan HR; Attendance web hanya ketika memeriksa login/revokasi karyawan. Media/Attendance service dan AIStor dijalankan saat fitur membutuhkannya. Hentikan hanya proses milik agen yang sudah tidak diperlukan; proses pengguna tidak dihentikan tanpa instruksi.
+- Pemecahan putaran didasarkan pada perilaku, dependensi dan risiko, bukan jumlah berkas. Putaran yang lebih besar tetap harus dapat ditinjau dan dipulihkan dengan aman.
+
+Pembagian T14 dicatat di [todo](todo.md): putaran A edit profil/email, lalu putaran B lifecycle/history/revokasi. Masing-masing mencakup API, UI, test bisnis/integrasi terkait dan satu checklist browser; T14 selesai setelah keduanya memenuhi acceptance.
+
 ## Cara menjalankan pekerjaan
-Task pada todo.md berukuran kecil. Jika implementasi perlu lebih dari sekitar lima file, pecah task sebelum bekerja dan catat dependensi. Checkpoint ditinjau sebelum fase berikutnya. Update spec dahulu bila keputusan berubah.
+Kerjakan putaran di todo.md secara serial sampai perilaku terkait lengkap. Pecah berdasarkan perilaku/dependensi/risiko yang dapat diverifikasi, bukan jumlah berkas. Checkpoint ditinjau sebelum fase berikutnya. Update spec dahulu bila keputusan berubah.
 
 ## Desain seluruh halaman dan kelanjutan proyek
 Rancangan seluruh halaman menjadi bagian dari kelanjutan seluruh proyek sesuai plan. [UI/UX](../docs/sdd/frontend-ui-ux.md) dan [design system](../docs/sdd/frontend-design-system.md) menjadi acuan frontend; [alur implementasi](../docs/development/implementation-workflow.md) menjelaskan read order, status awal, proses dan definisi selesai.
