@@ -48,6 +48,12 @@ export function usePhotoUpload(
 
   async function save() {
     if (!photo || request.current) return;
+    if (
+      upload?.blob === photo.blob &&
+      upload.purpose === purpose &&
+      upload.ready
+    )
+      return upload.ready;
     const controller = new AbortController();
     request.current = controller;
     if (
@@ -65,8 +71,10 @@ export function usePhotoUpload(
         attempt.current.key,
         controller.signal,
       );
-      if (!controller.signal.aborted)
+      if (!controller.signal.aborted) {
         setUpload({ blob: photo.blob, purpose, busy: false, ready });
+        return ready;
+      }
     } catch (reason) {
       if (controller.signal.aborted) return;
       if (reason instanceof AuthError && reason.status === 401) {

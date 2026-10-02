@@ -109,7 +109,7 @@ if (process.argv.includes("--grants")) {
   }
   // Attendance service tables
   for (const [db, user] of [["attendance_dev", "attendance_attendance"], ["attendance_test", "attendance_attendance_test"]]) {
-    for (const table of ["att_work_policies", "att_daily_records", "att_events", "att_idempotency_requests"]) {
+    for (const table of ["att_work_policies", "att_daily_records", "att_events", "att_idempotency_requests", "att_outbox"]) {
       sql += `GRANT SELECT, INSERT, UPDATE ON \`${db}\`.\`${table}\` TO '${user}'@'%';\n`;
     }
     sql += `GRANT SELECT, INSERT, UPDATE, DELETE ON \`${db}\`.att_holidays TO '${user}'@'%';\n`;

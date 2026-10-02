@@ -127,7 +127,7 @@ describe('HolidaysService (Unit)', () => {
         },
       ]);
 
-      const res = await service.findAll({});
+      const res = await service.findAll({ page: 1, pageSize: 20 });
 
       expect(res.data).toHaveLength(2);
       expect(res.data[0].id).toBe('past-id');

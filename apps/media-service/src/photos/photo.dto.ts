@@ -12,3 +12,8 @@ export class PhotoScopeDto extends PhotoUploadDto {
   @IsUUID()
   ownerEmployeeId: string;
 }
+
+export class PhotoBindDto extends PhotoScopeDto {
+  @ApiProperty({ format: 'uuid' }) @IsUUID('4') eventId: string;
+  @ApiProperty({ format: 'uuid' }) @IsUUID('4') actorAccountId: string;
+}

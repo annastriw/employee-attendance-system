@@ -1,53 +1,67 @@
-# Attendance Portal lokal (T13)
+# Attendance Portal lokal
+
+## Persiapan check-in T21
+
+Dari root proyek di PowerShell, gunakan konfigurasi MySQL, Auth, Employee dan AIStor/Media yang sudah dibuat. Ikuti [MySQL](mysql-local.md), [Auth](auth-local.md), [HR/Employee](hr-local.md), [Media](media-local.md) dan [Gateway](gateway-local.md). Jangan salin kredensial ke dokumentasi atau Git.
+
+Jika Docker belum berjalan:
+
+~~~powershell
+docker compose --env-file .env.mysql -f infra/compose.mysql.local.yml up -d mysql
+docker compose --env-file .env.aistor -f infra/compose.aistor.local.yml up -d
+~~~
+
+Siapkan Attendance dan schema terbaru:
+
+~~~powershell
+pnpm attendance:setup
+pnpm db:migrate
+pnpm db:grants
+pnpm db:generate
+~~~
+
+attendance:setup membaca secret internal yang sudah ada di .env.employee dan .env.media, lalu mengisi nilai yang belum tersedia di .env.attendance (ignored). Nilai existing dipertahankan. Attendance membaca .env.database dan .env.attendance, memakai akun MySQL khusus Attendance; tabel service lain diakses lewat HTTP internal. Untuk test terisolasi, jalankan pnpm db:migrate:test setelah database test siap.
 
 ## Menjalankan
 
-Dari root proyek di PowerShell, pastikan Docker Desktop aktif. Jika MySQL belum hidup:
-
-```powershell
-docker compose --env-file .env.mysql -f infra/compose.mysql.local.yml up -d mysql
-```
-
-Gunakan akun karyawan yang sudah dibuat melalui T12. MySQL development dan konfigurasi Auth/Gateway lokal harus sudah siap sesuai [panduan Auth](auth-local.md) dan [Gateway](gateway-local.md). Jalankan pada tiga terminal terpisah, dan biarkan terbuka:
-
-```powershell
-pnpm --dir apps/auth-service start:dev
-```
-
-```powershell
-pnpm --dir apps/api-gateway start:dev
-```
-
-```powershell
-pnpm --dir apps/attendance-web dev --port 5173 --strictPort
-```
-
-Buka http://localhost:5173. Login karyawan memakai Gateway di `http://localhost:3000/api/v1`; frontend tidak mengakses Auth 3001 langsung. Employee Service 3002 diperlukan untuk membuat akun melalui HR, tetapi tidak diperlukan saat hanya mencoba login akun yang sudah ada. Origin `http://localhost:5173` ada dalam template allowlist Auth dan Gateway. Pakai hostname `localhost` secara konsisten untuk browser dan Gateway agar cookie sesuai.
-
-## Checklist manual T13
-
-1. Buka `http://localhost:5173` pada desktop dan lebar ponsel 320 px. Halaman Masuk satu kolom, email/password terlihat, tombol tampilkan password dapat dipakai, tanpa geser horizontal.
-2. Masuk memakai email karyawan hasil T12 dan password sementara yang ditampilkan sekali. Halaman **Buat password baru** harus muncul; tautan `#beranda` tidak boleh melewati langkah ini.
-3. Isi password lama, password baru minimal 12 karakter (maksimal 72 byte UTF-8), dan konfirmasi berbeda. Muncul pesan validasi; password tidak berubah. Ulangi dengan konfirmasi sama dan password baru berbeda dari yang lama.
-4. Setelah tersimpan, portal meminta login ulang. Password sementara tidak berlaku; masuk dengan password baru, lalu **Beranda** menampilkan email akun dan pesan bahwa fitur absensi sedang disiapkan.
-5. Muat ulang halaman: sesi karyawan pulih. Klik **Keluar**, lalu muat ulang lagi: halaman Masuk tetap tampil. Akun HRD tidak dapat masuk di panel karyawan. Bila HR Portal juga terbuka, sesi HRD dan karyawan tidak saling menggantikan.
-
-Jangan masukkan password atau token ke laporan hasil pengujian. Catat hanya nomor langkah yang lulus/gagal dan pesan kesalahannya bila gagal.
-
-## Pemeriksaan frontend yang sudah lulus
-
-Typecheck, lint, build, enam test unit Auth client, tiga test komponen login, tiga test alur App, dan 12 test visual Playwright satu worker (E01/E02/home, terang/gelap, 320/1440 px) lulus. Test visual memakai respons sesi tiruan. Pengguna melaporkan checklist manual langkah 1–5 dengan API nyata lulus pada 2026-10-02; T13 ditutup. E2E otomatis belum dijalankan karena RAM terbatas. Spesifikasi: [login karyawan](../sdd/employee-auth-flow.md).
-
-## Capture T20
-
-Untuk Siapkan foto check-in pada beranda, jalankan Media Service juga (terminal terpisah, atau proses dist lokal yang sudah aktif):
+Jalankan setiap baris berikut pada terminal terpisah dari root proyek dan biarkan terbuka. Jangan membuat proses kedua jika port yang sama sudah digunakan:
 
 ~~~powershell
+pnpm --dir apps/auth-service start:dev
+pnpm --dir apps/employee-service start:dev
 pnpm --dir apps/media-service start:dev
+pnpm --dir apps/attendance-service start:dev
+pnpm --dir apps/api-gateway start:dev
+pnpm --dir apps/attendance-web dev --port 5173 --strictPort
+pnpm --dir apps/hr-web dev --port 5174 --strictPort
 ~~~
 
-AIStor dan .env.media runtime harus siap menurut [panduan Media](media-local.md). Portal tetap memakai http://localhost:5173 dan Gateway 3000; Auth 3001, Media 3004. Gunakan akun karyawan hasil T12/T13 yang telah mengganti password awal. Periksa kesehatan http://localhost:3004/health sebelum uji upload.
+| Aplikasi | Port | Pemeriksaan |
+| --- | --- | --- |
+| Gateway | 3000 | /health |
+| Auth | 3001 | /health |
+| Employee | 3002 | /health |
+| Attendance | 3003 | /health; /docs untuk Swagger |
+| Media | 3004 | /health |
+| Attendance Portal | 5173 | http://localhost:5173 |
+| HR Portal | 5174 | http://localhost:5174 |
 
-Ikuti [checklist manual capture](../sdd/attendance-capture.md#checklist-manual-pengguna). T20 menyiapkan foto+lokasi dan menyimpan foto privat; belum mencatat absensi. T21 mengirim prepared evidence ke Attendance dan menetapkan waktu resmi server. Gunakan HTTPS atau localhost untuk kamera/lokasi; akses http lewat IP LAN biasa akan diblokir browser. Untuk ponsel, buka origin HTTPS yang telah dimasukkan allowlist Auth/Gateway; konfigurasi deployment/tunnel tidak dibuat pada increment ini.
+Semua endpoint health backend menggunakan http://127.0.0.1:PORT. Attendance health menampilkan status database dan jumlah outbox pending/processing, tanpa data karyawan. Worker Attendance mengikat foto READY ke event melalui Media; retry berjalan otomatis dengan batch/lease/backoff terbatas.
 
-Spesifikasi dan bukti pengujian T20 ada di [capture portal karyawan](../sdd/attendance-capture.md). Tes otomatis memakai perangkat/sesi sintetis; hasil kamera/GPS/upload nyata dicatat terpisah, tanpa foto/koordinat/password/token di repo.
+Frontend hanya memakai Gateway http://localhost:3000/api/v1. Gunakan localhost secara konsisten untuk browser/cookie. Login karyawan memakai email/password dari HR dan wajib mengganti password awal. Hari ini dan check-in memerlukan kelima backend; proses Auth saja cukup untuk login, tetapi tidak cukup untuk memuat absensi.
+
+Untuk proses tanpa watch, build service terkait lalu gunakan start:prod. Perubahan source backend memerlukan build dan restart proses dist; Vite memperbarui frontend saat development. Deployment Vercel/VPS tetap tahap rilis, bukan setiap push.
+
+## Pengujian manual
+
+Ikuti [checklist T21](../sdd/attendance-checkin.md#checklist-manual) dan [capture T20](../sdd/attendance-capture.md#checklist-manual-pengguna). Pastikan health kelima backend 200, AIStor aktif, dan karyawan ACTIVE+ready dengan startDate yang sudah berlaku.
+
+Kamera/lokasi membutuhkan HTTPS atau localhost. HTTP melalui IP LAN biasa tidak memenuhi secure context. Uji ponsel memerlukan origin HTTPS yang telah dimasukkan ke allowlist Auth/Gateway; tunnel/deployment tidak dibuat pada increment ini.
+
+Alur: Hari ini → Check-in → Buka kamera → satu wajah dan lokasi aktif → kedip/manual → preview → alasan jika terlambat → Kirim check-in. Foto dikirim multipart terlebih dahulu; Attendance menerima ID foto READY, lokasi dan timestamp bukti, kemudian menetapkan waktu resmi server. Cek hasil/Kirim ulang menjaga key+payload yang sama ketika hasil belum pasti. Jangan menganggap 404 status request sebagai bukti gagal.
+
+Jangan kirim foto, koordinat, password, token, secret, atau berkas lisensi ke repo/laporan. Catat nomor langkah lulus/gagal dan pesan aman. Hasil sintetis otomatis tidak menggantikan penerimaan kamera/GPS pada perangkat nyata.
+
+## Bukti
+
+T13 login/password/logout diterima pengguna pada 2026-10-02; [spesifikasi login](../sdd/employee-auth-flow.md). T20 capture lulus pemeriksaan teknis dengan checklist perangkat masih pending. T21 bukti API/MySQL/AIStor, frontend, visual dan status manual ada di [check-in](../sdd/attendance-checkin.md).

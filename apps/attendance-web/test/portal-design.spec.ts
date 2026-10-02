@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 const title = {
   login: "Masuk",
   change: "Buat password baru",
-  home: "Beranda",
+  home: "Hari ini",
   capture: "Foto check-in",
 };
 
@@ -39,6 +39,30 @@ for (const state of ["login", "change", "home", "capture"] as const) {
                 }),
           );
 
+          await page.route("**/api/v1/me/attendance/today", (route) =>
+            route.fulfill({
+              json: {
+                data: {
+                  employeeName: "Synthetic Employee",
+                  attendanceDate: "2026-10-02",
+                  eligible: true,
+                  ineligibilityMessage: null,
+                  schedule: {
+                    type: "REGULAR_WORKDAY",
+                    start: "08:00:00",
+                    end: "17:00:00",
+                  },
+                  reasonRequired: false,
+                  status: "NOT_CHECKED_IN",
+                  record: null,
+                },
+                meta: {
+                  requestId: "visual",
+                  serverTime: "2026-10-02T07:00:00.000+07:00",
+                },
+              },
+            }),
+          );
           await page.goto(state === "capture" ? "/#foto-checkin" : "/");
           await expect(page.getByRole("heading", { level: 1 })).toHaveText(
             title[state],
@@ -79,7 +103,7 @@ for (const state of ["login", "change", "home", "capture"] as const) {
               page.getByRole("button", { name: "Kembali ke beranda" }),
             ).toBeFocused();
           } else {
-            await expect(page.getByText("employee@example.test")).toBeVisible();
+            await expect(page.getByText("Synthetic Employee")).toBeVisible();
             await expect(
               page.getByRole("button", { name: "Keluar" }),
             ).toBeVisible();

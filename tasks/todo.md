@@ -168,7 +168,8 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 ## T21 — Check-in ujung ke ujung
 - [ ] Selesai
 - Acceptance: Foto+lokasi wajib, waktu server, alasan late, snapshot, idempotency dan unique.
-- Verification: TDD/Supertest konkurensi dan Playwright check-in terintegrasi.
+- Verification: TDD/Supertest konkurensi, integrasi MySQL/AIStor; visual browser dan checklist manual per fitur sesuai tier test (E2E otomatis sebelum rilis).
+- Implementasi/verifikasi teknis 2026-10-02: [check-in](../docs/sdd/attendance-checkin.md), 14 integrasi nyata + 22 unit Attendance + 6 unit/66 kontrak Gateway + 41 frontend + 8 visual lulus; schema/typecheck/lint/build terkait lulus. Checklist kamera/GPS/API browser nyata masih pending; belum ditutup penuh.
 - Dependencies: 16,17,20
 - Target: apps/attendance-service/, apps/attendance-web/
 

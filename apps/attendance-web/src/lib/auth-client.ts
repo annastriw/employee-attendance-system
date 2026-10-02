@@ -12,9 +12,11 @@ interface Session {
 }
 export class AuthError extends Error {
   readonly status: number;
-  constructor(status: number, message: string) {
+  readonly code: string;
+  constructor(status: number, message: string, code = "") {
     super(message);
     this.status = status;
+    this.code = code;
   }
 }
 const messages: Record<number, string> = {
@@ -142,12 +144,15 @@ export function createAuthClient(
       body?: unknown;
       idempotencyKey?: string;
       signal?: AbortSignal;
+      timeoutMs?: number;
     } = {},
   ): Promise<T> {
     await ensureSession();
     const method = init.method ?? "GET";
     const multipart = init.body instanceof FormData;
-    const timeout = AbortSignal.timeout(multipart ? 25000 : 10000);
+    const timeout = AbortSignal.timeout(
+      init.timeoutMs ?? (multipart ? 25000 : 10000),
+    );
     let response: Response;
     try {
       response = await fetcher(`${baseUrl}/${path}`, {
@@ -179,6 +184,7 @@ export function createAuthClient(
     }
     const payload = (await response.json().catch(() => null)) as {
       message?: unknown;
+      error?: { message?: unknown; code?: unknown };
     } | null;
     if (!response.ok) {
       if (response.status === 401) {
@@ -189,11 +195,15 @@ export function createAuthClient(
         );
       }
       // Domain services return short, user-facing Indonesian messages for these.
-      const own = Array.isArray(payload?.message)
-        ? payload.message[0]
-        : payload?.message;
-      if ([400, 404, 409].includes(response.status) && typeof own === "string")
-        throw new AuthError(response.status, own);
+      const domain = payload?.error?.message ?? payload?.message;
+      const code =
+        typeof payload?.error?.code === "string" ? payload.error.code : "";
+      const own = Array.isArray(domain) ? domain[0] : domain;
+      if (
+        [400, 403, 404, 409, 422].includes(response.status) &&
+        typeof own === "string"
+      )
+        throw new AuthError(response.status, own, code);
       throw new AuthError(
         response.status,
         response.status === 403

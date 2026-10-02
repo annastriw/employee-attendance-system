@@ -16,7 +16,7 @@ import { MediaConfig } from '../config/media.config';
 import { PhotoStorage } from '../storage/photo-storage.service';
 import type { MediaActor } from '../auth/media.guard';
 import { normalizePhoto, sha256 } from './photo-normalizer';
-import type { PhotoScopeDto } from './photo.dto';
+import type { PhotoScopeDto, PhotoBindDto } from './photo.dto';
 
 const response = (row: MediaObject) => ({
   id: row.id,
@@ -195,7 +195,62 @@ export class PhotosService {
   }
 
   async inspect(id: string, scope: PhotoScopeDto) {
-    return response(await this.scoped(id, scope));
+    const row = await this.scoped(id, scope);
+    return { ...response(row), boundEventId: row.boundEventId };
+  }
+
+  async bind(id: string, scope: PhotoBindDto, requestId: string) {
+    try {
+      return await this.db.client.$transaction(
+        async (tx) => {
+          const row = await tx.mediaObject.findFirst({
+            where: {
+              id,
+              status: 'READY',
+              ownerEmployeeId: scope.ownerEmployeeId,
+              purpose: scope.purpose,
+            },
+          });
+          if (!row)
+            throw new NotFoundException('Foto siap pakai tidak ditemukan.');
+          if (row.boundEventId && row.boundEventId !== scope.eventId)
+            throw new ConflictException(
+              'Foto sudah digunakan untuk absensi lain.',
+            );
+          const changed = await tx.mediaObject.updateMany({
+            where: { id, boundEventId: null, status: 'READY' },
+            data: { boundEventId: scope.eventId, boundAt: new Date() },
+          });
+          if (!changed.count) {
+            const latest = await tx.mediaObject.findUniqueOrThrow({
+              where: { id },
+            });
+            if (latest.boundEventId !== scope.eventId)
+              throw new ConflictException(
+                'Foto sudah digunakan untuk absensi lain.',
+              );
+          } else {
+            await tx.mediaAuditLog.create({
+              data: {
+                actorAccountId: scope.actorAccountId,
+                action: 'ATTENDANCE_BOUND',
+                entityId: id,
+                requestId,
+              },
+            });
+          }
+          return { id, status: 'BOUND', eventId: scope.eventId };
+        },
+        { isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted },
+      );
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      )
+        throw new ConflictException('Event sudah memiliki foto.');
+      throw error;
+    }
   }
 
   async photoUrl(

@@ -1,7 +1,7 @@
 import { createRef } from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { AuthClient } from "../../lib/auth-client";
+import { AuthError, type AuthClient } from "../../lib/auth-client";
 import { CapturePanel } from "./CapturePanel";
 
 const mocks = vi.hoisted(() => ({
@@ -79,7 +79,9 @@ describe("production capture controls", () => {
       },
     });
     render(<CapturePanel {...props} />);
-    expect(screen.getByRole("button", { name: "Simpan foto" })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Kirim check-in" }),
+    ).toBeDisabled();
     fireEvent.click(screen.getByRole("button", { name: "Ambil ulang" }));
     expect(mocks.start).toHaveBeenCalledTimes(1);
     expect(client.api).not.toHaveBeenCalled();
@@ -95,5 +97,181 @@ describe("production capture controls", () => {
     fireEvent.click(screen.getByRole("button", { name: "Kembali ke beranda" }));
     expect(mocks.stop).toHaveBeenCalledTimes(1);
     expect(props.onBack).toHaveBeenCalledTimes(1);
+  });
+
+  const ready = {
+    id: "ed1ee3a0-0da2-4529-8694-d5e6e582c063",
+    status: "READY",
+    purpose: "CHECK_IN",
+    checksumSha256: "a".repeat(64),
+    byteSize: 100,
+    width: 640,
+    height: 480,
+  };
+  const record = {
+    id: "2f178ed8-8cf4-4aac-9dcb-805828295f88",
+    attendanceDate: "2026-10-02",
+    deletedAt: null,
+    checkIn: {
+      id: ready.id,
+      eventTime: "2026-10-02T08:01:00.000+07:00",
+      isLate: true,
+      isOutsideSchedule: false,
+      reason: "Jaringan",
+    },
+  };
+  function preview() {
+    const location = {
+      latitude: -6,
+      longitude: 106,
+      accuracy: 25,
+      capturedAt: Date.now(),
+    };
+    return {
+      ...state(),
+      phase: "preview",
+      locationFresh: true,
+      location,
+      photo: {
+        blob: new Blob(["jpeg"], { type: "image/jpeg" }),
+        url: "blob:photo",
+        method: "BLINK",
+        capturedAt: Date.now(),
+        location,
+      },
+    };
+  }
+  it("uploads private evidence once then submits only the photo ID and fresh location with a separate intent", async () => {
+    mocks.capture.mockReturnValue(preview());
+    const api = vi
+      .fn()
+      .mockResolvedValueOnce(ready)
+      .mockResolvedValueOnce({ data: record });
+    render(
+      <CapturePanel {...props} client={{ api } as unknown as AuthClient} />,
+    );
+    const button = screen.getByRole("button", { name: "Kirim check-in" });
+    fireEvent.click(button);
+    fireEvent.click(button);
+    await screen.findByRole("heading", { name: "Check-in tercatat" });
+    expect(api).toHaveBeenCalledTimes(2);
+    expect(api.mock.calls[0][1].body).toBeInstanceOf(FormData);
+    expect(api.mock.calls[1][1].body).toMatchObject({
+      photoObjectId: ready.id,
+      captureMethod: "AUTO",
+      location: { latitude: -6, longitude: 106 },
+    });
+    expect(api.mock.calls[1][1].body).not.toHaveProperty("purpose");
+    expect(api.mock.calls[1][1].body).not.toHaveProperty("employeeId");
+    expect(api.mock.calls[1][1].idempotencyKey).not.toBe(
+      api.mock.calls[0][1].idempotencyKey,
+    );
+  });
+  it("requires a nonblank late reason before uploading and focuses the field", async () => {
+    mocks.capture.mockReturnValue(preview());
+    const api = vi.fn();
+    render(
+      <CapturePanel
+        {...props}
+        reasonRequired
+        client={{ api } as unknown as AuthClient}
+      />,
+    );
+    fireEvent.change(screen.getByLabelText("Alasan terlambat"), {
+      target: { value: "   " },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Kirim check-in" }));
+    expect(screen.getByLabelText("Alasan terlambat")).toHaveFocus();
+    expect(api).not.toHaveBeenCalled();
+  });
+  it("preserves READY evidence at the late boundary and resubmits a corrected reason without another upload", async () => {
+    mocks.capture.mockReturnValue(preview());
+    const api = vi
+      .fn()
+      .mockResolvedValueOnce(ready)
+      .mockRejectedValueOnce(new AuthError(422, "late", "REASON_REQUIRED"))
+      .mockResolvedValueOnce({
+        data: {
+          state: "REJECTED",
+          responseStatus: 422,
+          response: {
+            error: { code: "REASON_REQUIRED", message: "Isi alasan." },
+          },
+        },
+      })
+      .mockResolvedValueOnce({ data: record });
+    render(
+      <CapturePanel {...props} client={{ api } as unknown as AuthClient} />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Kirim check-in" }));
+    const field = await screen.findByLabelText("Alasan terlambat");
+    await waitFor(() => expect(field).toHaveFocus());
+    fireEvent.change(field, { target: { value: "Jaringan" } });
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "Kirim check-in" }),
+      ).toBeEnabled(),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Kirim check-in" }));
+    await screen.findByRole("heading", { name: "Check-in tercatat" });
+    expect(
+      api.mock.calls.filter((c) => c[0] === "media/attendance-photos"),
+    ).toHaveLength(1);
+    expect(api.mock.calls[3][1].body.reason).toBe("Jaringan");
+  });
+  it("locks retake and location changes when an unobserved request still has an unknown outcome", async () => {
+    mocks.capture.mockReturnValue(preview());
+    const api = vi
+      .fn()
+      .mockResolvedValueOnce(ready)
+      .mockRejectedValueOnce(new AuthError(0, "network"))
+      .mockRejectedValueOnce(new AuthError(404, "unobserved"));
+    render(
+      <CapturePanel {...props} client={{ api } as unknown as AuthClient} />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Kirim check-in" }));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Cek hasil" })).toBeEnabled(),
+    );
+    expect(
+      screen.queryByRole("button", { name: "Ambil ulang" }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Perbarui" })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Kembali ke beranda" }),
+    ).toBeDisabled();
+  });
+
+  it("refreshes stale location after upload without reuploading READY bytes", async () => {
+    const captured = preview();
+    mocks.capture.mockReturnValue(captured);
+    const api = vi
+      .fn()
+      .mockImplementationOnce(async () => {
+        captured.photo.location = {
+          ...captured.photo.location,
+          capturedAt: Date.now() - 61000,
+        };
+        return ready;
+      })
+      .mockResolvedValueOnce({ data: record });
+    const panel = render(
+      <CapturePanel {...props} client={{ api } as unknown as AuthClient} />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Kirim check-in" }));
+    await screen.findByText("Perbarui lokasi sebelum mengirim absensi.");
+    expect(api).toHaveBeenCalledTimes(1);
+    captured.photo.location = {
+      ...captured.photo.location,
+      capturedAt: Date.now(),
+    };
+    panel.rerender(
+      <CapturePanel {...props} client={{ api } as unknown as AuthClient} />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Kirim check-in" }));
+    await screen.findByRole("heading", { name: "Check-in tercatat" });
+    expect(
+      api.mock.calls.filter((c) => c[0] === "media/attendance-photos"),
+    ).toHaveLength(1);
   });
 });
