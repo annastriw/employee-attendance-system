@@ -33,7 +33,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T30 Artefak deploy dan runbook | Antigravity | infra/, docs/deployment/ | T29 selesai | MySQL 3307, AIStor 9000/9001 aktif | Berjalan |
+| T30 Artefak deploy dan runbook | Antigravity | infra/, docs/deployment/ | T29 selesai | MySQL 3307, AIStor 9000/9001 aktif | Siap mulai (menunggu instruksi) |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 
