@@ -20,11 +20,7 @@ export class AttendanceProfileController {
     private readonly db: DatabaseService,
     private readonly config: EmployeeConfig,
   ) {}
-  @Get(':id/attendance-profile')
-  async get(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Headers('x-employee-service-key') supplied?: string,
-  ) {
+  private verifyKey(supplied?: string) {
     const expected = Buffer.from(this.config.provisioningSecret);
     if (
       typeof supplied !== 'string' ||
@@ -32,6 +28,54 @@ export class AttendanceProfileController {
       !timingSafeEqual(Buffer.from(supplied), expected)
     )
       throw new UnauthorizedException('Akses layanan tidak valid.');
+  }
+
+  @Get('roster')
+  async roster(@Headers('x-employee-service-key') supplied?: string) {
+    this.verifyKey(supplied);
+    const rows = await this.db.client.empEmployee.findMany({
+      where: { ready: true },
+      include: {
+        department: true,
+        position: true,
+        history: {
+          select: {
+            action: true,
+            before: true,
+            after: true,
+            createdAt: true,
+          },
+          orderBy: { createdAt: 'asc' },
+        },
+      },
+      orderBy: [{ name: 'asc' }, { id: 'asc' }],
+    });
+    return rows.map((r) => ({
+      id: r.id,
+      nik: r.nik,
+      name: r.name,
+      startDate: r.startDate.toISOString().slice(0, 10),
+      status: r.status,
+      ready: r.ready,
+      departmentId: r.department.id,
+      departmentName: r.department.name,
+      positionId: r.position.id,
+      positionName: r.position.name,
+      history: r.history.map((h) => ({
+        action: h.action,
+        before: h.before as Record<string, unknown>,
+        after: h.after as Record<string, unknown>,
+        createdAt: h.createdAt.toISOString(),
+      })),
+    }));
+  }
+
+  @Get(':id/attendance-profile')
+  async get(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Headers('x-employee-service-key') supplied?: string,
+  ) {
+    this.verifyKey(supplied);
     const row = await this.db.client.empEmployee.findUnique({
       where: { id },
       include: { department: true, position: true },

@@ -202,9 +202,10 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 - Target: apps/attendance-service/, apps/attendance-web/
 
 ## T25 — Monitoring dan rekap
-- [ ] Selesai
+- [x] Selesai (2026-10-03; spesifikasi di docs/sdd/attendance-monitoring.md, unit/integration MySQL dan UI HRD lulus)
 - Acceptance: Dashboard dan daftar termasuk missing; historical eligibility benar; deleted dikecualikan.
 - Verification: Integration test history, kalender dan gabungan late/early.
+- Implementasi/verifikasi teknis 2026-10-03: [monitoring & rekap](../docs/sdd/attendance-monitoring.md), 12 integrasi MySQL nyata (`attendance-service/test/monitoring.e2e-spec.ts`), 66 unit service attendance, 40 unit API Gateway, 22 unit Employee Service, serta 75 unit/component tests HR Web (`hr-web/src/pages/MonitoringPage.test.tsx` 5 passed) lulus. Endpoint `GET /api/v1/monitoring/summary` dan `GET /api/v1/monitoring/employees` terverifikasi dengan evaluasi missing attendance dari eligibility historis, soft-deleted dikecualikan dari metrik aktif dan ditandai badge "Dihapus HRD", status ganda (terlambat & pulang cepat) dipertahankan, filter metrik/departemen/status/search berfungsi. Typecheck/lint/build semua service terkait lulus 100% tanpa error.
 - Dependencies: 24
 - Target: apps/attendance-service/, apps/hr-web/
 

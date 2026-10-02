@@ -1,6 +1,5 @@
 import { AttendancePage } from "./AttendancePage";
 import { EmployeesPage } from "./EmployeesPage";
-import { ChartBar } from "@phosphor-icons/react";
 import { Notice } from "../components/molecules/Notice";
 import { WorkspaceLayout } from "../components/templates/WorkspaceLayout";
 import type { AdminUser, AuthClient } from "../lib/auth-client";
@@ -9,6 +8,7 @@ import { DepartmentsPage } from "./DepartmentsPage";
 
 import { PositionsPage } from "./PositionsPage";
 import { HolidaysPage } from "./HolidaysPage";
+import { MonitoringPage } from "./MonitoringPage";
 
 const TITLES = {
   ringkasan: "Ringkasan",
@@ -83,15 +83,13 @@ export function DashboardPage({
           onParamsChange={(next) => navigate("hari-libur", next)}
         />
       ) : (
-        <div className="empty-state">
-          <span className="empty-icon" aria-hidden="true">
-            <ChartBar size={22} />
-          </span>
-          <p className="empty-title">Belum ada data yang ditampilkan</p>
-          <p className="empty-body">
-            Ringkasan kehadiran muncul setelah karyawan mulai melakukan absensi.
-          </p>
-        </div>
+        <MonitoringPage
+          key={view}
+          client={client}
+          params={params}
+          onSessionExpired={onSessionExpired}
+          onParamsChange={(next) => navigate("ringkasan", next)}
+        />
       )}
     </WorkspaceLayout>
   );

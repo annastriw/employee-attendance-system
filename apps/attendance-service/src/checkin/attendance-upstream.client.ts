@@ -17,6 +17,24 @@ export interface EmployeeAttendanceProfile {
   department: { id: string; name: string };
   position: { id: string; name: string };
 }
+export interface EmployeeRosterItem {
+  id: string;
+  nik: string;
+  name: string;
+  startDate: string;
+  status: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
+  ready: boolean;
+  departmentId: string;
+  departmentName: string;
+  positionId: string;
+  positionName: string;
+  history: {
+    action: string;
+    before: Record<string, unknown>;
+    after: Record<string, unknown>;
+    createdAt: string;
+  }[];
+}
 @Injectable()
 export class AttendanceUpstreamClient {
   constructor(private readonly config: AttendanceConfig) {}
@@ -98,6 +116,18 @@ export class AttendanceUpstreamClient {
         'Profil karyawan belum dapat diverifikasi.',
       );
     return p;
+  }
+  async roster(requestId: string): Promise<EmployeeRosterItem[]> {
+    const list = (await this.call(
+      this.config.employeeUrl + '/api/v1/internal/employees/roster',
+      'X-Employee-Service-Key',
+      this.config.internalSecret,
+      requestId,
+    )) as EmployeeRosterItem[];
+    if (!Array.isArray(list)) {
+      throw new ServiceUnavailableException('Daftar karyawan belum dapat dimuat.');
+    }
+    return list;
   }
   async photo(
     photoId: string,
