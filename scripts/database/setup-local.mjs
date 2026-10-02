@@ -45,11 +45,13 @@ if (!existsSync(envFile)) {
 const env = parse(readFileSync(envFile));
 // Employee runtime accounts were added after the initial setup (T10). Append
 // missing credentials to the existing ignored file; never replace or print them.
-const employeeKeys = [
+const runtimeKeys = [
   ["EMPLOYEE_DATABASE_URL", "attendance_employee", "attendance_dev"],
   ["EMPLOYEE_TEST_DATABASE_URL", "attendance_employee_test", "attendance_test"],
+  ["ATTENDANCE_DATABASE_URL", "attendance_attendance", "attendance_dev"],
+  ["ATTENDANCE_TEST_DATABASE_URL", "attendance_attendance_test", "attendance_test"],
 ];
-const missing = employeeKeys.filter(([key]) => !env[key]);
+const missing = runtimeKeys.filter(([key]) => !env[key]);
 if (missing.length) {
   const lines = missing.map(([key, user, db]) =>
     `${key}=mysql://${user}:${randomBytes(32).toString("hex")}@127.0.0.1:3307/${db}`);
@@ -60,7 +62,7 @@ const users = [
   ["DATABASE_URL", "attendance_migrator", "attendance_dev"],
   ["AUTH_DATABASE_URL", "attendance_auth", "attendance_dev"],
   ["AUTH_TEST_DATABASE_URL", "attendance_auth_test", "attendance_test"],
-  ...employeeKeys,
+  ...runtimeKeys,
 ];
 for (const [key, user, database] of users) {
   const url = new URL(env[key]);
@@ -97,6 +99,14 @@ if (process.argv.includes("--grants")) {
     }
     sql += `GRANT SELECT, INSERT ON \`${db}\`.emp_audit_logs TO '${user}'@'%';\n`;
     sql += `GRANT SELECT, INSERT ON \`${db}\`.emp_employee_history TO '${user}'@'%';\n`;
+  }
+  // Attendance service tables
+  for (const [db, user] of [["attendance_dev", "attendance_attendance"], ["attendance_test", "attendance_attendance_test"]]) {
+    for (const table of ["att_work_policies", "att_daily_records", "att_events", "att_idempotency_requests"]) {
+      sql += `GRANT SELECT, INSERT, UPDATE ON \`${db}\`.\`${table}\` TO '${user}'@'%';\n`;
+    }
+    sql += `GRANT SELECT, INSERT, UPDATE, DELETE ON \`${db}\`.att_holidays TO '${user}'@'%';\n`;
+    sql += `GRANT SELECT, INSERT ON \`${db}\`.att_audit_logs TO '${user}'@'%';\n`;
   }
 }
 mysql(sql);

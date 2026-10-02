@@ -117,14 +117,14 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 - Bukti tiap putaran dicatat dalam satu module spec T14; detail kontrak ditentukan dari source/baseline sebelum coding. Reset password umum tetap T15.
 
 ## T15 — Reset password
-- [x] Selesai (2026-10-02; bukti otomatis di docs/sdd/employee-reset-password.md; checklist pengujian browser disiapkan)
+- [x] Selesai (2026-10-02; pengujian browser manual langkah 1–10 dan seluruh tes otomatis lulus; bukti di docs/sdd/employee-reset-password.md)
 - Acceptance: Reset tampil sekali, wajib ganti, semua sesi lama batal.
 - Verification: API/E2E reset lalu login baru; periksa tidak ada secret di log.
 - Dependencies: 14
 - Target: apps/{auth-service,employee-service,api-gateway,hr-web}/
 
 ## T16 — Aturan waktu dan eligibility
-- [ ] Selesai
+- [x] Selesai (2026-10-02; bukti TDD policy & eligibility, MySQL constraints & isolasi di docs/sdd/attendance-policies-eligibility.md)
 - Acceptance: Policy WIB dan eligibility historis eksplisit; selesaikan presisi ambang dan kalender campuran.
 - Verification: TDD boundary 08.00/17.00/akhir hari dan perubahan employee lifecycle.
 - Dependencies: 14
