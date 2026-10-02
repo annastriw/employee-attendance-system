@@ -196,7 +196,8 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 ## T24 — Riwayat pribadi
 - [ ] Selesai
 - Acceptance: Pagination/filter; hanya milik sendiri, deleted label tanpa foto, waktu+alasan terlihat.
-- Verification: API authorization dan component/Playwright riwayat.
+- Verification: Otorisasi/integrasi MySQL/AIStor nyata, component test dan visual; alur browser backend nyata memakai checklist manual sesuai tier test.
+- Implementasi/verifikasi teknis 2026-10-03: [riwayat pribadi](../docs/sdd/attendance-history.md), 28 integrasi gabungan termasuk dua skenario T24, 13 unit Gateway, 87 frontend dan tujuh tes riwayat ulang setelah penyesuaian urutan bukti lulus. Empat visual Home dan 12 riwayat 320/1440 terang/gelap serta typecheck/lint/build terkait lulus. Foto privat lazy 60 detik, data terhapus tanpa foto dan filter/kembali tersedia. Kendala CORS DELETE HRD diperbaiki pada commit terpisah. Manual T20–T24 tetap pending; belum ditutup penuh.
 - Dependencies: 23
 - Target: apps/attendance-service/, apps/attendance-web/
 

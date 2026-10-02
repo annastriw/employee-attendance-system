@@ -1,3 +1,5 @@
+import { AttendanceHistoryController } from '../history/attendance-history.controller';
+import { AttendanceHistoryService } from '../history/attendance-history.service';
 import { AttendanceLifecycleController } from '../lifecycle/attendance-lifecycle.controller';
 import { AttendanceLifecycleService } from '../lifecycle/attendance-lifecycle.service';
 import { Module } from '@nestjs/common';
@@ -14,10 +16,12 @@ import { AttendanceHealthController } from './health.controller';
     CheckInController,
     AttendanceHealthController,
     AttendanceLifecycleController,
+    AttendanceHistoryController,
   ],
   providers: [
     CheckInService,
     AttendanceLifecycleService,
+    AttendanceHistoryService,
     AttendanceUpstreamClient,
     MediaOutboxWorker,
     ServerClock,

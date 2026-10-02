@@ -2,6 +2,8 @@ import {
   Injectable,
   HttpException,
   ServiceUnavailableException,
+  UnauthorizedException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { isUUID } from 'class-validator';
 import { AttendanceConfig } from '../config/attendance.config';
@@ -24,6 +26,7 @@ export class AttendanceUpstreamClient {
     key: string,
     requestId: string,
     body?: unknown,
+    authorization?: string,
   ) {
     try {
       const response = await fetch(url, {
@@ -32,6 +35,7 @@ export class AttendanceUpstreamClient {
         headers: {
           [keyHeader]: key,
           'X-Request-ID': requestId,
+          ...(authorization ? { authorization } : {}),
           ...(body ? { 'Content-Type': 'application/json' } : {}),
         },
         ...(body ? { body: JSON.stringify(body) } : {}),
@@ -39,6 +43,10 @@ export class AttendanceUpstreamClient {
       });
       const payload: unknown = await response.json();
       if (!response.ok) {
+        if (authorization && response.status === 401)
+          throw new UnauthorizedException('Sesi tidak valid.');
+        if (authorization && response.status === 403)
+          throw new ForbiddenException('Foto tidak dapat diakses.');
         if (response.status === 404)
           throw rejection(
             'EVIDENCE_NOT_FOUND',
@@ -90,6 +98,39 @@ export class AttendanceUpstreamClient {
         'Profil karyawan belum dapat diverifikasi.',
       );
     return p;
+  }
+  async photo(
+    photoId: string,
+    employeeId: string,
+    purpose: 'CHECK_IN' | 'CHECK_OUT',
+    authorization: string,
+    requestId: string,
+  ) {
+    const payload = (await this.call(
+      this.config.mediaUrl +
+        '/api/v1/internal/media/attendance-photos/' +
+        photoId +
+        '/photo-url',
+      'X-Media-Service-Key',
+      this.config.mediaSecret,
+      requestId,
+      { ownerEmployeeId: employeeId, purpose },
+      authorization,
+    )) as { url?: unknown; expiresInSeconds?: unknown };
+    try {
+      if (typeof payload?.url !== 'string' || payload.expiresInSeconds !== 60)
+        throw new Error('Invalid photo response');
+      const url = new URL(payload.url);
+      if (
+        !['http:', 'https:'].includes(url.protocol) ||
+        url.username ||
+        url.password
+      )
+        throw new Error('Invalid photo URL');
+      return { url: payload.url, expiresInSeconds: 60 };
+    } catch {
+      throw new ServiceUnavailableException('Foto absensi belum dapat dimuat.');
+    }
   }
   async inspect(
     photoId: string,

@@ -52,6 +52,19 @@ beforeEach(() => {
 });
 
 describe("Employee portal authentication journey", () => {
+  it("protects history routes until login and password change, without reading private records", async () => {
+    window.history.replaceState(
+      null,
+      "",
+      "/#riwayat?id=11111111-1111-4111-8111-111111111111",
+    );
+    const auth = client();
+    vi.mocked(auth.restore).mockResolvedValue(employee);
+    render(<App client={auth} />);
+    await screen.findByRole("heading", { name: "Buat password baru" });
+    expect(auth.api).not.toHaveBeenCalled();
+  });
+
   it("forces a password change, requires re-login, then shows actual attendance data and logout", async () => {
     const auth = client();
     vi.mocked(auth.login)

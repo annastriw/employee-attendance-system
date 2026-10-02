@@ -19,25 +19,42 @@ export class AttendanceProxyController {
     const operation = requestPath.match(
       /^\/api\/v1\/me\/attendance\/requests\/([^/]+)$/,
     );
+    const list = requestPath === '/api/v1/me/attendance';
+    const detail = requestPath.match(/^\/api\/v1\/me\/attendance\/([^/]+)$/);
+    const photo = requestPath.match(
+      /^\/api\/v1\/me\/attendance\/([^/]+)\/events\/([^/]+)\/photo$/,
+    );
+    const seen = new Set<string>();
+    for (const [key] of url.searchParams) {
+      if (
+        !['startDate', 'endDate', 'page', 'pageSize'].includes(key) ||
+        seen.has(key)
+      )
+        throw new BadRequestException('Request tidak valid.');
+      seen.add(key);
+    }
     const allowed =
       method === 'GET'
-        ? requestPath === '/api/v1/me/attendance/today' ||
+        ? list ||
+          (!!detail && UUID_V4.test(detail[1])) ||
+          (!!photo && UUID_V4.test(photo[1]) && UUID_V4.test(photo[2])) ||
+          requestPath === '/api/v1/me/attendance/today' ||
           (!!operation && UUID_V4.test(operation[1]))
         : [
             '/api/v1/me/attendance/check-in',
             '/api/v1/me/attendance/check-out',
           ].includes(requestPath);
-    if (!allowed || url.search)
+    if (!allowed || (url.search && !(method === 'GET' && list)))
       throw new BadRequestException('Request tidak valid.');
     const headers: Record<string, string> = {
       'X-Request-ID': String(res.getHeader('X-Request-ID')),
     };
     if (typeof req.headers.authorization === 'string')
       headers.authorization = req.headers.authorization;
-    if (typeof req.headers['idempotency-key'] === 'string')
+    if (method === 'POST' && typeof req.headers['idempotency-key'] === 'string')
       headers['Idempotency-Key'] = req.headers['idempotency-key'];
     const result = await this.proxy.forward(
-      requestPath,
+      requestPath + url.search,
       method,
       headers,
       method === 'POST' ? req.body : undefined,
@@ -45,10 +62,22 @@ export class AttendanceProxyController {
     );
     res.status(result.status).json(result.payload);
   }
+  @Get() list(@Req() req: Request, @Res() res: Response) {
+    return this.forward('GET', req, res);
+  }
+  @Get(':id/events/:eventId/photo') photo(
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    return this.forward('GET', req, res);
+  }
   @Get('today') today(@Req() req: Request, @Res() res: Response) {
     return this.forward('GET', req, res);
   }
   @Get('requests/:key') operation(@Req() req: Request, @Res() res: Response) {
+    return this.forward('GET', req, res);
+  }
+  @Get(':id') detail(@Req() req: Request, @Res() res: Response) {
     return this.forward('GET', req, res);
   }
   @Post('check-in') checkIn(@Req() req: Request, @Res() res: Response) {

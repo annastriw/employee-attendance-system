@@ -13,6 +13,7 @@ import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 
 import { clearPendingCheckIn } from "./features/checkin/use-check-in";
+const HistoryPage = lazy(() => import("./pages/HistoryPage"));
 const CapturePage = lazy(() => import("./pages/CapturePage"));
 
 export function App({ client = authClient }: { client?: AuthClient }) {
@@ -21,7 +22,7 @@ export function App({ client = authClient }: { client?: AuthClient }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-  const { view, navigate } = useHashRoute();
+  const { view, params, navigate } = useHashRoute();
 
   useEffect(() => {
     let active = true;
@@ -58,7 +59,7 @@ export function App({ client = authClient }: { client?: AuthClient }) {
       view !== required &&
       !(
         required === "beranda" &&
-        ["foto-checkin", "foto-checkout"].includes(view)
+        ["foto-checkin", "foto-checkout", "riwayat"].includes(view)
       )
     )
       navigate(required);
@@ -131,6 +132,27 @@ export function App({ client = authClient }: { client?: AuthClient }) {
   }
 
   if (user) {
+    if (view === "riwayat")
+      return (
+        <Suspense
+          fallback={
+            <AuthShell
+              name="Attendance Portal"
+              brandIcon={<Clock size={16} weight="bold" />}
+            >
+              <p role="status">Memuat riwayat…</p>
+            </AuthShell>
+          }
+        >
+          <HistoryPage
+            client={client}
+            params={params}
+            onParamsChange={(next) => navigate("riwayat", next)}
+            onHome={() => navigate("beranda")}
+            onSessionExpired={sessionExpired}
+          />
+        </Suspense>
+      );
     if (["foto-checkin", "foto-checkout"].includes(view))
       return (
         <Suspense
@@ -160,6 +182,7 @@ export function App({ client = authClient }: { client?: AuthClient }) {
         busy={busy}
         error={error}
         onLogout={logout}
+        onHistory={() => navigate("riwayat")}
         onCapture={(purpose) =>
           navigate(purpose === "CHECK_OUT" ? "foto-checkout" : "foto-checkin")
         }

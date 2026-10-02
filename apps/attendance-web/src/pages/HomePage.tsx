@@ -18,6 +18,7 @@ interface Props {
   onLogout: () => Promise<void>;
   onCapture: (purpose: AttendancePurpose) => void;
   onSessionExpired: () => void;
+  onHistory: () => void;
 }
 export function HomePage({
   client,
@@ -27,6 +28,7 @@ export function HomePage({
   onLogout,
   onCapture,
   onSessionExpired,
+  onHistory,
 }: Props) {
   const today = useToday(client, onSessionExpired);
   const d = today.data,
@@ -161,6 +163,14 @@ export function HomePage({
               ? "Checkout"
               : "Check-in"}
         {(!completed || pending) && <ArrowRight size={16} aria-hidden="true" />}
+      </Button>
+      <Button
+        variant="secondary"
+        className="today-action"
+        fullWidth
+        onPress={onHistory}
+      >
+        Riwayat absensi
       </Button>
       <Button
         variant="ghost"
