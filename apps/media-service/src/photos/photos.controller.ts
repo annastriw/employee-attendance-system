@@ -26,7 +26,12 @@ import {
   type MediaRequest,
 } from '../auth/media.guard';
 import { PhotosService } from './photos.service';
-import { PhotoUploadDto, PhotoScopeDto, PhotoBindDto } from './photo.dto';
+import {
+  PhotoUploadDto,
+  PhotoScopeDto,
+  PhotoBindDto,
+  PhotoCleanupDto,
+} from './photo.dto';
 import { MAX_PHOTO_BYTES } from './photo-normalizer';
 
 @ApiTags('Attendance photos')
@@ -93,6 +98,20 @@ export class PhotosController {
 @Controller('internal/media/attendance-photos')
 export class InternalPhotosController {
   constructor(private readonly photos: PhotosService) {}
+
+  @Post('cleanup-orphans')
+  cleanupOrphans(
+    @Body() body: PhotoCleanupDto,
+    @Req() request: MediaRequest,
+  ) {
+    return this.photos.cleanupOrphans({
+      gracePeriodMs: body.gracePeriodMs,
+      limit: body.limit,
+      actorAccountId: request.actor?.id,
+      requestId: request.requestId,
+    });
+  }
+
   @Post(':id/bind')
   bind(
     @Param('id', new ParseUUIDPipe()) id: string,

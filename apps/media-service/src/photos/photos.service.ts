@@ -273,4 +273,66 @@ export class PhotosService {
     });
     return { url, expiresInSeconds: 60 };
   }
+
+  async cleanupOrphans(
+    options: {
+      gracePeriodMs?: number;
+      limit?: number;
+      actorAccountId?: string;
+      requestId?: string;
+    } = {},
+  ): Promise<{ cleanedCount: number; candidatesFound: number }> {
+    const gracePeriodMs = options.gracePeriodMs ?? 2 * 60 * 60 * 1000;
+    const limit = Math.min(options.limit ?? 50, 500);
+    const now = new Date();
+    const cutoff = new Date(now.getTime() - gracePeriodMs);
+
+    const candidates = await this.db.client.mediaObject.findMany({
+      where: {
+        boundEventId: null,
+        status: { in: ['READY', 'FAILED'] },
+        createdAt: { lte: cutoff },
+        OR: [{ leaseUntil: null }, { leaseUntil: { lt: now } }],
+      },
+      orderBy: { createdAt: 'asc' },
+      take: limit,
+    });
+
+    let cleanedCount = 0;
+    for (const orphan of candidates) {
+      await this.storage.delete(orphan.objectKey).catch(() => false);
+
+      const updated = await this.db.client.$transaction(async (tx) => {
+        const res = await tx.mediaObject.updateMany({
+          where: {
+            id: orphan.id,
+            boundEventId: null,
+            OR: [{ leaseUntil: null }, { leaseUntil: { lt: new Date() } }],
+          },
+          data: {
+            status: 'FAILED',
+            claimToken: null,
+            leaseUntil: null,
+          },
+        });
+        if (res.count > 0) {
+          await tx.mediaAuditLog.create({
+            data: {
+              actorAccountId: options.actorAccountId ?? null,
+              action: 'PHOTO_ORPHAN_CLEANED',
+              entityId: orphan.id,
+              requestId: options.requestId ?? randomUUID(),
+            },
+          });
+        }
+        return res.count;
+      });
+
+      if (updated > 0) {
+        cleanedCount++;
+      }
+    }
+
+    return { cleanedCount, candidatesFound: candidates.length };
+  }
 }

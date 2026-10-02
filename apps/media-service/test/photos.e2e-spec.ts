@@ -14,6 +14,7 @@ import { configureApp } from '../src/configure-app';
 import { MediaConfig } from '../src/config/media.config';
 import { DatabaseService } from '../src/database/database.service';
 import { PhotoStorage } from '../src/storage/photo-storage.service';
+import { PhotoOrphanWorker } from '../src/photos/photo-orphan.worker';
 import { sha256 } from '../src/photos/photo-normalizer';
 import { AppModule as AuthAppModule } from '../../auth-service/dist/app.module';
 import { AuthConfig } from '../../auth-service/dist/config/auth.config';
@@ -581,6 +582,125 @@ describe('T19 real Gateway–Media–Auth–MySQL–AIStor', () => {
       data: { leaseUntil: new Date(Date.now() - 1000) },
     });
     expect((await upload(key).expect(201)).body.id).toBe(row.id);
+  });
+
+  it('cleans up orphan photos older than grace period via internal maintenance endpoint while preserving bound and fresh photos', async () => {
+    const orphanKey = randomUUID();
+    const boundKey = randomUUID();
+    const freshKey = randomUUID();
+    const eventId = randomUUID();
+
+    // 1. Upload candidate orphan (employee 1)
+    const orphanUpload = await upload(orphanKey, tokens[1]).expect(201);
+    const orphanId = orphanUpload.body.id as string;
+
+    // 2. Upload bound photo (employee 1) and bind it to eventId
+    const boundUpload = await upload(boundKey, tokens[1]).expect(201);
+    const boundId = boundUpload.body.id as string;
+    await request(app.getHttpServer())
+      .post('/api/v1/internal/media/attendance-photos/' + boundId + '/bind')
+      .set('X-Media-Service-Key', config.internalSecret)
+      .send({
+        ownerEmployeeId: employeeIds[1],
+        purpose: 'CHECK_IN',
+        eventId,
+        actorAccountId: accountIds[1],
+      })
+      .expect(201);
+
+    // 3. Upload fresh photo (employee 1) - recent, must not be cleaned up
+    const freshUpload = await upload(freshKey, tokens[1]).expect(201);
+    const freshId = freshUpload.body.id as string;
+
+    // Age orphan and bound photos so their createdAt is 3 hours ago (> 2 hour grace period)
+    const threeHoursAgo = new Date(Date.now() - 3 * 60 * 60 * 1000);
+    await db.mediaObject.update({
+      where: { id: orphanId },
+      data: { createdAt: threeHoursAgo },
+    });
+    await db.mediaObject.update({
+      where: { id: boundId },
+      data: { createdAt: threeHoursAgo },
+    });
+
+    // Internal endpoint rejects unauthenticated requests (missing secret)
+    await request(app.getHttpServer())
+      .post('/api/v1/internal/media/attendance-photos/cleanup-orphans')
+      .send({ gracePeriodMs: 2 * 60 * 60 * 1000 })
+      .expect(401);
+
+    // Perform cleanup with 2 hours grace period
+    const cleanup = await request(app.getHttpServer())
+      .post('/api/v1/internal/media/attendance-photos/cleanup-orphans')
+      .set('X-Media-Service-Key', config.internalSecret)
+      .send({ gracePeriodMs: 2 * 60 * 60 * 1000 })
+      .expect(201);
+
+    expect(cleanup.body.cleanedCount).toBeGreaterThanOrEqual(1);
+
+    // Verify Photo A (orphan) is now FAILED and has audit log
+    const orphanRow = await db.mediaObject.findUniqueOrThrow({
+      where: { id: orphanId },
+    });
+    expect(orphanRow.status).toBe('FAILED');
+    expect(
+      await db.mediaAuditLog.count({
+        where: { entityId: orphanId, action: 'PHOTO_ORPHAN_CLEANED' },
+      }),
+    ).toBe(1);
+
+    // Inspecting or binding orphan photo now fails with 404
+    await internal(
+      orphanId,
+      'inspect',
+      employeeIds[1],
+      'CHECK_IN',
+      tokens[1],
+    ).expect(404);
+
+    // Verify Photo B (bound photo) was NOT cleaned up
+    const boundRow = await db.mediaObject.findUniqueOrThrow({
+      where: { id: boundId },
+    });
+    expect(boundRow.status).toBe('READY');
+    expect(boundRow.boundEventId).toBe(eventId);
+    expect(
+      await db.mediaAuditLog.count({
+        where: { entityId: boundId, action: 'PHOTO_ORPHAN_CLEANED' },
+      }),
+    ).toBe(0);
+
+    // Verify Photo C (fresh photo) was NOT cleaned up
+    const freshRow = await db.mediaObject.findUniqueOrThrow({
+      where: { id: freshId },
+    });
+    expect(freshRow.status).toBe('READY');
+    expect(freshRow.boundEventId).toBeNull();
+    expect(
+      await db.mediaAuditLog.count({
+        where: { entityId: freshId, action: 'PHOTO_ORPHAN_CLEANED' },
+      }),
+    ).toBe(0);
+  });
+
+  it('runs periodic cleanup safely through PhotoOrphanWorker.tick', async () => {
+    const orphanKey = randomUUID();
+    const uploadRes = await upload(orphanKey, tokens[1]).expect(201);
+    const photoId = uploadRes.body.id as string;
+
+    await db.mediaObject.update({
+      where: { id: photoId },
+      data: { createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000) },
+    });
+
+    const worker = app.get(PhotoOrphanWorker);
+    const result = await worker.tick({ gracePeriodMs: 2 * 60 * 60 * 1000 });
+    expect(result.cleanedCount).toBeGreaterThanOrEqual(1);
+
+    const updated = await db.mediaObject.findUniqueOrThrow({
+      where: { id: photoId },
+    });
+    expect(updated.status).toBe('FAILED');
   });
 
   it('denies a revoked real Auth session on upload and URL issuance immediately', async () => {

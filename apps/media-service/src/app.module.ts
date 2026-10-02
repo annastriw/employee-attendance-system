@@ -11,6 +11,7 @@ import {
 } from './photos/photos.controller';
 import { SessionGuard, EmployeeGuard, InternalGuard } from './auth/media.guard';
 import { HealthController } from './health.controller';
+import { PhotoOrphanWorker } from './photos/photo-orphan.worker';
 
 @Module({
   controllers: [
@@ -25,6 +26,7 @@ import { HealthController } from './health.controller';
     DatabaseService,
     PhotoStorage,
     PhotosService,
+    PhotoOrphanWorker,
     SessionGuard,
     EmployeeGuard,
     InternalGuard,

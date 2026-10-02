@@ -39,6 +39,7 @@ export class MediaConfig {
   readonly internalSecret: string;
   readonly port: number;
   readonly timeoutMs: number = 5000;
+  readonly workerEnabled: boolean;
 
   constructor() {
     if (process.env.NODE_ENV !== 'production') {
@@ -126,5 +127,7 @@ export class MediaConfig {
     this.port = Number(process.env.PORT ?? 3004);
     if (!Number.isInteger(this.port) || this.port < 1 || this.port > 65535)
       throw new Error('Invalid Media port.');
+    this.workerEnabled =
+      !test && process.env.MEDIA_CLEANUP_WORKER_ENABLED !== 'false';
   }
 }
