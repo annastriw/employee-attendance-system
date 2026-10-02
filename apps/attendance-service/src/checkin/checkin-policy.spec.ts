@@ -1,5 +1,6 @@
 import {
   payloadHash,
+  checkoutPayloadHash,
   validateEvidence,
   type CheckInInput,
 } from './checkin-policy';
@@ -16,6 +17,29 @@ const input = (): CheckInInput => ({
   },
 });
 describe('check-in evidence policy', () => {
+  it('T22 separates checkout operation and target while preserving check-in hashes', () => {
+    const a = input();
+    const target = 'f895d05c-28d1-453f-8795-7f543a323dc8';
+    expect(checkoutPayloadHash({ ...a, dailyRecordId: target })).not.toBe(
+      payloadHash(a),
+    );
+    expect(checkoutPayloadHash({ ...a, dailyRecordId: target })).not.toBe(
+      checkoutPayloadHash({
+        ...a,
+        dailyRecordId: '554d6a1b-2f3b-44a8-9a87-7a2d4d8bb8f0',
+      }),
+    );
+    expect(
+      checkoutPayloadHash({ ...a, dailyRecordId: target, reason: ' alasan ' }),
+    ).toBe(
+      checkoutPayloadHash({
+        ...a,
+        dailyRecordId: target,
+        clientCapturedAt: at.toISOString(),
+        reason: 'alasan',
+      }),
+    );
+  });
   it('uses canonical instants, trimmed reasons and stable field ordering', () => {
     const a = input();
     expect(payloadHash({ ...a, reason: ' alasan ' })).toBe(

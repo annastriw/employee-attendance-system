@@ -1,6 +1,6 @@
 # Attendance Portal lokal
 
-## Persiapan check-in T21
+## Persiapan absensi T21/T22
 
 Dari root proyek di PowerShell, gunakan konfigurasi MySQL, Auth, Employee dan AIStor/Media yang sudah dibuat. Ikuti [MySQL](mysql-local.md), [Auth](auth-local.md), [HR/Employee](hr-local.md), [Media](media-local.md) dan [Gateway](gateway-local.md). Jangan salin kredensial ke dokumentasi atau Git.
 
@@ -48,17 +48,19 @@ pnpm --dir apps/hr-web dev --port 5174 --strictPort
 
 Semua endpoint health backend menggunakan http://127.0.0.1:PORT. Attendance health menampilkan status database dan jumlah outbox pending/processing, tanpa data karyawan. Worker Attendance mengikat foto READY ke event melalui Media; retry berjalan otomatis dengan batch/lease/backoff terbatas.
 
-Frontend hanya memakai Gateway http://localhost:3000/api/v1. Gunakan localhost secara konsisten untuk browser/cookie. Login karyawan memakai email/password dari HR dan wajib mengganti password awal. Hari ini dan check-in memerlukan kelima backend; proses Auth saja cukup untuk login, tetapi tidak cukup untuk memuat absensi.
+Frontend hanya memakai Gateway http://localhost:3000/api/v1. Gunakan localhost secara konsisten untuk browser/cookie. Login karyawan memakai email/password dari HR dan wajib mengganti password awal. Hari ini, check-in dan checkout memerlukan kelima backend; proses Auth saja cukup untuk login, tetapi tidak cukup untuk memuat absensi.
 
 Untuk proses tanpa watch, build service terkait lalu gunakan start:prod. Perubahan source backend memerlukan build dan restart proses dist; Vite memperbarui frontend saat development. Deployment Vercel/VPS tetap tahap rilis, bukan setiap push.
 
 ## Pengujian manual
 
-Ikuti [checklist T21](../sdd/attendance-checkin.md#checklist-manual) dan [capture T20](../sdd/attendance-capture.md#checklist-manual-pengguna). Pastikan health kelima backend 200, AIStor aktif, dan karyawan ACTIVE+ready dengan startDate yang sudah berlaku.
+Ikuti [checklist checkout T22](../sdd/attendance-checkout.md#verifikasi-dan-checklist), [checklist T21](../sdd/attendance-checkin.md#checklist-manual) dan [capture T20](../sdd/attendance-capture.md#checklist-manual-pengguna). Pastikan health kelima backend 200, AIStor aktif, dan karyawan ACTIVE+ready dengan startDate yang sudah berlaku.
 
 Kamera/lokasi membutuhkan HTTPS atau localhost. HTTP melalui IP LAN biasa tidak memenuhi secure context. Uji ponsel memerlukan origin HTTPS yang telah dimasukkan ke allowlist Auth/Gateway; tunnel/deployment tidak dibuat pada increment ini.
 
 Alur: Hari ini → Check-in → Buka kamera → satu wajah dan lokasi aktif → kedip/manual → preview → alasan jika terlambat → Kirim check-in. Foto dikirim multipart terlebih dahulu; Attendance menerima ID foto READY, lokasi dan timestamp bukti, kemudian menetapkan waktu resmi server. Cek hasil/Kirim ulang menjaga key+payload yang sama ketika hasil belum pasti. Jangan menganggap 404 status request sebagai bukti gagal.
+
+Setelah check-in, Hari ini menawarkan Checkout. Capture memakai foto baru dengan purpose CHECK_OUT dan membawa dailyRecordId catatan tersebut. Pada hari kerja reguler sebelum 17.00 isi alasan pulang awal; hasil resmi menampilkan waktu checkout, lalu Hari ini menampilkan kedua waktu dan Absensi selesai. Checkout baru tanggal lampau ditolak; tidak ada checkout otomatis atau penetapan lembur.
 
 Jangan kirim foto, koordinat, password, token, secret, atau berkas lisensi ke repo/laporan. Catat nomor langkah lulus/gagal dan pesan aman. Hasil sintetis otomatis tidak menggantikan penerimaan kamera/GPS pada perangkat nyata.
 

@@ -56,7 +56,10 @@ export function App({ client = authClient }: { client?: AuthClient }) {
     if (
       !loading &&
       view !== required &&
-      !(required === "beranda" && view === "foto-checkin")
+      !(
+        required === "beranda" &&
+        ["foto-checkin", "foto-checkout"].includes(view)
+      )
     )
       navigate(required);
   }, [loading, navigate, required, view]);
@@ -128,7 +131,7 @@ export function App({ client = authClient }: { client?: AuthClient }) {
   }
 
   if (user) {
-    if (view === "foto-checkin")
+    if (["foto-checkin", "foto-checkout"].includes(view))
       return (
         <Suspense
           fallback={
@@ -141,6 +144,8 @@ export function App({ client = authClient }: { client?: AuthClient }) {
           }
         >
           <CapturePage
+            key={view}
+            purpose={view === "foto-checkout" ? "CHECK_OUT" : "CHECK_IN"}
             client={client}
             onBack={() => navigate("beranda")}
             onSessionExpired={sessionExpired}
@@ -155,7 +160,9 @@ export function App({ client = authClient }: { client?: AuthClient }) {
         busy={busy}
         error={error}
         onLogout={logout}
-        onCapture={() => navigate("foto-checkin")}
+        onCapture={(purpose) =>
+          navigate(purpose === "CHECK_OUT" ? "foto-checkout" : "foto-checkin")
+        }
       />
     );
   }

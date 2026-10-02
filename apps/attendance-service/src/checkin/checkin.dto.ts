@@ -60,3 +60,9 @@ export class CheckInDto implements CheckInInput {
   )
   reason?: string;
 }
+
+export class CheckOutDto extends CheckInDto {
+  @ApiProperty({ format: 'uuid', description: 'Owned daily record from today' })
+  @IsUUID('4')
+  dailyRecordId: string;
+}

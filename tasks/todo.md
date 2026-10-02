@@ -180,7 +180,8 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 ## T22 — Check-out ujung ke ujung
 - [ ] Selesai
 - Acceptance: Butuh check-in, alasan early, hari sama/cutoff, off-day tanpa late/early.
-- Verification: TDD boundary dan Playwright checkout dengan foto/lokasi.
+- Verification: TDD boundary/hash, integrasi MySQL/AIStor, frontend terfokus; visual dan checklist browser manual sesuai tier test.
+- Implementasi/verifikasi teknis 2026-10-02: [checkout](../docs/sdd/attendance-checkout.md), 21 integrasi termasuk tujuh checkout, enam unit policy/hash, tujuh unit Gateway dan 32 frontend lulus. Typecheck/lint/build terkait lulus; visual awal 12 lulus, lalu delapan verifikasi ulang beranda lulus setelah target sentuh disesuaikan menjadi 44 px. Manual kamera/GPS/API browser masih pending; belum ditutup penuh.
 - Dependencies: 21
 - Target: apps/attendance-service/, apps/attendance-web/
 

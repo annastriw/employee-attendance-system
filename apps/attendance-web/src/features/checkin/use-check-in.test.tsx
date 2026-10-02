@@ -195,4 +195,44 @@ describe("check-in intent recovery", () => {
     expect(result.current.pending).toBe(false);
     expect(api).toHaveBeenCalledTimes(1);
   });
+  it("T22 preserves checkout operation and target across remount and refuses a check-in result", async () => {
+    const api = vi
+      .fn()
+      .mockRejectedValueOnce(new AuthError(0, "lost"))
+      .mockRejectedValueOnce(new AuthError(404, "unknown"));
+    const client = { api } as unknown as AuthClient,
+      expired = vi.fn();
+    const first = renderHook(() => useCheckIn(client, expired, "CHECK_OUT"));
+    await act(async () =>
+      first.result.current.submit({ ...input, dailyRecordId: row.id }),
+    );
+    expect(api.mock.calls[0][0]).toBe("me/attendance/check-out");
+    const key = api.mock.calls[0][1].idempotencyKey;
+    first.unmount();
+    const next = renderHook(() => useCheckIn(client, expired, "CHECK_OUT"));
+    api
+      .mockResolvedValueOnce(envelope)
+      .mockRejectedValueOnce(new AuthError(404, "unknown"));
+    await act(async () => next.result.current.submit());
+    expect(next.result.current.record).toBe(null);
+    expect(next.result.current.pending).toBe(true);
+    expect(api.mock.calls[2][1]).toMatchObject({
+      idempotencyKey: key,
+      body: { dailyRecordId: row.id },
+    });
+    const completed = {
+      ...row,
+      checkOut: { ...row.checkIn, isEarlyDeparture: false },
+    };
+    api.mockResolvedValueOnce({
+      data: {
+        state: "SUCCEEDED",
+        responseStatus: 201,
+        response: { data: completed },
+      },
+    });
+    await act(async () => next.result.current.check());
+    expect(next.result.current.record?.checkOut).toEqual(completed.checkOut);
+    next.unmount();
+  });
 });

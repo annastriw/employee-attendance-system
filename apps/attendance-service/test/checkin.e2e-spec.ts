@@ -729,6 +729,314 @@ describe('T21 real Gateway–Attendance–Employee–Media–Auth–MySQL–AISt
     ).toBe(1);
   });
 
+  const checkout = (body: object, key = randomUUID(), token = tokens[0]) =>
+    request(gateway.getHttpServer())
+      .post('/api/v1/me/attendance/check-out')
+      .set('Authorization', 'Bearer ' + token)
+      .set('Idempotency-Key', key)
+      .send(body);
+  const startDay = async (day: string) => {
+    time = new Date(day + 'T00:00:00Z');
+    const photo = await upload();
+    return (
+      await checkIn(payload(photo), randomUUID(), tokens[0], gateway).expect(
+        201,
+      )
+    ).body.data;
+  };
+  it('T22 requires owned active check-in, checkout evidence and fresh GPS', async () => {
+    const row = await startDay('2026-12-07');
+    time = new Date('2026-12-07T10:00:00Z');
+    const photo = await upload(0, 'CHECK_OUT');
+    const body = { ...payload(photo), dailyRecordId: row.id };
+    await checkout(payload(photo)).expect(400);
+    await checkout({ ...body, dailyRecordId: randomUUID() }).expect(404);
+    const ownPhoto = await upload(1, 'CHECK_OUT');
+    await checkout(
+      { ...body, photoObjectId: ownPhoto },
+      randomUUID(),
+      tokens[1],
+    ).expect(404);
+    await checkout(body, randomUUID(), tokens[3]).expect(403);
+    await checkout(body, randomUUID(), tokens[2]).expect(403);
+    await checkout({
+      ...body,
+      photoObjectId: row.checkIn.photoObjectId,
+    }).expect(422);
+    const stale = {
+      ...body,
+      location: {
+        ...body.location,
+        capturedAt: wib(new Date(time.getTime() - 60001)),
+      },
+    };
+    expect((await checkout(stale).expect(422)).body.error.code).toBe(
+      'LOCATION_STALE',
+    );
+    await db.attDailyRecord.update({
+      where: { id: row.id },
+      data: { deletedAt: new Date() },
+    });
+    expect((await checkout(body).expect(409)).body.error.code).toBe(
+      'ATTENDANCE_DELETED',
+    );
+    expect(
+      await db.attEvent.count({
+        where: { dailyRecordId: row.id, eventType: 'CHECK_OUT' },
+      }),
+    ).toBe(0);
+  });
+  it('T22 enforces early boundary, preserves replay past midnight and separates operations', async () => {
+    const row = await startDay('2026-12-08');
+    time = new Date('2026-12-08T09:59:59.999Z');
+    const photo = await upload(0, 'CHECK_OUT');
+    const body = { ...payload(photo), dailyRecordId: row.id };
+    expect((await checkout(body).expect(422)).body.error.code).toBe(
+      'REASON_REQUIRED',
+    );
+    time = new Date('2026-12-08T10:00:00.000Z');
+    const key = randomUUID(),
+      accepted = { ...payload(photo), dailyRecordId: row.id };
+    const result = await checkout(accepted, key).expect(201);
+    expect(result.body.data.checkOut).toMatchObject({
+      eventTime: wib(time),
+      isEarlyDeparture: false,
+      isOutsideSchedule: false,
+    });
+    const today = await request(gateway.getHttpServer())
+      .get('/api/v1/me/attendance/today')
+      .set('Authorization', 'Bearer ' + tokens[0])
+      .expect(200);
+    expect(today.body.data.status).toBe('CHECKED_OUT');
+    expect(today.body.data.record.checkIn.eventTime).toBe(
+      row.checkIn.eventTime,
+    );
+    expect(
+      (await checkIn(payload(photo), key, tokens[0], gateway).expect(409)).body
+        .error.code,
+    ).toBe('IDEMPOTENCY_CONFLICT');
+    time = new Date('2026-12-08T17:00:00.000Z');
+    expect((await checkout(accepted, key).expect(201)).body).toEqual(
+      result.body,
+    );
+    const otherPhoto = await upload(0, 'CHECK_OUT');
+    expect(
+      (
+        await checkout({
+          ...payload(otherPhoto),
+          dailyRecordId: row.id,
+        }).expect(422)
+      ).body.error.code,
+    ).toBe('CHECKOUT_CUTOFF');
+  });
+  it('T22 records trimmed early reason and one checkout under competing requests with private binding', async () => {
+    const row = await startDay('2026-12-09');
+    time = new Date('2026-12-09T09:59:59.999Z');
+    const photo = await upload(0, 'CHECK_OUT'),
+      other = await upload(0, 'CHECK_OUT');
+    const body = {
+        ...payload(photo, '  Urusan keluarga  '),
+        dailyRecordId: row.id,
+      },
+      key = randomUUID();
+    const res = await Promise.all([
+      checkout(body, key),
+      checkout({ ...payload(other, 'Urusan keluarga'), dailyRecordId: row.id }),
+    ]);
+    expect(res.map((r) => r.status).sort((a,b) => a-b)).toEqual([201, 409]);
+    const stored = await db.attEvent.findFirstOrThrow({
+      where: { dailyRecordId: row.id, eventType: 'CHECK_OUT' },
+    });
+    expect(stored.isEarlyDeparture).toBe(true);
+    expect(stored.reason).toBe('Urusan keluarga');
+    expect(
+      await db.attEvent.count({
+        where: { dailyRecordId: row.id, eventType: 'CHECK_OUT' },
+      }),
+    ).toBe(1);
+    expect(
+      await db.attOutbox.count({
+        where: { eventId: stored.id, purpose: 'CHECK_OUT' },
+      }),
+    ).toBe(1);
+    await attendance.get(MediaOutboxWorker).drain();
+    expect(
+      (
+        await db.mediaObject.findUniqueOrThrow({
+          where: { id: stored.photoObjectId },
+        })
+      ).boundEventId,
+    ).toBe(stored.id);
+    const successful = res.find((r) => r.status === 201)!;
+    const winnerKey = successful === res[0] ? key : null;
+    if (winnerKey)
+      expect((await checkout(body, winnerKey).expect(201)).body).toEqual(
+        successful.body,
+      );
+  });
+  it('T22 uses a newly declared holiday for checkout without changing check-in snapshot', async () => {
+    const row = await startDay('2026-12-10');
+    const holidayId = randomUUID();
+    await db.attHoliday.create({
+      data: {
+        id: holidayId,
+        holidayDate: new Date('2026-12-10'),
+        description: 'T22 ' + prefix,
+      },
+    });
+    try {
+      time = new Date('2026-12-10T03:00:00Z');
+      const photo = await upload(0, 'CHECK_OUT');
+      const result = await checkout({
+        ...payload(photo),
+        dailyRecordId: row.id,
+      }).expect(201);
+      expect(result.body.data.checkIn.policySnapshot.scheduleType).toBe(
+        'REGULAR_WORKDAY',
+      );
+      expect(result.body.data.checkOut).toMatchObject({
+        isOutsideSchedule: true,
+        isEarlyDeparture: false,
+        reason: null,
+      });
+      expect(result.body.data.checkOut.policySnapshot.scheduleType).toBe(
+        'HOLIDAY',
+      );
+    } finally {
+      await db.attHoliday.delete({ where: { id: holidayId } });
+    }
+  });
+  it('T22 accepts weekend and the last millisecond of the same-day cutoff without overtime', async () => {
+    const row = await startDay('2026-12-12');
+    time = new Date('2026-12-12T16:59:59.999Z');
+    const photo = await upload(0, 'CHECK_OUT');
+    const result = await checkout({
+      ...payload(photo),
+      dailyRecordId: row.id,
+    }).expect(201);
+    expect(result.body.data.checkOut).toMatchObject({
+      isOutsideSchedule: true,
+      isEarlyDeparture: false,
+      eventTime: wib(time),
+    });
+    expect(result.body.data.checkOut.policySnapshot.scheduleType).toBe(
+      'WEEKEND',
+    );
+  });
+
+  it('T22 recovers a committed checkout with a lost response and rejects changed target or new key', async () => {
+    const row = await startDay('2026-12-14');
+    time = new Date('2026-12-14T10:00:00Z');
+    const photo = await upload(0, 'CHECK_OUT'),
+      key = randomUUID(),
+      body = { ...payload(photo), dailyRecordId: row.id };
+    const runtime = attendance.get(DatabaseService).client,
+      original = runtime.$transaction.bind(runtime);
+    const spy = jest
+      .spyOn(runtime, '$transaction')
+      .mockImplementationOnce(
+        async (...args: Parameters<typeof runtime.$transaction>) => {
+          await original(...args);
+          throw new Error('Synthetic checkout response lost after commit');
+        },
+      );
+    let result;
+    try {
+      result = await checkout(body, key).expect(201);
+    } finally {
+      spy.mockRestore();
+    }
+    expect((await checkout(body, key).expect(201)).body).toEqual(result.body);
+    expect(
+      (
+        await checkout({ ...body, dailyRecordId: randomUUID() }, key).expect(
+          409,
+        )
+      ).body.error.code,
+    ).toBe('IDEMPOTENCY_CONFLICT');
+    const other = await upload(0, 'CHECK_OUT');
+    expect(
+      (await checkout({ ...payload(other), dailyRecordId: row.id }).expect(409))
+        .body.error.code,
+    ).toBe('CHECKOUT_EXISTS');
+    expect(
+      await db.attAuditLog.count({
+        where: { entityId: row.id, action: 'CHECK_OUT_CREATED' },
+      }),
+    ).toBe(1);
+    const ownerStatus = await request(gateway.getHttpServer())
+      .get('/api/v1/me/attendance/requests/' + key)
+      .set('Authorization', 'Bearer ' + tokens[0])
+      .expect(200);
+    expect(ownerStatus.body.data.response).toEqual(result.body);
+    const upstream = attendance.get(AttendanceUpstreamClient),
+      bind = upstream.bind.bind(upstream);
+    let loseCheckoutBinding = true;
+    const lost = jest
+      .spyOn(upstream, 'bind')
+      .mockImplementation(async (...args) => {
+        await bind(...args);
+        if (args[0] === photo && loseCheckoutBinding) {
+          loseCheckoutBinding = false;
+          throw new Error('Lost checkout binding response');
+        }
+      });
+    await attendance.get(MediaOutboxWorker).drain();
+    lost.mockRestore();
+    expect(
+      (await db.attOutbox.findFirstOrThrow({ where: { photoObjectId: photo } }))
+        .state,
+    ).toBe('PENDING');
+    await db.attOutbox.updateMany({
+      where: { photoObjectId: photo },
+      data: { nextAttemptAt: new Date(0) },
+    });
+    await attendance.get(MediaOutboxWorker).drain();
+    expect(
+      (await db.attOutbox.findFirstOrThrow({ where: { photoObjectId: photo } }))
+        .state,
+    ).toBe('DELIVERED');
+    expect(
+      await db.mediaAuditLog.count({
+        where: { entityId: photo, action: 'ATTENDANCE_BOUND' },
+      }),
+    ).toBe(1);
+  });
+  it('T22 checks cutoff again after upstream delay and never creates an event on the next day', async () => {
+    const row = await startDay('2026-12-15');
+    time = new Date('2026-12-15T16:59:59.999Z');
+    const photo = await upload(0, 'CHECK_OUT'),
+      body = { ...payload(photo), dailyRecordId: row.id };
+    const upstream = attendance.get(AttendanceUpstreamClient),
+      inspect = upstream.inspect.bind(upstream);
+    const spy = jest
+      .spyOn(upstream, 'inspect')
+      .mockImplementationOnce(async (...args) => {
+        await inspect(...args);
+        time = new Date('2026-12-15T17:00:00.000Z');
+      });
+    try {
+      expect((await checkout(body).expect(422)).body.error.code).toBe(
+        'CHECKOUT_CUTOFF',
+      );
+    } finally {
+      spy.mockRestore();
+    }
+    expect(
+      await db.attEvent.count({
+        where: { dailyRecordId: row.id, eventType: 'CHECK_OUT' },
+      }),
+    ).toBe(0);
+    const nextToday = await request(gateway.getHttpServer())
+      .get('/api/v1/me/attendance/today')
+      .set('Authorization', 'Bearer ' + tokens[0])
+      .expect(200);
+    expect(nextToday.body.data).toMatchObject({
+      record: null,
+      status: 'NOT_CHECKED_IN',
+    });
+  });
+
   it('rejects a used photo on a later day and revalidates session revocation for successful retries', async () => {
     time = new Date('2026-11-11T00:00:00Z');
     const successful = await db.attIdempotencyRequest.findFirstOrThrow({
@@ -751,6 +1059,10 @@ describe('T21 real Gateway–Attendance–Employee–Media–Auth–MySQL–AISt
       where: { accountId: accountIds[0] },
       data: { revokedAt: new Date() },
     });
+    await checkout({
+      ...payload(randomUUID()),
+      dailyRecordId: randomUUID(),
+    }).expect(401);
     await request(gateway.getHttpServer())
       .get('/api/v1/me/attendance/requests/' + successful.id)
       .set('Authorization', 'Bearer ' + tokens[0])

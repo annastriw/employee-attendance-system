@@ -91,7 +91,12 @@ export class AttendanceUpstreamClient {
       );
     return p;
   }
-  async inspect(photoId: string, employeeId: string, requestId: string) {
+  async inspect(
+    photoId: string,
+    employeeId: string,
+    requestId: string,
+    purpose: 'CHECK_IN' | 'CHECK_OUT' = 'CHECK_IN',
+  ) {
     const p = (await this.call(
       this.config.mediaUrl +
         '/api/v1/internal/media/attendance-photos/' +
@@ -100,19 +105,14 @@ export class AttendanceUpstreamClient {
       'X-Media-Service-Key',
       this.config.mediaSecret,
       requestId,
-      { ownerEmployeeId: employeeId, purpose: 'CHECK_IN' },
+      { ownerEmployeeId: employeeId, purpose },
     )) as {
       id?: string;
       status?: string;
       purpose?: string;
       boundEventId?: string | null;
     };
-    if (
-      !p ||
-      p.id !== photoId ||
-      p.status !== 'READY' ||
-      p.purpose !== 'CHECK_IN'
-    )
+    if (!p || p.id !== photoId || p.status !== 'READY' || p.purpose !== purpose)
       throw new ServiceUnavailableException('Foto belum dapat diverifikasi.');
     if (p.boundEventId)
       throw rejection(

@@ -3,9 +3,12 @@ import { Clock, CheckCircle, SignOut, ArrowRight } from "@phosphor-icons/react";
 import { AuthShell } from "@attendance/ui";
 import { Notice } from "../components/molecules/Notice";
 import type { AuthClient, EmployeeUser } from "../lib/auth-client";
-import { clockLabel } from "../lib/attendance-client";
+import { clockLabel, type AttendancePurpose } from "../lib/attendance-client";
 import { useToday } from "../features/checkin/use-today";
-import { hasPendingCheckIn } from "../features/checkin/use-check-in";
+import {
+  hasPendingCheckIn,
+  pendingAttendancePurpose,
+} from "../features/checkin/use-check-in";
 import "./home-page.css";
 interface Props {
   client: AuthClient;
@@ -13,7 +16,7 @@ interface Props {
   busy: boolean;
   error: string;
   onLogout: () => Promise<void>;
-  onCapture: () => void;
+  onCapture: (purpose: AttendancePurpose) => void;
   onSessionExpired: () => void;
 }
 export function HomePage({
@@ -28,7 +31,10 @@ export function HomePage({
   const today = useToday(client, onSessionExpired);
   const d = today.data,
     pending = hasPendingCheckIn(client);
-  const checked = d?.status === "CHECKED_IN";
+  const checked = d?.status === "CHECKED_IN" || d?.status === "CHECKED_OUT";
+  const completed = d?.status === "CHECKED_OUT";
+  const nextPurpose =
+    pendingAttendancePurpose(client) ?? (checked ? "CHECK_OUT" : "CHECK_IN");
   return (
     <AuthShell
       name="Attendance Portal"
@@ -74,6 +80,16 @@ export function HomePage({
                     : "—"}
                 </strong>
               </div>
+              {d.record?.checkIn && (
+                <div className="today-checkin">
+                  <span>Checkout</span>
+                  <strong>
+                    {d.record.checkOut
+                      ? clockLabel(d.record.checkOut.eventTime)
+                      : "—"}
+                  </strong>
+                </div>
+              )}
               <p
                 className={checked ? "today-status recorded" : "today-status"}
                 role="status"
@@ -81,13 +97,19 @@ export function HomePage({
                 {checked && <CheckCircle size={16} aria-hidden="true" />}
                 {d.status === "DELETED"
                   ? "Absensi dihapus HRD"
-                  : checked
-                    ? d.record?.checkIn.isOutsideSchedule
-                      ? "Di luar jadwal"
-                      : d.record?.checkIn.isLate
-                        ? "Terlambat"
-                        : "Tepat waktu"
-                    : "Belum check-in"}
+                  : completed
+                    ? d.record?.checkOut?.isOutsideSchedule
+                      ? "Selesai · Di luar jadwal"
+                      : d.record?.checkOut?.isEarlyDeparture
+                        ? "Selesai · Pulang lebih awal"
+                        : "Absensi selesai"
+                    : checked
+                      ? d.record?.checkIn.isOutsideSchedule
+                        ? "Di luar jadwal"
+                        : d.record?.checkIn.isLate
+                          ? "Terlambat"
+                          : "Tepat waktu"
+                      : "Belum check-in"}
               </p>
             </section>
             {d.status === "DELETED" && (
@@ -108,7 +130,7 @@ export function HomePage({
         )
       )}
       {pending && (
-        <Notice message="Check-in sebelumnya belum dapat dipastikan. Periksa hasilnya." />
+        <Notice message="Pengiriman absensi sebelumnya belum dapat dipastikan. Periksa hasilnya." />
       )}
       {(today.error || error) && <Notice message={today.error || error} />}
       {today.error && (
@@ -118,24 +140,31 @@ export function HomePage({
       )}
       <Button
         variant="primary"
+        className="today-action"
         fullWidth
         isDisabled={
           busy ||
           (!pending &&
-            (today.loading || !d?.eligible || d.status !== "NOT_CHECKED_IN"))
+            (today.loading ||
+              !d?.eligible ||
+              !["NOT_CHECKED_IN", "CHECKED_IN"].includes(d.status)))
         }
-        onPress={onCapture}
+        onPress={() => onCapture(nextPurpose)}
       >
         {pending
-          ? "Cek hasil check-in"
-          : checked
-            ? "Check-in tercatat"
-            : "Check-in"}
-        {(!checked || pending) && <ArrowRight size={16} aria-hidden="true" />}
+          ? nextPurpose === "CHECK_OUT"
+            ? "Cek hasil checkout"
+            : "Cek hasil check-in"
+          : completed
+            ? "Absensi selesai"
+            : checked
+              ? "Checkout"
+              : "Check-in"}
+        {(!completed || pending) && <ArrowRight size={16} aria-hidden="true" />}
       </Button>
       <Button
         variant="ghost"
-        className="primary-button"
+        className="primary-button today-action"
         isDisabled={busy}
         onPress={() => {
           void onLogout();

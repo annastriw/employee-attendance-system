@@ -31,6 +31,7 @@ function client(): AuthClient {
           end: "17:00:00",
         },
         reasonRequired: false,
+        checkoutReasonRequired: false,
         status: "NOT_CHECKED_IN",
         record: null,
       },
@@ -206,6 +207,7 @@ describe("capture route protection", () => {
           end: "17:00:00",
         },
         reasonRequired: false,
+        checkoutReasonRequired: false,
         status: "CHECKED_IN",
         record: {
           id: "2f178ed8-8cf4-4aac-9dcb-805828295f88",
@@ -230,8 +232,80 @@ describe("capture route protection", () => {
     );
     await screen.findByRole("heading", { name: "Hari ini" });
     expect(
-      await screen.findByRole("button", { name: "Check-in tercatat" }),
+      await screen.findByRole("button", { name: "Checkout" }),
+    ).toBeEnabled();
+    expect(auth.api).toHaveBeenCalledTimes(3);
+  });
+  it("T22 opens checkout for today's check-in and refetches completed attendance on return", async () => {
+    const auth = client();
+    vi.mocked(auth.restore).mockResolvedValue({
+      ...employee,
+      mustChangePassword: false,
+    });
+    const row = {
+      id: "2f178ed8-8cf4-4aac-9dcb-805828295f88",
+      attendanceDate: "2026-10-02",
+      deletedAt: null,
+      checkIn: {
+        id: "ed1ee3a0-0da2-4529-8694-d5e6e582c063",
+        eventTime: "2026-10-02T08:00:00.000+07:00",
+        isLate: false,
+        isOutsideSchedule: false,
+        reason: null,
+      },
+    };
+    const response = {
+      data: {
+        employeeName: "Synthetic Employee",
+        attendanceDate: row.attendanceDate,
+        eligible: true,
+        ineligibilityMessage: null,
+        schedule: {
+          type: "REGULAR_WORKDAY",
+          start: "08:00:00",
+          end: "17:00:00",
+        },
+        reasonRequired: false,
+        checkoutReasonRequired: true,
+        status: "CHECKED_IN",
+        record: row,
+      },
+      meta: {
+        requestId: "visual",
+        serverTime: "2026-10-02T16:30:00.000+07:00",
+      },
+    };
+    vi.mocked(auth.api).mockResolvedValue(response);
+    const user = userEvent.setup({ delay: null });
+    render(<App client={auth} />);
+    const next = await screen.findByRole("button", { name: "Checkout" });
+    await user.click(next);
+    await screen.findByRole("heading", { name: "Foto checkout" });
+    expect(window.location.hash).toBe("#foto-checkout");
+    vi.mocked(auth.api).mockResolvedValueOnce({
+      ...response,
+      data: {
+        ...response.data,
+        status: "CHECKED_OUT",
+        checkoutReasonRequired: false,
+        record: {
+          ...row,
+          checkOut: {
+            ...row.checkIn,
+            id: "554d6a1b-2f3b-44a8-9a87-7a2d4d8bb8f0",
+            eventTime: "2026-10-02T17:00:00.000+07:00",
+            isEarlyDeparture: false,
+          },
+        },
+      },
+    });
+    await user.click(
+      screen.getByRole("button", { name: "Kembali ke beranda" }),
+    );
+    expect(
+      await screen.findByRole("button", { name: "Absensi selesai" }),
     ).toBeDisabled();
+    expect(screen.getByText("17.00.00")).toBeVisible();
     expect(auth.api).toHaveBeenCalledTimes(3);
   });
 });

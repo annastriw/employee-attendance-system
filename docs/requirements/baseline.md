@@ -85,6 +85,7 @@ Base /api/v1; Swagger /docs; UUID; waktu response ISO8601 +07:00; pagination/fil
 - POST /media/attendance-photos multipart; GET /attendance/:id/events/:eventId/photo-url.
 - GET /monitoring/summary dan /monitoring/employees; GET /attendance dan /attendance/:id; DELETE /attendance/:id dengan alasan; POST /attendance/:id/restore.
 - Payload attendance: photoObjectId, clientCapturedAt berzona (bukan waktu resmi), captureMethod, location{latitude,longitude,accuracyMeters,capturedAt}, reason.
+- Checkout menambahkan dailyRecordId dari catatan hari ini sebagai target tetap; harus milik sesi dan masih tanggal WIB yang sama. Detail [checkout T22](../sdd/attendance-checkout.md).
 - employeeId berasal dari sesi. Idempotency-Key wajib; jika ambang waktu terlewati dan alasan belum ada, service meminta alasan sebelum menerima.
 - Response sukses data+meta; error error{code,message,details}+meta. HTTP 400/401/403/404/409/422/503 sesuai kontrak.
 

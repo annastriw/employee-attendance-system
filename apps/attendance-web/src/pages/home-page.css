@@ -43,3 +43,7 @@
 .today-status.recorded {
   color: var(--accent);
 }
+
+.auth-content .today-action {
+  min-height: 2.75rem;
+}

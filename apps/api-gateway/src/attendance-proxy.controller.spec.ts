@@ -25,33 +25,36 @@ describe('Attendance Gateway boundary', () => {
       },
     }) as unknown as Request;
   beforeEach(() => {
-    forward
-      .mockReset()
-      .mockResolvedValue({
-        status: 422,
-        payload: { error: { code: 'REASON_REQUIRED', message: 'Isi alasan' } },
-      });
-  });
-  it('forwards JSON, identity, idempotency and correlation only, preserving domain status', async () => {
-    const res = response(),
-      request = req('check-in');
-    await controller.checkIn(request, res as unknown as Response);
-    expect(forward).toHaveBeenCalledWith(
-      request.originalUrl,
-      'POST',
-      {
-        authorization: 'Bearer test',
-        'Idempotency-Key': key,
-        'X-Request-ID': key,
-      },
-      request.body,
-      'attendance',
-    );
-    expect(res.status).toHaveBeenCalledWith(422);
-    expect(res.json).toHaveBeenCalledWith({
-      error: { code: 'REASON_REQUIRED', message: 'Isi alasan' },
+    forward.mockReset().mockResolvedValue({
+      status: 422,
+      payload: { error: { code: 'REASON_REQUIRED', message: 'Isi alasan' } },
     });
   });
+  it.each(['check-in', 'check-out'])(
+    'forwards %s identity, evidence and idempotency only, preserving domain status',
+    async (action) => {
+      const res = response(),
+        request = req(action);
+      await (action === 'check-in'
+        ? controller.checkIn(request, res as unknown as Response)
+        : controller.checkOut(request, res as unknown as Response));
+      expect(forward).toHaveBeenCalledWith(
+        request.originalUrl,
+        'POST',
+        {
+          authorization: 'Bearer test',
+          'Idempotency-Key': key,
+          'X-Request-ID': key,
+        },
+        request.body,
+        'attendance',
+      );
+      expect(res.status).toHaveBeenCalledWith(422);
+      expect(res.json).toHaveBeenCalledWith({
+        error: { code: 'REASON_REQUIRED', message: 'Isi alasan' },
+      });
+    },
+  );
   it.each([
     'today?employeeId=other',
     'requests/not-a-uuid',

@@ -274,4 +274,46 @@ describe("production capture controls", () => {
       api.mock.calls.filter((c) => c[0] === "media/attendance-photos"),
     ).toHaveLength(1);
   });
+  it("T22 requires early reason and submits new checkout evidence with the frozen daily target", async () => {
+    mocks.capture.mockReturnValue(preview());
+    const output = {
+      ...record,
+      checkOut: {
+        ...record.checkIn,
+        id: "554d6a1b-2f3b-44a8-9a87-7a2d4d8bb8f0",
+        eventTime: "2026-10-02T16:30:00.000+07:00",
+        isEarlyDeparture: true,
+        reason: "Urusan keluarga",
+      },
+    };
+    const api = vi
+      .fn()
+      .mockResolvedValueOnce({ ...ready, purpose: "CHECK_OUT" })
+      .mockResolvedValueOnce({ data: output });
+    render(
+      <CapturePanel
+        {...props}
+        client={{ api } as unknown as AuthClient}
+        purpose="CHECK_OUT"
+        dailyRecordId={record.id}
+        reasonRequired
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Kirim checkout" }));
+    expect(screen.getByLabelText("Alasan pulang awal")).toHaveFocus();
+    expect(api).not.toHaveBeenCalled();
+    fireEvent.change(screen.getByLabelText("Alasan pulang awal"), {
+      target: { value: " Urusan keluarga " },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Kirim checkout" }));
+    await screen.findByRole("heading", { name: "Checkout tercatat" });
+    expect(api.mock.calls[0][1].body.get("purpose")).toBe("CHECK_OUT");
+    expect(api.mock.calls[1][0]).toBe("me/attendance/check-out");
+    expect(api.mock.calls[1][1].body).toMatchObject({
+      dailyRecordId: record.id,
+      reason: "Urusan keluarga",
+      photoObjectId: ready.id,
+    });
+    expect(screen.getByText("Pulang lebih awal")).toBeVisible();
+  });
 });

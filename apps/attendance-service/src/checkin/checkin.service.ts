@@ -21,6 +21,8 @@ import {
 } from '../policy/time-policy.engine';
 import {
   payloadHash,
+  checkoutPayloadHash,
+  type CheckOutInput,
   validateEvidence,
   rejection,
   ServerClock,
@@ -36,6 +38,7 @@ const eventResponse = (event: AttEvent, deleted: boolean) => ({
   eventTime: wib(event.eventTime),
   clientCapturedAt: wib(event.clientCapturedAt),
   isLate: event.isLate,
+  isEarlyDeparture: event.isEarlyDeparture,
   isOutsideSchedule: event.isOutsideSchedule,
   captureMethod: event.captureMethod,
   reason: event.reason,
@@ -55,6 +58,12 @@ export function recordResponse(row: Daily) {
     attendanceDate: row.attendanceDate.toISOString().slice(0, 10),
     deletedAt: row.deletedAt ? wib(row.deletedAt) : null,
     checkIn: checkIn ? eventResponse(checkIn, !!row.deletedAt) : null,
+    checkOut: row.events.find((e) => e.eventType === 'CHECK_OUT')
+      ? eventResponse(
+          row.events.find((e) => e.eventType === 'CHECK_OUT')!,
+          !!row.deletedAt,
+        )
+      : null,
   };
 }
 @Injectable()
@@ -76,7 +85,11 @@ export class CheckInService {
       profile.status === 'ACTIVE' && profile.ready && profile.startDate <= date
     );
   }
-  private async evaluation(client: Prisma.TransactionClient, at: Date) {
+  private async evaluation(
+    client: Prisma.TransactionClient,
+    at: Date,
+    checkoutDate?: string,
+  ) {
     const date = TimePolicyEngine.getWibComponents(at).dateString;
     const policy = await client.attWorkPolicy.findFirst({
       where: { isActive: true },
@@ -86,6 +99,15 @@ export class CheckInService {
       where: { holidayDate: new Date(date + 'T00:00:00.000Z') },
     });
     // MySQL DATE has no timezone; pass its date string, not a shifted timestamp.
+    if (checkoutDate)
+      return TimePolicyEngine.evaluateCheckOut(
+        at,
+        checkoutDate,
+        policy ?? DEFAULT_WORK_POLICY,
+        holiday
+          ? [{ holidayDate: date, description: holiday.description }]
+          : [],
+      );
     return TimePolicyEngine.evaluateCheckIn(
       at,
       policy ?? DEFAULT_WORK_POLICY,
@@ -107,6 +129,11 @@ export class CheckInService {
       },
       include: { events: true },
     });
+    const checkoutEvaluation = await this.evaluation(
+      this.db.client,
+      at,
+      evaluation.attendanceDate,
+    );
     return this.success(
       {
         employeeName: profile.name,
@@ -121,10 +148,17 @@ export class CheckInService {
           end: evaluation.policySnapshot.checkOutTime,
         },
         reasonRequired: evaluation.reasonRequired,
+        checkoutReasonRequired:
+          !!row &&
+          !row.deletedAt &&
+          !row.events.some((e) => e.eventType === 'CHECK_OUT') &&
+          checkoutEvaluation.reasonRequired,
         status: row
           ? row.deletedAt
             ? 'DELETED'
-            : 'CHECKED_IN'
+            : row.events.some((e) => e.eventType === 'CHECK_OUT')
+              ? 'CHECKED_OUT'
+              : 'CHECKED_IN'
           : 'NOT_CHECKED_IN',
         record: row ? recordResponse(row) : null,
       },
@@ -136,7 +170,7 @@ export class CheckInService {
     if (!row.responseBody || !row.responseStatus)
       throw rejection(
         'REQUEST_PENDING',
-        'Check-in sedang diproses. Periksa hasil sebelum mencoba lagi.',
+        'Absensi sedang diproses. Periksa hasil sebelum mencoba lagi.',
         409,
       );
     return { status: row.responseStatus, body: row.responseBody };
@@ -168,7 +202,36 @@ export class CheckInService {
     authorization: string,
     requestId: string,
   ): Promise<Result> {
-    const hash = payloadHash(input),
+    return this.submit(key, input, actor, authorization, requestId, 'CHECK_IN');
+  }
+  async checkOut(
+    key: string,
+    input: CheckOutInput,
+    actor: SessionProfile,
+    authorization: string,
+    requestId: string,
+  ): Promise<Result> {
+    return this.submit(
+      key,
+      input,
+      actor,
+      authorization,
+      requestId,
+      'CHECK_OUT',
+    );
+  }
+  private async submit(
+    key: string,
+    input: CheckInInput,
+    actor: SessionProfile,
+    authorization: string,
+    requestId: string,
+    purpose: 'CHECK_IN' | 'CHECK_OUT',
+  ): Promise<Result> {
+    const hash =
+        purpose === 'CHECK_OUT'
+          ? checkoutPayloadHash(input as CheckOutInput)
+          : payloadHash(input),
       claimToken = randomUUID(),
       claimedAt = this.clock.now();
     let row: AttIdempotencyRequest;
@@ -223,7 +286,7 @@ export class CheckInService {
       if (!claimed.count)
         throw rejection(
           'REQUEST_PENDING',
-          'Check-in sedang diproses. Periksa hasil sebelum mencoba lagi.',
+          'Absensi sedang diproses. Periksa hasil sebelum mencoba lagi.',
           409,
         );
       row = existing;
@@ -237,6 +300,7 @@ export class CheckInService {
         input.photoObjectId,
         actor.employeeId!,
         requestId,
+        purpose,
       );
       const latest = await this.auth.profile(authorization, requestId);
       if (
@@ -252,7 +316,7 @@ export class CheckInService {
         );
       const body = await this.db.client.$transaction(
         async (tx) => {
-          const at = this.clock.now();
+          let at = this.clock.now();
           const owned = await tx.attIdempotencyRequest.updateMany({
             where: {
               id: key,
@@ -265,10 +329,61 @@ export class CheckInService {
           if (!owned.count)
             throw rejection(
               'REQUEST_PENDING',
-              'Check-in sedang dipulihkan. Periksa hasil terlebih dahulu.',
+              'Absensi sedang dipulihkan. Periksa hasil terlebih dahulu.',
               409,
             );
-          const evaluation = await this.evaluation(tx, at);
+          let existingDaily: Daily | null = null;
+          if (purpose === 'CHECK_OUT') {
+            const targetId = (input as CheckOutInput).dailyRecordId;
+            // Lock the owned row to serialize checkout with checkout/delete/restore.
+            const locked = await tx.attDailyRecord.updateMany({
+              where: { id: targetId, employeeId: actor.employeeId },
+              data: { updatedAt: at },
+            });
+            if (!locked.count)
+              throw rejection(
+                'CHECK_IN_REQUIRED',
+                'Catatan check-in milik Anda tidak ditemukan.',
+                404,
+              );
+            existingDaily = await tx.attDailyRecord.findUniqueOrThrow({
+              where: { id: targetId },
+              include: { events: true },
+            });
+            if (existingDaily.deletedAt)
+              throw rejection(
+                'ATTENDANCE_DELETED',
+                'Absensi dihapus HRD. Hubungi HRD untuk pemeriksaan.',
+                409,
+              );
+            const checkIn = existingDaily.events.find(
+              (e) => e.eventType === 'CHECK_IN',
+            );
+            if (!checkIn)
+              throw rejection(
+                'CHECK_IN_REQUIRED',
+                'Check-in diperlukan sebelum checkout.',
+                409,
+              );
+            at = this.clock.now();
+            if (at.getTime() < checkIn.eventTime.getTime())
+              throw rejection(
+                'CHECKOUT_BEFORE_CHECKIN',
+                'Waktu checkout harus setelah check-in.',
+              );
+          }
+          const evaluation = await this.evaluation(
+            tx,
+            at,
+            existingDaily?.attendanceDate.toISOString().slice(0, 10),
+          );
+          if ('isCutoffPassed' in evaluation && evaluation.isCutoffPassed)
+            throw rejection(
+              'CHECKOUT_CUTOFF',
+              'Batas checkout tanggal check-in sudah terlewati.',
+            );
+          if (existingDaily?.events.some((e) => e.eventType === 'CHECK_OUT'))
+            throw rejection('CHECKOUT_EXISTS', 'Checkout sudah tercatat.', 409);
           if (!this.eligible(profile, evaluation.attendanceDate))
             throw rejection(
               'EMPLOYEE_INELIGIBLE',
@@ -280,24 +395,28 @@ export class CheckInService {
           if (evaluation.reasonRequired && !reason)
             throw rejection(
               'REASON_REQUIRED',
-              'Isi alasan terlambat untuk melanjutkan check-in.',
+              purpose === 'CHECK_IN'
+                ? 'Isi alasan terlambat untuk melanjutkan check-in.'
+                : 'Isi alasan pulang awal untuk melanjutkan checkout.',
             );
-          const daily = await tx.attDailyRecord.create({
-            data: {
-              employeeId: actor.employeeId!,
-              attendanceDate: new Date(
-                evaluation.attendanceDate + 'T00:00:00.000Z',
-              ),
-              departmentIdSnapshot: profile.department.id,
-              departmentNameSnapshot: profile.department.name,
-              positionIdSnapshot: profile.position.id,
-              positionNameSnapshot: profile.position.name,
-            },
-          });
+          const daily =
+            existingDaily ??
+            (await tx.attDailyRecord.create({
+              data: {
+                employeeId: actor.employeeId!,
+                attendanceDate: new Date(
+                  evaluation.attendanceDate + 'T00:00:00.000Z',
+                ),
+                departmentIdSnapshot: profile.department.id,
+                departmentNameSnapshot: profile.department.name,
+                positionIdSnapshot: profile.position.id,
+                positionNameSnapshot: profile.position.name,
+              },
+            }));
           const event = await tx.attEvent.create({
             data: {
               dailyRecordId: daily.id,
-              eventType: 'CHECK_IN',
+              eventType: purpose,
               eventTime: at,
               clientCapturedAt: new Date(input.clientCapturedAt),
               captureMethod: input.captureMethod,
@@ -306,7 +425,11 @@ export class CheckInService {
               longitude: input.location.longitude,
               accuracyMeters: input.location.accuracyMeters,
               locationCapturedAt: new Date(input.location.capturedAt),
-              isLate: evaluation.isLate,
+              isLate: 'isLate' in evaluation ? evaluation.isLate : false,
+              isEarlyDeparture:
+                'isEarlyDeparture' in evaluation
+                  ? evaluation.isEarlyDeparture
+                  : false,
               isOutsideSchedule: evaluation.isOutsideSchedule,
               reason,
               policySnapshot:
@@ -316,7 +439,10 @@ export class CheckInService {
           await tx.attAuditLog.create({
             data: {
               actorAccountId: actor.id,
-              action: 'CHECK_IN_CREATED',
+              action:
+                purpose === 'CHECK_IN'
+                  ? 'CHECK_IN_CREATED'
+                  : 'CHECK_OUT_CREATED',
               entityType: 'ATTENDANCE',
               entityId: daily.id,
               requestId,
@@ -328,13 +454,16 @@ export class CheckInService {
               eventId: event.id,
               photoObjectId: event.photoObjectId,
               ownerEmployeeId: actor.employeeId!,
-              purpose: 'CHECK_IN',
+              purpose,
               actorAccountId: actor.id,
               requestId,
             },
           });
           const result = this.success(
-            recordResponse({ ...daily, events: [event] }),
+            recordResponse({
+              ...daily,
+              events: [...(existingDaily?.events ?? []), event],
+            }),
             requestId,
             at,
           );
@@ -397,7 +526,7 @@ export class CheckInService {
         data.message ??
         (typeof response === 'string'
           ? response
-          : 'Check-in belum dapat dipastikan. Periksa hasil atau coba lagi.');
+          : 'Absensi belum dapat dipastikan. Periksa hasil atau coba lagi.');
       const state = status >= 500 ? 'RETRYABLE' : 'REJECTED';
       const body = {
         error: { code, message },
@@ -420,7 +549,7 @@ export class CheckInService {
         .catch(() => null);
       if (!changed?.count)
         throw new ServiceUnavailableException(
-          'Check-in belum dapat dipastikan. Periksa hasil sebelum mengubah data.',
+          'Absensi belum dapat dipastikan. Periksa hasil sebelum mengubah data.',
         );
       return { status, body };
     }

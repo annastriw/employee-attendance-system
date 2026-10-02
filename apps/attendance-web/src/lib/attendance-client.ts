@@ -1,8 +1,10 @@
 import { AuthError, type AuthClient } from "./auth-client";
+export type AttendancePurpose = "CHECK_IN" | "CHECK_OUT";
 export interface CheckInRecord {
   id: string;
   attendanceDate: string;
   deletedAt: string | null;
+  checkOut?: CheckoutEvent | null;
   checkIn: {
     id: string;
     eventTime: string;
@@ -10,6 +12,13 @@ export interface CheckInRecord {
     isOutsideSchedule: boolean;
     reason: string | null;
   };
+}
+export interface CheckoutEvent {
+  id: string;
+  eventTime: string;
+  isEarlyDeparture: boolean;
+  isOutsideSchedule: boolean;
+  reason: string | null;
 }
 export interface Today {
   employeeName: string;
@@ -22,10 +31,12 @@ export interface Today {
     end: string;
   };
   reasonRequired: boolean;
-  status: "NOT_CHECKED_IN" | "CHECKED_IN" | "DELETED";
+  checkoutReasonRequired: boolean;
+  status: "NOT_CHECKED_IN" | "CHECKED_IN" | "CHECKED_OUT" | "DELETED";
   record: CheckInRecord | null;
 }
 export interface CheckInPayload {
+  dailyRecordId?: string;
   photoObjectId: string;
   clientCapturedAt: string;
   captureMethod: "AUTO" | "MANUAL";
@@ -61,6 +72,24 @@ export function readRecord(value: unknown): CheckInRecord {
     typeof row.checkIn.isOutsideSchedule !== "boolean"
   )
     throw new AuthError(503, "Hasil check-in belum dapat diverifikasi.");
+  if (
+    row.checkOut &&
+    (!uuid.test(row.checkOut.id) ||
+      !zoned(row.checkOut.eventTime) ||
+      typeof row.checkOut.isEarlyDeparture !== "boolean" ||
+      typeof row.checkOut.isOutsideSchedule !== "boolean" ||
+      Date.parse(row.checkOut.eventTime) < Date.parse(row.checkIn.eventTime))
+  )
+    throw new AuthError(503, "Hasil checkout belum dapat diverifikasi.");
+  return row;
+}
+export function readOperationRecord(
+  value: unknown,
+  purpose: AttendancePurpose,
+) {
+  const row = readRecord(value);
+  if (purpose === "CHECK_OUT" && !row.checkOut)
+    throw new AuthError(503, "Hasil checkout belum dapat diverifikasi.");
   return row;
 }
 export async function getToday(client: AuthClient, signal?: AbortSignal) {
@@ -75,7 +104,10 @@ export async function getToday(client: AuthClient, signal?: AbortSignal) {
     !/^\d{4}-\d{2}-\d{2}$/.test(d.attendanceDate) ||
     typeof d.eligible !== "boolean" ||
     typeof d.reasonRequired !== "boolean" ||
-    !["NOT_CHECKED_IN", "CHECKED_IN", "DELETED"].includes(d.status) ||
+    typeof d.checkoutReasonRequired !== "boolean" ||
+    !["NOT_CHECKED_IN", "CHECKED_IN", "CHECKED_OUT", "DELETED"].includes(
+      d.status,
+    ) ||
     !["REGULAR_WORKDAY", "WEEKEND", "HOLIDAY"].includes(d.schedule?.type) ||
     !/^\d{2}:\d{2}:\d{2}$/.test(d.schedule.start) ||
     !/^\d{2}:\d{2}:\d{2}$/.test(d.schedule.end) ||
@@ -85,6 +117,8 @@ export async function getToday(client: AuthClient, signal?: AbortSignal) {
 
   if (d.record) {
     if (
+      (d.status === "CHECKED_OUT" && !d.record.checkOut) ||
+      (d.status === "CHECKED_IN" && !!d.record.checkOut) ||
       d.record.attendanceDate !== d.attendanceDate ||
       (d.status === "DELETED" && !zoned(d.record.deletedAt))
     )
@@ -101,9 +135,12 @@ export async function postCheckIn(
   payload: CheckInPayload,
   key: string,
   signal: AbortSignal,
+  purpose: AttendancePurpose = "CHECK_IN",
 ) {
   const value = await client.api<Envelope<CheckInRecord>>(
-    "me/attendance/check-in",
+    purpose === "CHECK_IN"
+      ? "me/attendance/check-in"
+      : "me/attendance/check-out",
     {
       method: "POST",
       body: payload,
@@ -112,7 +149,7 @@ export async function postCheckIn(
       timeoutMs: 35000,
     },
   );
-  return readRecord(value?.data);
+  return readOperationRecord(value?.data, purpose);
 }
 export async function getCheckInStatus(
   client: AuthClient,
@@ -146,7 +183,7 @@ export async function getCheckInStatus(
       (typeof data.response?.error?.code !== "string" ||
         typeof data.response?.error?.message !== "string"))
   )
-    throw new AuthError(503, "Status check-in belum dapat diverifikasi.");
+    throw new AuthError(503, "Status absensi belum dapat diverifikasi.");
   if (data.state === "SUCCEEDED") readRecord(data.response?.data);
   return data;
 }

@@ -21,6 +21,7 @@ const today = {
   ineligibilityMessage: null,
   schedule: { type: "REGULAR_WORKDAY", start: "08:00:00", end: "17:00:00" },
   reasonRequired: true,
+  checkoutReasonRequired: true,
   status: "CHECKED_IN",
   record: row,
 };
@@ -85,5 +86,35 @@ describe("Attendance API response validation", () => {
         new AbortController().signal,
       ),
     ).rejects.toThrow("diverifikasi");
+  });
+  it("T22 requires a valid checkout in completed today and rejects malformed official checkout time", async () => {
+    const completed = {
+      ...today,
+      checkoutReasonRequired: false,
+      status: "CHECKED_OUT",
+      record: {
+        ...row,
+        checkOut: {
+          ...row.checkIn,
+          isEarlyDeparture: false,
+          eventTime: "2026-10-02T17:00:00.000+07:00",
+        },
+      },
+    };
+    expect((await getToday(client(completed))).data.status).toBe("CHECKED_OUT");
+    await expect(
+      getToday(client({ ...completed, record: row })),
+    ).rejects.toThrow();
+    await expect(
+      getToday(
+        client({
+          ...completed,
+          record: {
+            ...completed.record,
+            checkOut: { ...completed.record.checkOut, eventTime: "bad" },
+          },
+        }),
+      ),
+    ).rejects.toThrow();
   });
 });

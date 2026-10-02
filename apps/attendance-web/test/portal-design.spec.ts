@@ -5,13 +5,30 @@ const title = {
   change: "Buat password baru",
   home: "Hari ini",
   capture: "Foto check-in",
+  checkout: "Foto checkout",
+  ready: "Hari ini",
+  completed: "Hari ini",
 };
 
-for (const state of ["login", "change", "home", "capture"] as const) {
+for (const state of [
+  "login",
+  "change",
+  "home",
+  "capture",
+  "checkout",
+  "ready",
+  "completed",
+] as const) {
   for (const scheme of ["light", "dark"] as const) {
     for (const width of [320, 1440]) {
       test(
-        state + " " + scheme + " layout at " + width + "px",
+        (["checkout", "ready", "completed"].includes(state) ? "T22 " : "") +
+          state +
+          " " +
+          scheme +
+          " layout at " +
+          width +
+          "px",
         async ({ page }, info) => {
           const errors: string[] = [];
           page.on("pageerror", (error) => errors.push(error.message));
@@ -53,8 +70,38 @@ for (const state of ["login", "change", "home", "capture"] as const) {
                     end: "17:00:00",
                   },
                   reasonRequired: false,
-                  status: "NOT_CHECKED_IN",
-                  record: null,
+                  checkoutReasonRequired:
+                    state === "checkout" || state === "ready",
+                  status:
+                    state === "completed"
+                      ? "CHECKED_OUT"
+                      : state === "checkout" || state === "ready"
+                        ? "CHECKED_IN"
+                        : "NOT_CHECKED_IN",
+                  record: ["checkout", "ready", "completed"].includes(state)
+                    ? {
+                        id: "2f178ed8-8cf4-4aac-9dcb-805828295f88",
+                        attendanceDate: "2026-10-02",
+                        deletedAt: null,
+                        checkIn: {
+                          id: "ed1ee3a0-0da2-4529-8694-d5e6e582c063",
+                          eventTime: "2026-10-02T08:00:00.000+07:00",
+                          isLate: false,
+                          isOutsideSchedule: false,
+                          reason: null,
+                        },
+                        checkOut:
+                          state === "completed"
+                            ? {
+                                id: "554d6a1b-2f3b-44a8-9a87-7a2d4d8bb8f0",
+                                eventTime: "2026-10-02T17:00:00.000+07:00",
+                                isEarlyDeparture: false,
+                                isOutsideSchedule: false,
+                                reason: null,
+                              }
+                            : null,
+                      }
+                    : null,
                 },
                 meta: {
                   requestId: "visual",
@@ -63,7 +110,13 @@ for (const state of ["login", "change", "home", "capture"] as const) {
               },
             }),
           );
-          await page.goto(state === "capture" ? "/#foto-checkin" : "/");
+          await page.goto(
+            state === "capture"
+              ? "/#foto-checkin"
+              : state === "checkout"
+                ? "/#foto-checkout"
+                : "/",
+          );
           await expect(page.getByRole("heading", { level: 1 })).toHaveText(
             title[state],
           );
@@ -94,7 +147,7 @@ for (const state of ["login", "change", "home", "capture"] as const) {
             await expect(
               page.getByRole("button", { name: "Simpan password" }),
             ).toBeVisible();
-          } else if (state === "capture") {
+          } else if (state === "capture" || state === "checkout") {
             await expect(
               page.getByRole("button", { name: "Buka kamera" }),
             ).toBeVisible();
@@ -104,6 +157,10 @@ for (const state of ["login", "change", "home", "capture"] as const) {
             ).toBeFocused();
           } else {
             await expect(page.getByText("Synthetic Employee")).toBeVisible();
+            for (const button of await page.locator('.today-action').all()) {
+              const bounds = await button.boundingBox();
+              expect(bounds?.height).toBeGreaterThanOrEqual(44);
+            }
             await expect(
               page.getByRole("button", { name: "Keluar" }),
             ).toBeVisible();
