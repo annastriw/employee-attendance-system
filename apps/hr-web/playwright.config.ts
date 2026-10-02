@@ -1,7 +1,7 @@
 import { defineConfig } from "@playwright/test";
 export default defineConfig({
   testDir: "./test",
-  testMatch: ["hr-auth.spec.ts", "hr-departments.spec.ts", "hr-positions.spec.ts"],
+  testMatch: ["hr-auth.spec.ts", "hr-departments.spec.ts", "hr-positions.spec.ts", "hr-employees.spec.ts"],
   workers: 1,
   fullyParallel: false,
   globalSetup: "./test/global-setup.mjs",
@@ -20,6 +20,6 @@ export default defineConfig({
     command: "node test/run-stack.mjs",
     url: "http://localhost:15174",
     reuseExistingServer: false,
-    timeout: 60000,
+    timeout: 180000,
   },
 });

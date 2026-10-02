@@ -31,11 +31,13 @@ function stop(code = 0) {
 }
 for (const signal of ["SIGINT", "SIGTERM"]) process.on(signal, () => stop());
 async function ready(url) {
-  for (let attempt = 0; attempt < 150; attempt++) {
+  // Services boot slowly under memory pressure; keep probing (fetch itself is
+  // bounded to 1s) so a slow but healthy start is not aborted prematurely.
+  for (let attempt = 0; attempt < 600; attempt++) {
     try {
       if ((await fetch(url, { signal: AbortSignal.timeout(1000) })).ok) return;
     } catch {}
-    await new Promise((done) => setTimeout(done, 100));
+    await new Promise((done) => setTimeout(done, 200));
   }
   throw new Error("Test stack readiness failed.");
 }
