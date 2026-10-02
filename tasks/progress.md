@@ -4,8 +4,8 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 ## Snapshot terakhir
 
-- Tanggal: 2026-10-03 (Asia/Jakarta), akhir increment T27. HEAD diverifikasi dengan `git log`; jangan anggap hash di sini sebagai HEAD.
-- Tahap: fitur T08–T27 selesai dan diverifikasi; Checkpoint setelah T27 terpenuhi. Increment implementasi berikut T28 Review UI responsif. Fondasi T01–T07/UX01–UX02 masih perlu rekonsiliasi status lama dan isolasi test; T28–T31 tetap belum selesai. T09c tetap menjadi acuan tema.
+- Tanggal: 2026-10-03 (Asia/Jakarta), akhir increment T28. HEAD diverifikasi dengan `git log`; jangan anggap hash di sini sebagai HEAD.
+- Tahap: fitur T08–T28 selesai dan diverifikasi; Checkpoint setelah T28 terpenuhi. Increment implementasi berikut T29 Validasi integrasi dan CI. Fondasi T01–T07/UX01–UX02 masih perlu rekonsiliasi status lama dan isolasi test; T29–T31 tetap belum selesai. T09c tetap menjadi acuan tema.
 - Commit sesi ini pada dev (lama ke baru): 93488ae, f423e47, aa34d48, 1b7b05d, e4a6782, 83537f1, 112d7fa, a485480 (lihat git log), lalu:
   - c2f98fe docs: switch frontend theme to Linear-style zinc + emerald, Geist, Phosphor, light/dark
   - 36a24e4 feat(ui): Linear-style redesign with zinc + emerald, Geist, Phosphor and light/dark
@@ -21,6 +21,8 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 - Commit T15: ee2f76d (reset password karyawan, tests, dan H08 UI). Manual browser langkah 1–10 lulus penuh.
 - Commit T16: ffae59f (work policy thresholds, eligibility engine, dan integrasi MySQL).
 - Commit T25: 6665dfe (monitoring dan rekap harian HRD, API Gateway proxy, H02 UI).
+- Commit T26: b12fcf3 (Leaflet map dan foto privat HRD).
+- Commit T27: e504540 (outbox deduplication, retry, dan orphan cleanup worker).
 - Branch: dev, tracking origin/dev. Repository public [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system) dipilih pengguna pada 2026-10-02. Push awal terverifikasi: lokal dan remote dev sama pada 7cd397f. Visibilitas PUBLIC diverifikasi melalui GitHub setelah instruksi pengguna; commit berikut dipush setelah verifikasi, deployment tetap tahap terakhir.
 - Database lokal (Docker MySQL 127.0.0.1:3307): migration sampai `20261003020000_attendance_checkin` DITERAPKAN ke attendance_dev dan attendance_test. Grants Attendance dan Media dev/test diterapkan; kredensial runtime baru tersimpan dalam .env.database/.env.media ignored.
 - Host memory sering CRITICAL (1-2 GB). Jalankan suite berat satu per satu; Playwright 1 worker terbukti stabil.
@@ -30,13 +32,23 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T27 Outbox dan pemulihan kegagalan | Antigravity | apps/media-service, apps/attendance-service, apps/employee-service, docs/sdd/outbox-failure-recovery.md | T26 selesai | MySQL 3307, AIStor 9000/9001 aktif | Selesai |
+| T29 Validasi integrasi dan CI | Antigravity | .github/workflows/, package.json, test/ | T28 selesai | MySQL 3307, AIStor 9000/9001 aktif | Berjalan |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 
 ## Perubahan yang belum di-commit
 
 Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .windsurf/ dan skills-lock.json adalah berkas lokal; jangan di-stage, dihapus atau diubah tanpa scope jelas. Rahasia dan data pribadi tetap ignored.
+
+## Checkpoint T28 — 2026-10-03
+
+- Implementasi: [review UI responsif](../docs/sdd/ui-responsive-review.md).
+  1. **Audit & Desain Responsif**: Audit lengkap pada 5 keluarga layar (Akses E01/E02/H01, Tindakan & Capture E03–E06, Riwayat & Monitoring E07/E08/H02–H05, Direktori & Master H06–H13, Akun & Konfirmasi E09/H10/H14) memverifikasi konsistensi tema Linear (zinc + emerald), font Geist, ikon Phosphor, dan 100% Bahasa Indonesia.
+  2. **Touch Targets & Aksesibilitas**: Standardisasi target sentuh interaktif minimum 44x44 px (`min-height: 2.75rem`) pada seluruh tombol aksi utama (`.primary-button`), tombol tambah (`.list-add`), tombol pager (`.list-pager-buttons .button`, `.pager-btn`), tombol pemicu menu akun (`.account-trigger`), toggle menu mobile (`.mobile-menu-toggle`), tombol dialog footer (`.dialog-footer .button`), serta tombol aksi baris mobile (`.row-actions .button`). Penegasan fokus terlihat via `focus-visible` (`outline: 2px solid var(--focus); outline-offset: 2px`) pada seluruh kontrol form dan kartu metrik interaktif.
+  3. **Table & Evidence Responsiveness**: Penambahan gaya `.table-responsive` (`overflow-x: auto`) dan `.portal-table` (`min-width: 36rem`) pada tabel monitoring kehadiran H02; penyesuaian `.attendance-evidence-grid` (`minmax(min(100%, 18rem), 1fr)` dan 1-kolom pada ponsel) memastikan 0 overflow horizontal pada viewport terkecil 320 px (`scrollWidth <= innerWidth`).
+  4. **Code Splitting & Optimasi Bundel**: Konfigurasi `manualChunks` di `apps/hr-web/vite.config.ts` memecah `leaflet`, `@heroui/react`, dan `@phosphor-icons/react` ke dalam chunk terpisah (seluruh chunk < 400 kB, bebas warning Vite).
+  5. **Verifikasi Suite**: 87 tes unit/komponen di `attendance-web` dan 78 tes di `hr-web` lulus 100%. Linting (`eslint .`) 0 error, build production kedua portal lulus, serta 24 pengujian visual Playwright (`test:ui`) pada 320/1440 px terang/gelap (termasuk skenario baru H02 monitoring & H04 leaflet evidence) lulus 100%.
+- Langkah berikut: T29 Validasi integrasi dan CI (konfigurasi CI GitHub Actions, pipeline lint/test/build terisolasi).
 
 ## Checkpoint T27 — 2026-10-03
 

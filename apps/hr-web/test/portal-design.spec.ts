@@ -257,3 +257,203 @@ for (const scheme of ['light', 'dark'] as const) for (const width of [320, 1440]
    expect(errors).toEqual([]);
  });
 }
+
+
+// T28: H02 Monitoring & Rekap visual tests across 320px and 1440px in light & dark modes
+const monitoringSummaryFixture = {
+  totalActiveEmployees: 5,
+  checkedIn: 3,
+  late: 1,
+  earlyDeparture: 1,
+  pendingCheckout: 1,
+  missingAttendance: 2,
+};
+const monitoringEmployeesFixture = [
+  {
+    employeeId: "emp-1",
+    recordId: "att-1",
+    name: "Budi Santoso",
+    nik: "EMP-2026-001",
+    department: "Keuangan",
+    position: "Analis",
+    checkInTime: "2026-10-02T08:05:00.000+07:00",
+    checkOutTime: "2026-10-02T17:00:00.000+07:00",
+    isLate: true,
+    isEarlyDeparture: false,
+    status: "COMPLETED",
+  },
+  {
+    employeeId: "emp-2",
+    recordId: "att-2",
+    name: "Siti Rahma",
+    nik: "EMP-2026-002",
+    department: "Operasional",
+    position: "Staf Logistik",
+    checkInTime: "2026-10-02T07:55:00.000+07:00",
+    checkOutTime: "2026-10-02T16:30:00.000+07:00",
+    isLate: false,
+    isEarlyDeparture: true,
+    status: "COMPLETED",
+  },
+];
+
+for (const scheme of ["light", "dark"] as const) {
+  for (const width of [320, 1440]) {
+    test(`T28 H02 monitoring ${scheme} layout at ${width}px`, async ({ page }, info) => {
+      const errors: string[] = [];
+      page.on("pageerror", (e) => errors.push(e.message));
+      await page.emulateMedia({ colorScheme: scheme });
+      await page.setViewportSize({ width, height: 900 });
+      await page.route("**/api/v1/auth/refresh", (route) =>
+        route.fulfill({
+          json: {
+            accessToken: "visual-test-session",
+            expiresIn: 3600,
+            user: {
+              id: "ui-test",
+              email: "admin@example.test",
+              role: "ADMIN_HRD",
+              employeeId: null,
+              mustChangePassword: false,
+            },
+          },
+        }),
+      );
+      await page.route("**/api/v1/monitoring/summary*", (route) =>
+        route.fulfill({ json: monitoringSummaryFixture }),
+      );
+      await page.route("**/api/v1/monitoring/employees*", (route) =>
+        route.fulfill({
+          json: {
+            items: monitoringEmployeesFixture,
+            total: monitoringEmployeesFixture.length,
+            page: 1,
+            pageSize: 20,
+          },
+        }),
+      );
+      await page.route("**/api/v1/departments*", (route) =>
+        route.fulfill({ json: { items: [], total: 0, page: 1, pageSize: 100 } }),
+      );
+
+      await page.goto("http://127.0.0.1:15175/#ringkasan");
+      await expect(page.getByRole("heading", { name: "Ringkasan" })).toBeVisible();
+      await expect(page.getByText("Hadir / Check-in")).toBeVisible();
+      await expect(page.getByRole("table", { name: "Tabel monitoring kehadiran" })).toBeVisible();
+
+      // Check no horizontal page overflow
+      expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
+
+      // Verify touch targets for actionable buttons (navigation, reset, search submit)
+      const buttons = await page.locator(".monitoring-page").getByRole("button").all();
+      for (const btn of buttons) {
+        if (!(await btn.isVisible()) || (await btn.isDisabled())) continue;
+        const box = await btn.boundingBox();
+        if (box) {
+          expect(box.height).toBeGreaterThanOrEqual(44);
+        }
+      }
+
+      await page.screenshot({
+        path: info.outputPath(`monitoring-${scheme}-${width}.png`),
+        fullPage: true,
+      });
+      expect(errors).toEqual([]);
+    });
+  }
+}
+
+// T28: H04 Attendance Leaflet Map and Evidence visual tests
+const leafletEvidenceFixture = {
+  id: "33333333-3333-4333-8333-333333333333",
+  employeeId: "emp-leaflet",
+  employee: { id: "emp-leaflet", name: "Ahmad Dahlan", status: "ACTIVE" },
+  attendanceDate: "2026-10-02",
+  version: "2026-10-03T00:00:00.000Z",
+  department: "Teknologi",
+  position: "Senior Engineer",
+  deletedAt: null,
+  deleteReason: null,
+  deletedByAccountId: null,
+  checkIn: {
+    id: "cin-1",
+    eventTime: "2026-10-02T08:00:00.000+07:00",
+    reason: null,
+    isLate: false,
+    isEarlyDeparture: false,
+    isOutsideSchedule: false,
+    location: {
+      latitude: -6.2088,
+      longitude: 106.8456,
+      accuracyMeters: 15.5,
+      capturedAt: "2026-10-02T07:59:50.000+07:00",
+    },
+  },
+  checkOut: {
+    id: "cout-1",
+    eventTime: "2026-10-02T17:05:00.000+07:00",
+    reason: null,
+    isLate: false,
+    isEarlyDeparture: false,
+    isOutsideSchedule: false,
+    location: {
+      latitude: -6.209,
+      longitude: 106.8458,
+      accuracyMeters: 20.0,
+      capturedAt: "2026-10-02T17:04:45.000+07:00",
+    },
+  },
+  history: [],
+};
+
+for (const scheme of ["light", "dark"] as const) {
+  for (const width of [320, 1440]) {
+    test(`T28 H04 leaflet evidence ${scheme} layout at ${width}px`, async ({ page }, info) => {
+      const errors: string[] = [];
+      page.on("pageerror", (e) => errors.push(e.message));
+      await page.emulateMedia({ colorScheme: scheme });
+      await page.setViewportSize({ width, height: 900 });
+      await page.route("**/api/v1/auth/refresh", (route) =>
+        route.fulfill({
+          json: {
+            accessToken: "visual-test-session",
+            expiresIn: 3600,
+            user: {
+              id: "ui-test",
+              email: "admin@example.test",
+              role: "ADMIN_HRD",
+              employeeId: null,
+              mustChangePassword: false,
+            },
+          },
+        }),
+      );
+      await page.route("**/api/v1/attendance/**", (route) =>
+        route.fulfill({ json: { data: leafletEvidenceFixture } }),
+      );
+
+      await page.goto(`http://127.0.0.1:15175/#absensi?id=${leafletEvidenceFixture.id}`);
+      await expect(page.getByText("Ahmad Dahlan")).toBeVisible();
+      await expect(page.getByRole("region", { name: /Peta Check-in/ })).toBeVisible();
+
+      // Check no horizontal page overflow
+      expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
+
+      // Verify touch targets for evidence buttons
+      const buttons = await page.locator(".attendance-detail button").all();
+      for (const btn of buttons) {
+        if (!(await btn.isVisible()) || (await btn.isDisabled())) continue;
+        const box = await btn.boundingBox();
+        if (box) {
+          expect(box.height).toBeGreaterThanOrEqual(44);
+        }
+      }
+
+      await page.screenshot({
+        path: info.outputPath(`leaflet-evidence-${scheme}-${width}.png`),
+        fullPage: true,
+      });
+      expect(errors).toEqual([]);
+    });
+  }
+}

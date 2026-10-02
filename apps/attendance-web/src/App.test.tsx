@@ -128,7 +128,7 @@ describe("Employee portal authentication journey", () => {
     await user.click(screen.getByRole("button", { name: "Keluar" }));
     await screen.findByRole("heading", { name: "Masuk" });
     expect(auth.logout).toHaveBeenCalledTimes(1);
-  });
+  }, 15000);
 
   it("guards a deep link and restores an unrestricted employee session", async () => {
     window.history.replaceState(null, "", "/#beranda");

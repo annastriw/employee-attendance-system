@@ -234,9 +234,15 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 - Target: service terkait; pecah per alur
 
 ## T28 — Review UI responsif
-- [ ] Selesai
+- [x] Selesai (2026-10-03; spesifikasi di docs/sdd/ui-responsive-review.md, audit 5 keluarga layar, touch targets >= 44 px, perbaikan table-responsive/evidence-grid, dan pengujian visual 320/1440 px terang/gelap terverifikasi)
 - Acceptance: HeroUI+custom, bahasa Indonesia, fokus keyboard, loading/error/empty state dan mobile konsisten.
 - Verification: Browser ukuran desktop/tablet/mobile, keyboard dan visual review.
+- Implementasi/verifikasi teknis 2026-10-03: [review UI responsif](../docs/sdd/ui-responsive-review.md).
+  1. **Audit & Desain Responsif**: Audit lengkap pada 5 keluarga layar (Akses E01/E02/H01, Tindakan & Capture E03–E06, Riwayat & Monitoring E07/E08/H02–H05, Direktori & Master H06–H13, Akun & Konfirmasi E09/H10/H14) memverifikasi konsistensi tema Linear (zinc + emerald), font Geist, ikon Phosphor, dan 100% Bahasa Indonesia.
+  2. **Touch Targets & Aksesibilitas**: Standardisasi target sentuh interaktif minimum 44x44 px (`min-height: 2.75rem`) pada seluruh tombol aksi utama (`.primary-button`), tombol tambah (`.list-add`), tombol pager (`.list-pager-buttons .button`, `.pager-btn`), tombol pemicu menu akun (`.account-trigger`), toggle menu mobile (`.mobile-menu-toggle`), tombol dialog footer (`.dialog-footer .button`), serta tombol aksi baris mobile (`.row-actions .button`). Penegasan fokus terlihat via `focus-visible` (`outline: 2px solid var(--focus); outline-offset: 2px`) pada seluruh kontrol form dan kartu metrik interaktif.
+  3. **Table & Evidence Responsiveness**: Penambahan gaya `.table-responsive` (`overflow-x: auto`) dan `.portal-table` (`min-width: 36rem`) pada tabel monitoring kehadiran H02; penyesuaian `.attendance-evidence-grid` (`minmax(min(100%, 18rem), 1fr)` dan 1-kolom pada ponsel) memastikan 0 overflow horizontal pada viewport terkecil 320 px (`scrollWidth <= innerWidth`).
+  4. **Code Splitting & Optimasi Bundel**: Konfigurasi `manualChunks` di `apps/hr-web/vite.config.ts` memecah `leaflet`, `@heroui/react`, dan `@phosphor-icons/react` ke dalam chunk terpisah (seluruh chunk < 400 kB, bebas warning Vite).
+  5. **Verifikasi Suite**: 87 tes unit/komponen di `attendance-web` dan 78 tes di `hr-web` lulus 100%. Linting (`eslint .`) 0 error, build production kedua portal lulus, serta 24 pengujian visual Playwright (`test:ui`) pada 320/1440 px terang/gelap (termasuk skenario baru H02 monitoring & H04 leaflet evidence) lulus 100%.
 - Dependencies: 26
 - Target: kedua frontend; task per halaman
 
