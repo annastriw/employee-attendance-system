@@ -55,6 +55,21 @@ describe('HRD attendance Gateway contract', () => {
     );
     expect(forward.mock.calls[1][3]).toBeUndefined();
   });
+  it('forwards photo request for HRD without query params and strips foreign headers', async () => {
+    const eventId = '22222222-2222-4222-8222-222222222222';
+    const request = req('/' + id + '/events/' + eventId + '/photo');
+    await controller.photo(request, res());
+    expect(forward).toHaveBeenCalledWith(
+      request.originalUrl,
+      'GET',
+      {
+        authorization: 'Bearer scoped',
+        'X-Request-ID': id,
+      },
+      undefined,
+      'attendance',
+    );
+  });
   it.each([
     '?status=ACTIVE&status=DELETED',
     '?internal=1',
@@ -62,6 +77,8 @@ describe('HRD attendance Gateway contract', () => {
     '/not-uuid',
     '/../internal/employees',
     '/' + id + '/restore',
+    '/' + id + '/events/not-uuid/photo',
+    '/' + id + '/events/' + id + '/photo?foo=bar',
   ])(
     'rejects unsafe GET boundary %s without contacting an upstream',
     async (path) => {

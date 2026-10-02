@@ -36,6 +36,20 @@ export class AttendanceLifecycleController {
   ) {
     return this.service.list(query, req.requestId);
   }
+  @Get(':id/events/:eventId/photo') photo(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param('eventId', new ParseUUIDPipe({ version: '4' })) eventId: string,
+    @Req() req: AttendanceRequest,
+  ) {
+    this.noQuery(req);
+    return this.service.photo(
+      id,
+      eventId,
+      req.actor!,
+      req.headers.authorization!,
+      req.requestId,
+    );
+  }
   @Get(':id') detail(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Req() req: AttendanceRequest,

@@ -3,6 +3,7 @@ import { Button, Label, TextArea } from "@heroui/react";
 import { ArrowLeft, Trash, ArrowCounterClockwise } from "@phosphor-icons/react";
 import { Notice } from "../components/molecules/Notice";
 import { ConfirmDialog } from "../components/organisms/ConfirmDialog";
+import { AttendanceEvidence } from "../components/organisms/AttendanceEvidence";
 import { AuthError, type AuthClient } from "../lib/auth-client";
 import {
   attendanceDate,
@@ -16,11 +17,13 @@ export function AttendanceDetailPage({
   id,
   onBack,
   handle,
+  onSessionExpired = () => {},
 }: {
   client: Client;
   id: string;
   onBack: () => void;
   handle: (e: unknown) => string;
+  onSessionExpired?: () => void;
 }) {
   const [data, setData] = useState<AttendanceRecord | null>(null);
   const [reload, setReload] = useState(0);
@@ -146,27 +149,25 @@ export function AttendanceDetailPage({
                   {attendanceStatus(data)}
                 </span>
               </div>
-              <div className="attendance-events">
-                {[data.checkIn, data.checkOut].map((event, i) => (
-                  <div key={i} className="attendance-event">
-                    <h3>{i ? "Checkout" : "Check-in"}</h3>
-                    <p className="attendance-event-time">
-                      {attendanceTime(event?.eventTime)} <span>WIB</span>
-                    </p>
-                    {event?.isLate && (
-                      <p className="employee-secondary">Terlambat</p>
-                    )}
-                    {event?.isEarlyDeparture && (
-                      <p className="employee-secondary">Pulang awal</p>
-                    )}
-                    {event?.isOutsideSchedule && (
-                      <p className="employee-secondary">Di luar jadwal</p>
-                    )}
-                    {event?.reason && (
-                      <p className="attendance-reason">{event.reason}</p>
-                    )}
-                  </div>
-                ))}
+              <div className="attendance-evidence-grid">
+                <AttendanceEvidence
+                  client={client}
+                  recordId={data.id}
+                  event={data.checkIn}
+                  label="check-in"
+                  date={data.attendanceDate}
+                  isDeleted={!!data.deletedAt}
+                  onSessionExpired={onSessionExpired}
+                />
+                <AttendanceEvidence
+                  client={client}
+                  recordId={data.id}
+                  event={data.checkOut}
+                  label="checkout"
+                  date={data.attendanceDate}
+                  isDeleted={!!data.deletedAt}
+                  onSessionExpired={onSessionExpired}
+                />
               </div>
               {data.deletedAt && (
                 <div className="attendance-deletion">

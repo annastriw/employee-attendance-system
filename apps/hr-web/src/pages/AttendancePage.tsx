@@ -108,6 +108,7 @@ export function AttendancePage({
         id={id}
         onBack={() => update({ id: undefined })}
         handle={handle}
+        onSessionExpired={onSessionExpired}
       />
     );
   const total = data?.meta.total ?? 0;

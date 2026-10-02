@@ -210,15 +210,16 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 - Target: apps/attendance-service/, apps/hr-web/
 
 ## T26 — Detail monitoring Leaflet
-- [ ] Selesai
+- [x] Selesai (2026-10-03; spesifikasi di docs/sdd/attendance-leaflet-monitoring.md, gateway proxy, photo endpoint, dan UI Leaflet terverifikasi)
 - Acceptance: Dua lokasi, accuracy, waktu, alasan dan foto privat tampil sesuai akses.
 - Verification: Browser test detail dan uji peta mobile.
+- Implementasi/verifikasi teknis 2026-10-03: [detail monitoring Leaflet](../docs/sdd/attendance-leaflet-monitoring.md). Backend `attendance-service` endpoint `GET /api/v1/attendance/:id/events/:eventId/photo` menerbitkan signed URL foto privat 60 detik bagi HRD untuk absensi aktif maupun soft-deleted (baseline baris 53); `api-gateway` memvalidasi UUID v4 dan meneruskan foto (43 unit tests lulus); integrasi nyata MySQL/AIStor di `checkin.e2e-spec.ts` memverifikasi otorisasi dan akses foto; frontend `hr-web` mengintegrasikan Leaflet (`AttendanceMap.tsx`) dengan marker custom SVG + lingkaran akurasi dan atribusi OSM, `AttendanceEvidence.tsx` menyajikan dua bukti berdampingan (desktop) atau bertumpuk (mobile) dengan foto privat ber-timer 60 detik dan rincian tekstual lokasi (78 tests `hr-web` lulus). Typecheck, lint, dan production build seluruh package terkait lulus 100% tanpa error.
 - Dependencies: 25
 - Target: apps/hr-web/
 
 ### Checkpoint setelah T26
-- [ ] Test relevan dan build/lint lulus.
-- [ ] Alur fase diverifikasi, batasan dicatat dan ditinjau.
+- [x] Test relevan dan build/lint lulus.
+- [x] Alur fase diverifikasi, batasan dicatat dan ditinjau.
 
 ## T27 — Outbox dan pemulihan kegagalan
 - [ ] Selesai

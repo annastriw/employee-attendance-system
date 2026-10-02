@@ -315,3 +315,126 @@
 .btn-action-link { display: inline-flex; align-items: center; gap: 0.375rem; min-height: 2.75rem; font-size: 0.8125rem; color: var(--accent); font-weight: 500; text-decoration: none; }
 .btn-action-link:hover { text-decoration: underline; }
 
+/* T26 Attendance Evidence & Leaflet Map styles (Linear zinc + emerald) */
+.attendance-evidence-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+}
+.attendance-evidence-card {
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+.evidence-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.evidence-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+.evidence-time {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+}
+.evidence-muted {
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+.evidence-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+.attendance-evidence-photo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.attendance-photo-frame {
+  width: 100%;
+  max-height: 260px;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.attendance-photo-img {
+  max-width: 100%;
+  max-height: 260px;
+  object-fit: contain;
+  border-radius: 0.5rem;
+}
+.btn-load-photo {
+  min-height: 2.75rem;
+}
+.attendance-evidence-location {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  margin-top: 0.5rem;
+}
+.location-heading {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+.attendance-map-wrapper {
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.attendance-map-container {
+  height: 200px;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+.attendance-map-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 0.8125rem;
+  text-align: center;
+  padding: 1rem;
+}
+.attendance-location-specs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  background: var(--panel);
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+}
+.location-spec-item dt {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+.location-spec-item dd {
+  color: var(--foreground);
+  font-weight: 600;
+  margin-top: 0.125rem;
+  font-variant-numeric: tabular-nums;
+}
+
+

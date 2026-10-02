@@ -13,6 +13,10 @@ const UUID =
   '[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}';
 const DETAIL = new RegExp('^/api/v1/attendance/' + UUID + '$', 'i');
 const RESTORE = new RegExp('^/api/v1/attendance/' + UUID + '/restore$', 'i');
+const PHOTO = new RegExp(
+  '^/api/v1/attendance/' + UUID + '/events/' + UUID + '/photo$',
+  'i',
+);
 const QUERIES = new Set([
   'status',
   'startDate',
@@ -33,7 +37,7 @@ export class AttendanceAdminProxyController {
     const list = url.pathname === '/api/v1/attendance';
     const allowed =
       method === 'GET'
-        ? list || DETAIL.test(url.pathname)
+        ? list || DETAIL.test(url.pathname) || PHOTO.test(url.pathname)
         : method === 'DELETE'
           ? DETAIL.test(url.pathname)
           : RESTORE.test(url.pathname);
@@ -60,6 +64,12 @@ export class AttendanceAdminProxyController {
     res.status(result.status).json(result.payload);
   }
   @Get() list(@Req() req: Request, @Res() res: Response) {
+    return this.forward('GET', req, res);
+  }
+  @Get(':id/events/:eventId/photo') photo(
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
     return this.forward('GET', req, res);
   }
   @Get(':id') detail(@Req() req: Request, @Res() res: Response) {

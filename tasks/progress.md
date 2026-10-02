@@ -4,8 +4,8 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 ## Snapshot terakhir
 
-- Tanggal: 2026-10-03 (Asia/Jakarta), akhir increment T25. HEAD diverifikasi dengan `git log`; jangan anggap hash di sini sebagai HEAD.
-- Tahap: fitur T08–T25 selesai dan diverifikasi. Increment implementasi berikut T26 Detail monitoring Leaflet. Fondasi T01–T07/UX01–UX02 masih perlu rekonsiliasi status lama dan isolasi test; T26–T31 tetap belum selesai. T09c tetap menjadi acuan tema.
+- Tanggal: 2026-10-03 (Asia/Jakarta), akhir increment T26. HEAD diverifikasi dengan `git log`; jangan anggap hash di sini sebagai HEAD.
+- Tahap: fitur T08–T26 selesai dan diverifikasi; Checkpoint setelah T26 terpenuhi. Increment implementasi berikut T27 Outbox dan pemulihan kegagalan. Fondasi T01–T07/UX01–UX02 masih perlu rekonsiliasi status lama dan isolasi test; T27–T31 tetap belum selesai. T09c tetap menjadi acuan tema.
 - Commit sesi ini pada dev (lama ke baru): 93488ae, f423e47, aa34d48, 1b7b05d, e4a6782, 83537f1, 112d7fa, a485480 (lihat git log), lalu:
   - c2f98fe docs: switch frontend theme to Linear-style zinc + emerald, Geist, Phosphor, light/dark
   - 36a24e4 feat(ui): Linear-style redesign with zinc + emerald, Geist, Phosphor and light/dark
@@ -20,6 +20,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 - Commit T14: a39ecb1 (Putaran A: edit profil dan email), d92f8d9 (Putaran B: lifecycle transitions, tests, dan H08 UI).
 - Commit T15: ee2f76d (reset password karyawan, tests, dan H08 UI). Manual browser langkah 1–10 lulus penuh.
 - Commit T16: ffae59f (work policy thresholds, eligibility engine, dan integrasi MySQL).
+- Commit T25: 6665dfe (monitoring dan rekap harian HRD, API Gateway proxy, H02 UI).
 - Branch: dev, tracking origin/dev. Repository public [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system) dipilih pengguna pada 2026-10-02. Push awal terverifikasi: lokal dan remote dev sama pada 7cd397f. Visibilitas PUBLIC diverifikasi melalui GitHub setelah instruksi pengguna; commit berikut dipush setelah verifikasi, deployment tetap tahap terakhir.
 - Database lokal (Docker MySQL 127.0.0.1:3307): migration sampai `20261003020000_attendance_checkin` DITERAPKAN ke attendance_dev dan attendance_test. Grants Attendance dan Media dev/test diterapkan; kredensial runtime baru tersimpan dalam .env.database/.env.media ignored.
 - Host memory sering CRITICAL (1-2 GB). Jalankan suite berat satu per satu; Playwright 1 worker terbukti stabil.
@@ -29,13 +30,23 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T25 Monitoring dan rekap | Antigravity | apps/attendance-service, apps/employee-service, apps/api-gateway, apps/hr-web, docs/sdd/attendance-monitoring.md | T24 selesai | MySQL 3307, AIStor 9000/9001 aktif | Selesai |
+| T26 Detail monitoring Leaflet | Antigravity | apps/attendance-service, apps/api-gateway, apps/hr-web, docs/sdd/attendance-leaflet-monitoring.md | T25 selesai | MySQL 3307, AIStor 9000/9001 aktif | Selesai |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 
 ## Perubahan yang belum di-commit
 
 Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .windsurf/ dan skills-lock.json adalah berkas lokal; jangan di-stage, dihapus atau diubah tanpa scope jelas. Rahasia dan data pribadi tetap ignored.
+
+## Checkpoint T26 — 2026-10-03
+
+- Implementasi: [detail monitoring Leaflet](../docs/sdd/attendance-leaflet-monitoring.md). Detail absensi HRD (Layar H04) menampilkan bukti check-in dan checkout lengkap.
+- Backend: Endpoint `GET /api/v1/attendance/:id/events/:eventId/photo` di Attendance Service memvalidasi otentikasi HRD dan menerbitkan signed URL foto privat berdurasi 60 detik melalui `media-service`. Mendukung penayangan foto untuk absensi aktif maupun soft-deleted sesuai klausul baseline line 53.
+- Gateway: `AttendanceAdminProxyController` di `api-gateway` memvalidasi UUID v4 pada path foto dan query exclusion, lalu meneruskan ke `attendance-service`. 43 unit tests lulus.
+- Frontend: `AttendanceMap.tsx` mengintegrasikan Leaflet dengan custom SVG marker bertema Linear emerald, lingkaran akurasi (`accuracyMeters`), dan atribusi OSM. `AttendanceEvidence.tsx` menyajikan dua kartu bukti (check-in & checkout) berdampingan pada desktop dan bertumpuk pada ponsel, memuat peta interaktif, data tekstual tahan-gagal (koordinat, akurasi, waktu), dan foto privat dengan timer kedaluwarsa 60 detik.
+- Verifikasi: Integration test E2E MySQL/AIStor di `checkin.e2e-spec.ts` memverifikasi izin foto HRD untuk record aktif & terhapus, penolakan token non-HRD (403), unauthenticated (401), dan event ID salah (404). 78 tests di `hr-web` lulus. Typecheck, lint, dan production build semua package terkait lulus 100% tanpa error.
+- Checkpoint setelah T26: seluruh pengujian relevan lulus, alur fase diverifikasi.
+- Langkah berikut: T27 Outbox dan pemulihan kegagalan (event dedup/retry, provisioning compensation, cleanup orphan).
 
 ## Checkpoint T25 — 2026-10-03
 
