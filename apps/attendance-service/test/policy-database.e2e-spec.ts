@@ -77,12 +77,17 @@ describe('T16 Attendance Policy & Real MySQL Database Integration', () => {
     });
 
     it('exposes schedule classification via GET /api/v1/policies/schedule', async () => {
+      const targetDate = '2026-10-07'; // Wednesday
+      await dbService.client.attHoliday.deleteMany({
+        where: { holidayDate: new Date(`${targetDate}T00:00:00.000Z`) },
+      });
+
       const res = await request(app.getHttpServer())
         .get('/api/v1/policies/schedule')
-        .query({ date: '2026-10-02' }) // Friday
+        .query({ date: targetDate })
         .expect(200);
 
-      expect(res.body.data.date).toBe('2026-10-02');
+      expect(res.body.data.date).toBe(targetDate);
       expect(res.body.data.scheduleType).toBe('REGULAR_WORKDAY');
       expect(res.body.data.isWorkday).toBe(true);
     });

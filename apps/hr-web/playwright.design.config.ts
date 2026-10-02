@@ -10,7 +10,7 @@ export default defineConfig({
   testDir: "./test",
   testMatch: "portal-design.spec.ts",
   workers: 1,
-  use: { browserName: "chromium", channel: "chrome", trace: "retain-on-failure" },
+  use: { browserName: "chromium", channel: process.env.CI ? undefined : "chrome", trace: "retain-on-failure" },
   webServer: process.env.HR_DESIGN_ONLY === "true" ? [hrServer] : [
     hrServer,
     { command: "pnpm --dir ../attendance-web run dev --host 127.0.0.1 --port 15173 --strictPort",

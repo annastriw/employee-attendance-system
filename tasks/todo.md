@@ -247,15 +247,27 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 - Target: kedua frontend; task per halaman
 
 ## T29 — Validasi integrasi dan CI
-- [ ] Selesai
+- [x] Selesai (2026-10-03; spesifikasi di docs/sdd/integration-validation-ci.md, workflow .github/workflows/ci.yml, pipeline lokal pnpm validate, skrip ci:setup/ci:grants, dan verifikasi seluruh suite test lulus)
 - Acceptance: Build/lint/test menjalankan skenario penting dengan env test terpisah; pipeline branch dev/main.
 - Verification: Run pipeline lokal/CI dan Playwright core journeys.
+- Implementasi/verifikasi teknis 2026-10-03: [validasi integrasi dan CI](../docs/sdd/integration-validation-ci.md).
+  1. **Konfigurasi Otomasi CI**: Workflow GitHub Actions (`.github/workflows/ci.yml`) dikonfigurasi untuk branch `dev` dan `main` (push dan PR) dengan tiga job terisolasi: `quality` (statis, lint, typecheck, build, unit test), `integration` (layanan kontainer MySQL 8.4.11 di port 3307 dan MinIO AIStor di port 9000/9001), serta `visual-e2e` (Playwright chromium headless).
+  2. **Isolasi Database & Storage Testing**: Skrip otomasi `scripts/ci/setup-ci-environment.mjs` menginisialisasi database `attendance_dev`, `attendance_test`, `attendance_shadow`, akun runtime least-privilege, hak akses tabel per-service (`pnpm run ci:grants`), dan pembuatan bucket privat (`attendance-photos`, `attendance-photos-test`).
+  3. **Verifikasi Constraint & Hak Akses**: `pnpm run db:verify` memvalidasi koneksi Prisma, zona waktu UTC (+00:00), constraint unik email/token (termasuk reservasi email akun arsip), foreign keys sesi, rollback transaksi, serta pencegahan akses runtime terhadap tabel migrasi atau penghapusan audit trail.
+  4. **Perbaikan Hermeticity Test**: Penyempurnaan `policy-database.e2e-spec.ts` untuk membersihkan tanggal target sebelum evaluasi `REGULAR_WORKDAY`, serta penyesuaian Playwright channel (`process.env.CI ? undefined : "chrome"`) agar kompatibel lintas OS (Windows lokal dan Linux runner).
+  5. **Verifikasi Rantai Quality Gate**:
+     - `pnpm run lint`: oxlint pada 5 service NestJS dan eslint pada 2 frontend React lulus 100% (0 error, 0 warning).
+     - `pnpm run db:validate` & `pnpm run db:typecheck`: Skema Prisma dan TypeScript database script lulus 100%.
+     - `pnpm run build`: Seluruh paket dan aplikasi terkompilasi exit code 0.
+     - `pnpm run test`: 344 unit/komponen test lintas seluruh monorepo lulus 100%.
+     - `test:e2e` backend: 209 integration test lulus 100% terhadap MySQL dan AIStor (Auth 14, Employee 35, Media 20, Attendance 64, Gateway 76).
+     - `test:ui` Playwright: 24 layout test (320/1440 px terang/gelap) lulus 100%.
 - Dependencies: 27,28
 - Target: konfigurasi CI, test integration/E2E
 
 ### Checkpoint setelah T29
-- [ ] Test relevan dan build/lint lulus.
-- [ ] Alur fase diverifikasi, batasan dicatat dan ditinjau.
+- [x] Test relevan dan build/lint lulus.
+- [x] Alur fase diverifikasi, batasan dicatat dan ditinjau.
 
 ## T30 — Artefak deploy dan runbook
 - [ ] Selesai

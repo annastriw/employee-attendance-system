@@ -1,0 +1,179 @@
+name: CI
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    branches: [dev, main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Lint, Typecheck & Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.0
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint all packages (oxlint & eslint)
+        run: pnpm run lint
+
+      - name: Validate Prisma schema
+        run: pnpm run db:validate
+
+      - name: Typecheck database scripts
+        run: pnpm run db:typecheck
+
+      - name: Build all packages and applications
+        run: pnpm run build
+
+      - name: Run unit & component tests across monorepo
+        run: pnpm run test
+
+  integration:
+    name: Backend MySQL & Storage Integration Tests
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4.11
+        env:
+          MYSQL_ROOT_PASSWORD: ci_root_password
+          MYSQL_DATABASE: attendance_dev
+        ports:
+          - 3307:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pci_root_password"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+      minio:
+        image: minio/minio:RELEASE.2024-11-07T00-52-28Z
+        env:
+          MINIO_ROOT_USER: attendance-local-admin
+          MINIO_ROOT_PASSWORD: minio_ci_root_password_12345678
+        ports:
+          - 9000:9000
+          - 9001:9001
+        command: server /data --console-address ":9001"
+        options: >-
+          --health-cmd="curl -f http://127.0.0.1:9000/minio/health/live"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.0
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client & build database package
+        run: pnpm run db:generate
+
+      - name: Build backend distributions for inter-service test imports
+        run: pnpm run build
+
+      - name: Setup CI databases, users and MinIO buckets
+        env:
+          MYSQL_ROOT_PASSWORD: ci_root_password
+          AISTOR_ROOT_PASSWORD: minio_ci_root_password_12345678
+        run: pnpm run ci:setup
+
+      - name: Deploy migrations to isolated test database
+        run: pnpm run db:migrate:test
+
+      - name: Apply least-privilege table grants to test users
+        env:
+          MYSQL_ROOT_PASSWORD: ci_root_password
+        run: pnpm run ci:grants
+
+      - name: Verify database constraints, grants and UTC persistence
+        run: pnpm run db:verify
+
+      - name: Auth Service E2E tests
+        run: pnpm --filter auth-service test:e2e
+
+      - name: Employee Service E2E tests
+        run: pnpm --filter employee-service test:e2e
+
+      - name: Media Service E2E tests
+        run: pnpm --filter media-service test:e2e
+
+      - name: Attendance Service E2E tests
+        run: pnpm --filter attendance-service test:e2e
+
+      - name: API Gateway contracts and proxy E2E tests
+        run: pnpm --filter api-gateway test:e2e
+
+  visual-e2e:
+    name: Playwright Visual & Layout Regressions
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.0
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Chromium with dependencies
+        run: npx playwright install --with-deps chromium
+
+      - name: Build shared packages
+        run: pnpm --filter @attendance/database build
+
+      - name: Run HR Web visual tests (320/1440px light/dark)
+        run: pnpm --filter hr-web test:ui
+
+      - name: Run Attendance Web visual tests (320/1440px light/dark)
+        run: pnpm --filter attendance-web test:ui
+
+      - name: Upload Playwright test results artifact on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-visual-results
+          path: |
+            apps/hr-web/test-results/
+            apps/attendance-web/test-results/

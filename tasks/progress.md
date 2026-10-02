@@ -4,8 +4,8 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 ## Snapshot terakhir
 
-- Tanggal: 2026-10-03 (Asia/Jakarta), akhir increment T28. HEAD diverifikasi dengan `git log`; jangan anggap hash di sini sebagai HEAD.
-- Tahap: fitur T08–T28 selesai dan diverifikasi; Checkpoint setelah T28 terpenuhi. Increment implementasi berikut T29 Validasi integrasi dan CI. Fondasi T01–T07/UX01–UX02 masih perlu rekonsiliasi status lama dan isolasi test; T29–T31 tetap belum selesai. T09c tetap menjadi acuan tema.
+- Tanggal: 2026-10-03 (Asia/Jakarta), akhir increment T29. HEAD diverifikasi dengan `git log`; jangan anggap hash di sini sebagai HEAD.
+- Tahap: fitur T08–T29 selesai dan diverifikasi; Checkpoint setelah T29 terpenuhi. Increment implementasi berikut T30 Artefak deploy dan runbook. Fondasi T01–T07/UX01–UX02 masih perlu rekonsiliasi status lama dan isolasi test; T30–T31 tetap belum selesai. T09c tetap menjadi acuan tema.
 - Commit sesi ini pada dev (lama ke baru): 93488ae, f423e47, aa34d48, 1b7b05d, e4a6782, 83537f1, 112d7fa, a485480 (lihat git log), lalu:
   - c2f98fe docs: switch frontend theme to Linear-style zinc + emerald, Geist, Phosphor, light/dark
   - 36a24e4 feat(ui): Linear-style redesign with zinc + emerald, Geist, Phosphor and light/dark
@@ -23,6 +23,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 - Commit T25: 6665dfe (monitoring dan rekap harian HRD, API Gateway proxy, H02 UI).
 - Commit T26: b12fcf3 (Leaflet map dan foto privat HRD).
 - Commit T27: e504540 (outbox deduplication, retry, dan orphan cleanup worker).
+- Commit T28: 073f44a (review UI responsif, touch targets, aksesibilitas, dan polesan state).
 - Branch: dev, tracking origin/dev. Repository public [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system) dipilih pengguna pada 2026-10-02. Push awal terverifikasi: lokal dan remote dev sama pada 7cd397f. Visibilitas PUBLIC diverifikasi melalui GitHub setelah instruksi pengguna; commit berikut dipush setelah verifikasi, deployment tetap tahap terakhir.
 - Database lokal (Docker MySQL 127.0.0.1:3307): migration sampai `20261003020000_attendance_checkin` DITERAPKAN ke attendance_dev dan attendance_test. Grants Attendance dan Media dev/test diterapkan; kredensial runtime baru tersimpan dalam .env.database/.env.media ignored.
 - Host memory sering CRITICAL (1-2 GB). Jalankan suite berat satu per satu; Playwright 1 worker terbukti stabil.
@@ -32,13 +33,29 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T29 Validasi integrasi dan CI | Antigravity | .github/workflows/, package.json, test/ | T28 selesai | MySQL 3307, AIStor 9000/9001 aktif | Berjalan |
+| T30 Artefak deploy dan runbook | Antigravity | infra/, docs/deployment/ | T29 selesai | MySQL 3307, AIStor 9000/9001 aktif | Berjalan |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 
 ## Perubahan yang belum di-commit
 
 Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .windsurf/ dan skills-lock.json adalah berkas lokal; jangan di-stage, dihapus atau diubah tanpa scope jelas. Rahasia dan data pribadi tetap ignored.
+
+## Checkpoint T29 — 2026-10-03
+
+- Implementasi: [validasi integrasi dan CI](../docs/sdd/integration-validation-ci.md).
+  1. **Konfigurasi Otomasi CI**: Workflow GitHub Actions (`.github/workflows/ci.yml`) dikonfigurasi untuk branch `dev` dan `main` (push dan PR) dengan tiga job terisolasi: `quality` (statis, lint, typecheck, build, unit test), `integration` (layanan kontainer MySQL 8.4.11 di port 3307 dan MinIO AIStor di port 9000/9001), serta `visual-e2e` (Playwright chromium headless).
+  2. **Isolasi Database & Storage Testing**: Skrip otomasi `scripts/ci/setup-ci-environment.mjs` menginisialisasi database `attendance_dev`, `attendance_test`, `attendance_shadow`, akun runtime least-privilege, hak akses tabel per-service (`pnpm run ci:grants`), dan pembuatan bucket privat (`attendance-photos`, `attendance-photos-test`).
+  3. **Verifikasi Constraint & Hak Akses**: `pnpm run db:verify` memvalidasi koneksi Prisma, zona waktu UTC (+00:00), constraint unik email/token (termasuk reservasi email akun arsip), foreign keys sesi, rollback transaksi, serta pencegahan akses runtime terhadap tabel migrasi atau penghapusan audit trail.
+  4. **Perbaikan Hermeticity Test**: Penyempurnaan `policy-database.e2e-spec.ts` untuk membersihkan tanggal target sebelum evaluasi `REGULAR_WORKDAY`, serta penyesuaian Playwright channel (`process.env.CI ? undefined : "chrome"`) agar kompatibel lintas OS (Windows lokal dan Linux runner).
+  5. **Verifikasi Rantai Quality Gate**:
+     - `pnpm run lint`: oxlint pada 5 service NestJS dan eslint pada 2 frontend React lulus 100% (0 error, 0 warning).
+     - `pnpm run db:validate` & `pnpm run db:typecheck`: Skema Prisma dan TypeScript database script lulus 100%.
+     - `pnpm run build`: Seluruh paket dan aplikasi terkompilasi exit code 0.
+     - `pnpm run test`: 344 unit/komponen test lintas seluruh monorepo lulus 100%.
+     - `test:e2e` backend: 209 integration test lulus 100% terhadap MySQL dan AIStor (Auth 14, Employee 35, Media 20, Attendance 64, Gateway 76).
+     - `test:ui` Playwright: 24 layout test (320/1440 px terang/gelap) lulus 100%.
+- Langkah berikut: T30 Artefak deploy dan runbook (konfigurasi VPS Ubuntu, Vercel, Cloudflare, backup/restore dan rollback).
 
 ## Checkpoint T28 — 2026-10-03
 
