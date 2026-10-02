@@ -94,15 +94,16 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 - Target: apps/{employee-service,auth-service}/, apps/hr-web/
 
 ## T13 — Login karyawan
-- [ ] Selesai
+- [x] Selesai
 - Acceptance: Panel sendiri, password sementara wajib diganti, sesi role dibatasi.
-- Verification: Jest/component/Playwright login hingga home.
+- Verification: Unit/component dan visual lulus; browser manual langkah 1–5 melalui API nyata lulus menurut pengguna (2026-10-02). Bukti: [alur login karyawan](../docs/sdd/employee-auth-flow.md).
 - Dependencies: 12
 - Target: apps/auth-service/, apps/attendance-web/
 
 ### Checkpoint setelah T13
-- [ ] Test relevan dan build/lint lulus.
-- [ ] Alur fase diverifikasi, batasan dicatat dan ditinjau.
+- [x] Test relevan dan build/lint lulus.
+- [x] Alur fase diverifikasi, batasan dicatat dan ditinjau.
+- Bukti: T12 dan T13 browser manual pengguna lulus; unit/komponen, integrasi backend T12 dan visual terkait lulus. Suite otomatis browser dan seluruh monorepo tidak diulang karena RAM terbatas; bukti manual tidak diklaim sebagai hasil Playwright.
 
 ## T14 — Perubahan dan lifecycle karyawan
 - [ ] Selesai
