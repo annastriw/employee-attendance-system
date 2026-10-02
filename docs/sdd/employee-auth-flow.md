@@ -1,6 +1,6 @@
-# Login karyawan (T13, layar E01/E02) — DRAF
+# Login karyawan (T13, layar E01/E02)
 
-> Status: draf disiapkan sambil menunggu verifikasi E2E T12. Belum diimplementasikan; belum ada bukti acceptance. Jangan centang T13 sampai bukti nyata ada.
+> Status: frontend terimplementasi dan lolos pemeriksaan komponen, build, lint, serta visual. Alur login karyawan melalui Gateway/Auth/MySQL nyata masih menunggu verifikasi browser manual; T13 belum dicentang.
 
 Acuan: [baseline](../requirements/baseline.md), [Auth Service](auth-service.md), [Auth database](auth-database.md), [HRD auth flow](hr-auth-flow.md) sebagai pola, [UI/UX E01](frontend-ui-ux.md), [design system](frontend-design-system.md).
 
@@ -38,11 +38,11 @@ Satu tindakan utama, label terlihat, toggle password keyboard-accessible, busy/e
 - Sesi dibatasi peran `EMPLOYEE`; cookie refresh karyawan terpisah dari admin (login HRD di tab lain tidak saling mencabut).
 - Tidak ada token/password di storage, URL, atau log.
 
-## Verifikasi (rencana, tier test plan.md)
-- Tier 1: `tsc`/lint `apps/attendance-web`.
-- Tier 2: Vitest/RTL `auth-client` employee (login, accept menolak non-EMPLOYEE, restore, 401 clear, forced-change) dan komponen E01/E02 (validasi, toggle, forced-change, no secret di DOM).
-- Tier 3: `test:ui` E01/E02/home terang+gelap 320/768/1024/1440 px bila layout/CSS berubah.
-- Tier 4 (checkpoint): Playwright E2E nyata (Gateway+Auth+MySQL test) — login → forced change → login ulang → home → logout; desktop/mobile/keyboard; cookie employee ≠ admin. Build dist Auth/Gateway sebelum E2E; satu worker; data uji dibersihkan.
+## Verifikasi (tier test plan.md)
+- Tier 1: Typecheck, lint, dan build `apps/attendance-web` lulus.
+- Tier 2: Enam test unit `auth-client`, tiga test komponen `LoginPage`, dan tiga test alur `App` lulus. Alur mencakup wajib ganti password, validasi konfirmasi, login ulang, guard tautan langsung, pemulihan sesi, 401, dan logout.
+- Tier 3: Dua belas test Playwright visual E01/E02/home pada 320/1440 px, terang/gelap, lulus dengan satu worker dan respons sesi tiruan. Screenshot E01, E02 mobile, dan home desktop ditinjau. Pemeriksaan visual ini tidak membuktikan API nyata.
+- Tier 4 (checkpoint): browser manual melalui Gateway+Auth+MySQL nyata masih menunggu. Gunakan [panduan Attendance lokal](../deployment/attendance-local.md): login akun hasil T12 → E02 → login ulang → home → logout; cek desktop/mobile dan pemisahan sesi HRD. Suite E2E otomatis tidak dijalankan karena RAM host terbatas.
 
 ## Dependencies
-T12 (provisioning akun karyawan) harus hijau: tanpa akun karyawan + `mustChangePassword`, E2E login karyawan tidak punya subjek nyata. Draf ini disiapkan paralel; implementasi mulai setelah T12 terverifikasi.
+T12 (provisioning akun karyawan) sudah ditutup berdasarkan integrasi MySQL dan pemeriksaan browser manual pengguna. Akun hasil T12 dengan `mustChangePassword` dipakai untuk checkpoint T13.

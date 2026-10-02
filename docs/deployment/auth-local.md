@@ -73,7 +73,7 @@ Audit production: tidak ada advisory yang diketahui setelah override dependency 
 
 ## Batas
 Portal HRD dan Gateway sudah terintegrasi. HRD dapat membuat akun karyawan melalui H07/H10.
-Portal login karyawan dikerjakan pada T13; lifecycle akun pada T14 dan reset password umum pada T15.
+Frontend login karyawan T13 sudah tersedia di Attendance Portal; alur browser dengan API nyata masih menunggu verifikasi manual. Lifecycle akun pada T14 dan reset password umum pada T15.
 Fitur absensi menyusul pada task berikutnya.
 
 ## Provisioning T12
