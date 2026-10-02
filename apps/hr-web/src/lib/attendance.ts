@@ -1,3 +1,12 @@
+import type { AuthClient } from "./auth-client";
+
+export interface AttendanceEventLocation {
+  latitude: number;
+  longitude: number;
+  accuracyMeters: number;
+  capturedAt: string;
+}
+
 export interface AttendanceEvent {
   id: string;
   eventTime: string;
@@ -5,6 +14,7 @@ export interface AttendanceEvent {
   isLate: boolean;
   isEarlyDeparture: boolean;
   isOutsideSchedule: boolean;
+  location?: AttendanceEventLocation | null;
 }
 export interface AttendanceRecord {
   id: string;
@@ -52,3 +62,14 @@ export const attendanceTime = (value?: string) =>
     : "—";
 export const attendanceStatus = (row: AttendanceRecord) =>
   row.deletedAt ? "Dihapus HRD" : row.checkOut ? "Selesai" : "Belum checkout";
+
+export async function getAttendancePhoto(
+  client: Pick<AuthClient, "api">,
+  recordId: string,
+  eventId: string,
+): Promise<{ url: string; expiresInSeconds: number }> {
+  const res = await client.api<{
+    data: { url: string; expiresInSeconds: number };
+  }>(`attendance/${recordId}/events/${eventId}/photo`);
+  return res.data;
+}

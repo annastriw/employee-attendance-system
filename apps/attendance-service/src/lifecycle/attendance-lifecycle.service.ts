@@ -139,6 +139,40 @@ export class AttendanceLifecycleService {
       requestId,
     );
   }
+  async photo(
+    id: string,
+    eventId: string,
+    actor: SessionProfile,
+    authorization: string,
+    requestId: string,
+  ) {
+    const current = await this.auth.profile(authorization, requestId);
+    if (
+      current.id !== actor.id ||
+      current.role !== 'ADMIN_HRD' ||
+      current.mustChangePassword
+    )
+      throw new ForbiddenException(
+        'Sesi HRD tidak dapat melakukan tindakan ini.',
+      );
+    const row = await this.db.client.attDailyRecord.findUnique({
+      where: { id },
+      include: { events: true },
+    });
+    if (!row)
+      throw rejection('ATTENDANCE_NOT_FOUND', 'Absensi tidak ditemukan.', 404);
+    const event = row.events.find((e) => e.id === eventId);
+    if (!event)
+      throw rejection('PHOTO_NOT_FOUND', 'Foto absensi tidak ditemukan.', 404);
+    const photo = await this.upstream.photo(
+      event.photoObjectId,
+      row.employeeId,
+      event.eventType,
+      authorization,
+      requestId,
+    );
+    return this.envelope(photo, requestId);
+  }
   async change(
     id: string,
     version: string,

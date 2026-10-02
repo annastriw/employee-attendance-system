@@ -7,6 +7,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 import { CheckInModule } from './checkin/checkin.module';
+import { AttendanceMonitoringModule } from './monitoring/attendance-monitoring.module';
 @Module({
   imports: [
     DatabaseModule,
@@ -14,6 +15,7 @@ import { CheckInModule } from './checkin/checkin.module';
     AuthModule,
     HolidaysModule,
     CheckInModule,
+    AttendanceMonitoringModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -22,14 +22,26 @@ const record = {
     isLate: false,
     isEarlyDeparture: false,
     isOutsideSchedule: false,
+    location: {
+      latitude: -6.2088,
+      longitude: 106.8456,
+      accuracyMeters: 15,
+      capturedAt: "2026-10-02T07:59:50.000+07:00",
+    },
   },
   checkOut: {
-    id,
+    id: "22222222-2222-4222-8222-222222222222",
     eventTime: "2026-10-02T17:00:00.000+07:00",
     reason: null,
     isLate: false,
     isEarlyDeparture: false,
     isOutsideSchedule: false,
+    location: {
+      latitude: -6.2091,
+      longitude: 106.8459,
+      accuracyMeters: 12,
+      capturedAt: "2026-10-02T16:59:45.000+07:00",
+    },
   },
   history: [],
 };
@@ -225,5 +237,51 @@ describe("HRD attendance lifecycle", () => {
     });
     await waitFor(() => expect(onSessionExpired).toHaveBeenCalled());
     expect(screen.queryByRole("grid")).not.toBeInTheDocument();
+  });
+
+  it("renders dual location maps, coordinates, accuracy and time for check-in and checkout", async () => {
+    setup();
+    expect(await screen.findByText("Lokasi Check-in")).toBeInTheDocument();
+    expect(screen.getByText("Lokasi Checkout")).toBeInTheDocument();
+    expect(screen.getByText("-6.208800, 106.845600")).toBeInTheDocument();
+    expect(screen.getByText("-6.209100, 106.845900")).toBeInTheDocument();
+    expect(screen.getByText("15.0 m")).toBeInTheDocument();
+    expect(screen.getByText("12.0 m")).toBeInTheDocument();
+    expect(screen.getAllByTestId("attendance-map")).toHaveLength(2);
+  });
+
+  it("loads signed private photo on demand and displays image", async () => {
+    const { user } = setup("id=" + id, async (path) => {
+      if (path.includes("/photo")) {
+        return { data: { url: "https://storage.local/photo.jpg", expiresInSeconds: 60 } };
+      }
+      return { data: record };
+    });
+
+    const loadBtn = await screen.findByRole("button", { name: "Lihat foto check-in" });
+    await user.click(loadBtn);
+
+    expect(await screen.findByRole("img", { name: /Foto check-in/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Muat ulang foto check-in" })).toBeInTheDocument();
+  });
+
+  it("allows HRD to load private photo even on soft-deleted attendance record", async () => {
+    const deletedRecord = {
+      ...record,
+      deletedAt: "2026-10-02T10:00:00.000Z",
+      deleteReason: "Pemeriksaan",
+    };
+    const { user } = setup("id=" + id, async (path) => {
+      if (path.includes("/photo")) {
+        return { data: { url: "https://storage.local/deleted-photo.jpg", expiresInSeconds: 60 } };
+      }
+      return { data: deletedRecord };
+    });
+
+    expect(await screen.findAllByText("Foto absensi (Dihapus HRD)")).toHaveLength(2);
+    const loadBtn = screen.getByRole("button", { name: "Lihat foto check-in" });
+    await user.click(loadBtn);
+
+    expect(await screen.findByRole("img", { name: /Foto check-in/i })).toBeInTheDocument();
   });
 });

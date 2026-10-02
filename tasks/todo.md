@@ -202,22 +202,24 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 - Target: apps/attendance-service/, apps/attendance-web/
 
 ## T25 — Monitoring dan rekap
-- [ ] Selesai
+- [x] Selesai (2026-10-03; spesifikasi di docs/sdd/attendance-monitoring.md, unit/integration MySQL dan UI HRD lulus)
 - Acceptance: Dashboard dan daftar termasuk missing; historical eligibility benar; deleted dikecualikan.
 - Verification: Integration test history, kalender dan gabungan late/early.
+- Implementasi/verifikasi teknis 2026-10-03: [monitoring & rekap](../docs/sdd/attendance-monitoring.md), 12 integrasi MySQL nyata (`attendance-service/test/monitoring.e2e-spec.ts`), 66 unit service attendance, 40 unit API Gateway, 22 unit Employee Service, serta 75 unit/component tests HR Web (`hr-web/src/pages/MonitoringPage.test.tsx` 5 passed) lulus. Endpoint `GET /api/v1/monitoring/summary` dan `GET /api/v1/monitoring/employees` terverifikasi dengan evaluasi missing attendance dari eligibility historis, soft-deleted dikecualikan dari metrik aktif dan ditandai badge "Dihapus HRD", status ganda (terlambat & pulang cepat) dipertahankan, filter metrik/departemen/status/search berfungsi. Typecheck/lint/build semua service terkait lulus 100% tanpa error.
 - Dependencies: 24
 - Target: apps/attendance-service/, apps/hr-web/
 
 ## T26 — Detail monitoring Leaflet
-- [ ] Selesai
+- [x] Selesai (2026-10-03; spesifikasi di docs/sdd/attendance-leaflet-monitoring.md, gateway proxy, photo endpoint, dan UI Leaflet terverifikasi)
 - Acceptance: Dua lokasi, accuracy, waktu, alasan dan foto privat tampil sesuai akses.
 - Verification: Browser test detail dan uji peta mobile.
+- Implementasi/verifikasi teknis 2026-10-03: [detail monitoring Leaflet](../docs/sdd/attendance-leaflet-monitoring.md). Backend `attendance-service` endpoint `GET /api/v1/attendance/:id/events/:eventId/photo` menerbitkan signed URL foto privat 60 detik bagi HRD untuk absensi aktif maupun soft-deleted (baseline baris 53); `api-gateway` memvalidasi UUID v4 dan meneruskan foto (43 unit tests lulus); integrasi nyata MySQL/AIStor di `checkin.e2e-spec.ts` memverifikasi otorisasi dan akses foto; frontend `hr-web` mengintegrasikan Leaflet (`AttendanceMap.tsx`) dengan marker custom SVG + lingkaran akurasi dan atribusi OSM, `AttendanceEvidence.tsx` menyajikan dua bukti berdampingan (desktop) atau bertumpuk (mobile) dengan foto privat ber-timer 60 detik dan rincian tekstual lokasi (78 tests `hr-web` lulus). Typecheck, lint, dan production build seluruh package terkait lulus 100% tanpa error.
 - Dependencies: 25
 - Target: apps/hr-web/
 
 ### Checkpoint setelah T26
-- [ ] Test relevan dan build/lint lulus.
-- [ ] Alur fase diverifikasi, batasan dicatat dan ditinjau.
+- [x] Test relevan dan build/lint lulus.
+- [x] Alur fase diverifikasi, batasan dicatat dan ditinjau.
 
 ## T27 — Outbox dan pemulihan kegagalan
 - [ ] Selesai

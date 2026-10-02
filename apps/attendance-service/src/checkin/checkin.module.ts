@@ -26,5 +26,6 @@ import { AttendanceHealthController } from './health.controller';
     MediaOutboxWorker,
     ServerClock,
   ],
+  exports: [AttendanceUpstreamClient, ServerClock],
 })
 export class CheckInModule {}

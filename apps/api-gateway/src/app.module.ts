@@ -19,6 +19,7 @@ import { EmployeeProxyController } from './employee-proxy.controller';
 import { HolidaysProxyController } from './holidays-proxy.controller';
 
 import { AttendanceProxyController } from './attendance-proxy.controller';
+import { MonitoringProxyController } from './monitoring-proxy.controller';
 @Module({
   controllers: [
     AppController,
@@ -31,6 +32,7 @@ import { AttendanceProxyController } from './attendance-proxy.controller';
     HolidaysProxyController,
     AttendanceProxyController,
     AttendanceAdminProxyController,
+    MonitoringProxyController,
     MediaProxyController,
   ],
   providers: [AppService, GatewayConfig, AuthProxyService, MediaUploadGuard],

@@ -1500,4 +1500,38 @@ describe('T21 real Gateway–Attendance–Employee–Media–Auth–MySQL–AISt
       '/' + event.dailyRecordId + '/events/' + event.id + '/photo',
     ).expect(401);
   });
+
+  it('T26 allows HRD to obtain signed photo URLs for active and deleted attendance records, and enforces authorization', async () => {
+    const row = await startDay('2026-12-18');
+    const detail = (await adminGet('/' + row.id).expect(200)).body.data;
+    expect(detail.checkIn.location).toBeDefined();
+    expect(detail.checkIn.location.latitude).toBeDefined();
+    expect(detail.checkIn.location.accuracyMeters).toBeDefined();
+
+    // HRD can fetch photo for active record
+    const photoRes = (
+      await adminGet('/' + row.id + '/events/' + detail.checkIn.id + '/photo').expect(200)
+    ).body.data;
+    expect(photoRes.url).toContain('http');
+    expect(photoRes.expiresInSeconds).toBe(60);
+
+    // Unauthenticated and employee token rejected
+    await request(gateway.getHttpServer())
+      .get('/api/v1/attendance/' + row.id + '/events/' + detail.checkIn.id + '/photo')
+      .expect(401);
+    await adminGet('/' + row.id + '/events/' + detail.checkIn.id + '/photo', tokens[0]).expect(403);
+
+    // Unknown event ID returns 404
+    await adminGet('/' + row.id + '/events/' + randomUUID() + '/photo').expect(404);
+
+    // Soft delete record
+    await adminChange(row.id, detail.version, 'Pemeriksaan foto T26').expect(200);
+
+    // HRD can still fetch photo of soft-deleted record (baseline line 53)
+    const deletedPhoto = (
+      await adminGet('/' + row.id + '/events/' + detail.checkIn.id + '/photo').expect(200)
+    ).body.data;
+    expect(deletedPhoto.url).toContain('http');
+    expect(deletedPhoto.expiresInSeconds).toBe(60);
+  });
 });

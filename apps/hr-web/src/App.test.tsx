@@ -71,9 +71,7 @@ describe("HR portal authentication journey", () => {
     const user = userEvent.setup();
     render(<App client={api} />);
     await screen.findByRole("heading", { name: "Ringkasan" });
-    expect(
-      screen.getByText("Belum ada data yang ditampilkan"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Karyawan Aktif")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Menu akun" }));
     await user.click(await screen.findByRole("menuitem", { name: "Keluar" }));
     await screen.findByRole("heading", { name: "Masuk" });
