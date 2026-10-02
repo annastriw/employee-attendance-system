@@ -186,3 +186,5 @@ Jalankan langkah-langkah pengujian manual berikut di peramban untuk memverifikas
 10. **Tampilan Responsif & Tema**:
     - Uji dialog konfirmasi reset password dan dialog password sementara pada viewport ponsel (320 px) serta mode terang dan gelap.
     - Pastikan tata letak rapi, teks terbaca jelas, tombol aksi tidak terpotong, dan tidak ada *horizontal overflow*.
+
+Hasil diterima: pengguna menyatakan seluruh checklist pengujian browser manual T15 (Stack Nyata langkah 1–10) berhasil pada 2026-10-02. T15 ditutup lengkap; beralih ke T16 (aturan waktu dan eligibility absensi).

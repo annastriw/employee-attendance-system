@@ -288,3 +288,114 @@ model AuthPasswordReset {
   @@index([accountId, createdAt])
   @@map("auth_password_resets")
 }
+
+enum AttEventType {
+  CHECK_IN
+  CHECK_OUT
+}
+
+enum AttCaptureMethod {
+  AUTO
+  MANUAL
+}
+
+model AttWorkPolicy {
+  id           String   @id @default(uuid()) @db.Char(36)
+  name         String   @db.VarChar(80)
+  workDays     String   @default("1,2,3,4,5") @map("work_days") @db.VarChar(20)
+  checkInTime  String   @default("08:00:00") @map("check_in_time") @db.VarChar(8)
+  checkOutTime String   @default("17:00:00") @map("check_out_time") @db.VarChar(8)
+  cutoffTime   String   @default("23:59:59") @map("cutoff_time") @db.VarChar(8)
+  timezone     String   @default("Asia/Jakarta") @db.VarChar(40)
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.DateTime(3)
+
+  @@index([isActive])
+  @@map("att_work_policies")
+}
+
+model AttHoliday {
+  id          String   @id @default(uuid()) @db.Char(36)
+  holidayDate DateTime @unique @map("holiday_date") @db.Date
+  description String   @db.VarChar(200)
+  createdAt   DateTime @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.DateTime(3)
+
+  @@index([holidayDate])
+  @@map("att_holidays")
+}
+
+model AttDailyRecord {
+  id                     String         @id @default(uuid()) @db.Char(36)
+  employeeId             String         @map("employee_id") @db.Char(36)
+  attendanceDate         DateTime       @map("attendance_date") @db.Date
+  departmentIdSnapshot   String         @map("department_id_snapshot") @db.Char(36)
+  departmentNameSnapshot String         @map("department_name_snapshot") @db.VarChar(120)
+  positionIdSnapshot     String         @map("position_id_snapshot") @db.Char(36)
+  positionNameSnapshot   String         @map("position_name_snapshot") @db.VarChar(120)
+  deletedAt              DateTime?      @map("deleted_at") @db.DateTime(3)
+  deleteReason           String?        @map("delete_reason") @db.VarChar(500)
+  deletedByAccountId     String?        @map("deleted_by_account_id") @db.Char(36)
+  createdAt              DateTime       @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt              DateTime       @updatedAt @map("updated_at") @db.DateTime(3)
+  events                 AttEvent[]
+
+  @@unique([employeeId, attendanceDate])
+  @@index([attendanceDate, deletedAt])
+  @@index([employeeId, attendanceDate, deletedAt])
+  @@map("att_daily_records")
+}
+
+model AttEvent {
+  id                 String           @id @default(uuid()) @db.Char(36)
+  dailyRecordId      String           @map("daily_record_id") @db.Char(36)
+  eventType          AttEventType     @map("event_type")
+  eventTime          DateTime         @map("event_time") @db.DateTime(3)
+  clientCapturedAt   DateTime         @map("client_captured_at") @db.DateTime(3)
+  isOutsideSchedule  Boolean          @default(false) @map("is_outside_schedule")
+  isLate             Boolean          @default(false) @map("is_late")
+  isEarlyDeparture   Boolean          @default(false) @map("is_early_departure")
+  reason             String?          @db.VarChar(500)
+  photoObjectId      String           @map("photo_object_id") @db.Char(36)
+  captureMethod      AttCaptureMethod @map("capture_method")
+  latitude           Decimal          @db.Decimal(10, 7)
+  longitude          Decimal          @db.Decimal(10, 7)
+  accuracyMeters     Decimal          @map("accuracy_meters") @db.Decimal(8, 2)
+  locationCapturedAt DateTime         @map("location_captured_at") @db.DateTime(3)
+  policySnapshot     Json             @map("policy_snapshot")
+  createdAt          DateTime         @default(now()) @map("created_at") @db.DateTime(3)
+  dailyRecord        AttDailyRecord   @relation(fields: [dailyRecordId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([dailyRecordId, eventType])
+  @@index([eventType, eventTime])
+  @@map("att_events")
+}
+
+model AttIdempotencyRequest {
+  id             String   @id @db.Char(36)
+  employeeId     String   @map("employee_id") @db.Char(36)
+  payloadHash    String   @map("payload_hash") @db.Char(64)
+  responseStatus Int      @map("response_status")
+  responseBody   Json     @map("response_body")
+  createdAt      DateTime @default(now()) @map("created_at") @db.DateTime(3)
+
+  @@index([employeeId, createdAt])
+  @@map("att_idempotency_requests")
+}
+
+model AttAuditLog {
+  id             String   @id @default(uuid()) @db.Char(36)
+  actorAccountId String?  @map("actor_account_id") @db.Char(36)
+  action         String   @db.VarChar(80)
+  entityType     String   @map("entity_type") @db.VarChar(40)
+  entityId       String?  @map("entity_id") @db.Char(36)
+  reason         String?  @db.VarChar(500)
+  details        Json?
+  requestId      String?  @map("request_id") @db.Char(36)
+  createdAt      DateTime @default(now()) @map("created_at") @db.DateTime(3)
+
+  @@index([actorAccountId, createdAt])
+  @@index([entityType, entityId, createdAt])
+  @@map("att_audit_logs")
+}
