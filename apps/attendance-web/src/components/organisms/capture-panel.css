@@ -1,0 +1,150 @@
+.capture-page {
+  width: min(100%, 608px);
+  margin: 0 auto;
+  padding: 24px;
+}
+.capture-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.capture-header .brand {
+  margin: 0;
+}
+.capture-header button {
+  flex-shrink: 0;
+  min-width: 44px;
+  min-height: 44px;
+}
+.capture-title {
+  margin-bottom: 20px;
+}
+.capture-title h1 {
+  margin: 0 0 6px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+}
+.capture-title p,
+.capture-note {
+  color: var(--muted);
+}
+.capture-camera {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-secondary);
+}
+.capture-video,
+.capture-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: scaleX(-1);
+  display: block;
+}
+.capture-hidden {
+  visibility: hidden;
+  position: absolute;
+}
+.capture-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  text-align: center;
+  padding: 16px;
+}
+.capture-placeholder p {
+  margin: 0;
+}
+.capture-guide {
+  position: absolute;
+  width: 42%;
+  height: 66%;
+  top: 17%;
+  left: 29%;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.capture-hint {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin: 8px 0;
+}
+.capture-location {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+.capture-location > svg {
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.capture-location > div {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.capture-location strong,
+.capture-ready strong {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.capture-location p,
+.capture-ready p {
+  font-size: 0.8125rem;
+  margin: 2px 0 0;
+  color: var(--muted);
+}
+.capture-location button {
+  padding-inline: 8px;
+  flex-shrink: 0;
+  min-width: 44px;
+  min-height: 44px;
+}
+.capture-page .alert {
+  margin-top: 16px;
+  border-radius: 12px;
+  overflow-wrap: anywhere;
+}
+.capture-ready {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 16px;
+}
+.capture-ready > svg {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.capture-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+.capture-actions button {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding-inline: 12px;
+}
+.capture-note {
+  font-size: 0.8125rem;
+  text-align: center;
+  margin-top: 12px;
+}

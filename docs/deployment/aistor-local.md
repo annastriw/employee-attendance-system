@@ -40,7 +40,7 @@ Jangan gunakan down --volumes untuk penghentian biasa karena menghapus data.
 3. Login memakai kredensial lokal, buat bucket attendance-photos privat.
 4. Upload objek uji, baca ulang, restart container, pastikan objek tetap tersedia.
 5. Request anonim ke objek harus ditolak.
-6. Kredensial root hanya untuk setup; Media Service nanti memakai akun/policy khusus.
+6. Kredensial root hanya untuk setup; Media Service memakai akun/policy khusus yang disiapkan dengan pnpm storage:setup. Lihat [Media lokal](media-local.md).
 7. Backup/restore diuji sebelum live.
 
 Pemeriksaan health saja belum membuktikan operasi S3 tersedia: lisensi harus diterima dan upload/read perlu diuji.

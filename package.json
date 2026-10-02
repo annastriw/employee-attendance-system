@@ -10,6 +10,7 @@
     "build": "pnpm -r --if-present run build",
     "test": "pnpm -r --if-present run test",
     "lint": "pnpm -r --if-present run lint",
+    "storage:setup": "node scripts/storage/setup-local.mjs",
     "db:setup": "node scripts/database/setup-local.mjs",
     "db:validate": "prisma validate",
     "db:grants": "node scripts/database/setup-local.mjs --grants",

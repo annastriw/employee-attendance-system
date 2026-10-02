@@ -142,14 +142,16 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 - [x] Alur fase diverifikasi, batasan dicatat dan ditinjau.
 
 ## T18 — Spike kamera dan lokasi
-- [ ] Selesai
+- [x] Selesai
+- [x] Prototipe terisolasi, 21 test, build/lint dan smoke model/WASM aktual dengan perangkat sintetis; [bukti/parameter/checklist](../docs/architecture/camera-location-spike.md).
+- [x] Uji manual diterima pengguna pada 2026-10-02: semua alur berjalan; detail platform/benchmark tidak diberikan. Threshold awal dipertahankan untuk T20.
 - Acceptance: Buktikan MediaPipe, blink/manual fallback, izin lokasi dan kamera pada desktop/mobile HTTPS.
 - Verification: Uji perangkat nyata dan catat threshold yang dipilih; belum dianggap fitur lengkap.
 - Dependencies: 7
 - Target: docs/architecture/, prototipe terisolasi
 
 ## T19 — Foto privat backend
-- [ ] Selesai
+- [x] Selesai
 - Acceptance: Upload tervalidasi ke MinIO AIStor Free, READY, checksum, pemilik/purpose, akses terotorisasi.
 - Verification: Integration test MinIO AIStor Free dan penolakan akses foto pengguna lain.
 - Dependencies: 13
@@ -159,6 +161,7 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 - [ ] Selesai
 - Acceptance: Satu wajah, blink, manual fallback, preview/retake, lokasi wajib.
 - Verification: Component test error izin dan uji manual mobile/kamera.
+- Implementasi/verifikasi teknis 2026-10-02: [capture portal](../docs/sdd/attendance-capture.md), 54 tes terfokus + 8 visual, typecheck/lint/build lulus. Checklist perangkat/API nyata masih pending; belum ditutup penuh.
 - Dependencies: 18,19
 - Target: apps/attendance-web/
 

@@ -9,16 +9,22 @@ interface Props {
   busy: boolean;
   error: string;
   onLogout: () => Promise<void>;
+  onCapture: () => void;
 }
 
-export function HomePage({ user, busy, error, onLogout }: Props) {
+export function HomePage({ user, busy, error, onLogout, onCapture }: Props) {
   return (
-    <AuthShell name="Attendance Portal" brandIcon={<Clock size={16} weight="bold" />}>
+    <AuthShell
+      name="Attendance Portal"
+      brandIcon={<Clock size={16} weight="bold" />}
+    >
       <h1>Beranda</h1>
       <p className="page-intro">Anda masuk sebagai karyawan.</p>
       <p className="signed-in-email">{user.email}</p>
       <div className="status-card" role="status">
-        <span className="showcase-icon" aria-hidden="true"><Hourglass size={18} /></span>
+        <span className="showcase-icon" aria-hidden="true">
+          <Hourglass size={18} />
+        </span>
         <div>
           <strong>Absensi segera tersedia</strong>
           <p className="unavailable-message">
@@ -26,13 +32,18 @@ export function HomePage({ user, busy, error, onLogout }: Props) {
           </p>
         </div>
       </div>
+      <Button variant="primary" fullWidth isDisabled={busy} onPress={onCapture}>
+        Siapkan foto check-in
+      </Button>
       {error && <Notice message={error} />}
       <Button
         type="button"
         variant="ghost"
         className="primary-button"
         isDisabled={busy}
-        onPress={() => { void onLogout(); }}
+        onPress={() => {
+          void onLogout();
+        }}
       >
         {busy ? "Keluar…" : "Keluar"}
       </Button>

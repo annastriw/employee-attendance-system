@@ -95,7 +95,10 @@ export function createAuthClient(
       typeof session.user.mustChangePassword !== "boolean"
     ) {
       clear();
-      throw new AuthError(403, "Akun ini tidak memiliki akses ke portal karyawan.");
+      throw new AuthError(
+        403,
+        "Akun ini tidak memiliki akses ke portal karyawan.",
+      );
     }
     token = session.accessToken;
     user = {
@@ -134,10 +137,17 @@ export function createAuthClient(
   }
   async function api<T>(
     path: string,
-    init: { method?: "GET" | "POST" | "PATCH"; body?: unknown; idempotencyKey?: string } = {},
+    init: {
+      method?: "GET" | "POST" | "PATCH";
+      body?: unknown;
+      idempotencyKey?: string;
+      signal?: AbortSignal;
+    } = {},
   ): Promise<T> {
     await ensureSession();
     const method = init.method ?? "GET";
+    const multipart = init.body instanceof FormData;
+    const timeout = AbortSignal.timeout(multipart ? 25000 : 10000);
     let response: Response;
     try {
       response = await fetcher(`${baseUrl}/${path}`, {
@@ -145,23 +155,43 @@ export function createAuthClient(
         credentials: "include",
         headers: {
           Authorization: `Bearer ${token}`,
-          ...(init.idempotencyKey ? { "Idempotency-Key": init.idempotencyKey } : {}),
-          ...(method !== "GET" ? { "Content-Type": "application/json" } : {}),
+          ...(init.idempotencyKey
+            ? { "Idempotency-Key": init.idempotencyKey }
+            : {}),
+          ...(method !== "GET" && !multipart
+            ? { "Content-Type": "application/json" }
+            : {}),
         },
-        ...(method !== "GET" ? { body: JSON.stringify(init.body ?? {}) } : {}),
-        signal: AbortSignal.timeout(10000),
+        ...(method !== "GET"
+          ? {
+              body: multipart
+                ? (init.body as FormData)
+                : JSON.stringify(init.body ?? {}),
+            }
+          : {}),
+        signal: init.signal ? AbortSignal.any([init.signal, timeout]) : timeout,
       });
     } catch {
-      throw new AuthError(0, "Tidak dapat terhubung. Periksa koneksi Anda dan coba lagi.");
+      throw new AuthError(
+        0,
+        "Tidak dapat terhubung. Periksa koneksi Anda dan coba lagi.",
+      );
     }
-    const payload = (await response.json().catch(() => null)) as { message?: unknown } | null;
+    const payload = (await response.json().catch(() => null)) as {
+      message?: unknown;
+    } | null;
     if (!response.ok) {
       if (response.status === 401) {
         clear();
-        throw new AuthError(401, "Sesi Anda telah berakhir. Silakan masuk kembali.");
+        throw new AuthError(
+          401,
+          "Sesi Anda telah berakhir. Silakan masuk kembali.",
+        );
       }
       // Domain services return short, user-facing Indonesian messages for these.
-      const own = Array.isArray(payload?.message) ? payload.message[0] : payload?.message;
+      const own = Array.isArray(payload?.message)
+        ? payload.message[0]
+        : payload?.message;
       if ([400, 404, 409].includes(response.status) && typeof own === "string")
         throw new AuthError(response.status, own);
       throw new AuthError(
@@ -171,7 +201,11 @@ export function createAuthClient(
           : "Layanan sementara tidak tersedia. Coba lagi sebentar.",
       );
     }
-    if (!payload) throw new AuthError(503, "Respons layanan tidak dapat dibaca. Coba lagi sebentar.");
+    if (!payload)
+      throw new AuthError(
+        503,
+        "Respons layanan tidak dapat dibaca. Coba lagi sebentar.",
+      );
     return payload as T;
   }
   return {
