@@ -1,6 +1,6 @@
 # Login karyawan (T13, layar E01/E02)
 
-> Status: frontend terimplementasi dan lolos pemeriksaan komponen, build, lint, serta visual. Alur login karyawan melalui Gateway/Auth/MySQL nyata masih menunggu verifikasi browser manual; T13 belum dicentang.
+> Status: T13 selesai. Frontend lolos pemeriksaan komponen, build, lint, serta visual. Pengguna melaporkan langkah manual 1–5 melalui Gateway/Auth/MySQL nyata lulus pada 2026-10-02.
 
 Acuan: [baseline](../requirements/baseline.md), [Auth Service](auth-service.md), [Auth database](auth-database.md), [HRD auth flow](hr-auth-flow.md) sebagai pola, [UI/UX E01](frontend-ui-ux.md), [design system](frontend-design-system.md).
 
@@ -42,7 +42,7 @@ Satu tindakan utama, label terlihat, toggle password keyboard-accessible, busy/e
 - Tier 1: Typecheck, lint, dan build `apps/attendance-web` lulus.
 - Tier 2: Enam test unit `auth-client`, tiga test komponen `LoginPage`, dan tiga test alur `App` lulus. Alur mencakup wajib ganti password, validasi konfirmasi, login ulang, guard tautan langsung, pemulihan sesi, 401, dan logout.
 - Tier 3: Dua belas test Playwright visual E01/E02/home pada 320/1440 px, terang/gelap, lulus dengan satu worker dan respons sesi tiruan. Screenshot E01, E02 mobile, dan home desktop ditinjau. Pemeriksaan visual ini tidak membuktikan API nyata.
-- Tier 4 (checkpoint): browser manual melalui Gateway+Auth+MySQL nyata masih menunggu. Gunakan [panduan Attendance lokal](../deployment/attendance-local.md): login akun hasil T12 → E02 → login ulang → home → logout; cek desktop/mobile dan pemisahan sesi HRD. Suite E2E otomatis tidak dijalankan karena RAM host terbatas.
+- Tier 4 (checkpoint): pengguna melaporkan seluruh langkah 1–5 dalam [panduan Attendance lokal](../deployment/attendance-local.md) lulus pada 2026-10-02: desktop/mobile, login akun hasil T12, guard wajib E02, konfirmasi password, login ulang dengan password baru, penolakan password lama, home, reload, logout, penolakan akun HRD, serta pemisahan sesi HRD/karyawan. Suite E2E otomatis tidak dijalankan karena RAM host terbatas; hasil manual tidak diklaim sebagai hasil Playwright.
 
 ## Dependencies
 T12 (provisioning akun karyawan) sudah ditutup berdasarkan integrasi MySQL dan pemeriksaan browser manual pengguna. Akun hasil T12 dengan `mustChangePassword` dipakai untuk checkpoint T13.

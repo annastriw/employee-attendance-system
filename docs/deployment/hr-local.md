@@ -73,4 +73,4 @@ Database test memakai schema terpisah pada instance MySQL lokal yang sama; conta
 - Screenshot desktop/mobile telah ditinjau; tidak ada JavaScript page error pada browser journeys. Accessibility audit otomatis dan perangkat ponsel fisik belum diuji pada tahap ini.
 - MCP HeroUI timeout; komponen dibuat berdasarkan [dokumentasi resmi HeroUI](https://heroui.com/en/docs/react/getting-started/quick-start) dan API package terpasang. Review browser memakai Playwright; Chrome DevTools MCP juga tidak merespons.
 
-Spesifikasi: [alur HRD](../sdd/hr-auth-flow.md). Frontend login karyawan T13 tersedia; verifikasi manual API nyata mengikuti [panduan Attendance](attendance-local.md). Spesifikasi pembuatan akun: [Employee provisioning](../sdd/employee-provisioning.md).
+Spesifikasi: [alur HRD](../sdd/hr-auth-flow.md). Login karyawan T13 selesai dengan browser manual API nyata; lihat [panduan Attendance](attendance-local.md). Spesifikasi pembuatan akun: [Employee provisioning](../sdd/employee-provisioning.md).

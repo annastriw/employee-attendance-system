@@ -36,4 +36,4 @@ Jangan masukkan password atau token ke laporan hasil pengujian. Catat hanya nomo
 
 ## Pemeriksaan frontend yang sudah lulus
 
-Typecheck, lint, build, enam test unit Auth client, tiga test komponen login, tiga test alur App, dan 12 test visual Playwright satu worker (E01/E02/home, terang/gelap, 320/1440 px) lulus. Test visual memakai respons sesi tiruan; alur API nyata menunggu checklist manual di atas. Spesifikasi: [login karyawan](../sdd/employee-auth-flow.md).
+Typecheck, lint, build, enam test unit Auth client, tiga test komponen login, tiga test alur App, dan 12 test visual Playwright satu worker (E01/E02/home, terang/gelap, 320/1440 px) lulus. Test visual memakai respons sesi tiruan. Pengguna melaporkan checklist manual langkah 1–5 dengan API nyata lulus pada 2026-10-02; T13 ditutup. E2E otomatis belum dijalankan karena RAM terbatas. Spesifikasi: [login karyawan](../sdd/employee-auth-flow.md).

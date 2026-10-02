@@ -5,7 +5,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 ## Snapshot terakhir
 
 - Tanggal: 2026-10-02 (Asia/Jakarta). HEAD diverifikasi dengan `git log`; jangan anggap hash di sini sebagai HEAD.
-- Tahap: T08-T12 selesai. T12 provisioning backend/UI terverifikasi sebelumnya; pengguna melaporkan browser manual desktop/mobile lulus pada 2026-10-02. T13 login karyawan adalah increment aktif: frontend, unit/komponen, build, dan visual lulus; checkpoint browser dengan API nyata menunggu hasil manual pengguna. T09c tetap menjadi acuan tema.
+- Tahap: T08-T13 selesai. T12 dan T13 browser manual pengguna lulus pada 2026-10-02. T13 unit/komponen, build/lint/typecheck dan visual lulus; batas suite otomatis dicatat. T14 adalah task berikutnya. T09c tetap menjadi acuan tema.
 - Commit sesi ini pada dev (lama ke baru): 93488ae, f423e47, aa34d48, 1b7b05d, e4a6782, 83537f1, 112d7fa, a485480 (lihat git log), lalu:
   - c2f98fe docs: switch frontend theme to Linear-style zinc + emerald, Geist, Phosphor, light/dark
   - 36a24e4 feat(ui): Linear-style redesign with zinc + emerald, Geist, Phosphor and light/dark
@@ -26,7 +26,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T13 — login karyawan E01/E02 | Codex, 2026-10-02 | apps/attendance-web/src/{App.tsx,lib/auth-client.ts,pages/*}, test terkait, docs/sdd/employee-auth-flow.md, docs/deployment/attendance-local.md | T12 selesai berdasar browser manual pengguna + bukti integrasi MySQL | Tidak ada listener 3000/3001/3002/5173/5174 saat pemeriksaan; MySQL belum diaudit ulang | Frontend dan tes visual selesai; menunggu browser manual API nyata sebelum centang T13 |
+| Penutupan T13 | Codex, 2026-10-02 | tasks/{todo,progress}.md, docs/sdd/employee-auth-flow.md, runbook lokal | Pengguna melaporkan langkah manual 1–5 lulus | Pengguna menjalankan stack untuk uji manual; proses belum diaudit ulang | T13 dan checkpoint ditutup; T14 siap, implementasi belum dimulai |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 
@@ -36,7 +36,7 @@ Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .w
 
 ## Bukti pemeriksaan
 
-- T13 frontend: Attendance typecheck/lint/build lulus; enam unit Auth client, tiga komponen E01, dan tiga alur App lulus. Playwright visual 12/12 lulus (E01/E02/home, 320/1440 px, terang/gelap, satu worker, sesi tiruan); screenshot ditinjau. Browser API nyata belum diuji karena pengguna memilih verifikasi manual pada host RAM terbatas. Checklist ada di [Attendance lokal](../docs/deployment/attendance-local.md); T13 tetap terbuka.
+- T13 frontend: Attendance typecheck/lint/build lulus; enam unit Auth client, tiga komponen E01, dan tiga alur App lulus. Playwright visual 12/12 lulus (E01/E02/home, 320/1440 px, terang/gelap, satu worker, sesi tiruan); screenshot ditinjau. Pengguna melaporkan browser API nyata langkah 1–5 lulus pada 2026-10-02: wajib ganti password, login ulang, reload/logout, role dan pemisahan sesi; lihat [Attendance lokal](../docs/deployment/attendance-local.md). T13 dan checkpoint ditutup. E2E otomatis dan seluruh suite monorepo tidak diulang karena RAM terbatas.
 
 - T12 browser: pengguna melaporkan lima pemeriksaan manual desktop/mobile lulus pada 2026-10-02 (buat akun valid, password sementara sekali tampil, data bertahan tanpa membuka password lagi, konflik email tanpa data ganda, form/dialog 320 px). Spec Playwright desktop/mobile + harness/runbook di-commit dan dipush sebagai 9400f3a. Sintaks JS, HR typecheck/lint dan discovery dua skenario lulus; suite Playwright otomatis belum dijalankan karena RAM host sekitar 1,9 GB. Bukti backend MySQL dan visual T12 sebelumnya tetap berlaku; hasil otomatis tidak diklaim lulus.
 
@@ -64,7 +64,7 @@ Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .w
 
 ## Langkah berikut
 
-1. **T13 login karyawan.** Frontend dan pemeriksaan terfokus/visual selesai. Pengguna menjalankan [checklist browser manual](../docs/deployment/attendance-local.md) memakai akun karyawan hasil T12 dengan Auth/Gateway/MySQL development. Catat hasil tanpa rahasia; jika lulus, tutup T13 dan checkpoint di todo/progress. Spec Playwright T12 otomatis tetap belum dijalankan karena RAM terbatas.
+1. **T14 perubahan dan lifecycle karyawan.** T13 beserta checkpoint selesai setelah pengguna melaporkan langkah browser manual 1–5 lulus. Baca baseline, todo, dan kontrak provisioning sebelum implementasi edit/email/nonaktif/arsip/restore, history dan revokasi. Pengguna sedang meminta saran penghematan proses; kebijakan test belum diubah. Spec Playwright T12 otomatis tetap belum dijalankan karena RAM terbatas.
 2. Limit 429 E2E Auth tetap menunggu keputusan pengguna: refresh limit sendiri atau run per spec. Jangan longgarkan limit login. Run T11 per spec terpisah lulus; konfigurasi Auth tidak diubah.
 3. T09c selesai dan menjadi acuan wajib semua halaman berikutnya: gunakan token/komponen packages/ui, HeroUI, zinc–emerald, Geist, Phosphor dan mode terang/gelap. Kontrak mencakup E01–E09/H01–H14, seluruh state/dialog/mobile; jangan kembali ke T09b monokrom.
 4. Polesan H11 selesai bersama H12: (a) shared MasterDataPage menampilkan skeleton selama refetch sehingga baris lama tidak tampil bersama pesan sukses; test komponen dan E2E desktop/mobile menunggu baris hilang sesudah aktifkan pada filter Nonaktif. (b) pager tidak lagi memakai kelas monospace, diverifikasi computed font pada test visual. (c) status memakai satu ToggleButtonGroup berbatas dan separator HeroUI, screenshot terang/gelap ditinjau.
