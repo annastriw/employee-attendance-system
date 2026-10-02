@@ -86,8 +86,8 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 - Target: apps/employee-service/, apps/hr-web/
 
 ## T12 — Pembuatan akun karyawan
-- [ ] Selesai
-- Kontrak awal: [employee-provisioning](../docs/sdd/employee-provisioning.md); implementasi dan bukti acceptance belum tersedia.
+- [x] Selesai (2026-10-02; browser manual desktop/mobile lulus menurut laporan pengguna, bukti backend MySQL pada kontrak)
+- Kontrak dan bukti: [employee-provisioning](../docs/sdd/employee-provisioning.md). Spec Playwright ditambahkan; run otomatis ditunda karena RAM host.
 - Acceptance: Profil+akun dibuat terkoordinasi; password sementara tampil sekali; NIK/email unik.
 - Verification: Integration test konflik unik, kegagalan antarservice, retry dan sanitasi log.
 - Dependencies: 11

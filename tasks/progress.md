@@ -5,7 +5,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 ## Snapshot terakhir
 
 - Tanggal: 2026-10-02 (Asia/Jakarta). HEAD diverifikasi dengan `git log`; jangan anggap hash di sini sebagai HEAD.
-- Tahap: T08-T11 selesai. T11 master jabatan selesai database → Employee → Gateway → H12 → test nyata. T09c disetujui pengguna dan selesai; seluruh halaman wajib mengikuti tema Linear.
+- Tahap: T08-T12 selesai. T12 provisioning backend/UI terverifikasi sebelumnya; pengguna melaporkan browser manual desktop/mobile lulus pada 2026-10-02. T13 login karyawan adalah increment aktif. T09c tetap menjadi acuan tema.
 - Commit sesi ini pada dev (lama ke baru): 93488ae, f423e47, aa34d48, 1b7b05d, e4a6782, 83537f1, 112d7fa, a485480 (lihat git log), lalu:
   - c2f98fe docs: switch frontend theme to Linear-style zinc + emerald, Geist, Phosphor, light/dark
   - 36a24e4 feat(ui): Linear-style redesign with zinc + emerald, Geist, Phosphor and light/dark
@@ -19,13 +19,13 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 - Branch: dev, tracking origin/dev. Repository public [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system) dipilih pengguna pada 2026-10-02. Push awal terverifikasi: lokal dan remote dev sama pada 7cd397f. Visibilitas PUBLIC diverifikasi melalui GitHub setelah instruksi pengguna; commit berikut dipush setelah verifikasi, deployment tetap tahap terakhir.
 - Database lokal (Docker MySQL 127.0.0.1:3307): migration `20261001160000_employee_master_departments` dan `20261002080000_employee_master_positions` DITERAPKAN ke attendance_dev dan attendance_test. Akun `attendance_employee`/`attendance_employee_test` dibuat via `pnpm db:grants`; kredensial ada di `.env.database` (ignored).
 - Host memory sering CRITICAL (1-2 GB). Jalankan suite berat satu per satu; Playwright 1 worker terbukti stabil.
-- Semua port aplikasi/test 3000/3001/3002, 15173/15174/15175 dan 15300/15301/15302 diperiksa tertutup. Stack E2E dimatikan setelah test; Docker MySQL tetap berjalan di 3307.
+- Pengguna melaporkan MySQL dan Auth/Employee/Gateway/HR web lokal berjalan untuk uji manual T12. Port proyek: MySQL 3307, Gateway 3000, Auth 3001, Employee 3002, HR 5174. Status proses tidak diaudit ulang oleh agen pada sesi ini.
 
 ## Satu pekerjaan aktif
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T12 — HRD H07/H10 | Codex, 2026-10-02 | apps/hr-web/src; test/portal-design.spec.ts; progress | T11 selesai | hanya Docker MySQL 3307; tidak menambah proses | H07/H10 dan recovery UI lulus statis/komponen/visual; E2E browser nyata menyusul |
+| T13 — login karyawan E01/E02 | Codex, 2026-10-02 | apps/attendance-web/src/{App.tsx,lib/auth-client.ts,pages/*}, test terkait, docs/sdd/employee-auth-flow.md | T12 selesai berdasar browser manual pengguna + bukti integrasi MySQL | MySQL 3307 dan Auth/Employee/Gateway/HR web dilaporkan pengguna berjalan; Attendance web belum dinyalakan | Kontrak dibaca; implementasi frontend T13 berikutnya |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 
@@ -34,6 +34,8 @@ Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increme
 Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .windsurf/ dan skills-lock.json adalah berkas lokal; jangan di-stage, dihapus atau diubah tanpa scope jelas. Rahasia dan data pribadi tetap ignored.
 
 ## Bukti pemeriksaan
+
+- T12 browser: pengguna melaporkan lima pemeriksaan manual desktop/mobile lulus pada 2026-10-02 (buat akun valid, password sementara sekali tampil, data bertahan tanpa membuka password lagi, konflik email tanpa data ganda, form/dialog 320 px). Spec Playwright desktop/mobile + harness/runbook di-commit dan dipush sebagai 9400f3a. Sintaks JS, HR typecheck/lint dan discovery dua skenario lulus; suite Playwright otomatis belum dijalankan karena RAM host sekitar 1,9 GB. Bukti backend MySQL dan visual T12 sebelumnya tetap berlaku; hasil otomatis tidak diklaim lulus.
 
 - T12 UI: typecheck/lint dan 25 test terfokus HR (Employees 7, AuthClient 8, selector 6, App 4) lulus. Visual T12 8 test terang/gelap pada 320/768/1024/1440 lulus; daftar, H07, H10 dan koreksi email diperiksa, screenshot ditinjau. E2E nyata belum dijalankan pada increment UI ini.
 
@@ -59,7 +61,7 @@ Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .w
 
 ## Langkah berikut
 
-1. Terapkan [tier test terbaru](plan.md#tier-test-biaya-vs-nilai--disetujui-2026-10-02) pada T12: statis + unit/komponen terfokus per increment, visual halaman terdampak saat layout/CSS berubah, API MySQL/E2E saat fitur lengkap. T12 pembuatan akun karyawan: lanjutkan [module spec provisioning](../docs/sdd/employee-provisioning.md) ke schema/migration/grants akun+profil (unik NIK/email, idempotensi, kompensasi/pemulihan). Integrasikan selector master aktif yang sudah diuji ke form H07; pemuatan pilihan harus berfilter ACTIVE dan mendukung pagination. Jangan membuka akun/hasil sukses sebelum profil+akun konsisten.
+1. **T13 login karyawan.** Implementasi hanya di apps/attendance-web menurut docs/sdd/employee-auth-flow.md: klien Auth panel employee, E01 satu kolom, E02 ganti password wajib, home jujur, guard sesi. Tier 1–2 per perubahan. Visual halaman terdampak saat layout berubah; checkpoint browser nyata memakai akun dari T12 ketika memori cukup. Spec Playwright T12 yang sudah ditambahkan tetap menunggu eksekusi otomatis saat RAM lega.
 2. Limit 429 E2E Auth tetap menunggu keputusan pengguna: refresh limit sendiri atau run per spec. Jangan longgarkan limit login. Run T11 per spec terpisah lulus; konfigurasi Auth tidak diubah.
 3. T09c selesai dan menjadi acuan wajib semua halaman berikutnya: gunakan token/komponen packages/ui, HeroUI, zinc–emerald, Geist, Phosphor dan mode terang/gelap. Kontrak mencakup E01–E09/H01–H14, seluruh state/dialog/mobile; jangan kembali ke T09b monokrom.
 4. Polesan H11 selesai bersama H12: (a) shared MasterDataPage menampilkan skeleton selama refetch sehingga baris lama tidak tampil bersama pesan sukses; test komponen dan E2E desktop/mobile menunggu baris hilang sesudah aktifkan pada filter Nonaktif. (b) pager tidak lagi memakai kelas monospace, diverifikasi computed font pada test visual. (c) status memakai satu ToggleButtonGroup berbatas dan separator HeroUI, screenshot terang/gelap ditinjau.
@@ -68,7 +70,7 @@ Catatan: E2E memakai service dari `dist`; jalankan `pnpm --dir apps/<service> ru
 ## Kendala dan kebutuhan eksternal
 
 - Remote GitHub sudah tersedia; akses Vercel/VPS/Cloudflare dan tahap deployment masih menyusul.
-- Tool resource_status tidak tersedia pada sesi ini; RAM diperiksa via OS (sekitar 0,57–1,64 GiB tersedia). Playwright/Vitest memakai satu worker.
+- Tool resource_status tidak tersedia pada sesi ini; RAM OS sekitar 1,9 GB tersedia saat pemeriksaan T12. Suite berat tetap serial, Playwright 1 worker. Pengguna memilih verifikasi browser T12 secara manual karena batas RAM.
 - Build HR lulus dengan warning ukuran chunk JS sekitar 650 kB; tidak menurunkan batas warning atau menambah tooling.
 - Akses Vercel/VPS/Cloudflare dan instruksi promosi main belum tersedia pada snapshot; siapkan artefak independen dahulu.
 - Detail teknis terbuka seperti threshold capture, batas foto/lokasi, presisi waktu dan outbox harus dituntaskan melalui spike/spec/test terkait.
