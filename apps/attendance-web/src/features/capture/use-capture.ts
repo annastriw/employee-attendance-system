@@ -8,7 +8,7 @@ interface Frame { status: FaceStatus; stable: boolean; at: number; wallTime: num
 interface Run { vision?: Vision; stream?: MediaStream; timer?: ReturnType<typeof setTimeout>; gate: BlinkGate }
 interface Photo { blob: Blob; url: string; method: "BLINK" | "MANUAL"; capturedAt: number; location: DeviceLocation }
 
-export function useCaptureSpike() {
+export function useCapture() {
   const video = useRef<HTMLVideoElement>(null);
   const run = useRef<Run | null>(null);
   const photoUrl = useRef<string | null>(null);

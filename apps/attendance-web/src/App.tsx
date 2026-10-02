@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Clock } from "@phosphor-icons/react";
 import { AuthShell } from "@attendance/ui";
 import {
@@ -11,6 +11,8 @@ import { useHashRoute, type View } from "./lib/use-hash-route";
 import { ChangePasswordPage } from "./pages/ChangePasswordPage";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
+
+const CapturePage = lazy(() => import("./pages/CapturePage"));
 
 export function App({ client = authClient }: { client?: AuthClient }) {
   const [user, setUser] = useState<EmployeeUser | null>(null);
@@ -30,21 +32,32 @@ export function App({ client = authClient }: { client?: AuthClient }) {
       .catch((reason: unknown) => {
         if (active) {
           setError(
-            reason instanceof Error ? reason.message : "Sesi tidak dapat dipulihkan.",
+            reason instanceof Error
+              ? reason.message
+              : "Sesi tidak dapat dipulihkan.",
           );
         }
       })
       .finally(() => {
         if (active) setLoading(false);
       });
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [client]);
 
   const required: View = user
-    ? user.mustChangePassword ? "ganti-password" : "beranda"
+    ? user.mustChangePassword
+      ? "ganti-password"
+      : "beranda"
     : "masuk";
   useEffect(() => {
-    if (!loading && view !== required) navigate(required);
+    if (
+      !loading &&
+      view !== required &&
+      !(required === "beranda" && view === "foto-checkin")
+    )
+      navigate(required);
   }, [loading, navigate, required, view]);
 
   async function act(action: () => Promise<void>) {
@@ -54,7 +67,11 @@ export function App({ client = authClient }: { client?: AuthClient }) {
     try {
       await action();
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Terjadi kesalahan. Coba lagi.");
+      setError(
+        reason instanceof Error
+          ? reason.message
+          : "Terjadi kesalahan. Coba lagi.",
+      );
       if (reason instanceof AuthError && reason.status === 401 && user) {
         setUser(null);
       }
@@ -71,8 +88,13 @@ export function App({ client = authClient }: { client?: AuthClient }) {
 
   if (loading) {
     return (
-      <AuthShell name="Attendance Portal" brandIcon={<Clock size={16} weight="bold" />}>
-        <p role="status" className="loading-session">Memeriksa sesi Anda…</p>
+      <AuthShell
+        name="Attendance Portal"
+        brandIcon={<Clock size={16} weight="bold" />}
+      >
+        <p role="status" className="loading-session">
+          Memeriksa sesi Anda…
+        </p>
       </AuthShell>
     );
   }
@@ -88,7 +110,9 @@ export function App({ client = authClient }: { client?: AuthClient }) {
           act(async () => {
             await client.changePassword(current, replacement);
             setUser(null);
-            setMessage("Password berhasil diperbarui. Silakan masuk dengan password baru.");
+            setMessage(
+              "Password berhasil diperbarui. Silakan masuk dengan password baru.",
+            );
           })
         }
       />
@@ -96,7 +120,37 @@ export function App({ client = authClient }: { client?: AuthClient }) {
   }
 
   if (user) {
-    return <HomePage user={user} busy={busy} error={error} onLogout={logout} />;
+    if (view === "foto-checkin")
+      return (
+        <Suspense
+          fallback={
+            <AuthShell
+              name="Attendance Portal"
+              brandIcon={<Clock size={16} weight="bold" />}
+            >
+              <p role="status">Menyiapkan kamera…</p>
+            </AuthShell>
+          }
+        >
+          <CapturePage
+            client={client}
+            onBack={() => navigate("beranda")}
+            onSessionExpired={() => {
+              setUser(null);
+              setError("Sesi Anda telah berakhir. Silakan masuk kembali.");
+            }}
+          />
+        </Suspense>
+      );
+    return (
+      <HomePage
+        user={user}
+        busy={busy}
+        error={error}
+        onLogout={logout}
+        onCapture={() => navigate("foto-checkin")}
+      />
+    );
   }
 
   return (
@@ -105,7 +159,9 @@ export function App({ client = authClient }: { client?: AuthClient }) {
       error={error}
       message={message}
       onSubmit={(email, password) =>
-        act(async () => { setUser(await client.login(email, password)); })
+        act(async () => {
+          setUser(await client.login(email, password));
+        })
       }
     />
   );

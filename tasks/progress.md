@@ -5,7 +5,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 ## Snapshot terakhir
 
 - Tanggal: 2026-10-02 (Asia/Jakarta). HEAD diverifikasi dengan `git log`; jangan anggap hash di sini sebagai HEAD.
-- Tahap: T08-T17 selesai. T15 (reset password karyawan) lulus manual peramban langkah 1–10 dan ditutup penuh pada 2026-10-02. T16 (aturan waktu dan eligibility absensi) selesai diimplementasikan end-to-end. T17 (kalender libur HRD) selesai diimplementasikan end-to-end; tes unit/kontrak, integrasi MySQL nyata, dan UI component tests 100% lulus; spesifikasi di docs/sdd/attendance-holidays.md. T18 diterima pengguna setelah konfirmasi semua alur uji berjalan pada 2026-10-02. T19 foto privat backend selesai; T20 capture produksi menjadi pekerjaan berikutnya. T09c tetap menjadi acuan tema.
+- Tahap: T08-T17 selesai. T15 (reset password karyawan) lulus manual peramban langkah 1–10 dan ditutup penuh pada 2026-10-02. T16 (aturan waktu dan eligibility absensi) selesai diimplementasikan end-to-end. T17 (kalender libur HRD) selesai diimplementasikan end-to-end; tes unit/kontrak, integrasi MySQL nyata, dan UI component tests 100% lulus; spesifikasi di docs/sdd/attendance-holidays.md. T18 diterima pengguna setelah konfirmasi semua alur uji berjalan pada 2026-10-02. T19 foto privat backend selesai; T20 capture produksi diimplementasikan dan lulus teknis, checklist perangkat/API nyata masih pending. T21 check-in menjadi implementasi berikut setelah penerimaan T20. T09c tetap menjadi acuan tema.
 - Commit sesi ini pada dev (lama ke baru): 93488ae, f423e47, aa34d48, 1b7b05d, e4a6782, 83537f1, 112d7fa, a485480 (lihat git log), lalu:
   - c2f98fe docs: switch frontend theme to Linear-style zinc + emerald, Geist, Phosphor, light/dark
   - 36a24e4 feat(ui): Linear-style redesign with zinc + emerald, Geist, Phosphor and light/dark
@@ -29,13 +29,22 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T19 — Foto privat backend | Codex selesai | apps/media-service/, apps/api-gateway/, prisma/, scripts/storage/, docs/sdd/media-photos.md | T13/T18 selesai | MySQL 3307, AIStor 9000/9001 dan Vite spike 5173 PID 12068 aktif; backend test sudah ditutup | Acceptance dan verifikasi lulus; T20 berikutnya |
+| T20 — Capture frontend | Codex, checkpoint uji pengguna | apps/attendance-web/src/features/capture/, components/organisms/, pages/, lib/auth-client.ts, docs/sdd/attendance-capture.md | T18/T19 selesai | Vite 5173, Gateway 3000, Auth 3001, Media 3004, MySQL 3307, AIStor 9000/9001 | Implementasi + verifikasi teknis lulus; checklist perangkat/API nyata pending |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 
 ## Perubahan yang belum di-commit
 
 Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .windsurf/ dan skills-lock.json adalah berkas lokal; jangan di-stage, dihapus atau diubah tanpa scope jelas. Rahasia dan data pribadi tetap ignored.
+
+## Checkpoint T20 — 2026-10-02
+
+- Implementasi: mesin T18 dipromosikan tanpa duplikasi; route lazy terproteksi, HeroUI preview/retake/lokasi wajib, upload privat T19, retry key sama, pembatalan/tab/unmount/401, prepared evidence WIB untuk T21. T20 belum mencatat absensi.
+- Verifikasi: 54 tes terfokus lulus dalam beberapa suite, delapan visual halaman berubah 320/1440 terang/gelap, typecheck/lint/build. Chrome DevTools memeriksa idle, ukuran target sentuh, overflow dan error model Offline/alert; HeroUI MCP digunakan. Chunk MediaPipe terpisah dari main login. Review diff/code selesai; tidak ada backend/dependency/credential berubah.
+- Uji perangkat/API nyata: tujuh langkah pada [capture portal](../docs/sdd/attendance-capture.md#checklist-manual-pengguna) belum diterima. Jangan menutup T20 atau mengklaim kamera/GPS/upload browser nyata lulus hanya berdasarkan mock/health.
+- Proses dibiarkan aktif: Vite 5173 PID 12068 (server lama digunakan ulang), Auth 3001 PID 9524/session 12180, Media 3004 PID 21216/session 94162, Gateway 3000 PID 18392/session 86885. Backend dari dist T19, tanpa watch. Ketiga health 200, MySQL/AIStor up. Cek listener sebelum restart; rebuild/restart backend hanya jika source berubah.
+- Fixture visual di apps/attendance-web/.local (ignored) hanya sesi sintetis, bukan akun/API nyata; browser MCP dikembalikan ke portal asli http://localhost:5173. Screenshot/build/test-results ignored. Tooling lokal untracked tetap dibiarkan.
+- Commit/push dev dikerjakan setelah pemeriksaan akhir; lihat git log dan origin/dev untuk hash aktual. Langkah berikut: menerima hasil uji T20, lalu T21 (foto+lokasi, eligibility, late reason, waktu server, snapshot, idempotensi/unique) serial sesuai plan. Tidak ada pergantian agen otomatis.
 
 ## Bukti pemeriksaan
 

@@ -161,6 +161,7 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 - [ ] Selesai
 - Acceptance: Satu wajah, blink, manual fallback, preview/retake, lokasi wajib.
 - Verification: Component test error izin dan uji manual mobile/kamera.
+- Implementasi/verifikasi teknis 2026-10-02: [capture portal](../docs/sdd/attendance-capture.md), 54 tes terfokus + 8 visual, typecheck/lint/build lulus. Checklist perangkat/API nyata masih pending; belum ditutup penuh.
 - Dependencies: 18,19
 - Target: apps/attendance-web/
 

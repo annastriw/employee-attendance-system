@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
-export type View = "masuk" | "ganti-password" | "beranda";
-const views: View[] = ["masuk", "ganti-password", "beranda"];
+export type View = "masuk" | "ganti-password" | "beranda" | "foto-checkin";
+const views: View[] = ["masuk", "ganti-password", "beranda", "foto-checkin"];
 
 function read(): View {
   const value = window.location.hash.replace(/^#/, "");

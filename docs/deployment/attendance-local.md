@@ -37,3 +37,17 @@ Jangan masukkan password atau token ke laporan hasil pengujian. Catat hanya nomo
 ## Pemeriksaan frontend yang sudah lulus
 
 Typecheck, lint, build, enam test unit Auth client, tiga test komponen login, tiga test alur App, dan 12 test visual Playwright satu worker (E01/E02/home, terang/gelap, 320/1440 px) lulus. Test visual memakai respons sesi tiruan. Pengguna melaporkan checklist manual langkah 1–5 dengan API nyata lulus pada 2026-10-02; T13 ditutup. E2E otomatis belum dijalankan karena RAM terbatas. Spesifikasi: [login karyawan](../sdd/employee-auth-flow.md).
+
+## Capture T20
+
+Untuk Siapkan foto check-in pada beranda, jalankan Media Service juga (terminal terpisah, atau proses dist lokal yang sudah aktif):
+
+~~~powershell
+pnpm --dir apps/media-service start:dev
+~~~
+
+AIStor dan .env.media runtime harus siap menurut [panduan Media](media-local.md). Portal tetap memakai http://localhost:5173 dan Gateway 3000; Auth 3001, Media 3004. Gunakan akun karyawan hasil T12/T13 yang telah mengganti password awal. Periksa kesehatan http://localhost:3004/health sebelum uji upload.
+
+Ikuti [checklist manual capture](../sdd/attendance-capture.md#checklist-manual-pengguna). T20 menyiapkan foto+lokasi dan menyimpan foto privat; belum mencatat absensi. T21 mengirim prepared evidence ke Attendance dan menetapkan waktu resmi server. Gunakan HTTPS atau localhost untuk kamera/lokasi; akses http lewat IP LAN biasa akan diblokir browser. Untuk ponsel, buka origin HTTPS yang telah dimasukkan allowlist Auth/Gateway; konfigurasi deployment/tunnel tidak dibuat pada increment ini.
+
+Spesifikasi dan bukti pengujian T20 ada di [capture portal karyawan](../sdd/attendance-capture.md). Tes otomatis memakai perangkat/sesi sintetis; hasil kamera/GPS/upload nyata dicatat terpisah, tanpa foto/koordinat/password/token di repo.

@@ -1,7 +1,7 @@
 import { Button } from "@heroui/react";
 import { Camera, MapPin, Stop, ArrowCounterClockwise, Clock } from "@phosphor-icons/react";
 import { PortalBrand } from "@attendance/ui";
-import { useCaptureSpike } from "./use-capture-spike";
+import { useCapture } from "../../features/capture/use-capture";
 
 const hints = {
   none: "Posisikan wajah di dalam panduan.",
@@ -12,7 +12,7 @@ const hints = {
 };
 
 export function CaptureSpike() {
-  const { video, phase, error, frame, photo, location, locationFresh, locationError, locationBusy, manualReady, start, stop, locate, capture: takePhoto } = useCaptureSpike();
+  const { video, phase, error, frame, photo, location, locationFresh, locationError, locationBusy, manualReady, start, stop, locate, capture: takePhoto } = useCapture();
   const active = ["model", "camera", "running"].includes(phase);
   let hint = "Foto dan lokasi hanya dipakai untuk uji perangkat.";
   if (phase === "model") hint = "Memuat model wajah…";
