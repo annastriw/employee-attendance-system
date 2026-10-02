@@ -225,3 +225,8 @@
 .provisioning-result { display: grid; gap: .5rem; padding: 1rem; border: 1px solid var(--border); border-radius: .75rem; background: var(--surface); }
 @media (max-width: 767px) { .employee-form-grid { grid-template-columns: minmax(0,1fr); } .form-section { padding: 1rem; } }
 @media (max-width: 639px) { .employee-extra { display: none; } .employee-table th:last-child { width: 4.75rem; } }
+
+.employee-detail { display: grid; gap: 1.5rem; max-width: 48rem; }
+.employee-detail-header { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
+.employee-detail-header h2 { font-size: 1.125rem; font-weight: 600; }
+.employee-name { min-width: 0; max-width: 100%; padding: 0; height: auto; white-space: normal; text-align: left; justify-content: flex-start; }

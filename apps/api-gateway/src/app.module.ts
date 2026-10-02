@@ -1,4 +1,4 @@
-import { EmployeesProxyController, EmployeeProvisioningProxyController } from './employee-provisioning-proxy.controller';
+import { EmployeesProxyController, EmployeeProvisioningProxyController, EmployeeEmailChangesProxyController } from './employee-provisioning-proxy.controller';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -8,7 +8,7 @@ import { AuthProxyController } from './auth-proxy.controller';
 import { EmployeeProxyController } from './employee-proxy.controller';
 
 @Module({
-  controllers: [AppController, AuthProxyController, EmployeeProxyController, EmployeesProxyController, EmployeeProvisioningProxyController],
+  controllers: [AppController, AuthProxyController, EmployeeProxyController, EmployeesProxyController, EmployeeProvisioningProxyController, EmployeeEmailChangesProxyController],
   providers: [AppService, GatewayConfig, AuthProxyService],
 })
 export class AppModule {}

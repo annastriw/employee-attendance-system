@@ -15,3 +15,10 @@ export async function loadActiveMasters(client: Pick<AuthClient, 'api'>, resourc
     page++;
   }
 }
+
+export interface EmailChangeOperation { id: string; employeeId: string; email: string; status: 'PENDING' | 'COMPLETED' | 'FAILED'; errorCode: string | null }
+export interface EmployeeDetail extends Omit<EmployeeInput, 'status' | 'phone'> {
+  phone: string | null; status: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
+  id: string; department: MasterRecord; position: MasterRecord;
+  updatedAt: string; emailChange: EmailChangeOperation | null;
+}

@@ -149,6 +149,28 @@ describe('Auth Gateway HTTP contract', () => {
     expect(received.method).toBe('POST');
     expect(JSON.parse(received.body)).toEqual({ panel: 'admin' });
   });
+
+  describe('T14 profile/email allowlist', () => {
+    const id = '0b7c2f4e-3d1a-4c8b-9e6f-2a5d7c9e1b3f';
+    it.each([['get', '/api/v1/employees/' + id, 'GET'], ['patch', '/api/v1/employees/' + id, 'PATCH'], ['get', '/api/v1/employee-email-changes/' + id, 'GET'], ['post', '/api/v1/employee-email-changes/' + id + '/retry', 'POST']] as const)('forwards approved %s %s', async (verb, path, method) => {
+      await request(app.getHttpServer())[verb](path).set('Authorization', 'Bearer admin').send(verb === 'get' ? undefined : { name: 'Updated' }).expect(200);
+      expect(received.url).toBe(path); expect(received.method).toBe(method);
+    });
+    it('forwards an email idempotency key and drops cookies/signatures and spoofed actor headers', async () => {
+      const path = '/api/v1/employees/' + id + '/email';
+      const body = { expectedEmail: 'old@example.test', email: 'new@example.test' };
+      await request(app.getHttpServer()).post(path).set('Authorization', 'Bearer admin').set('Idempotency-Key', id).set('Cookie', 'secret=value').set('X-Service-Signature', 'forged').set('X-Actor-Id', 'forged').send(body).expect(200);
+      expect(received.headers['idempotency-key']).toBe(id); expect(received.headers.cookie).toBeUndefined(); expect(received.headers['x-service-signature']).toBeUndefined(); expect(received.headers['x-actor-id']).toBeUndefined();
+      expect(JSON.parse(received.body)).toEqual(body);
+    });
+    it('rejects missing key, non-list queries, invalid IDs, and internal Auth paths', async () => {
+      await request(app.getHttpServer()).post('/api/v1/employees/' + id + '/email').send({}).expect(400);
+      await request(app.getHttpServer()).get('/api/v1/employees/' + id + '?status=ACTIVE').expect(400);
+      await request(app.getHttpServer()).get('/api/v1/employee-email-changes/' + id + '?secret=true').expect(400);
+      await request(app.getHttpServer()).patch('/api/v1/employees/not-a-uuid').send({}).expect(400);
+      await request(app.getHttpServer()).post('/api/v1/internal/employee-email-changes/' + id).send({}).expect(404);
+    });
+  });
   it('preserves tokens/cookies and request ID, discards forged proxy/internal headers', async () => {
     const id = '61d286de-dfb1-4b19-9d7d-a4d477b3808e';
     const result = await request(app.getHttpServer())

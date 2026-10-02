@@ -5,8 +5,8 @@ export interface AccountReceipt { operationId: string; accountId: string; finali
 @Injectable()
 export class ProvisioningAuthClient {
   constructor(private readonly config: EmployeeConfig) {}
-  async call<T>(id: string, action: 'prepare' | 'finalize' | 'credentials', body: unknown, requestId?: string, authorization?: string): Promise<T> {
-    const path = '/api/v1/internal/provisioning/' + id + '/' + action;
+  async call<T>(id: string, action: 'prepare' | 'finalize' | 'credentials' | 'email', body: unknown, requestId?: string, authorization?: string): Promise<T> {
+    const path = action === 'email' ? '/api/v1/internal/employee-email-changes/' + id : '/api/v1/internal/provisioning/' + id + '/' + action;
     const timestamp = String(Date.now()); const payload = JSON.stringify(body);
     const signature = createHmac('sha256', Buffer.from(this.config.provisioningSecret, 'hex')).update(timestamp + '\nPOST\n' + path + '\n' + payload).digest('hex');
     let response: Response;

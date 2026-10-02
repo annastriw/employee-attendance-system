@@ -26,7 +26,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| Pembagian putaran T14 dan eksekusi ringkas | Codex, 2026-10-02 | tasks/{plan,todo,progress}.md, docs/development/implementation-workflow.md | Persetujuan pengguna atas pelaksanaan per fitur lengkap | Tidak memulai proses aplikasi/test berat | Putaran A edit profil/email, kemudian B lifecycle/history/revokasi; implementasi belum dimulai |
+| T14 A — edit profil/email | Codex, 2026-10-02 | prisma/schema+migration, Auth/Employee/Gateway API, HR detail/form, test terkait, docs/sdd/employee-lifecycle.md | T13 selesai; pola T12 digunakan ulang | MySQL 3307 aktif; tidak ada listener aplikasi 3000/3001/3002/5173/5174 pada pemeriksaan akhir | API/UI dan pemeriksaan terfokus lulus; menunggu browser manual A sebelum B |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 
@@ -35,6 +35,8 @@ Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increme
 Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .windsurf/ dan skills-lock.json adalah berkas lokal; jangan di-stage, dihapus atau diubah tanpa scope jelas. Rahasia dan data pribadi tetap ignored.
 
 ## Bukti pemeriksaan
+
+- T14 A: edit profil dan email terpisah, history/audit profil atomik, email durable + receipt/revokasi/recovery diimplementasikan. Migration dev/test/grants dan diff schema exit 0; typecheck/lint/build package terdampak lulus. Auth 3 unit, Employee 9 unit, Gateway 51 kontrak, HR 14 komponen lulus. MySQL: 5 skenario lulus awal + 1 lulus rerun setelah perbaikan fixture port; visual 4/4 lulus dan screenshot ditinjau. Rincian/batas bukti dan checklist browser ada di [module spec T14](../docs/sdd/employee-lifecycle.md). Browser API nyata belum diklaim lulus; A/B tetap terbuka.
 
 - Pelaksanaan per putaran disetujui pengguna (2026-10-02): fitur lengkap API+UI+test/dokumentasi dalam satu putaran, reuse T10–T13, polesan tambahan pada T28, baca konteks terkait saja, checklist browser sekali sesudah putaran lengkap, dan service seperlunya. T14 dibagi A edit profil/email, B lifecycle/history/revokasi. Perubahan dokumentasi diperiksa isi, tautan dan diff; test aplikasi tidak diulang.
 
@@ -68,7 +70,7 @@ Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .w
 
 ## Langkah berikut
 
-1. **T14 perubahan dan lifecycle karyawan.** T13 beserta checkpoint selesai setelah pengguna melaporkan langkah browser manual 1–5 lulus. Mulai putaran A edit profil/email, lalu B lifecycle/history/revokasi sebagaimana todo. Baca baseline dan source/provisioning terkait sebelum menulis kontrak T14; selesaikan API+UI+test per putaran, checklist browser sesudah lengkap. Revisi percepatan disetujui pengguna dan diterapkan: E2E browser manual saat development, pemeriksaan terfokus, regresi otomatis sebelum rilis saat resource tersedia; lihat tier test plan. Spec Playwright T12 otomatis tetap belum dijalankan karena RAM terbatas.
+1. **T14 A menunggu checklist browser manual.** API/UI dan pemeriksaan terkait selesai; jalankan lima langkah pada [module spec](../docs/sdd/employee-lifecycle.md#checklist-browser-manual-a), terima hasil pengguna lalu tutup A dan lanjut B lifecycle/history/revokasi. T14 tetap terbuka; spec Playwright T12 otomatis masih belum dijalankan karena RAM terbatas.
 2. Limit 429 E2E Auth tetap menunggu keputusan pengguna: refresh limit sendiri atau run per spec. Jangan longgarkan limit login. Run T11 per spec terpisah lulus; konfigurasi Auth tidak diubah.
 3. T09c selesai dan menjadi acuan wajib semua halaman berikutnya: gunakan token/komponen packages/ui, HeroUI, zinc–emerald, Geist, Phosphor dan mode terang/gelap. Kontrak mencakup E01–E09/H01–H14, seluruh state/dialog/mobile; jangan kembali ke T09b monokrom.
 4. Polesan H11 selesai bersama H12: (a) shared MasterDataPage menampilkan skeleton selama refetch sehingga baris lama tidak tampil bersama pesan sukses; test komponen dan E2E desktop/mobile menunggu baris hilang sesudah aktifkan pada filter Nonaktif. (b) pager tidak lagi memakai kelas monospace, diverifikasi computed font pada test visual. (c) status memakai satu ToggleButtonGroup berbatas dan separator HeroUI, screenshot terang/gelap ditinjau.
@@ -78,9 +80,10 @@ Catatan: E2E memakai service dari `dist`; jalankan `pnpm --dir apps/<service> ru
 
 - Remote GitHub sudah tersedia; akses Vercel/VPS/Cloudflare dan tahap deployment masih menyusul.
 - Tool resource_status tidak tersedia pada sesi ini; RAM OS sekitar 1,9 GB tersedia saat pemeriksaan T12. Suite berat tetap serial, Playwright 1 worker. Pengguna memilih verifikasi browser nyata secara manual karena batas RAM.
-- Build HR lulus dengan warning ukuran chunk JS sekitar 650 kB; tidak menurunkan batas warning atau menambah tooling.
+- Build HR lulus dengan warning ukuran chunk JS sekitar 679 kB; tidak menurunkan batas warning atau menambah tooling.
 - Akses Vercel/VPS/Cloudflare dan instruksi promosi main belum tersedia pada snapshot; siapkan artefak independen dahulu.
 - Detail teknis terbuka seperti threshold capture, batas foto/lokasi, presisi waktu dan outbox harus dituntaskan melalui spike/spec/test terkait.
+- Suite visual HR lama masih memiliki assertion placeholder Attendance sebelum T13; belum dijalankan pada putaran A yang hanya memeriksa halaman terdampak. Selaraskan saat checkpoint regresi sebelum rilis.
 - Tidak ada keputusan tambahan pengguna yang diperlukan untuk meneruskan task rutin dalam scope saat ini.
 
 ## Format update sesi berikut

@@ -83,7 +83,7 @@ for (const db of ["attendance_dev", "attendance_test", "attendance_shadow"]) {
 }
 if (process.argv.includes("--grants")) {
   for (const [db, user] of [["attendance_dev", "attendance_auth"], ["attendance_test", "attendance_auth_test"]]) {
-    for (const table of ["auth_accounts", "auth_sessions", "auth_provisioning"]) {
+    for (const table of ["auth_accounts", "auth_sessions", "auth_provisioning", "auth_email_changes"]) {
       sql += `GRANT SELECT, INSERT, UPDATE ON \`${db}\`.\`${table}\` TO '${user}'@'%';\n`;
     }
     sql += `GRANT SELECT, INSERT ON \`${db}\`.auth_audit_logs TO '${user}'@'%';\n`;
@@ -92,10 +92,11 @@ if (process.argv.includes("--grants")) {
   for (const [db, user] of [["attendance_dev", "attendance_employee"], ["attendance_test", "attendance_employee_test"]]) {
     sql += `GRANT SELECT, INSERT, UPDATE ON \`${db}\`.emp_departments TO '${user}'@'%';\n`;
     sql += `GRANT SELECT, INSERT, UPDATE ON \`${db}\`.emp_positions TO '${user}'@'%';\n`;
-    for (const table of ["emp_employees", "emp_provisioning"]) {
+    for (const table of ["emp_employees", "emp_provisioning", "emp_email_changes"]) {
       sql += `GRANT SELECT, INSERT, UPDATE ON \`${db}\`.\`${table}\` TO '${user}'@'%';\n`;
     }
     sql += `GRANT SELECT, INSERT ON \`${db}\`.emp_audit_logs TO '${user}'@'%';\n`;
+    sql += `GRANT SELECT, INSERT ON \`${db}\`.emp_employee_history TO '${user}'@'%';\n`;
   }
 }
 mysql(sql);

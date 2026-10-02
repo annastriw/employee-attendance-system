@@ -148,3 +148,43 @@ for (const scheme of ['light', 'dark'] as const) for (const width of [320, 768, 
     await page.screenshot({path:info.outputPath('employee-email-recovery-'+scheme+'-'+width+'.png'),fullPage:true});expect(errors).toEqual([]);
   });
 }
+
+for (const scheme of ["light", "dark"] as const) {
+  for (const width of [320, 1440]) {
+    test("HR employee edit " + scheme + " at " + width + "px", async ({ page }, info) => {
+      const id = "11111111-1111-4111-8111-111111111111";
+      const department = { id, name: "Operasional", code: "OPS", status: "INACTIVE", createdAt: "", updatedAt: "" };
+      const position = { ...department, id: "22222222-2222-4222-8222-222222222222", name: "Analis", code: "ANA", status: "ACTIVE" };
+      const employee = { id, nik: "EMP-EDIT", name: "Karyawan Operasional Regional Timur", phone: null, email: "employee@example.test", departmentId: id, positionId: position.id, startDate: "2026-10-02", status: "ACTIVE", updatedAt: "2026-10-02T12:00:00.000Z", emailChange: null };
+      const errors: string[] = [];
+      page.on("pageerror", error => errors.push(error.message));
+      await page.setViewportSize({ width, height: 900 });
+      await page.emulateMedia({ colorScheme: scheme });
+      await page.route("**/api/v1/**", route => {
+        const path = new URL(route.request().url()).pathname;
+        if (path.endsWith("/auth/refresh")) return route.fulfill({ json: { accessToken: "visual-token", expiresIn: 3600, user: { id: "visual-admin", email: "admin@example.test", role: "ADMIN_HRD", mustChangePassword: false } } });
+        if (path.endsWith("/departments")) return route.fulfill({ json: { items: [], total: 0, page: 1, pageSize: 100 } });
+        if (path.endsWith("/positions")) return route.fulfill({ json: { items: [position], total: 1, page: 1, pageSize: 100 } });
+        if (path.endsWith("/employees/" + id)) return route.fulfill({ json: { ...employee, department, position } });
+        if (path.endsWith("/employees")) return route.fulfill({ json: { items: [{ ...employee, department: department.name, position: position.name }], total: 1, page: 1, pageSize: 20 } });
+        return route.fulfill({ status: 404, json: { message: "Unexpected visual request" } });
+      });
+      await page.goto("http://127.0.0.1:15175/#karyawan");
+      await page.getByRole("button", { name: "Buka " + employee.name }).click();
+      await expect(page.getByRole("heading", { name: "Profil karyawan" })).toBeVisible();
+      await expect(page.getByLabel("Nama", { exact: true })).toHaveValue(employee.name);
+      await expect(page.getByText(/Nilai lama tetap tersimpan/)).toBeVisible();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
+      await page.screenshot({ path: info.outputPath("employee-edit-" + scheme + "-" + width + ".png"), animations: "disabled", fullPage: true });
+      await page.getByLabel("Email baru").fill("updated@example.test");
+      await page.getByRole("button", { name: "Ubah email", exact: true }).click();
+      const dialog = page.getByRole("dialog");
+      await expect(dialog).toBeVisible();
+      await expect(dialog.getByRole("button", { name: "Ubah email", exact: true })).toBeVisible();
+      await expect(dialog.getByText(/Semua sesi karyawan akan dicabut/)).toBeVisible();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
+      await page.screenshot({ path: info.outputPath("email-confirm-" + scheme + "-" + width + ".png"), animations: "disabled", fullPage: true });
+      expect(errors).toEqual([]);
+    });
+  }
+}

@@ -82,7 +82,7 @@ export class EmployeesService implements OnModuleInit, OnModuleDestroy {
   async list(query: ListEmployeesQuery) {
     const where: Prisma.EmpEmployeeWhereInput = { ready: true, provisioning: { status: 'COMPLETED' }, ...(query.status ? { status: query.status } : {}), ...(query.search ? { OR: [{ name: { contains: query.search } }, { nik: { contains: query.search } }] } : {}) };
     const [items, total] = await this.database.client.$transaction([this.database.client.empEmployee.findMany({ where, include: { department: true, position: true, provisioning: { select: { email: true } } }, orderBy: [{ name: 'asc' }, { id: 'asc' }], skip: (query.page - 1) * query.pageSize, take: query.pageSize }), this.database.client.empEmployee.count({ where })]);
-    return { items: items.map(row => ({ id: row.id, nik: row.nik, name: row.name, phone: row.phone, email: row.provisioning?.email, department: row.department.name, position: row.position.name, startDate: row.startDate.toISOString().slice(0, 10), status: row.status })), total, page: query.page, pageSize: query.pageSize };
+    return { items: items.map(row => ({ id: row.id, nik: row.nik, name: row.name, phone: row.phone, email: row.accountEmail ?? row.provisioning?.email, department: row.department.name, position: row.position.name, startDate: row.startDate.toISOString().slice(0, 10), status: row.status })), total, page: query.page, pageSize: query.pageSize };
   }
   async runOne(id: string) {
     const token = randomUUID(); const now = new Date();
@@ -103,7 +103,7 @@ export class EmployeesService implements OnModuleInit, OnModuleDestroy {
           const current = await tx.empProvisioning.findUniqueOrThrow({ where: { id } });
           if (current.leaseToken !== token) throw new Error('Lease lost');
           await this.masters(tx, row.employee.departmentId, row.employee.positionId);
-          await tx.empEmployee.update({ where: { id: row.employeeId }, data: { ready: true, status: row.desiredStatus } });
+          await tx.empEmployee.update({ where: { id: row.employeeId }, data: { ready: true, status: row.desiredStatus, accountEmail: row.email } });
           await tx.empProvisioning.update({ where: { id }, data: { phase: 'FINALIZE' } });
         });
       }
