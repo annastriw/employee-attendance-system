@@ -324,6 +324,26 @@ describe('Auth Gateway HTTP contract', () => {
       .send({})
       .expect(403);
   });
+  it('allows DELETE preflight for attendance lifecycle from the HR portal', async () => {
+    const result = await request(app.getHttpServer())
+      .options('/api/v1/attendance/0b7c2f4e-3d1a-4c8b-9e6f-2a5d7c9e1b3f')
+      .set('Origin', 'http://localhost:5174')
+      .set('Access-Control-Request-Method', 'DELETE')
+      .set('Access-Control-Request-Headers', 'authorization,content-type')
+      .expect(204);
+    expect(result.headers['access-control-allow-methods'].split(',')).toContain('DELETE');
+    expect(result.headers['access-control-allow-origin']).toBe('http://localhost:5174');
+    expect(result.headers['access-control-allow-headers'].toLowerCase()).toContain('authorization');
+    expect(result.headers['access-control-allow-credentials']).toBe('true');
+  });
+  it('rejects DELETE preflight from an origin outside the allowlist', async () => {
+    const result = await request(app.getHttpServer())
+      .options('/api/v1/attendance/0b7c2f4e-3d1a-4c8b-9e6f-2a5d7c9e1b3f')
+      .set('Origin', 'https://evil.test')
+      .set('Access-Control-Request-Method', 'DELETE')
+      .expect(403);
+    expect(result.headers['access-control-allow-origin']).toBeUndefined();
+  });
   it('handles preflight for the HR portal', async () => {
     await request(app.getHttpServer())
       .options('/api/v1/auth/admin/login')

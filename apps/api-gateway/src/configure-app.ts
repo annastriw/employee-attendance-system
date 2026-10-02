@@ -80,7 +80,7 @@ export function configureApp(app: INestApplication) {
   app.enableCors({
     origin: config.origins,
     credentials: true,
-    methods: ['GET', 'POST', 'PATCH', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID', 'Idempotency-Key'],
   });
   (app as NestExpressApplication).useBodyParser('json', {

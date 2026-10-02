@@ -43,3 +43,7 @@ Navigasi Absensi dan Absensi dihapus; daftar ringkas nama, tanggal, waktu check-
 5. Login HRD, pulihkan dari detail terhapus: kedua waktu/alasan/bukti asli kembali, audit penghapusan/pemulihan tercatat.
 6. Dua tab HRD membuka versi sama; ubah pada tab pertama, konfirmasi tab kedua ditolak lalu muat terbaru. Simulasikan koneksi hilang sesudah submit; jangan kirim ulang sebelum memuat terbaru.
 7. Buka riwayat karyawan arsip; akses karyawan langsung ke API HRD ditolak. Uji keyboard dan mobile.
+
+## Koreksi CORS browser — 2026-10-03
+
+Review ketika mengerjakan T24 menemukan Gateway belum mencantumkan DELETE pada metode CORS. Preflight dari HR Portal mengembalikan 204 tetapi tanpa izin DELETE, sehingga browser memblokir aksi hapus. Gateway kini mengizinkan DELETE untuk origin yang sudah ada dalam allowlist; JWT, role HRD dan validasi mutasi tetap ditegakkan di Attendance. Test regresi membuktikan kegagalan sebelum perbaikan, lalu tiga kontrak preflight (DELETE valid, origin asing ditolak, POST existing) lulus. Checklist manual T23 tetap pending.
