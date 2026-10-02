@@ -6,6 +6,7 @@ import { EmployeesService } from './employees.service';
 import { EmployeeProfileService } from './employee-profile.service';
 import { EmployeeEmailChangesService } from './email-changes.service';
 import { EmployeeLifecycleService } from './lifecycle.service';
+import { EmployeeResetPasswordService } from './reset-password.service';
 import { ProvisioningAuthClient } from './provisioning-auth.client';
 const actor = (req: EmployeeRequest) => ({ accountId: req.actor!.id, requestId: req.requestId });
 function operationKey(key?: string) {
@@ -14,7 +15,7 @@ function operationKey(key?: string) {
 }
 @Controller('employees') @UseGuards(AdminGuard)
 export class EmployeesController {
-  constructor(private readonly service: EmployeesService, private readonly profiles: EmployeeProfileService, private readonly emailChanges: EmployeeEmailChangesService, private readonly lifecycle: EmployeeLifecycleService) {}
+  constructor(private readonly service: EmployeesService, private readonly profiles: EmployeeProfileService, private readonly emailChanges: EmployeeEmailChangesService, private readonly lifecycle: EmployeeLifecycleService, private readonly resetPasswords: EmployeeResetPasswordService) {}
   @Get() list(@Query() query: ListEmployeesQuery) { return this.service.list(query); }
   @Get(':id') detail(@Param('id', ParseUUIDPipe) id: string) { return this.profiles.detail(id); }
   @Get(':id/history') history(@Param('id', ParseUUIDPipe) id: string, @Query() query: ListEmployeesQuery) { return this.profiles.history(id, query); }
@@ -26,6 +27,10 @@ export class EmployeesController {
   @Post(':id/lifecycle') @HttpCode(200)
   lifecycleChange(@Param('id', ParseUUIDPipe) id: string, @Headers('idempotency-key') key: string | undefined, @Body() body: ChangeLifecycleDto, @Req() req: EmployeeRequest) {
     return this.lifecycle.start(operationKey(key), id, body, actor(req));
+  }
+  @Post(':id/reset-password') @HttpCode(200)
+  resetPassword(@Param('id', ParseUUIDPipe) id: string, @Headers('idempotency-key') key: string | undefined, @Req() req: EmployeeRequest) {
+    return this.resetPasswords.reset(operationKey(key), id, actor(req));
   }
   @Post() create(@Headers('idempotency-key') key: string | undefined, @Body() body: CreateEmployeeDto, @Req() req: EmployeeRequest) {
     return this.service.create(operationKey(key), body, actor(req));
@@ -50,5 +55,5 @@ export class EmployeeLifecycleController {
   @Get(':id') get(@Param('id', ParseUUIDPipe) id: string, @Req() req: EmployeeRequest) { return this.service.operation(id, actor(req)); }
   @Post(':id/retry') @HttpCode(200) retry(@Param('id', ParseUUIDPipe) id: string, @Req() req: EmployeeRequest) { return this.service.retry(id, actor(req)); }
 }
-@Module({ controllers: [EmployeesController, EmployeeProvisioningController, EmployeeEmailChangesController, EmployeeLifecycleController], providers: [EmployeesService, EmployeeProfileService, EmployeeEmailChangesService, EmployeeLifecycleService, ProvisioningAuthClient, AuthClient, AdminGuard] })
+@Module({ controllers: [EmployeesController, EmployeeProvisioningController, EmployeeEmailChangesController, EmployeeLifecycleController], providers: [EmployeesService, EmployeeProfileService, EmployeeEmailChangesService, EmployeeLifecycleService, EmployeeResetPasswordService, ProvisioningAuthClient, AuthClient, AdminGuard] })
 export class EmployeesModule {}

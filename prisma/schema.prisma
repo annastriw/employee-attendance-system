@@ -34,6 +34,7 @@ model AuthAccount {
   sessions           AuthSession[]
   provisioning       AuthProvisioning?
   emailChanges       AuthEmailChange[]
+  passwordResets     AuthPasswordReset[]
 
   @@index([role, status])
   @@map("auth_accounts")
@@ -273,4 +274,17 @@ model AuthEmailChange {
 
   @@index([accountId, createdAt])
   @@map("auth_email_changes")
+}
+
+model AuthPasswordReset {
+  id             String      @id @db.Char(36)
+  accountId      String      @map("account_id") @db.Char(36)
+  actorAccountId String      @map("actor_account_id") @db.Char(36)
+  payloadHash    String      @map("payload_hash") @db.Char(64)
+  claimedAt      DateTime    @default(now()) @map("claimed_at") @db.DateTime(3)
+  createdAt      DateTime    @default(now()) @map("created_at") @db.DateTime(3)
+  account        AuthAccount @relation(fields: [accountId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([accountId, createdAt])
+  @@map("auth_password_resets")
 }

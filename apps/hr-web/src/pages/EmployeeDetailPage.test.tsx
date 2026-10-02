@@ -330,4 +330,69 @@ describe('H08 Employee lifecycle actions and history', () => {
       within(historySection).getByText(/Status diubah menjadi/),
     ).toBeVisible();
   });
+
+  it('shows reset password confirmation dialog with session revocation warning, executes API call, and displays one-time TemporaryPasswordDialog', async () => {
+    const tempPassword = 'New-Temp-Password-123';
+    const { api, user } = setup(async (path, init) => {
+      if (path.startsWith('departments?')) return { items: [], total: 0, pageSize: 100 };
+      if (path.startsWith('positions?')) return { items: [position], total: 1, pageSize: 100 };
+      if (path.includes('/history?')) {
+        return {
+          items: [
+            {
+              id: 'hist-reset-1',
+              action: 'EMPLOYEE_PASSWORD_RESET',
+              before: {},
+              after: { mustChangePassword: true },
+              actorAccountId: 'actor-1',
+              createdAt: '2026-10-02T11:00:00.000Z',
+            },
+          ],
+          total: 1,
+          page: 1,
+          pageSize: 10,
+        };
+      }
+      if (path.endsWith('/reset-password') && init?.method === 'POST') {
+        return { email: detail.email, temporaryPassword: tempPassword };
+      }
+      return detail;
+    });
+
+    const resetBtn = await screen.findByRole('button', { name: 'Reset password' });
+    expect(resetBtn).toBeVisible();
+    expect(resetBtn).not.toBeDisabled();
+    await user.click(resetBtn);
+
+    // Confirmation dialog with explicit revocation warning
+    expect(screen.getByText('Reset password karyawan?')).toBeVisible();
+    expect(screen.getByText(/Semua sesi karyawan akan dicabut seketika/)).toBeVisible();
+    expect(screen.getByText(/Password sementara baru akan dibuat dan hanya ditampilkan sekali/)).toBeVisible();
+
+    // Confirm action
+    const confirmBtn = screen.getByRole('button', { name: 'Reset password' });
+    await user.click(confirmBtn);
+
+    await waitFor(() => {
+      const resetCall = api.mock.calls.find(([path, init]) => path.endsWith('/reset-password') && init?.method === 'POST');
+      expect(resetCall).toBeDefined();
+      expect(resetCall?.[1]?.idempotencyKey).toBeDefined();
+    });
+
+    // One-time TemporaryPasswordDialog is rendered
+    expect(screen.getByRole('heading', { name: 'Password sementara' })).toBeVisible();
+    expect(screen.getByDisplayValue(tempPassword)).toBeVisible();
+
+    // Close one-time dialog
+    const finishBtn = screen.getByRole('button', { name: 'Selesai' });
+    await user.click(finishBtn);
+
+    expect(screen.queryByDisplayValue(tempPassword)).not.toBeInTheDocument();
+    expect(screen.getByText(/Password berhasil di-reset/)).toBeVisible();
+
+    // History section renders password reset event
+    const historySection = screen.getByRole('region', { name: 'Riwayat perubahan karyawan' });
+    expect(within(historySection).getByText('Password di-reset')).toBeVisible();
+    expect(within(historySection).getByText('Sesi dicabut dan password sementara baru dibuat.')).toBeVisible();
+  });
 });

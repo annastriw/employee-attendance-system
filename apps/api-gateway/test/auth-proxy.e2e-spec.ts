@@ -201,12 +201,31 @@ describe('Auth Gateway HTTP contract', () => {
       expect(received.headers['x-actor-id']).toBeUndefined();
       expect(JSON.parse(received.body)).toEqual(body);
     });
+    it('forwards a reset-password idempotency key and drops cookies/signatures and spoofed actor headers', async () => {
+      const path = `/api/v1/employees/${id}/reset-password`;
+      await request(app.getHttpServer())
+        .post(path)
+        .set('Authorization', 'Bearer admin')
+        .set('Idempotency-Key', id)
+        .set('Cookie', 'secret=value')
+        .set('X-Service-Signature', 'forged')
+        .set('X-Actor-Id', 'forged')
+        .send({})
+        .expect(200);
+      expect(received.headers['idempotency-key']).toBe(id);
+      expect(received.headers.cookie).toBeUndefined();
+      expect(received.headers['x-service-signature']).toBeUndefined();
+      expect(received.headers['x-actor-id']).toBeUndefined();
+    });
     it('rejects missing key, invalid queries, invalid IDs, and internal Auth paths', async () => {
       await request(app.getHttpServer()).post(`/api/v1/employees/${id}/lifecycle`).send({}).expect(400);
+      await request(app.getHttpServer()).post(`/api/v1/employees/${id}/reset-password`).send({}).expect(400);
       await request(app.getHttpServer()).get(`/api/v1/employees/${id}/history?secret=true`).expect(400);
       await request(app.getHttpServer()).get(`/api/v1/employee-lifecycle/${id}?secret=true`).expect(400);
       await request(app.getHttpServer()).post(`/api/v1/employees/not-a-uuid/lifecycle`).send({}).expect(400);
+      await request(app.getHttpServer()).post(`/api/v1/employees/not-a-uuid/reset-password`).send({}).expect(400);
       await request(app.getHttpServer()).post(`/api/v1/internal/employee-lifecycle/${id}`).send({}).expect(404);
+      await request(app.getHttpServer()).post(`/api/v1/internal/employee-reset-password/${id}`).send({}).expect(404);
     });
   });
   it('preserves tokens/cookies and request ID, discards forged proxy/internal headers', async () => {

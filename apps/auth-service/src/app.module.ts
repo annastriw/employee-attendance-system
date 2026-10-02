@@ -7,6 +7,7 @@ import { DatabaseModule } from './database/database.module';
 import { HealthController } from './health/health.controller';
 import { AccountEmailChangesModule } from './email-changes/email-changes.controller';
 import { AccountLifecycleModule } from './lifecycle/lifecycle.controller';
+import { AccountResetPasswordModule } from './reset-password/reset-password.controller';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -15,7 +16,7 @@ import { AppService } from './app.service';
   imports: [
     DatabaseModule,
     AuthModule,
-    AccountProvisioningModule, AccountEmailChangesModule, AccountLifecycleModule,
+    AccountProvisioningModule, AccountEmailChangesModule, AccountLifecycleModule, AccountResetPasswordModule,
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 10 }]),
   ],
   controllers: [AppController, HealthController],

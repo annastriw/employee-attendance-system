@@ -10,10 +10,12 @@ import {
   type LifecycleOperation,
   type EmployeeHistoryRecord,
   type EmployeeHistoryPage,
+  type TemporaryCredential,
 } from '../lib/employees';
 import type { MasterRecord } from '../lib/master-data';
 import { EmployeeForm } from '../components/organisms/EmployeeForm';
 import { ConfirmDialog } from '../components/organisms/ConfirmDialog';
+import { TemporaryPasswordDialog } from '../components/organisms/TemporaryPasswordDialog';
 import { Notice } from '../components/molecules/Notice';
 import { StatusBadge } from '../components/molecules/StatusBadge';
 
@@ -32,6 +34,8 @@ function formatAction(action: string): string {
       return 'Status dinonaktifkan';
     case 'EMPLOYEE_LIFECYCLE_ARCHIVED':
       return 'Status diarsipkan';
+    case 'EMPLOYEE_PASSWORD_RESET':
+      return 'Password di-reset';
     default:
       return action;
   }
@@ -52,6 +56,13 @@ function formatHistoryDetails(item: EmployeeHistoryRecord) {
     return (
       <p className="dialog-text">
         Email diubah menjadi <strong>{String(item.after?.email ?? '')}</strong>
+      </p>
+    );
+  }
+  if (item.action === 'EMPLOYEE_PASSWORD_RESET') {
+    return (
+      <p className="dialog-text">
+        Sesi dicabut dan password sementara baru dibuat.
       </p>
     );
   }
@@ -99,6 +110,8 @@ export function EmployeeDetailPage({
   const [confirmLifecycle, setConfirmLifecycle] = useState<
     'ACTIVE' | 'INACTIVE' | 'ARCHIVED' | null
   >(null);
+  const [confirmReset, setConfirmReset] = useState(false);
+  const [resetCredential, setResetCredential] = useState<TemporaryCredential | null>(null);
 
   const [history, setHistory] = useState<EmployeeHistoryRecord[]>([]);
   const [historyTotal, setHistoryTotal] = useState(0);
@@ -408,6 +421,34 @@ export function EmployeeDetailPage({
     }
   }
 
+  async function executeResetPassword() {
+    if (!detail) return;
+    const key = crypto.randomUUID();
+    setBusy(true);
+    setNotice('');
+    setLifecycleError('');
+    try {
+      const res = await client.api<TemporaryCredential>(
+        'employees/' + employeeId + '/reset-password',
+        {
+          method: 'POST',
+          idempotencyKey: key,
+        },
+      );
+      setConfirmReset(false);
+      setResetCredential(res);
+      setNotice(
+        'Password berhasil di-reset. Sampaikan password sementara baru kepada karyawan.',
+      );
+      setReload((current) => current + 1);
+    } catch (reason) {
+      setConfirmReset(false);
+      setLifecycleError(handle(reason));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <div className="employee-detail">
       <div className="employee-detail-header">
@@ -444,6 +485,13 @@ export function EmployeeDetailPage({
                   <Button
                     variant="secondary"
                     isDisabled={busy || detail.hasPendingOperation}
+                    onPress={() => setConfirmReset(true)}
+                  >
+                    Reset password
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    isDisabled={busy || detail.hasPendingOperation}
                     onPress={() => setConfirmLifecycle('INACTIVE')}
                   >
                     Nonaktifkan
@@ -459,6 +507,13 @@ export function EmployeeDetailPage({
               )}
               {detail.status === 'INACTIVE' && (
                 <>
+                  <Button
+                    variant="secondary"
+                    isDisabled={busy || detail.hasPendingOperation}
+                    onPress={() => setConfirmReset(true)}
+                  >
+                    Reset password
+                  </Button>
                   <Button
                     variant="primary"
                     isDisabled={busy || detail.hasPendingOperation}
@@ -725,6 +780,28 @@ export function EmployeeDetailPage({
           </p>
         )}
       </ConfirmDialog>
+
+      <ConfirmDialog
+        open={confirmReset}
+        title="Reset password karyawan?"
+        confirmLabel="Reset password"
+        busy={busy}
+        error={lifecycleError}
+        onClose={() => setConfirmReset(false)}
+        onConfirm={() => void executeResetPassword()}
+      >
+        <p className="dialog-text">
+          Reset password untuk <strong>{detail?.name}</strong> ({detail?.email})? Semua sesi
+          karyawan akan dicabut seketika. Password sementara baru akan dibuat dan hanya ditampilkan sekali.
+        </p>
+      </ConfirmDialog>
+
+      {resetCredential && (
+        <TemporaryPasswordDialog
+          credential={resetCredential}
+          onClose={() => setResetCredential(null)}
+        />
+      )}
     </div>
   );
 }

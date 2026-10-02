@@ -167,3 +167,6 @@ Gunakan karyawan uji T12/T13 dengan password yang sudah diganti. Jalankan stack 
 6. **Responsivitas & Tema**:
    - Periksa halaman detail dan seluruh dialog konfirmasi pada lebar layar 320 px (ponsel) serta mode terang dan gelap.
    - Seluruh teks terbaca jelas, tombol aksi dapat ditekan tanpa terpotong, dan tidak ada overflow horizontal pada layout.
+
+Hasil diterima: pengguna menyatakan sudah lolos pada 2026-10-02. Putaran B dan seluruh T14 ditutup lengkap; beralih ke T15 (reset password).
+
