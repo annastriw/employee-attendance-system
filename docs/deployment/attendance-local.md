@@ -1,6 +1,6 @@
 # Attendance Portal lokal
 
-## Persiapan absensi T21/T22
+## Persiapan absensi T21–T23
 
 Dari root proyek di PowerShell, gunakan konfigurasi MySQL, Auth, Employee dan AIStor/Media yang sudah dibuat. Ikuti [MySQL](mysql-local.md), [Auth](auth-local.md), [HR/Employee](hr-local.md), [Media](media-local.md) dan [Gateway](gateway-local.md). Jangan salin kredensial ke dokumentasi atau Git.
 
@@ -63,6 +63,8 @@ Alur: Hari ini → Check-in → Buka kamera → satu wajah dan lokasi aktif → 
 Setelah check-in, Hari ini menawarkan Checkout. Capture memakai foto baru dengan purpose CHECK_OUT dan membawa dailyRecordId catatan tersebut. Pada hari kerja reguler sebelum 17.00 isi alasan pulang awal; hasil resmi menampilkan waktu checkout, lalu Hari ini menampilkan kedua waktu dan Absensi selesai. Checkout baru tanggal lampau ditolak; tidak ada checkout otomatis atau penetapan lembur.
 
 Jangan kirim foto, koordinat, password, token, secret, atau berkas lisensi ke repo/laporan. Catat nomor langkah lulus/gagal dan pesan aman. Hasil sintetis otomatis tidak menggantikan penerimaan kamera/GPS pada perangkat nyata.
+
+Untuk HRD, buka Absensi atau Absensi dihapus pada HR Portal; dari profil karyawan tersedia Lihat absensi. Detail → Hapus absensi → alasan wajib → konfirmasi satu hari. Pemulihan mengembalikan data asli. Jika hasil belum pasti atau versi berubah, Muat data terbaru sebelum membuat konfirmasi baru. Ikuti [checklist T23](../sdd/attendance-lifecycle.md#checklist-manual-pengguna); kamera/GPS/checkout manual T20–T22 tetap perlu diterima terpisah.
 
 ## Bukti
 

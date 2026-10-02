@@ -1,3 +1,4 @@
+import { AttendanceAdminProxyController } from './attendance-admin-proxy.controller';
 import {
   MediaProxyController,
   MediaUploadGuard,
@@ -29,6 +30,7 @@ import { AttendanceProxyController } from './attendance-proxy.controller';
     EmployeeLifecycleProxyController,
     HolidaysProxyController,
     AttendanceProxyController,
+    AttendanceAdminProxyController,
     MediaProxyController,
   ],
   providers: [AppService, GatewayConfig, AuthProxyService, MediaUploadGuard],

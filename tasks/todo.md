@@ -189,6 +189,7 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 - [ ] Selesai
 - Acceptance: Alasan/audit wajib, seluruh hari, tidak bisa absen ulang, restore data asli.
 - Verification: Integration test delete/retry/restore/concurrency dan UI HRD.
+- Implementasi/verifikasi teknis 2026-10-03: [lifecycle absensi](../docs/sdd/attendance-lifecycle.md), 21 regresi check-in/checkout dan lima skenario T23 terverifikasi dalam run serial; delapan unit Gateway, 28 frontend terkait dan 12 visual lulus. Typecheck/lint/build package terkait lulus. Checklist manual HRD/backend browser masih pending; belum ditutup penuh.
 - Dependencies: 22
 - Target: apps/attendance-service/, apps/hr-web/
 

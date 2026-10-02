@@ -457,6 +457,7 @@ export function EmployeeDetailPage({
           Kembali
         </Button>
         <h2>Profil karyawan</h2>
+        <a className="attendance-history-link" href={"#absensi?employeeId=" + employeeId}>Lihat absensi</a>
       </div>
 
       {loadError ? (
