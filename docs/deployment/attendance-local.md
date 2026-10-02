@@ -64,7 +64,7 @@ Setelah check-in, Hari ini menawarkan Checkout. Capture memakai foto baru dengan
 
 Jangan kirim foto, koordinat, password, token, secret, atau berkas lisensi ke repo/laporan. Catat nomor langkah lulus/gagal dan pesan aman. Hasil sintetis otomatis tidak menggantikan penerimaan kamera/GPS pada perangkat nyata.
 
-Untuk HRD, buka Absensi atau Absensi dihapus pada HR Portal; dari profil karyawan tersedia Lihat absensi. Detail → Hapus absensi → alasan wajib → konfirmasi satu hari. Pemulihan mengembalikan data asli. Jika hasil belum pasti atau versi berubah, Muat data terbaru sebelum membuat konfirmasi baru. Ikuti [checklist T23](../sdd/attendance-lifecycle.md#checklist-manual-pengguna); kamera/GPS/checkout manual T20–T22 tetap perlu diterima terpisah.
+Untuk HRD, buka Absensi atau Absensi dihapus pada HR Portal; dari profil karyawan tersedia Lihat absensi. Detail → Hapus absensi → alasan wajib → konfirmasi satu hari. Pemulihan mengembalikan data asli. Jika hasil belum pasti atau versi berubah, Muat data terbaru sebelum membuat konfirmasi baru. Ikuti [checklist T23](../sdd/attendance-lifecycle.md#checklist-manual-pengguna); kamera/GPS/checkout manual T20–T22 diterima pengguna pada 2026-10-03.
 
 ## Riwayat pribadi T24
 
@@ -74,4 +74,6 @@ Catatan yang dihapus HRD tetap terlihat dengan waktu asli serta alasan/waktu pen
 
 ## Bukti
 
-T13 login/password/logout diterima pengguna pada 2026-10-02; [spesifikasi login](../sdd/employee-auth-flow.md). T20 capture lulus pemeriksaan teknis dengan checklist perangkat masih pending. T21 bukti API/MySQL/AIStor, frontend, visual dan status manual ada di [check-in](../sdd/attendance-checkin.md).
+T13 login/password/logout diterima pengguna pada 2026-10-02; [spesifikasi login](../sdd/employee-auth-flow.md). T20–T24 diterima manual oleh pengguna pada 2026-10-03 setelah konfirmasi seluruh alur aman; checklist pada masing-masing module spec sudah dicentang. Tidak ada hasil Playwright atau tes perangkat baru yang diklaim pada pembaruan dokumentasi ini. T21 bukti API/MySQL/AIStor, frontend, visual dan status manual ada di [check-in](../sdd/attendance-checkin.md).
+
+Ringkasan penerimaan dan bagian yang belum selesai tersedia pada [checklist sampai T24](../../tasks/todo.md#penerimaan-manual-sampai-t24--2026-10-03). T25 monitoring/rekap dan T26 peta Leaflet belum tersedia; gunakan checklist masing-masing tahap setelah implementasinya selesai.

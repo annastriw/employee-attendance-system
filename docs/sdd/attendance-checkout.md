@@ -1,5 +1,7 @@
 # T22 — Checkout ujung ke ujung
 
+Status manual: diterima pengguna pada 2026-10-03 (Asia/Jakarta). Pengguna mengonfirmasi seluruh pengujian manual sampai T24 aman; checklist tujuh langkah di bawah dicentang berdasarkan laporan tersebut, bukan pengujian ulang agen atau hasil Playwright. Rincian perangkat/browser dan angka benchmark tidak diberikan. T22 ditutup penuh; catatan pending pada checkpoint lama merupakan status historis sebelum penerimaan ini.
+
 ## Kontrak dan acceptance
 
 Mengikuti baseline, T16–T21 dan E03–E06. POST /api/v1/me/attendance/check-out memakai JWT karyawan, Idempotency-Key UUID v4, payload foto/lokasi T21 ditambah dailyRecordId UUID v4. ID catatan target mencegah request tertunda tersambung ke hari lain; employeeId tetap dari sesi. Foto READY privat milik karyawan dengan purpose CHECK_OUT, berbeda dari foto check-in. Lokasi maksimal 60 detik, toleransi future 5 detik; waktu resmi dari server.
@@ -22,15 +24,15 @@ Hari ini menampilkan dua waktu dan satu tindakan berikutnya: Check-in, Checkout,
 - [x] MySQL/AIStor nyata: tanpa check-in, owner, soft delete, foto scope/freshness, early boundary, same-day cutoff, mixed holiday/weekend, unique/concurrency, recovery/binding/revokasi.
 - [x] Frontend alur checkout, alasan, READY reuse, pending payload/target/key, validasi response dan refetch.
 - [x] Typecheck/lint/build terkait dan visual 320/1440 terang/gelap.
-- [ ] Manual perangkat/API browser nyata.
+- [x] Manual perangkat/API browser nyata. Diterima pengguna 2026-10-03.
 
-1. Login karyawan siap dan check-in hari ini; Hari ini menunjukkan waktu serta tombol Checkout.
-2. Checkout meminta foto baru dan lokasi aktif; pada hari kerja reguler sebelum 17.00 isi alasan pulang awal, blank ditolak; weekend/libur tidak mewajibkan alasan.
-3. Kirim lalu lihat waktu resmi/status; kembali Hari ini menampilkan kedua waktu dan Absensi selesai.
-4. Reload/kirim ulang tidak menggandakan event. Foto check-in, catatan karyawan lain/terhapus atau lokasi stale ditolak.
-5. Putus koneksi saat submit lalu cek hasil/retry key sama; target/foto/alasan tidak berubah sebelum hasil jelas.
-6. Checkout hari lampau tidak ditawarkan/diterima. Periksa weekend/libur tanpa early, serta sesi lama setelah nonaktif/reset ditolak.
-7. Periksa desktop/ponsel, 320/1440 terang/gelap dan fokus keyboard.
+- [x] 1. Login karyawan siap dan check-in hari ini; Hari ini menunjukkan waktu serta tombol Checkout.
+- [x] 2. Checkout meminta foto baru dan lokasi aktif; pada hari kerja reguler sebelum 17.00 isi alasan pulang awal, blank ditolak; weekend/libur tidak mewajibkan alasan.
+- [x] 3. Kirim lalu lihat waktu resmi/status; kembali Hari ini menampilkan kedua waktu dan Absensi selesai.
+- [x] 4. Reload/kirim ulang tidak menggandakan event. Foto check-in, catatan karyawan lain/terhapus atau lokasi stale ditolak.
+- [x] 5. Putus koneksi saat submit lalu cek hasil/retry key sama; target/foto/alasan tidak berubah sebelum hasil jelas.
+- [x] 6. Checkout hari lampau tidak ditawarkan/diterima. Periksa weekend/libur tanpa early, serta sesi lama setelah nonaktif/reset ditolak.
+- [x] 7. Periksa desktop/ponsel, 320/1440 terang/gelap dan fokus keyboard.
 
 Acuan: [baseline](../requirements/baseline.md), [check-in](attendance-checkin.md), [UI/UX](frontend-ui-ux.md), [lokal](../deployment/attendance-local.md). Riwayat/monitoring/soft delete UI dan deployment tetap task berikut.
 

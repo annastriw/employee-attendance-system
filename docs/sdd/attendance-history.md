@@ -1,5 +1,7 @@
 # T24 — Riwayat pribadi karyawan
 
+Status manual: diterima pengguna pada 2026-10-03 (Asia/Jakarta). Pengguna mengonfirmasi seluruh pengujian manual sampai T24 aman; checklist tujuh langkah di bawah dicentang berdasarkan laporan tersebut, bukan pengujian ulang agen atau hasil Playwright. Rincian perangkat/browser dan angka benchmark tidak diberikan. T24 ditutup penuh; catatan pending pada checkpoint lama merupakan status historis sebelum penerimaan ini.
+
 ## Scope dan API
 
 E07 daftar dan E08 detail untuk pemilik sesi EMPLOYEE saja. Auth memverifikasi sesi/revokasi dan kewajiban ganti password setiap request. Tanpa employeeId yang dapat dikirim client; ID pemilik selalu dari sesi. Tidak membuat baris missing atau mengubah bukti absensi.
@@ -22,7 +24,7 @@ UI baca ulang eksplisit tanpa data lama terlihat sesudah filter/error; batalkan 
 - [x] Foto privat scoped kedua event, 404 silang pemilik/event, 409 deleted, URL/bukti terjaga sesudah restore.
 - [x] Frontend: filter/kembali/pagination, detail deleted tanpa foto, foto lazy/TTL/error, sesi berakhir dan data lama tidak tampil.
 - [x] Typecheck/lint/build package terkait; visual halaman berubah 320/1440 terang/gelap dan review HeroUI/browser MCP.
-- [ ] Checklist browser backend nyata diterima pengguna.
+- [x] Checklist browser backend nyata diterima pengguna. Diterima pengguna 2026-10-03.
 
 ## Bukti teknis — 2026-10-03
 
@@ -34,10 +36,10 @@ Halaman riwayat memiliki chunk terpisah (sekitar 14,57 kB sebelum gzip), tanpa m
 
 ## Checklist manual pengguna
 
-1. Login karyawan, Hari ini → Riwayat; filter tanggal, pagination dan buka satu tanggal. Kembali mempertahankan periode/page.
-2. Detail menampilkan kedua waktu WIB, alasan absensi, snapshot departemen/jabatan serta koordinat/accuracy/waktu lokasi.
-3. Pilih Lihat foto pada masing-masing event. Foto privat terbuka, hilang setelah 60 detik dan dapat dimuat kembali; error foto tidak menghilangkan detail.
-4. HRD menghapus tanggal tersebut dengan alasan; muat ulang riwayat/detail karyawan. Label Dihapus HRD, waktu asli, waktu/alasan penghapusan terlihat dan tidak ada foto/tombol foto.
-5. HRD memulihkan catatan; muat ulang riwayat, data asli kembali dan foto dapat diminta kembali.
-6. Uji dua akun: ID/detail/event akun lain ditolak 404. Setelah logout/reset/nonaktif, akses sesi lama ditolak.
-7. Uji keyboard dan mobile, periode tanpa data, koneksi terputus lalu Muat ulang. Manual kamera/GPS T20–T23 tetap terpisah.
+- [x] 1. Login karyawan, Hari ini → Riwayat; filter tanggal, pagination dan buka satu tanggal. Kembali mempertahankan periode/page.
+- [x] 2. Detail menampilkan kedua waktu WIB, alasan absensi, snapshot departemen/jabatan serta koordinat/accuracy/waktu lokasi.
+- [x] 3. Pilih Lihat foto pada masing-masing event. Foto privat terbuka, hilang setelah 60 detik dan dapat dimuat kembali; error foto tidak menghilangkan detail.
+- [x] 4. HRD menghapus tanggal tersebut dengan alasan; muat ulang riwayat/detail karyawan. Label Dihapus HRD, waktu asli, waktu/alasan penghapusan terlihat dan tidak ada foto/tombol foto.
+- [x] 5. HRD memulihkan catatan; muat ulang riwayat, data asli kembali dan foto dapat diminta kembali.
+- [x] 6. Uji dua akun: ID/detail/event akun lain ditolak 404. Setelah logout/reset/nonaktif, akses sesi lama ditolak.
+- [x] 7. Uji keyboard dan mobile, periode tanpa data, koneksi terputus lalu Muat ulang. Manual kamera/GPS T20–T23 tetap terpisah.

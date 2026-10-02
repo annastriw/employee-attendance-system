@@ -5,7 +5,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 ## Snapshot terakhir
 
 - Tanggal: 2026-10-03 (Asia/Jakarta), akhir increment T24. HEAD diverifikasi dengan `git log`; jangan anggap hash di sini sebagai HEAD.
-- Tahap: T08-T17 selesai. T15 (reset password karyawan) lulus manual peramban langkah 1–10 dan ditutup penuh pada 2026-10-02. T16 (aturan waktu dan eligibility absensi) selesai diimplementasikan end-to-end. T17 (kalender libur HRD) selesai diimplementasikan end-to-end; tes unit/kontrak, integrasi MySQL nyata, dan UI component tests 100% lulus; spesifikasi di docs/sdd/attendance-holidays.md. T18 diterima pengguna setelah konfirmasi semua alur uji berjalan pada 2026-10-02. T19 foto privat backend selesai; T20 capture produksi diimplementasikan dan lulus teknis, checklist perangkat/API nyata masih pending. T21 check-in diimplementasikan dan verifikasi teknis lulus; checklist browser/perangkat T20/T21 masih pending. T22 checkout diimplementasikan dan lulus teknis; manual T20/T21/T22 tetap pending. T23 soft delete/restore absensi diimplementasikan dan lulus teknis; manual HRD/browser backend nyata masih pending. T24 riwayat pribadi diimplementasikan dan lulus teknis; manual browser/API nyata tetap pending. Increment berikut T25 monitoring dan rekap sesuai dependency plan. T09c tetap menjadi acuan tema.
+- Tahap: fitur T08–T24 selesai dan diterima. Pada 2026-10-03 pengguna mengonfirmasi seluruh manual sampai T24 aman; T20–T24 dan checkpoint T21 ditutup penuh berdasarkan laporan pengguna. Bukti otomatis existing tetap terpisah; tidak ada tes aplikasi baru pada pembaruan acceptance ini. Fondasi T01–T07/UX01–UX02 masih perlu rekonsiliasi status lama dan isolasi test; T25–T31 tetap belum selesai. Increment implementasi berikut T25 monitoring dan rekap. T09c tetap menjadi acuan tema.
 - Commit sesi ini pada dev (lama ke baru): 93488ae, f423e47, aa34d48, 1b7b05d, e4a6782, 83537f1, 112d7fa, a485480 (lihat git log), lalu:
   - c2f98fe docs: switch frontend theme to Linear-style zinc + emerald, Geist, Phosphor, light/dark
   - 36a24e4 feat(ui): Linear-style redesign with zinc + emerald, Geist, Phosphor and light/dark
@@ -29,13 +29,19 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T24 — Riwayat pribadi | Codex aktif | Attendance/history, Gateway, Attendance Web, test, docs/sdd/attendance-history.md | T23 teknis tersedia; manual T20–T23 tetap pending | Backend 3000–3004; portal 5173/5174; MySQL 3307, AIStor 9000/9001 | Implementasi/verifikasi teknis lulus; manual T20–T24 pending, siap lanjut T25 serial |
+| Penutupan acceptance T20–T24 | Codex | tasks/todo.md, progress dan lima module specs absensi + panduan lokal | Konfirmasi manual pengguna 2026-10-03 | Dokumentasi saja; tidak mengubah proses/port | Diterima, checklist dicentang; belum ada implementasi T25 aktif |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 
 ## Perubahan yang belum di-commit
 
 Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .windsurf/ dan skills-lock.json adalah berkas lokal; jangan di-stage, dihapus atau diubah tanpa scope jelas. Rahasia dan data pribadi tetap ignored.
+
+## Penutupan manual sampai T24 — 2026-10-03
+
+- Pengguna menyatakan seluruh pengujian manual sampai T24 aman. T20–T24, 35 langkah manual pada lima module specs dan checkpoint T21 dicentang; UX03/UX04 diselaraskan dengan task fitur yang telah diterima. Ini penerimaan pengguna, bukan run otomatis baru atau pengujian ulang agen. Perangkat/browser/benchmark rinci tidak diberikan.
+- [Ringkasan checklist](todo.md#penerimaan-manual-sampai-t24--2026-10-03) menjadi status acceptance terbaru; catatan pending dalam checkpoint lama di bawah merupakan status historis sebelum konfirmasi ini. Tidak menyatakan T01–T07/UX01–UX02, T25–T31 atau deployment selesai.
+- Perubahan hanya dokumentasi, diverifikasi isi/tautan/diff dan di-commit/push ke dev setelah review. Runtime tidak dihentikan/dijalankan ulang. Jangan memakai PID historis sebagai status live. Tidak ada task coding lain aktif; berikut T25 serial sesuai dependency, serta rekonsiliasi fondasi sebelum rilis.
 
 ## Checkpoint T24 — 2026-10-03
 

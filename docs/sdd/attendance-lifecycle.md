@@ -1,5 +1,7 @@
 # T23 — Penghapusan dan pemulihan absensi
 
+Status manual: diterima pengguna pada 2026-10-03 (Asia/Jakarta). Pengguna mengonfirmasi seluruh pengujian manual sampai T24 aman; checklist tujuh langkah di bawah dicentang berdasarkan laporan tersebut, bukan pengujian ulang agen atau hasil Playwright. Rincian perangkat/browser dan angka benchmark tidak diberikan. T23 ditutup penuh; catatan pending pada checkpoint lama merupakan status historis sebelum penerimaan ini.
+
 ## Scope dan kontrak
 HRD menghapus satu catatan harian beserta kedua event secara logis, dengan alasan 1–500 karakter setelah trim. Identitas, tanggal dan dampak seluruh hari tampil pada konfirmasi. Catatan, foto privat, snapshot, outbox dan kunci unik tetap tersimpan. Pemulihan tidak mengaktifkan karyawan arsip dan tidak mengubah data bukti. Tidak ada hard delete atau edit bukti.
 
@@ -25,7 +27,7 @@ Navigasi Absensi dan Absensi dihapus; daftar ringkas nama, tanggal, waktu check-
 - [x] Retry/stale/concurrency tidak menggandakan transisi; delete tidak membuka check-in/checkout.
 - [x] Restore mempertahankan data asli; riwayat karyawan arsip dapat dibaca.
 - [x] API nyata MySQL/AIStor, frontend behavior, typecheck/lint/build, visual halaman berubah 320/1440 terang/gelap.
-- [ ] Manual browser melalui backend nyata.
+- [x] Manual browser melalui backend nyata. Diterima pengguna 2026-10-03.
 
 ## Verifikasi teknis 2026-10-03
 - RED: empat skenario integrasi gagal 404 sebelum endpoint tersedia; enam tes UI gagal sebelum perilaku diimplementasikan.
@@ -36,13 +38,13 @@ Navigasi Absensi dan Absensi dihapus; daftar ringkas nama, tanggal, waktu check-
 - Manual HRD/browser backend nyata checklist berikut masih pending, demikian pula penerimaan perangkat T20–T22. Tidak mengklaim deployment atau penerimaan manual.
 
 ## Checklist manual pengguna
-1. Login HRD, buka Absensi; filter tanggal/karyawan dan buka detail yang memiliki check-in/checkout.
-2. Pilih Hapus: nama/tanggal terlihat, alasan kosong ditolak; batalkan sekali, pastikan data tetap aktif.
-3. Isi alasan dan konfirmasi: pindah ke Absensi dihapus, alasan/waktu terlihat, kedua waktu asli tetap.
-4. Pada portal karyawan hari yang sama, status terhapus terlihat dan check-in/checkout baru ditolak.
-5. Login HRD, pulihkan dari detail terhapus: kedua waktu/alasan/bukti asli kembali, audit penghapusan/pemulihan tercatat.
-6. Dua tab HRD membuka versi sama; ubah pada tab pertama, konfirmasi tab kedua ditolak lalu muat terbaru. Simulasikan koneksi hilang sesudah submit; jangan kirim ulang sebelum memuat terbaru.
-7. Buka riwayat karyawan arsip; akses karyawan langsung ke API HRD ditolak. Uji keyboard dan mobile.
+- [x] 1. Login HRD, buka Absensi; filter tanggal/karyawan dan buka detail yang memiliki check-in/checkout.
+- [x] 2. Pilih Hapus: nama/tanggal terlihat, alasan kosong ditolak; batalkan sekali, pastikan data tetap aktif.
+- [x] 3. Isi alasan dan konfirmasi: pindah ke Absensi dihapus, alasan/waktu terlihat, kedua waktu asli tetap.
+- [x] 4. Pada portal karyawan hari yang sama, status terhapus terlihat dan check-in/checkout baru ditolak.
+- [x] 5. Login HRD, pulihkan dari detail terhapus: kedua waktu/alasan/bukti asli kembali, audit penghapusan/pemulihan tercatat.
+- [x] 6. Dua tab HRD membuka versi sama; ubah pada tab pertama, konfirmasi tab kedua ditolak lalu muat terbaru. Simulasikan koneksi hilang sesudah submit; jangan kirim ulang sebelum memuat terbaru.
+- [x] 7. Buka riwayat karyawan arsip; akses karyawan langsung ke API HRD ditolak. Uji keyboard dan mobile.
 
 ## Koreksi CORS browser — 2026-10-03
 
