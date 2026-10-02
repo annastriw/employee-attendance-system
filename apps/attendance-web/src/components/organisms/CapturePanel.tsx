@@ -1,4 +1,5 @@
-import { Alert, Button, Spinner } from "@heroui/react";
+import { useEffect, useRef, useState } from "react";
+import { Alert, Button, Spinner, Label, TextArea } from "@heroui/react";
 import {
   ArrowLeft,
   Camera,
@@ -12,18 +13,25 @@ import { PortalBrand } from "@attendance/ui";
 import type { AuthClient } from "../../lib/auth-client";
 import { useCapture } from "../../features/capture/use-capture";
 import { usePhotoUpload } from "../../features/capture/use-photo-upload";
-import type { PhotoPurpose } from "../../features/capture/photo-upload";
+import {
+  prepareEvidence,
+  type PhotoPurpose,
+} from "../../features/capture/photo-upload";
+import { useCheckIn } from "../../features/checkin/use-check-in";
+import { clockLabel } from "../../lib/attendance-client";
 import "./capture-panel.css";
 
 interface Props {
   client: AuthClient;
   purpose: PhotoPurpose;
+  reasonRequired?: boolean;
   onBack: () => void;
   onSessionExpired: () => void;
 }
 export function CapturePanel({
   client,
   purpose,
+  reasonRequired = false,
   onBack,
   onSessionExpired,
 }: Props) {
@@ -49,9 +57,52 @@ export function CapturePanel({
     purpose,
     onSessionExpired,
   );
+
+  const checkIn = useCheckIn(client, onSessionExpired);
+  const [reason, setReason] = useState("");
+  const [sending, setSending] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const reasonField = useRef<HTMLTextAreaElement>(null);
+  const sendLock = useRef(false);
+  const needsReason = reasonRequired || checkIn.code === "REASON_REQUIRED";
+  useEffect(() => {
+    if (checkIn.code === "REASON_REQUIRED") reasonField.current?.focus();
+  }, [checkIn.code]);
+  async function send() {
+    if (!photo || sendLock.current || checkIn.pending || checkIn.record) return;
+    if (needsReason && !reason.trim()) {
+      setSubmitError("Isi alasan terlambat.");
+      reasonField.current?.focus();
+      return;
+    }
+    sendLock.current = true;
+    setSending(true);
+    setSubmitError("");
+    try {
+      const ready = await save();
+      if (!ready) return;
+      const evidence = prepareEvidence(photo, ready);
+      const payload = {
+        photoObjectId: evidence.photoObjectId,
+        clientCapturedAt: evidence.clientCapturedAt,
+        captureMethod: evidence.captureMethod,
+        location: evidence.location,
+        ...(reason.trim() ? { reason: reason.trim() } : {}),
+      };
+      await checkIn.submit(payload);
+    } catch (failure) {
+      setSubmitError(
+        failure instanceof Error ? failure.message : "Periksa foto dan lokasi.",
+      );
+    } finally {
+      sendLock.current = false;
+      setSending(false);
+    }
+  }
+
   const preparing = phase === "model" || phase === "camera";
   const running = phase === "running";
-  const busy = !!upload?.busy;
+  const busy = sending || !!upload?.busy || checkIn.busy;
   const saved = !!upload?.ready;
   const hint =
     frame?.status === "multiple"
@@ -71,6 +122,36 @@ export function CapturePanel({
       ? "Lokasi siap"
       : locationError ||
         (location ? "Lokasi perlu diperbarui." : "Lokasi belum tersedia.");
+
+  if (checkIn.record)
+    return (
+      <main className="capture-page">
+        <header className="capture-header">
+          <PortalBrand
+            name="Attendance Portal"
+            icon={<Clock size={16} weight="bold" />}
+          />
+        </header>
+        <div className="capture-success" role="status">
+          <CheckCircle size={32} aria-hidden="true" />
+          <h1>Check-in tercatat</h1>
+          <p className="capture-success-time">
+            {clockLabel(checkIn.record.checkIn.eventTime)} <span>WIB</span>
+          </p>
+          <p>
+            {checkIn.record.checkIn.isOutsideSchedule
+              ? "Di luar jadwal"
+              : checkIn.record.checkIn.isLate
+                ? "Terlambat"
+                : "Tepat waktu"}
+          </p>
+        </div>
+        <Button variant="primary" fullWidth onPress={onBack}>
+          Lihat hari ini
+        </Button>
+      </main>
+    );
+
   return (
     <main className="capture-page">
       <header className="capture-header">
@@ -82,7 +163,7 @@ export function CapturePanel({
           variant="ghost"
           isIconOnly
           aria-label="Kembali ke beranda"
-          isDisabled={busy}
+          isDisabled={busy || checkIn.pending}
           onPress={() => {
             stop();
             onBack();
@@ -92,11 +173,19 @@ export function CapturePanel({
         </Button>
       </header>
       <div className="capture-title">
-        <h1>{purpose === "CHECK_IN" ? "Foto check-in" : "Foto checkout"}</h1>
+        <h1>
+          {checkIn.pending
+            ? "Periksa check-in"
+            : purpose === "CHECK_IN"
+              ? "Foto check-in"
+              : "Foto checkout"}
+        </h1>
         <p>
-          {photo
-            ? "Periksa foto dan lokasi Anda."
-            : "Foto otomatis setelah Anda berkedip."}
+          {checkIn.pending
+            ? "Periksa hasil pengiriman sebelumnya."
+            : photo
+              ? "Periksa foto dan lokasi Anda."
+              : "Foto otomatis setelah Anda berkedip."}
         </p>
       </div>
       <section className="capture-camera" aria-label="Kamera dan preview foto">
@@ -161,7 +250,7 @@ export function CapturePanel({
           <Button
             variant="ghost"
             size="sm"
-            isDisabled={locationBusy || busy}
+            isDisabled={locationBusy || busy || checkIn.pending}
             onPress={() => {
               void locate();
             }}
@@ -170,6 +259,40 @@ export function CapturePanel({
           </Button>
         </section>
       )}
+
+      {photo && (needsReason || reason) && (
+        <div className="capture-reason">
+          <Label htmlFor="checkin-reason" isRequired={needsReason}>
+            Alasan terlambat
+          </Label>
+          <TextArea
+            id="checkin-reason"
+            ref={reasonField}
+            fullWidth
+            rows={3}
+            maxLength={500}
+            required={needsReason}
+            disabled={busy || checkIn.pending}
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="Tuliskan alasan singkat"
+          />
+        </div>
+      )}
+      {(checkIn.error || submitError) && (
+        <Alert status="danger" role="alert">
+          <Alert.Indicator>
+            <WarningCircle size={20} aria-hidden="true" />
+          </Alert.Indicator>
+          <Alert.Content>
+            <Alert.Title>Periksa check-in</Alert.Title>
+            <Alert.Description>
+              {checkIn.error || submitError}
+            </Alert.Description>
+          </Alert.Content>
+        </Alert>
+      )}
+
       {upload?.error && (
         <Alert status="danger" role="alert">
           <Alert.Indicator>
@@ -188,42 +311,66 @@ export function CapturePanel({
             <strong>
               {locationFresh ? "Foto siap" : "Foto tersimpan; perbarui lokasi"}
             </strong>
-            <p>Absensi belum dikirim.</p>
+            <p>
+              {checkIn.pending
+                ? "Memeriksa hasil check-in."
+                : "Siap dikirim bersama lokasi."}
+            </p>
           </div>
         </div>
       )}
+
       <div className="capture-actions">
-        {photo ? (
+        {checkIn.pending ? (
           <>
             <Button
               variant="outline"
               isDisabled={busy}
               onPress={() => {
+                void checkIn.check();
+              }}
+            >
+              Cek hasil
+            </Button>
+            <Button
+              variant="primary"
+              isDisabled={busy}
+              isPending={busy}
+              onPress={() => {
+                void checkIn.submit();
+              }}
+            >
+              Kirim ulang
+            </Button>
+          </>
+        ) : photo ? (
+          <>
+            <Button
+              variant="outline"
+              isDisabled={busy}
+              onPress={() => {
+                setSubmitError("");
                 void start();
               }}
             >
               Ambil ulang
             </Button>
-            {!saved && (
-              <Button
-                variant="primary"
-                isPending={busy}
-                isDisabled={busy || !locationFresh || locationBusy}
-                onPress={() => {
-                  void save();
-                }}
-              >
-                {busy ? (
-                  <>
-                    <Spinner color="current" size="sm" /> Menyimpan…
-                  </>
-                ) : upload?.error ? (
-                  "Coba simpan lagi"
-                ) : (
-                  "Simpan foto"
-                )}
-              </Button>
-            )}
+            <Button
+              variant="primary"
+              isPending={busy}
+              isDisabled={busy || !locationFresh || locationBusy}
+              onPress={() => {
+                void send();
+              }}
+            >
+              {busy ? (
+                <>
+                  <Spinner color="current" size="sm" /> Mengirim…
+                </>
+              ) : (
+                "Kirim check-in"
+              )}
+            </Button>
           </>
         ) : running || preparing ? (
           <>
@@ -252,7 +399,8 @@ export function CapturePanel({
           </Button>
         )}
       </div>
-      {!photo && !running && !preparing && (
+
+      {!checkIn.pending && !photo && !running && !preparing && (
         <p className="capture-note">
           Izinkan kamera dan lokasi untuk melanjutkan.
         </p>

@@ -66,9 +66,9 @@ Dokumen ini merekam keputusan pengguna dalam sesi perencanaan. Dokumen rancangan
 - UUID CHAR(36), InnoDB utf8mb4; DATETIME(3) UTC, attendance_date DATE WIB.
 - Auth: auth_accounts, auth_sessions, auth_audit_logs; hash refresh token, pemeriksaan status sesi untuk membatalkan JWT lama.
 - Employee: emp_employees, emp_departments, emp_positions, emp_employee_history, emp_audit_logs.
-- Attendance: att_work_policies, att_holidays, att_daily_records, att_events, att_idempotency_requests, att_audit_logs.
+- Attendance: att_work_policies, att_holidays, att_daily_records, att_events, att_idempotency_requests, att_audit_logs, att_outbox.
 - Media: media_objects, media_audit_logs; status PENDING/READY/FAILED, bucket/key unik, checksum, pemilik/purpose.
-- UNIQUE(employee_id,attendance_date) tetap untuk soft delete; UNIQUE(daily_record_id,event_type).
+- UNIQUE(employee_id,attendance_date) tetap untuk soft delete; UNIQUE(daily_record_id,event_type) dan UNIQUE(photo_object_id) pada event. Binding foto/event unik, intent ber-state dan outbox durable mengikuti [kontrak check-in T21](../sdd/attendance-checkin.md).
 - Event snapshot jadwal/hari libur, foto, koordinat, akurasi, waktu lokasi, metode capture, is_late/is_early_departure dan reason.
 - Profil departemen/jabatan snapshot di catatan harian; riwayat karyawan untuk eligibility historis.
 - Missing attendance dihitung, bukan baris palsu. Absensi terhapus bukan missing.

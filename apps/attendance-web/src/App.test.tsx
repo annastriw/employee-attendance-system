@@ -19,7 +19,26 @@ const employee: EmployeeUser = {
 function client(): AuthClient {
   return {
     restore: vi.fn().mockResolvedValue(null),
-    api: vi.fn().mockResolvedValue({}),
+    api: vi.fn().mockResolvedValue({
+      data: {
+        employeeName: "Synthetic Employee",
+        attendanceDate: "2026-10-02",
+        eligible: true,
+        ineligibilityMessage: null,
+        schedule: {
+          type: "REGULAR_WORKDAY",
+          start: "08:00:00",
+          end: "17:00:00",
+        },
+        reasonRequired: false,
+        status: "NOT_CHECKED_IN",
+        record: null,
+      },
+      meta: {
+        requestId: "visual",
+        serverTime: "2026-10-02T07:00:00.000+07:00",
+      },
+    }),
     currentUser: vi.fn().mockReturnValue(null),
     login: vi.fn().mockResolvedValue(employee),
     changePassword: vi.fn().mockResolvedValue(undefined),
@@ -32,12 +51,12 @@ beforeEach(() => {
 });
 
 describe("Employee portal authentication journey", () => {
-  it("forces a password change, requires re-login, then shows an honest home and logout", async () => {
+  it("forces a password change, requires re-login, then shows actual attendance data and logout", async () => {
     const auth = client();
     vi.mocked(auth.login)
       .mockResolvedValueOnce(employee)
       .mockResolvedValueOnce({ ...employee, mustChangePassword: false });
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     render(<App client={auth} />);
 
     await screen.findByRole("heading", { name: "Masuk" });
@@ -47,7 +66,7 @@ describe("Employee portal authentication journey", () => {
     await screen.findByRole("heading", { name: "Buat password baru" });
     expect(window.location.hash).toBe("#ganti-password");
     expect(
-      screen.queryByRole("heading", { name: "Beranda" }),
+      screen.queryByRole("heading", { name: "Hari ini" }),
     ).not.toBeInTheDocument();
 
     await user.type(
@@ -88,12 +107,10 @@ describe("Employee portal authentication journey", () => {
       "Replacement-Test-123456",
     );
     await user.click(screen.getByRole("button", { name: "Masuk" }));
-    await screen.findByRole("heading", { name: "Beranda" });
+    await screen.findByRole("heading", { name: "Hari ini" });
     expect(window.location.hash).toBe("#beranda");
-    expect(screen.getByText(employee.email)).toBeVisible();
-    expect(
-      screen.getByText("Fitur check-in dan checkout sedang disiapkan."),
-    ).toBeVisible();
+    expect(await screen.findByText("Synthetic Employee")).toBeVisible();
+    expect(screen.getByText("Belum check-in")).toBeVisible();
     await user.click(screen.getByRole("button", { name: "Keluar" }));
     await screen.findByRole("heading", { name: "Masuk" });
     expect(auth.logout).toHaveBeenCalledTimes(1);
@@ -113,7 +130,7 @@ describe("Employee portal authentication journey", () => {
       mustChangePassword: false,
     });
     render(<App client={signedIn} />);
-    await screen.findByRole("heading", { name: "Beranda" });
+    await screen.findByRole("heading", { name: "Hari ini" });
     expect(window.location.hash).toBe("#beranda");
   });
 
@@ -126,9 +143,9 @@ describe("Employee portal authentication journey", () => {
     vi.mocked(auth.logout).mockRejectedValue(
       new AuthError(401, "Sesi Anda telah berakhir. Silakan masuk kembali."),
     );
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     render(<App client={auth} />);
-    await screen.findByRole("heading", { name: "Beranda" });
+    await screen.findByRole("heading", { name: "Hari ini" });
     await user.click(screen.getByRole("button", { name: "Keluar" }));
     await screen.findByRole("heading", { name: "Masuk" });
     expect(screen.getByRole("alert")).toHaveTextContent(
@@ -155,24 +172,66 @@ describe("capture route protection", () => {
     await screen.findByRole("heading", { name: "Buat password baru" });
     expect(window.location.hash).toBe("#ganti-password");
   });
-  it("lets an unrestricted employee open and leave capture without requesting the API", async () => {
+  it("lets an unrestricted employee open and leave capture after checking eligibility without requesting camera", async () => {
     const auth = client();
     vi.mocked(auth.restore).mockResolvedValue({
       ...employee,
       mustChangePassword: false,
     });
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     render(<App client={auth} />);
-    await screen.findByRole("heading", { name: "Beranda" });
-    await user.click(
-      screen.getByRole("button", { name: "Siapkan foto check-in" }),
-    );
+    await screen.findByRole("heading", { name: "Hari ini" });
+    await screen.findByText("Belum check-in");
+    await user.click(screen.getByRole("button", { name: "Check-in" }));
     await screen.findByRole("heading", { name: "Foto check-in" });
     expect(window.location.hash).toBe("#foto-checkin");
-    expect(auth.api).not.toHaveBeenCalled();
+    expect(auth.api).toHaveBeenCalledWith(
+      "me/attendance/today",
+      expect.anything(),
+    );
+    expect(
+      vi
+        .mocked(auth.api)
+        .mock.calls.every((c) => c[0] === "me/attendance/today"),
+    ).toBe(true);
+    vi.mocked(auth.api).mockResolvedValueOnce({
+      data: {
+        employeeName: "Synthetic Employee",
+        attendanceDate: "2026-10-02",
+        eligible: true,
+        ineligibilityMessage: null,
+        schedule: {
+          type: "REGULAR_WORKDAY",
+          start: "08:00:00",
+          end: "17:00:00",
+        },
+        reasonRequired: false,
+        status: "CHECKED_IN",
+        record: {
+          id: "2f178ed8-8cf4-4aac-9dcb-805828295f88",
+          attendanceDate: "2026-10-02",
+          deletedAt: null,
+          checkIn: {
+            id: "ed1ee3a0-0da2-4529-8694-d5e6e582c063",
+            eventTime: "2026-10-02T08:00:00.000+07:00",
+            isLate: false,
+            isOutsideSchedule: false,
+            reason: null,
+          },
+        },
+      },
+      meta: {
+        requestId: "visual",
+        serverTime: "2026-10-02T08:00:00.000+07:00",
+      },
+    });
     await user.click(
       screen.getByRole("button", { name: "Kembali ke beranda" }),
     );
-    await screen.findByRole("heading", { name: "Beranda" });
+    await screen.findByRole("heading", { name: "Hari ini" });
+    expect(
+      await screen.findByRole("button", { name: "Check-in tercatat" }),
+    ).toBeDisabled();
+    expect(auth.api).toHaveBeenCalledTimes(3);
   });
 });

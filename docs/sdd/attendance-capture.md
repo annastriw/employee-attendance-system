@@ -39,11 +39,11 @@ Submit guard ref mencegah klik paralel. Busy menonaktifkan retake/kembali; route
 
 ## Checklist manual pengguna
 
-1. Login akun karyawan siap, pilih Siapkan foto check-in; kamera belum diminta sebelum Buka kamera.
+1. Login akun karyawan siap, pilih Check-in; kamera belum diminta sebelum Buka kamera.
 2. Izinkan kamera/lokasi. Nol/dua wajah memblokir Ambil foto; satu wajah jelas dan stabil memungkinkan manual. Kedipan open–closed–open mengambil satu foto.
 3. Preview: kamera berhenti; Ambil ulang mencabut foto lama dan memulai flow baru.
 4. Tolak/timeout/nonaktifkan lokasi: capture/pengiriman terblokir. Tombol Perbarui memulihkan tanpa input koordinat.
-5. Simpan foto: request multipart melalui backend nyata menjadi READY; belum ada klaim absensi tersimpan. Setelah >60 detik perbarui lokasi; foto sama tidak diupload ulang.
+5. Pada T21, Kirim check-in mengunggah multipart menjadi READY lalu mencatat absensi lewat Attendance. Isi alasan jika diperlukan; hasil sukses harus memuat waktu resmi. Setelah >60 detik perbarui lokasi; foto READY yang sama tidak diupload ulang. Lanjutkan [checklist check-in](attendance-checkin.md#checklist-manual).
 6. Putus koneksi saat upload: hasil belum dipastikan; retry memakai key sama. Navigasi/logout/tab ditinggalkan melepas kamera dan tidak memasang hasil sesi lama.
 7. Uji desktop/ponsel pada HTTPS/localhost, terang/gelap; kontrol bisa dibaca/ditekan pada 320 px, tanpa geser horizontal.
 

@@ -52,7 +52,12 @@ export class AuthProxyService {
           ? { body: multipart ? body : JSON.stringify(body ?? {}) }
           : {}),
         signal: AbortSignal.timeout(
-          upstream === 'media' ? 15000 : this.config.timeoutMs,
+          upstream === 'media'
+            ? 15000
+            : upstream === 'attendance' &&
+                path === '/api/v1/me/attendance/check-in'
+              ? 30000
+              : this.config.timeoutMs,
         ),
         redirect: 'manual',
       });

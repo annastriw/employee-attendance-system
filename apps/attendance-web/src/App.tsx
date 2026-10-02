@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { Clock } from "@phosphor-icons/react";
 import { AuthShell } from "@attendance/ui";
 import {
@@ -12,6 +12,7 @@ import { ChangePasswordPage } from "./pages/ChangePasswordPage";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 
+import { clearPendingCheckIn } from "./features/checkin/use-check-in";
 const CapturePage = lazy(() => import("./pages/CapturePage"));
 
 export function App({ client = authClient }: { client?: AuthClient }) {
@@ -73,6 +74,7 @@ export function App({ client = authClient }: { client?: AuthClient }) {
           : "Terjadi kesalahan. Coba lagi.",
       );
       if (reason instanceof AuthError && reason.status === 401 && user) {
+        clearPendingCheckIn(client);
         setUser(null);
       }
     } finally {
@@ -80,9 +82,15 @@ export function App({ client = authClient }: { client?: AuthClient }) {
     }
   }
 
+  const sessionExpired = useCallback(() => {
+    clearPendingCheckIn(client);
+    setUser(null);
+    setError("Sesi Anda telah berakhir. Silakan masuk kembali.");
+  }, [client]);
   const logout = () =>
     act(async () => {
       await client.logout();
+      clearPendingCheckIn(client);
       setUser(null);
     });
 
@@ -135,15 +143,14 @@ export function App({ client = authClient }: { client?: AuthClient }) {
           <CapturePage
             client={client}
             onBack={() => navigate("beranda")}
-            onSessionExpired={() => {
-              setUser(null);
-              setError("Sesi Anda telah berakhir. Silakan masuk kembali.");
-            }}
+            onSessionExpired={sessionExpired}
           />
         </Suspense>
       );
     return (
       <HomePage
+        client={client}
+        onSessionExpired={sessionExpired}
         user={user}
         busy={busy}
         error={error}

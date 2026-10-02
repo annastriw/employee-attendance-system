@@ -148,3 +148,39 @@
   text-align: center;
   margin-top: 12px;
 }
+.capture-reason {
+  display: grid;
+  gap: 8px;
+  margin-top: 20px;
+}
+.capture-reason textarea {
+  border-radius: 8px;
+  resize: vertical;
+  min-height: 88px;
+}
+.capture-success {
+  padding: 48px 0;
+  text-align: center;
+}
+.capture-success > svg {
+  margin-inline: auto;
+  color: var(--accent);
+}
+.capture-success h1 {
+  font-size: 1.5rem;
+  letter-spacing: -0.035em;
+  margin: 16px 0;
+}
+.capture-success-time {
+  font-size: 2.5rem;
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+  letter-spacing: -0.04em;
+}
+.capture-success-time span {
+  font-size: 0.875rem;
+  color: var(--muted);
+  letter-spacing: 0;
+}
+
+.capture-page > .button { min-height: 44px; }

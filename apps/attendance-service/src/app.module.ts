@@ -6,8 +6,15 @@ import { HolidaysModule } from './holidays/holidays.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
+import { CheckInModule } from './checkin/checkin.module';
 @Module({
-  imports: [DatabaseModule, PolicyModule, AuthModule, HolidaysModule],
+  imports: [
+    DatabaseModule,
+    PolicyModule,
+    AuthModule,
+    HolidaysModule,
+    CheckInModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

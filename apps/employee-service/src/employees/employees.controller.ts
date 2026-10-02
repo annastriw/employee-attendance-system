@@ -8,6 +8,7 @@ import { EmployeeEmailChangesService } from './email-changes.service';
 import { EmployeeLifecycleService } from './lifecycle.service';
 import { EmployeeResetPasswordService } from './reset-password.service';
 import { ProvisioningAuthClient } from './provisioning-auth.client';
+import { AttendanceProfileController } from "./attendance-profile.controller";
 const actor = (req: EmployeeRequest) => ({ accountId: req.actor!.id, requestId: req.requestId });
 function operationKey(key?: string) {
   if (!key || !isUUID(key, '4')) throw new BadRequestException('Idempotency-Key UUID wajib diisi.');
@@ -55,5 +56,5 @@ export class EmployeeLifecycleController {
   @Get(':id') get(@Param('id', ParseUUIDPipe) id: string, @Req() req: EmployeeRequest) { return this.service.operation(id, actor(req)); }
   @Post(':id/retry') @HttpCode(200) retry(@Param('id', ParseUUIDPipe) id: string, @Req() req: EmployeeRequest) { return this.service.retry(id, actor(req)); }
 }
-@Module({ controllers: [EmployeesController, EmployeeProvisioningController, EmployeeEmailChangesController, EmployeeLifecycleController], providers: [EmployeesService, EmployeeProfileService, EmployeeEmailChangesService, EmployeeLifecycleService, EmployeeResetPasswordService, ProvisioningAuthClient, AuthClient, AdminGuard] })
+@Module({ controllers: [AttendanceProfileController, EmployeesController, EmployeeProvisioningController, EmployeeEmailChangesController, EmployeeLifecycleController], providers: [EmployeesService, EmployeeProfileService, EmployeeEmailChangesService, EmployeeLifecycleService, EmployeeResetPasswordService, ProvisioningAuthClient, AuthClient, AdminGuard] })
 export class EmployeesModule {}
