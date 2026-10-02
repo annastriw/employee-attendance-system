@@ -222,9 +222,14 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 - [x] Alur fase diverifikasi, batasan dicatat dan ditinjau.
 
 ## T27 — Outbox dan pemulihan kegagalan
-- [ ] Selesai
+- [x] Selesai (2026-10-03; spesifikasi di docs/sdd/outbox-failure-recovery.md, worker outbox, kompensasi provisioning, dan pembersihan orphan media terverifikasi)
 - Acceptance: Event dedup/retry, provisioning compensation dan cleanup orphan terdokumentasi serta bekerja.
 - Verification: Fault injection service offline, event ulang dan upload orphan.
+- Implementasi/verifikasi teknis 2026-10-03: [outbox dan pemulihan kegagalan](../docs/sdd/outbox-failure-recovery.md).
+  1. **Event Dedup & Retry**: `MediaOutboxWorker` di `apps/attendance-service` menerapkan CAS lease token (30 detik), bounded batch 10, dan exponential backoff saat upstream offline/503 (`media-outbox.worker.spec.ts` 5 unit tests lulus). Deduplikasi dan idempotensi binding terverifikasi pada `apps/media-service` (`photos.service.ts` `bind` mengembalikan 200 idempotent pada event sama). Suite 29 integrasi MySQL/AIStor di `checkin.e2e-spec.ts` lulus penuh termasuk fault injection kehilangan response dan recovery sewa kadaluarsa.
+  2. **Provisioning Compensation**: `EmployeesService` di `apps/employee-service` mengoordinasikan saga 3-fase (`PREPARE` -> `PUBLISH` -> `FINALIZE`). Jika terjadi kegagalan fatal sebelum finalize, kompensasi atomik memastikan profil karyawan ditandai `ready: false, status: 'INACTIVE'` dan akun Auth tetap `INACTIVE`. Koreksi email konflik didukung tanpa duplikasi NIK (`provisioning.e2e-spec.ts` 7/7 lulus, `profile-email.e2e-spec.ts` 6/6 lulus, `lifecycle.e2e-spec.ts` 5/5 lulus).
+  3. **Media Orphan Cleanup**: `PhotosService.cleanupOrphans`, `PhotoOrphanWorker` (`photo-orphan.worker.spec.ts` 5 unit tests lulus), dan endpoint internal `POST /internal/media/attendance-photos/cleanup-orphans` di `apps/media-service` memvalidasi dan membersihkan foto tak bertuan (`boundEventId IS NULL`) yang melampaui grace period (default 2 jam): status diubah ke `FAILED`, dicatat dalam `media_audit_logs` (`PHOTO_ORPHAN_CLEANED`), dan objek storage dihapus secara aman. Seluruh foto yang telah terikat (`boundEventId IS NOT NULL`) serta unggahan baru dalam grace period dipastikan tetap utuh (20 tests `photos.e2e-spec.ts` lulus).
+  4. Typecheck, oxlint (0 warning, 0 error), dan build production semua package terkait lulus 100%.
 - Dependencies: 12,14,19,21
 - Target: service terkait; pecah per alur
 

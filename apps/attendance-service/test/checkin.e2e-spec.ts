@@ -1463,6 +1463,10 @@ describe('T21 real Gateway–Attendance–Employee–Media–Auth–MySQL–AISt
     });
     await adminGet('').expect(401);
     await adminChange(row.id, latest.version, 'Sesi dicabut').expect(401);
+    await db.authSession.updateMany({
+      where: { accountId: accountIds[3] },
+      data: { revokedAt: null },
+    });
   });
 
   it('rejects a used photo on a later day and revalidates session revocation for successful retries', async () => {
@@ -1499,10 +1503,14 @@ describe('T21 real Gateway–Attendance–Employee–Media–Auth–MySQL–AISt
     await historyGet(
       '/' + event.dailyRecordId + '/events/' + event.id + '/photo',
     ).expect(401);
+    await db.authSession.updateMany({
+      where: { accountId: accountIds[0] },
+      data: { revokedAt: null },
+    });
   });
 
   it('T26 allows HRD to obtain signed photo URLs for active and deleted attendance records, and enforces authorization', async () => {
-    const row = await startDay('2026-12-18');
+    const row = await startDay('2026-12-28');
     const detail = (await adminGet('/' + row.id).expect(200)).body.data;
     expect(detail.checkIn.location).toBeDefined();
     expect(detail.checkIn.location.latitude).toBeDefined();

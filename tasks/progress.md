@@ -4,8 +4,8 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 ## Snapshot terakhir
 
-- Tanggal: 2026-10-03 (Asia/Jakarta), akhir increment T26. HEAD diverifikasi dengan `git log`; jangan anggap hash di sini sebagai HEAD.
-- Tahap: fitur T08–T26 selesai dan diverifikasi; Checkpoint setelah T26 terpenuhi. Increment implementasi berikut T27 Outbox dan pemulihan kegagalan. Fondasi T01–T07/UX01–UX02 masih perlu rekonsiliasi status lama dan isolasi test; T27–T31 tetap belum selesai. T09c tetap menjadi acuan tema.
+- Tanggal: 2026-10-03 (Asia/Jakarta), akhir increment T27. HEAD diverifikasi dengan `git log`; jangan anggap hash di sini sebagai HEAD.
+- Tahap: fitur T08–T27 selesai dan diverifikasi; Checkpoint setelah T27 terpenuhi. Increment implementasi berikut T28 Review UI responsif. Fondasi T01–T07/UX01–UX02 masih perlu rekonsiliasi status lama dan isolasi test; T28–T31 tetap belum selesai. T09c tetap menjadi acuan tema.
 - Commit sesi ini pada dev (lama ke baru): 93488ae, f423e47, aa34d48, 1b7b05d, e4a6782, 83537f1, 112d7fa, a485480 (lihat git log), lalu:
   - c2f98fe docs: switch frontend theme to Linear-style zinc + emerald, Geist, Phosphor, light/dark
   - 36a24e4 feat(ui): Linear-style redesign with zinc + emerald, Geist, Phosphor and light/dark
@@ -30,13 +30,28 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T26 Detail monitoring Leaflet | Antigravity | apps/attendance-service, apps/api-gateway, apps/hr-web, docs/sdd/attendance-leaflet-monitoring.md | T25 selesai | MySQL 3307, AIStor 9000/9001 aktif | Selesai |
+| T27 Outbox dan pemulihan kegagalan | Antigravity | apps/media-service, apps/attendance-service, apps/employee-service, docs/sdd/outbox-failure-recovery.md | T26 selesai | MySQL 3307, AIStor 9000/9001 aktif | Selesai |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 
 ## Perubahan yang belum di-commit
 
 Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .windsurf/ dan skills-lock.json adalah berkas lokal; jangan di-stage, dihapus atau diubah tanpa scope jelas. Rahasia dan data pribadi tetap ignored.
+
+## Checkpoint T27 — 2026-10-03
+
+- Implementasi: [outbox dan pemulihan kegagalan](../docs/sdd/outbox-failure-recovery.md). Tiga pilar ketahanan lintas layanan (resilience across boundaries):
+  1. **Transactional Outbox & Deduplikasi (Attendance $\to$ Media)**: `MediaOutboxWorker` di `attendance-service` mengambil task dari `att_outbox` dengan CAS claim token 30 detik, bounded batch 10, serta menangani kegagalan upstream (offline/503/timeout) dengan exponential backoff terukur ($1\text{s} \times 2^{\text{attempts}}$ hingga maksimal 60 detik). Media Service menjamin deduplikasi dan idempotensi pada `POST /internal/media/attendance-photos/:id/bind`.
+  2. **Provisioning Compensation (Employee $\leftrightarrow$ Auth)**: `EmployeesService` di `employee-service` mengoordinasikan saga 3-fase (`PREPARE` $\to$ `PUBLISH` $\to$ `FINALIZE`). Pada kegagalan terminal sebelum finalisasi (misal invalidasi departemen/jabatan), kompensasi atomik memastikan profil karyawan dikembalikan ke `ready: false, status: 'INACTIVE'` dan akun Auth tetap `INACTIVE`. Konflik email dapat dikoreksi melalui `POST /api/v1/employee-provisioning/:id/retry` dengan reservasi NIK tanpa duplikasi data.
+  3. **Media Orphan Cleanup (Media $\leftrightarrow$ AIStor)**: `PhotosService.cleanupOrphans`, `PhotoOrphanWorker`, dan endpoint internal `POST /internal/media/attendance-photos/cleanup-orphans` membersihkan foto tak bertuan (`boundEventId IS NULL`) yang berstatus `READY`/`FAILED` dan melampaui grace period (default 2 jam): status diubah ke `FAILED`, dicatat dalam `media_audit_logs` (`PHOTO_ORPHAN_CLEANED`), dan objek storage dihapus secara aman. Seluruh foto yang telah terikat (`boundEventId IS NOT NULL`) serta foto baru dalam batas grace period dipastikan tidak tersentuh.
+- Verifikasi:
+  - 5 unit tests `MediaOutboxWorker` (`media-outbox.worker.spec.ts`) lulus, membuktikan siklus timer, fault injection upstream 503 dengan exponential backoff, CAS recovery dari sewa kadaluarsa, dan deduplikasi worker paralel.
+  - 5 unit tests `PhotoOrphanWorker` (`photo-orphan.worker.spec.ts`) lulus, membuktikan siklus background timer, pencegahan eksekusi tumpang-tindih (concurrency guard), dan penanganan error yang graceful.
+  - 20 tests e2e Media Service (`photos.e2e-spec.ts`) lulus 100%, memverifikasi pembersihan orphan foto lewat endpoint internal dan worker tick, transisi state `FAILED` dan audit log, serta perlindungan mutlak bagi foto terikat dan foto baru.
+  - 29 tests e2e Attendance Service (`checkin.e2e-spec.ts`) lulus 100%, memverifikasi outbox durable, recovery respon ambigu, pengikatan private checkout, otorisasi foto HRD T26, dan revalidasi sesi.
+  - 7 tests e2e Employee Provisioning (`provisioning.e2e-spec.ts`), 6 tests `profile-email.e2e-spec.ts`, dan 5 tests `lifecycle.e2e-spec.ts` lulus 100%.
+  - Typecheck, oxlint (0 warning, 0 error), dan build production semua package terkait lulus 100%.
+- Langkah berikut: T28 Review UI responsif (HeroUI+custom, bahasa Indonesia, fokus keyboard, loading/error/empty state dan mobile konsisten).
 
 ## Checkpoint T26 — 2026-10-03
 

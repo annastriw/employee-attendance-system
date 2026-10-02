@@ -104,6 +104,30 @@ export class PhotoStorage implements OnModuleDestroy {
   async ready() {
     return this.client.bucketExists(this.config.bucket);
   }
+  async delete(key: string): Promise<boolean> {
+    try {
+      await this.client.removeObject(this.config.bucket, key);
+      return true;
+    } catch (error) {
+      if (
+        error &&
+        typeof error === 'object' &&
+        'code' in error &&
+        error.code === 'NoSuchKey'
+      ) {
+        return true;
+      }
+      if (
+        error &&
+        typeof error === 'object' &&
+        'code' in error &&
+        error.code === 'AccessDenied'
+      ) {
+        return false;
+      }
+      throw error;
+    }
+  }
   onModuleDestroy() {
     this.agent.destroy();
   }
