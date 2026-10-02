@@ -9,7 +9,7 @@ export default defineConfig({
   use: {
     baseURL: "http://localhost:15174",
     browserName: "chromium",
-    channel: "chrome",
+    channel: process.env.CI ? undefined : "chrome",
     trace: "retain-on-failure",
   },
   projects: [
