@@ -18,7 +18,7 @@ async function forward(proxy: AuthProxyService, method: 'GET' | 'POST' | 'PATCH'
   for (const [key, value] of url.searchParams) { if (!KEYS.has(key) || query.has(key)) throw new BadRequestException('Request tidak valid.'); query.set(key, value); }
   const headers: Record<string, string> = { 'X-Request-ID': String(res.getHeader('X-Request-ID')) };
   if (typeof req.headers.authorization === 'string') headers.authorization = req.headers.authorization;
-  const needsKey = resource === 'employees' && method === 'POST' && (url.pathname.endsWith('/lifecycle') || url.pathname === '/api/v1/employees');
+  const needsKey = resource === 'employees' && method === 'POST';
   if (needsKey) {
     const key = req.headers['idempotency-key'];
     if (typeof key !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(key)) throw new BadRequestException('Request tidak valid.');

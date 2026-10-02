@@ -165,7 +165,8 @@ for (const scheme of ["light", "dark"] as const) {
         if (path.endsWith("/auth/refresh")) return route.fulfill({ json: { accessToken: "visual-token", expiresIn: 3600, user: { id: "visual-admin", email: "admin@example.test", role: "ADMIN_HRD", mustChangePassword: false } } });
         if (path.endsWith("/departments")) return route.fulfill({ json: { items: [], total: 0, page: 1, pageSize: 100 } });
         if (path.endsWith("/positions")) return route.fulfill({ json: { items: [position], total: 1, page: 1, pageSize: 100 } });
-        if (path.endsWith("/employees/" + id)) return route.fulfill({ json: { ...employee, department, position } });
+        if (path.includes("/history")) return route.fulfill({ json: { items: [{ id: "hist-1", action: "EMPLOYEE_LIFECYCLE_ACTIVE", before: { status: "INACTIVE" }, after: { status: "ACTIVE" }, actorAccountId: "act", createdAt: "2026-10-02T10:00:00.000Z" }], total: 1, page: 1, pageSize: 10 } });
+        if (path.endsWith("/employees/" + id)) return route.fulfill({ json: { ...employee, department, position, archivedAt: null, emailChange: null, lifecycleChange: null, hasPendingOperation: false } });
         if (path.endsWith("/employees")) return route.fulfill({ json: { items: [{ ...employee, department: department.name, position: position.name }], total: 1, page: 1, pageSize: 20 } });
         return route.fulfill({ status: 404, json: { message: "Unexpected visual request" } });
       });
@@ -176,6 +177,14 @@ for (const scheme of ["light", "dark"] as const) {
       await expect(page.getByText(/Nilai lama tetap tersimpan/)).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
       await page.screenshot({ path: info.outputPath("employee-edit-" + scheme + "-" + width + ".png"), animations: "disabled", fullPage: true });
+      await page.getByRole("button", { name: "Nonaktifkan", exact: true }).click();
+      const lifecycleDialog = page.getByRole("dialog");
+      await expect(lifecycleDialog).toBeVisible();
+      await expect(lifecycleDialog.getByRole("button", { name: "Nonaktifkan", exact: true })).toBeVisible();
+      await expect(lifecycleDialog.getByText(/Semua sesi karyawan akan dicabut/)).toBeVisible();
+      await page.screenshot({ path: info.outputPath("lifecycle-confirm-" + scheme + "-" + width + ".png"), animations: "disabled", fullPage: true });
+      await lifecycleDialog.getByRole("button", { name: "Batal", exact: true }).click();
+      await expect(lifecycleDialog).toBeHidden();
       await page.getByLabel("Email baru").fill("updated@example.test");
       await page.getByRole("button", { name: "Ubah email", exact: true }).click();
       const dialog = page.getByRole("dialog");

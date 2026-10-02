@@ -26,7 +26,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T14 B — lifecycle/history/revokasi | Agen berikut, belum mulai | docs/sdd/employee-lifecycle.md lalu schema/Auth/Employee/Gateway/HR dan test terkait sesuai kontrak | T14 A selesai dan manual pengguna lulus | MySQL 3307 aktif; tidak ada service/frontend listener pada pemeriksaan handoff | Handoff pengguna; tulis kontrak B dari baseline/source, lalu satu putaran API+UI+test |
+| T14 B — lifecycle/history/revokasi | Selesai (2026-10-02) | Gateway, Employee, Auth, HR Web, docs/sdd/employee-lifecycle.md | T14 A selesai dan manual pengguna lulus | MySQL 3307 aktif | Backend dist, Gateway contract 57, MySQL e2e 5, Vitest 9, visual 4 lulus; checklist browser manual siap |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 
@@ -35,6 +35,8 @@ Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increme
 Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .windsurf/ dan skills-lock.json adalah berkas lokal; jangan di-stage, dihapus atau diubah tanpa scope jelas. Rahasia dan data pribadi tetap ignored.
 
 ## Bukti pemeriksaan
+
+- T14 B: transisi status (aktif/nonaktif/arsip/restore INACTIVE), revokasi instan semua sesi aktif pada non-ACTIVE, aktivasi terpisah, reservasi email/NIK tanpa hard delete, eksklusi timbal-balik terhadap email change PENDING, dan riwayat terkurasi atomik selesai diimplementasikan. Gateway allowlist 57 kontrak HTTP lulus (termasuk 5 kontrak baru B). Integrasi MySQL nyata 5/5 skenario lulus (`lifecycle.e2e-spec.ts`). UI H08 (`apps/hr-web`): kartu status dengan aksi dinamis, ConfirmDialog dengan peringatan wajib revokasi sesi dan status nonaktif setelah restore, penguncian saat operasi pending, timeline riwayat (`GET /history`), Vitest 9/9 lulus. Visual Playwright 4/4 skenario lulus pada 320/1440 px terang/gelap (`portal-design.spec.ts`); screenshot form detail, konfirmasi nonaktifkan dan konfirmasi email ditinjau; tanpa overflow. Typecheck dan lint semua package terdampak (Gateway, Employee, Auth, HR) 100% bersih; backend dist dibangun. Checklist browser manual disiapkan di [employee lifecycle](../docs/sdd/employee-lifecycle.md).
 
 - T14 A: edit profil dan email terpisah, history/audit profil atomik, email durable + receipt/revokasi/recovery diimplementasikan. Migration dev/test/grants dan diff schema exit 0; typecheck/lint/build package terdampak lulus. Auth 3 unit, Employee 9 unit, Gateway 51 kontrak, HR 14 komponen lulus. MySQL: 5 skenario lulus awal + 1 lulus rerun setelah perbaikan fixture port; visual 4/4 lulus dan screenshot ditinjau. Rincian/batas bukti dan checklist browser ada di [module spec T14](../docs/sdd/employee-lifecycle.md). Pengguna melaporkan checklist browser API nyata lulus pada 2026-10-02; A ditutup, B dan T14 keseluruhan tetap terbuka.
 
@@ -70,7 +72,7 @@ Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .w
 
 ## Langkah berikut
 
-1. **Lanjut T14 B lifecycle/history/revokasi.** A selesai dan pengguna melaporkan checklist manual lulus. Baca AGENTS, tier plan, todo T14, baseline lifecycle dan [module spec](../docs/sdd/employee-lifecycle.md). Tulis kontrak B sebelum coding: aktif/nonaktif/arsip/restore INACTIVE, history, NIK/email tetap dicadangkan, revokasi/login dan pemulihan lintas service; tentukan interaksi dengan email PENDING. Reuse implementasi A/T12, satu agen aktif, test terfokus; browser nyata manual sekali sesudah putaran lengkap.
+1. **Verifikasi checklist browser manual B oleh pengguna**, lalu tutup T14 secara penuh dan lanjut ke T15 (reset password umum). Rincian langkah pengujian manual 1–6 ada pada [module spec T14](../docs/sdd/employee-lifecycle.md). Seluruh implementasi teknis dan tes otomatis B telah selesai dan lulus.
 2. Limit 429 E2E Auth tetap menunggu keputusan pengguna: refresh limit sendiri atau run per spec. Jangan longgarkan limit login. Run T11 per spec terpisah lulus; konfigurasi Auth tidak diubah.
 3. T09c selesai dan menjadi acuan wajib semua halaman berikutnya: gunakan token/komponen packages/ui, HeroUI, zinc–emerald, Geist, Phosphor dan mode terang/gelap. Kontrak mencakup E01–E09/H01–H14, seluruh state/dialog/mobile; jangan kembali ke T09b monokrom.
 4. Polesan H11 selesai bersama H12: (a) shared MasterDataPage menampilkan skeleton selama refetch sehingga baris lama tidak tampil bersama pesan sukses; test komponen dan E2E desktop/mobile menunggu baris hilang sesudah aktifkan pada filter Nonaktif. (b) pager tidak lagi memakai kelas monospace, diverifikasi computed font pada test visual. (c) status memakai satu ToggleButtonGroup berbatas dan separator HeroUI, screenshot terang/gelap ditinjau.

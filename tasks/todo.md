@@ -112,7 +112,7 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 - Dependencies: 13
 - Target: apps/{employee-service,auth-service}/, apps/hr-web/
 - [x] Putaran A — edit profil/email: kontrak sinkronisasi Employee–Auth, API dan form HR menggunakan pola yang ada; validasi master, konflik NIK/email termasuk nonaktif/arsip, serta konsistensi dan pemulihan perubahan lintas service. Test terkait dan satu checklist browser sesudah putaran lengkap.
-- [ ] Putaran B — lifecycle/history/revokasi: aktif/nonaktif/arsip/restore, riwayat perubahan, email/NIK tetap dicadangkan, restore menghasilkan INACTIVE dan aktivasi terpisah; login/token lama ditolak setelah nonaktif/arsip. API, UI, test MySQL/revokasi/pemulihan terkait dan satu checklist browser sesudah putaran lengkap.
+- [x] Putaran B — lifecycle/history/revokasi: aktif/nonaktif/arsip/restore, riwayat perubahan, email/NIK tetap dicadangkan, restore menghasilkan INACTIVE dan aktivasi terpisah; login/token lama ditolak setelah nonaktif/arsip. API, UI, test MySQL/revokasi/pemulihan terkait dan satu checklist browser sesudah putaran lengkap.
 - Putaran A selesai: implementasi/test terfokus lulus dan pengguna melaporkan checklist browser manual lulus pada 2026-10-02. Checklist/bukti di [employee lifecycle](../docs/sdd/employee-lifecycle.md).
 - Bukti tiap putaran dicatat dalam satu module spec T14; detail kontrak ditentukan dari source/baseline sebelum coding. Reset password umum tetap T15.
 

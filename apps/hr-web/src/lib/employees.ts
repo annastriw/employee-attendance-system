@@ -17,8 +17,14 @@ export async function loadActiveMasters(client: Pick<AuthClient, 'api'>, resourc
 }
 
 export interface EmailChangeOperation { id: string; employeeId: string; email: string; status: 'PENDING' | 'COMPLETED' | 'FAILED'; errorCode: string | null }
+export interface LifecycleOperation { id: string; employeeId: string; targetStatus: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED'; status: 'PENDING' | 'COMPLETED' | 'FAILED'; errorCode: string | null }
+export interface EmployeeHistoryRecord { id: string; action: string; before: Record<string, unknown> | null; after: Record<string, unknown> | null; actorAccountId: string; createdAt: string }
+export interface EmployeeHistoryPage { items: EmployeeHistoryRecord[]; total: number; page: number; pageSize: number }
 export interface EmployeeDetail extends Omit<EmployeeInput, 'status' | 'phone'> {
   phone: string | null; status: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
   id: string; department: MasterRecord; position: MasterRecord;
-  updatedAt: string; emailChange: EmailChangeOperation | null;
+  updatedAt: string; archivedAt: string | null;
+  emailChange: EmailChangeOperation | null;
+  lifecycleChange: LifecycleOperation | null;
+  hasPendingOperation?: boolean;
 }
