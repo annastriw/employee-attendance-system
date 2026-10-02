@@ -83,7 +83,7 @@ for (const db of ["attendance_dev", "attendance_test", "attendance_shadow"]) {
 }
 if (process.argv.includes("--grants")) {
   for (const [db, user] of [["attendance_dev", "attendance_auth"], ["attendance_test", "attendance_auth_test"]]) {
-    for (const table of ["auth_accounts", "auth_sessions", "auth_provisioning", "auth_email_changes"]) {
+    for (const table of ["auth_accounts", "auth_sessions", "auth_provisioning", "auth_email_changes", "auth_password_resets"]) {
       sql += `GRANT SELECT, INSERT, UPDATE ON \`${db}\`.\`${table}\` TO '${user}'@'%';\n`;
     }
     sql += `GRANT SELECT, INSERT ON \`${db}\`.auth_audit_logs TO '${user}'@'%';\n`;

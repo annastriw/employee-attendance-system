@@ -5,7 +5,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 ## Snapshot terakhir
 
 - Tanggal: 2026-10-02 (Asia/Jakarta). HEAD diverifikasi dengan `git log`; jangan anggap hash di sini sebagai HEAD.
-- Tahap: T08-T13 selesai. T12 dan T13 browser manual pengguna lulus pada 2026-10-02. T13 unit/komponen, build/lint/typecheck dan visual lulus; batas suite otomatis dicatat. T14 A selesai dengan browser manual pengguna lulus; T14 B menjadi pekerjaan berikutnya. T09c tetap menjadi acuan tema.
+- Tahap: T08-T15 selesai. T14 A dan B lulus manual pengguna dan tes otomatis; T14 ditutup penuh pada 2026-10-02. T15 (reset password karyawan) selesai diimplementasikan end-to-end; tes otomatis 100% lulus, checklist manual peramban disiapkan di docs/sdd/employee-reset-password.md. T16 (aturan waktu dan eligibility) menjadi pekerjaan berikutnya. T09c tetap menjadi acuan tema.
 - Commit sesi ini pada dev (lama ke baru): 93488ae, f423e47, aa34d48, 1b7b05d, e4a6782, 83537f1, 112d7fa, a485480 (lihat git log), lalu:
   - c2f98fe docs: switch frontend theme to Linear-style zinc + emerald, Geist, Phosphor, light/dark
   - 36a24e4 feat(ui): Linear-style redesign with zinc + emerald, Geist, Phosphor and light/dark
@@ -17,8 +17,9 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
   - d9738b1 test(hr-web): real-API department journey with Employee Service in the E2E stack
 - Commit T13 pada dev: a51ddc2 (Auth client employee), 51bb3cb (HeroUI/test setup), 56f6a2a (E01), c5a8a2d (E02/home/guard dan tes alur), eb931ba (tes visual). Semua dipush ke origin/dev; baca git log untuk HEAD.
 - Commit T11: 85143ce (schema/migration/grants), 73293bc (Employee API + unit/MySQL), c4da4dd (Gateway allowlist/kontrak), 49e4eb7 (filter aktif untuk penugasan), 2f46086 (H12/shared UI/selector/polesan H11), fbc034a (HRD nyata + assertion refetch). Penutupan T11: 0d33caf. Persetujuan T09c: b31ccc5. Kebijakan testing cepat: 7cd397f; baca git log sebagai sumber HEAD.
+- Commit T14: a39ecb1 (Putaran A: edit profil dan email), d92f8d9 (Putaran B: lifecycle transitions, tests, dan H08 UI).
 - Branch: dev, tracking origin/dev. Repository public [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system) dipilih pengguna pada 2026-10-02. Push awal terverifikasi: lokal dan remote dev sama pada 7cd397f. Visibilitas PUBLIC diverifikasi melalui GitHub setelah instruksi pengguna; commit berikut dipush setelah verifikasi, deployment tetap tahap terakhir.
-- Database lokal (Docker MySQL 127.0.0.1:3307): migration sampai `20261002190000_employee_profile_email_changes` DITERAPKAN ke attendance_dev dan attendance_test. Akun `attendance_employee`/`attendance_employee_test` dibuat via `pnpm db:grants`; kredensial ada di `.env.database` (ignored).
+- Database lokal (Docker MySQL 127.0.0.1:3307): migration sampai `20261002210000_employee_password_reset` DITERAPKAN ke attendance_dev dan attendance_test. Grants `auth_password_resets` diterapkan ke `attendance_auth` dan `attendance_auth_test`.
 - Host memory sering CRITICAL (1-2 GB). Jalankan suite berat satu per satu; Playwright 1 worker terbukti stabil.
 - Pemeriksaan handoff 2026-10-02: hanya MySQL 127.0.0.1:3307 (PID 6672) ditemukan; tidak ada listener pada 3000/3001/3002/3003/3004/5173/5174. Tidak ada proses aplikasi yang dihentikan oleh agen. Port proyek: MySQL 3307, Gateway 3000, Auth 3001, Employee 3002, Attendance 5173, HR 5174.
 
@@ -26,7 +27,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T14 B — lifecycle/history/revokasi | Selesai (2026-10-02) | Gateway, Employee, Auth, HR Web, docs/sdd/employee-lifecycle.md | T14 A selesai dan manual pengguna lulus | MySQL 3307 aktif | Backend dist, Gateway contract 57, MySQL e2e 5, Vitest 9, visual 4 lulus; checklist browser manual siap |
+| T15 — Reset password | Selesai (2026-10-02) | Gateway, Employee, Auth, HR Web, docs/sdd/employee-reset-password.md | T14 selesai | MySQL 3307 aktif | Implementasi DB, Auth, Employee, Gateway, dan H08 UI selesai; tes otomatis 100% lulus; verifikasi manual peramban disiapkan |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 
@@ -35,6 +36,8 @@ Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increme
 Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .windsurf/ dan skills-lock.json adalah berkas lokal; jangan di-stage, dihapus atau diubah tanpa scope jelas. Rahasia dan data pribadi tetap ignored.
 
 ## Bukti pemeriksaan
+
+- T15: reset password karyawan oleh HRD (`POST /api/v1/employees/:id/reset-password`). One-time display, Idempotency-Key UUID (replay ditolak 409 "Password sudah ditampilkan"), revokasi instan seluruh sesi aktif lama karyawan, kewajiban ganti password (`mustChangePassword = true`, diarahkan ke E02), mutual exclusion terhadap operasi PENDING email/lifecycle (409), penolakan reset pada karyawan ARCHIVED (409), zero-secret leakage pada audit logs dan riwayat. Migration `20261002210000_employee_password_reset` diterapkan dev/test, grant `auth_password_resets` diterapkan. Auth 3 unit, Employee 4 unit, Gateway 58 kontrak HTTP Supertest lulus. Integrasi MySQL nyata 5/5 skenario lulus (`reset-password.e2e-spec.ts`). UI H08 (`apps/hr-web`): tombol Reset password pada ACTIVE/INACTIVE, ConfirmDialog dengan peringatan wajib revokasi sesi dan tampilan sekali, TemporaryPasswordDialog dengan tombol Salin & penghapusan credential dari state React saat dialog ditutup, format riwayat `EMPLOYEE_PASSWORD_RESET` pada timeline, Vitest 10/10 lulus. Visual Playwright 4/4 skenario lulus pada 320/1440 px terang/gelap (`portal-design.spec.ts`); screenshot dialog konfirmasi dan temporary password ditinjau; tanpa overflow. Typecheck dan lint semua package terdampak (Gateway, Employee, Auth, HR) 100% bersih; backend dist (Auth, Employee, Gateway) dan frontend HR Web dibangun exit 0. Checklist browser manual disiapkan di [employee reset password](../docs/sdd/employee-reset-password.md).
 
 - T14 B: transisi status (aktif/nonaktif/arsip/restore INACTIVE), revokasi instan semua sesi aktif pada non-ACTIVE, aktivasi terpisah, reservasi email/NIK tanpa hard delete, eksklusi timbal-balik terhadap email change PENDING, dan riwayat terkurasi atomik selesai diimplementasikan. Gateway allowlist 57 kontrak HTTP lulus (termasuk 5 kontrak baru B). Integrasi MySQL nyata 5/5 skenario lulus (`lifecycle.e2e-spec.ts`). UI H08 (`apps/hr-web`): kartu status dengan aksi dinamis, ConfirmDialog dengan peringatan wajib revokasi sesi dan status nonaktif setelah restore, penguncian saat operasi pending, timeline riwayat (`GET /history`), Vitest 9/9 lulus. Visual Playwright 4/4 skenario lulus pada 320/1440 px terang/gelap (`portal-design.spec.ts`); screenshot form detail, konfirmasi nonaktifkan dan konfirmasi email ditinjau; tanpa overflow. Typecheck dan lint semua package terdampak (Gateway, Employee, Auth, HR) 100% bersih; backend dist dibangun. Checklist browser manual disiapkan di [employee lifecycle](../docs/sdd/employee-lifecycle.md).
 

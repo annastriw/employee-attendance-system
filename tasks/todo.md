@@ -106,22 +106,22 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 - Bukti: T12 dan T13 browser manual pengguna lulus; unit/komponen, integrasi backend T12 dan visual terkait lulus. Suite otomatis browser dan seluruh monorepo tidak diulang karena RAM terbatas; bukti manual tidak diklaim sebagai hasil Playwright.
 
 ## T14 — Perubahan dan lifecycle karyawan
-- [ ] Selesai
+- [x] Selesai (2026-10-02; putaran A & B lulus manual pengguna dan tes otomatis; bukti di docs/sdd/employee-lifecycle.md)
 - Acceptance: Edit profil/email, nonaktif/arsip/restore; history dan revokasi konsisten.
 - Verification: Integration test restore nonaktif dan token lama ditolak.
 - Dependencies: 13
 - Target: apps/{employee-service,auth-service}/, apps/hr-web/
 - [x] Putaran A — edit profil/email: kontrak sinkronisasi Employee–Auth, API dan form HR menggunakan pola yang ada; validasi master, konflik NIK/email termasuk nonaktif/arsip, serta konsistensi dan pemulihan perubahan lintas service. Test terkait dan satu checklist browser sesudah putaran lengkap.
 - [x] Putaran B — lifecycle/history/revokasi: aktif/nonaktif/arsip/restore, riwayat perubahan, email/NIK tetap dicadangkan, restore menghasilkan INACTIVE dan aktivasi terpisah; login/token lama ditolak setelah nonaktif/arsip. API, UI, test MySQL/revokasi/pemulihan terkait dan satu checklist browser sesudah putaran lengkap.
-- Putaran A selesai: implementasi/test terfokus lulus dan pengguna melaporkan checklist browser manual lulus pada 2026-10-02. Checklist/bukti di [employee lifecycle](../docs/sdd/employee-lifecycle.md).
+- Putaran A & B selesai: implementasi/test terfokus lulus dan pengguna melaporkan checklist browser manual lulus pada 2026-10-02. Checklist/bukti di [employee lifecycle](../docs/sdd/employee-lifecycle.md).
 - Bukti tiap putaran dicatat dalam satu module spec T14; detail kontrak ditentukan dari source/baseline sebelum coding. Reset password umum tetap T15.
 
 ## T15 — Reset password
-- [ ] Selesai
+- [x] Selesai (2026-10-02; bukti otomatis di docs/sdd/employee-reset-password.md; checklist pengujian browser disiapkan)
 - Acceptance: Reset tampil sekali, wajib ganti, semua sesi lama batal.
 - Verification: API/E2E reset lalu login baru; periksa tidak ada secret di log.
 - Dependencies: 14
-- Target: apps/auth-service/, apps/hr-web/
+- Target: apps/{auth-service,employee-service,api-gateway,hr-web}/
 
 ## T16 — Aturan waktu dan eligibility
 - [ ] Selesai

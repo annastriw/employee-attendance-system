@@ -3,7 +3,7 @@ import type { Request, Response } from 'express';
 import { AuthProxyService } from './auth-proxy.service';
 const UUID = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
 const PATHS = {
-  employees: new RegExp('^/api/v1/employees(?:/' + UUID + '(?:/email|/lifecycle|/history)?)?$', 'i'),
+  employees: new RegExp('^/api/v1/employees(?:/' + UUID + '(?:/email|/lifecycle|/history|/reset-password)?)?$', 'i'),
   provisioning: new RegExp('^/api/v1/employee-provisioning/' + UUID + '(?:/(retry|credentials))?$', 'i'),
   email: new RegExp('^/api/v1/employee-email-changes/' + UUID + '(?:/retry)?$', 'i'),
   lifecycle: new RegExp('^/api/v1/employee-lifecycle/' + UUID + '(?:/retry)?$', 'i'),
@@ -36,6 +36,7 @@ export class EmployeesProxyController {
   @Patch(':id') update(@Req() req: Request, @Res() res: Response) { return forward(this.proxy, 'PATCH', req, res, 'employees'); }
   @Post(':id/email') email(@Req() req: Request, @Res() res: Response) { return forward(this.proxy, 'POST', req, res, 'employees'); }
   @Post(':id/lifecycle') lifecycle(@Req() req: Request, @Res() res: Response) { return forward(this.proxy, 'POST', req, res, 'employees'); }
+  @Post(':id/reset-password') resetPassword(@Req() req: Request, @Res() res: Response) { return forward(this.proxy, 'POST', req, res, 'employees'); }
   @Post() create(@Req() req: Request, @Res() res: Response) { return forward(this.proxy, 'POST', req, res, 'employees'); }
 }
 @Controller('api/v1/employee-provisioning')

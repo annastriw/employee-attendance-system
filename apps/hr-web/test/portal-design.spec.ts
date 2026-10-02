@@ -177,6 +177,15 @@ for (const scheme of ["light", "dark"] as const) {
       await expect(page.getByText(/Nilai lama tetap tersimpan/)).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
       await page.screenshot({ path: info.outputPath("employee-edit-" + scheme + "-" + width + ".png"), animations: "disabled", fullPage: true });
+      await page.getByRole("button", { name: "Reset password", exact: true }).click();
+      const resetDialog = page.getByRole("dialog");
+      await expect(resetDialog).toBeVisible();
+      await expect(resetDialog.getByRole("button", { name: "Reset password", exact: true })).toBeVisible();
+      await expect(resetDialog.getByText(/Semua sesi karyawan akan dicabut seketika/)).toBeVisible();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
+      await page.screenshot({ path: info.outputPath("reset-confirm-" + scheme + "-" + width + ".png"), animations: "disabled", fullPage: true });
+      await resetDialog.getByRole("button", { name: "Batal", exact: true }).click();
+      await expect(resetDialog).toBeHidden();
       await page.getByRole("button", { name: "Nonaktifkan", exact: true }).click();
       const lifecycleDialog = page.getByRole("dialog");
       await expect(lifecycleDialog).toBeVisible();
