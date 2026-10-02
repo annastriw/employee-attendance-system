@@ -5,7 +5,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 ## Snapshot terakhir
 
 - Tanggal: 2026-10-02 (Asia/Jakarta). HEAD diverifikasi dengan `git log`; jangan anggap hash di sini sebagai HEAD.
-- Tahap: T08-T17 selesai. T15 (reset password karyawan) lulus manual peramban langkah 1–10 dan ditutup penuh pada 2026-10-02. T16 (aturan waktu dan eligibility absensi) selesai diimplementasikan end-to-end. T17 (kalender libur HRD) selesai diimplementasikan end-to-end; tes unit/kontrak, integrasi MySQL nyata, dan UI component tests 100% lulus; spesifikasi di docs/sdd/attendance-holidays.md. T18 prototipe kamera/lokasi tersedia dan terverifikasi otomatis/sintetis; uji perangkat nyata masih pending. T19 foto privat backend siap dikerjakan serial saat menunggu hasil uji T18. T09c tetap menjadi acuan tema.
+- Tahap: T08-T17 selesai. T15 (reset password karyawan) lulus manual peramban langkah 1–10 dan ditutup penuh pada 2026-10-02. T16 (aturan waktu dan eligibility absensi) selesai diimplementasikan end-to-end. T17 (kalender libur HRD) selesai diimplementasikan end-to-end; tes unit/kontrak, integrasi MySQL nyata, dan UI component tests 100% lulus; spesifikasi di docs/sdd/attendance-holidays.md. T18 diterima pengguna setelah konfirmasi semua alur uji berjalan pada 2026-10-02. T19 foto privat backend menjadi pekerjaan berikutnya. T09c tetap menjadi acuan tema.
 - Commit sesi ini pada dev (lama ke baru): 93488ae, f423e47, aa34d48, 1b7b05d, e4a6782, 83537f1, 112d7fa, a485480 (lihat git log), lalu:
   - c2f98fe docs: switch frontend theme to Linear-style zinc + emerald, Geist, Phosphor, light/dark
   - 36a24e4 feat(ui): Linear-style redesign with zinc + emerald, Geist, Phosphor and light/dark
@@ -29,7 +29,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T18 — Spike kamera dan lokasi | Menunggu uji perangkat nyata (2026-10-02) | apps/attendance-web/src/spikes/capture/, spikes/capture.html, vite.capture.config.ts, docs/architecture/camera-location-spike.md | T07 siap, T17 selesai | Vite 5173 PID 12068/session 96015 dibiarkan aktif untuk uji pengguna; backend tidak dijalankan | Prototipe/21 test/build/lint/model aktual + kamera sintetis lulus; T18 belum selesai |
+| T18 — Spike kamera dan lokasi | Diterima pengguna (2026-10-02) | apps/attendance-web/src/spikes/capture/, spikes/capture.html, vite.capture.config.ts, docs/architecture/camera-location-spike.md | T07 siap, T17 selesai | Vite 5173 PID 12068/session 96015 dibiarkan aktif untuk uji pengguna; backend tidak dijalankan | Prototipe/21 test/build/lint/model aktual + kamera sintetis lulus; uji manual diterima pengguna; T18 selesai |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 

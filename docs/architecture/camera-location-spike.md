@@ -1,6 +1,6 @@
 # T18 — Spike kamera dan lokasi
 
-Status: prototipe terverifikasi otomatis/sintetis; menunggu uji perangkat nyata.
+Status: diterima pengguna pada 2026-10-02 setelah laporan uji semua alur berjalan.
 Acuan: [baseline](../requirements/baseline.md), [UI/UX](../sdd/frontend-ui-ux.md),
 [task](../../tasks/todo.md#t18--spike-kamera-dan-lokasi).
 
@@ -44,14 +44,13 @@ Callback async sesi lama tidak boleh menghidupkan kamera/mengganti hasil sesi ba
 - [x] Unit: count/confidence/posisi, blink/reset/gap, location fresh/invalid.
 - [x] Komponen: izin ditolak, retry, preview/retake dan manual gate.
 - [x] Visual 320/1440 px terang/gelap, fokus dan overflow (idle/running sintetis).
-- [ ] Desktop kamera nyata dan GPS browser melalui secure context.
-- [ ] Android Chrome dan iOS Safari melalui HTTPS tepercaya.
+- [x] Uji perangkat nyata diterima berdasarkan konfirmasi pengguna: "saya sudah uji jalan semua" (2026-10-02). Detail model perangkat/OS/browser dan angka benchmark tidak diberikan; tidak diklaim sebagai matriks Android/iOS spesifik.
 - [ ] Nol/dua wajah, pencahayaan rendah, kacamata, blink dan manual.
 - [ ] Lokasi denied/timeout/stale, kamera denied/unavailable dan model gagal.
 - [ ] Stop/background/retake melepas tracks; callback lama diabaikan.
 
 Bukti otomatis/simulasi tidak membuktikan kamera, kedip manusia atau GPS nyata.
-T18 tetap terbuka sampai hasil perangkat nyata dicatat; T19 dapat dikerjakan
+T18 ditutup berdasarkan penerimaan uji pengguna; T19 dapat dikerjakan
 serial saat menunggu perangkat karena tidak bergantung pada T18.
 
 ## Menjalankan
@@ -98,5 +97,13 @@ hasil. Jangan memasukkan foto pribadi atau koordinat ke Git.
 - Foto, screenshot dan skrip smoke hanya di `.local/` (ignored), tidak di Git.
 - Review menemukan kamera terputus dan blendshape hilang perlu gate/error
   eksplisit; diperbaiki dan regression tests lulus. API/login/DB tidak berubah.
-- Desktop kamera/GPS nyata, Android dan iOS HTTPS masih menunggu pengujian
-  pengguna. Belum ada klaim blink nyata, akurasi lokasi nyata atau T18 selesai.
+- Pengguna mengonfirmasi semua alur uji berjalan pada 2026-10-02 dan meminta lanjut.
+  T18 diterima; tidak mengarang platform perangkat, success rate atau akurasi GPS.
+
+## Penerimaan pengguna
+Pada 2026-10-02 pengguna menyampaikan: "sudah mantap, saya sudah uji jalan semua, sekarang lanjut saja".
+Laporan ini menjadi bukti manual dari pengguna, terpisah dari bukti otomatis/sintetis.
+Parameter awal dipertahankan untuk integrasi T20; evaluasi ulang jika ditemukan
+kendala perangkat. Angka benchmark, model perangkat dan versi browser tidak diberikan.
+Skenario kegagalan di checklist yang belum dicatat perangkat nyata tetap dibuktikan
+oleh test/simulasi yang dijelaskan; tidak dinyatakan sebagai observasi perangkat pengguna.
