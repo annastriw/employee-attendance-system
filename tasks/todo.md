@@ -131,15 +131,15 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 - Target: apps/attendance-service/, docs/sdd/
 
 ## T17 — Kalender libur HRD
-- [ ] Selesai
+- [x] Selesai (2026-10-02; bukti spesifikasi, CRUD kalender libur, Gateway proxy, H13 UI, 15 unit/MySQL E2E dan 8 component tests di docs/sdd/attendance-holidays.md)
 - Acceptance: CRUD hari ini/mendatang, past ditolak, perubahan dicatat.
 - Verification: API/UI test past date, same-day edit dan snapshot event lama.
 - Dependencies: 16
 - Target: apps/attendance-service/, apps/hr-web/
 
 ### Checkpoint setelah T17
-- [ ] Test relevan dan build/lint lulus.
-- [ ] Alur fase diverifikasi, batasan dicatat dan ditinjau.
+- [x] Test relevan dan build/lint lulus.
+- [x] Alur fase diverifikasi, batasan dicatat dan ditinjau.
 
 ## T18 — Spike kamera dan lokasi
 - [ ] Selesai

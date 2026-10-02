@@ -1,11 +1,12 @@
 import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { GatewayConfig } from './gateway.config';
 
-export type Upstream = 'auth' | 'employee';
-type Method = 'GET' | 'POST' | 'PATCH';
+export type Upstream = 'auth' | 'employee' | 'attendance';
+type Method = 'GET' | 'POST' | 'PATCH' | 'DELETE';
 const OUTAGE: Record<Upstream, string> = {
   auth: 'Layanan autentikasi sementara tidak tersedia.',
   employee: 'Layanan data karyawan sementara tidak tersedia.',
+  attendance: 'Layanan absensi sementara tidak tersedia.',
 };
 
 @Injectable()
@@ -18,8 +19,13 @@ export class AuthProxyService {
     body?: unknown,
     upstream: Upstream = 'auth',
   ) {
-    const base = upstream === 'auth' ? this.config.authUrl : this.config.employeeUrl;
-    const withBody = method !== 'GET';
+    const base =
+      upstream === 'auth'
+        ? this.config.authUrl
+        : upstream === 'employee'
+          ? this.config.employeeUrl
+          : this.config.attendanceUrl;
+    const withBody = method !== 'GET' && method !== 'DELETE';
     try {
       const response = await fetch(`${base}${path}`, {
         method,

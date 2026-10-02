@@ -7,8 +7,9 @@ import { useHashRoute } from "../lib/use-hash-route";
 import { DepartmentsPage } from "./DepartmentsPage";
 
 import { PositionsPage } from "./PositionsPage";
+import { HolidaysPage } from "./HolidaysPage";
 
-const TITLES = { ringkasan: "Ringkasan", departemen: "Departemen", jabatan: "Jabatan", karyawan: "Karyawan" } as const;
+const TITLES = { ringkasan: "Ringkasan", departemen: "Departemen", jabatan: "Jabatan", karyawan: "Karyawan", "hari-libur": "Hari Libur" } as const;
 
 export function DashboardPage({ user, client, busy, error, onLogout, onSessionExpired }: {
   user: AdminUser;
@@ -30,6 +31,9 @@ export function DashboardPage({ user, client, busy, error, onLogout, onSessionEx
       ) : view === "jabatan" ? (
         <PositionsPage client={client} params={params} onSessionExpired={onSessionExpired}
           onParamsChange={(next) => navigate("jabatan", next)} />
+      ) : view === "hari-libur" ? (
+        <HolidaysPage client={client} params={params} onSessionExpired={onSessionExpired}
+          onParamsChange={(next) => navigate("hari-libur", next)} />
       ) : (
         <div className="empty-state">
           <span className="empty-icon" aria-hidden="true"><ChartBar size={22} /></span>

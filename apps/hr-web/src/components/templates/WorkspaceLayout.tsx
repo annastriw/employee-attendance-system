@@ -1,7 +1,6 @@
-import { Users } from '@phosphor-icons/react';
 import { useRef, useState, type ReactNode } from "react";
 import { Button } from "@heroui/react";
-import { Briefcase, Buildings, List, SquaresFour } from "@phosphor-icons/react";
+import { Briefcase, Buildings, CalendarBlank, List, SquaresFour, Users } from "@phosphor-icons/react";
 import { Brand, PageTitle } from "../atoms/Brand";
 import { AccountMenu } from "../molecules/AccountMenu";
 import type { View } from "../../lib/use-hash-route";
@@ -12,6 +11,7 @@ const NAV: { view: View; label: string; icon: ReactNode }[] = [
   { view: "karyawan", label: "Karyawan", icon: <Users size={18} aria-hidden="true" /> },
   { view: "departemen", label: "Departemen", icon: <Buildings size={18} aria-hidden="true" /> },
   { view: "jabatan", label: "Jabatan", icon: <Briefcase size={18} aria-hidden="true" /> },
+  { view: "hari-libur", label: "Hari Libur", icon: <CalendarBlank size={18} aria-hidden="true" /> },
 ];
 
 function NavLinks({ active, onNavigate }: { active: View; onNavigate?: () => void }) {

@@ -6,9 +6,19 @@ import { GatewayConfig } from './gateway.config';
 import { AuthProxyService } from './auth-proxy.service';
 import { AuthProxyController } from './auth-proxy.controller';
 import { EmployeeProxyController } from './employee-proxy.controller';
+import { HolidaysProxyController } from './holidays-proxy.controller';
 
 @Module({
-  controllers: [AppController, AuthProxyController, EmployeeProxyController, EmployeesProxyController, EmployeeProvisioningProxyController, EmployeeEmailChangesProxyController, EmployeeLifecycleProxyController],
+  controllers: [
+    AppController,
+    AuthProxyController,
+    EmployeeProxyController,
+    EmployeesProxyController,
+    EmployeeProvisioningProxyController,
+    EmployeeEmailChangesProxyController,
+    EmployeeLifecycleProxyController,
+    HolidaysProxyController,
+  ],
   providers: [AppService, GatewayConfig, AuthProxyService],
 })
 export class AppModule {}
