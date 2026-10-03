@@ -6,6 +6,7 @@
 - [Development](development/implementation-workflow.md): satu increment di dev.
 - [Testing](testing/workflow.md): unit wajib, integrasi cepat bila perlu, UI/UX manual menunggu pengguna oke.
 - [Rilis](development/ci-cd-workflow.md): PR dev → main, CI ringkas, image cached/paralel dan status deployment.
+- [VPS manual tahap per tahap](deployment/vps-production-manual.md): lanjut T30 dari infra yang sudah tersedia.
 - [Plan](../tasks/plan.md), [todo](../tasks/todo.md), [progress](../tasks/progress.md): urutan, penerimaan dan titik lanjut VPS.
 - [UI/UX](sdd/frontend-ui-ux.md), [design system](sdd/frontend-design-system.md): arah desain kedua portal.
 

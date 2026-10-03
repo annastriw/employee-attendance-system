@@ -2,6 +2,14 @@
 
 Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mulai/selesai task, sebelum sesi berganti atau kapasitas sesi habis. Status completion tetap di [todo](todo.md); dependency di [plan](plan.md); prosedur pada [alur implementasi](../docs/development/implementation-workflow.md).
 
+## Titik lanjut aktif — manual T25/T26 diterima, T30 tutorial
+
+- Pengguna menyatakan: monitoring dan detail absensi sudah oke (2026-10-03). Acceptance manual T25/T26 dicatat/diterima; tidak mengarang perangkat/browser, tidak menjalankan ulang test dan tidak menerima recovery/live dari scope ini.
+- T30 dilanjutkan manual oleh pengguna, satu tahap per giliran. Runbook docs/deployment/vps-production-manual.md tahap 1 hanya inventaris Compose/resource/port/network dan jumlah tabel attendance_prod, tanpa membuka secret atau mengubah VPS.
+- Menunggu output tahap 1 sebelum membuat migration/akun runtime/backend Compose atau menentukan langkah lanjut. Jangan menggunakan setup demo lama sebagai bukti production.
+- Kode/workflow terbaru tetap dev; main masih dasar rilis pertama. Belum promosi/merge main, publish image atau deploy VPS. Unit/integrasi hanya sesuai workflow terbaru, UI manual pengguna.
+- Verifikasi increment dokumentasi: review isi/command read-only/SQL SELECT, tautan lokal dan diff. Tidak ada suite aplikasi baru yang dijalankan atau perubahan proses/port/VPS.
+
 ## Aturan aktif terbaru — unit wajib dan manual acceptance pengguna
 
 - Coding/commit/push langsung dev; main hanya melalui PR rilis pengguna. Lokal/remote tetap dev dan main, source terbaru di dev; tidak mempromosikan bootstrap main atau mengubah VPS pada increment dokumentasi ini.
@@ -54,7 +62,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T30 — aturan testing cepat dan penerimaan manual | Sesi ini (serial) | README/index/testing, AGENTS, spec/runbook, plan/todo/progress, script unit/CI | Keputusan terbaru pengguna | Tidak mengubah VPS/proses/port | Verifikasi/commit/push dev; main menunggu PR rilis |
+| T30 — tutorial manual VPS tahap 1 | Sesi ini (serial) | docs/deployment/vps-production-manual.md, docs index, todo/progress | Manual T25/T26 diterima pengguna | Tidak mengubah VPS/proses/port | Menunggu output inventaris infra/schema sebelum tahap berikut |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 

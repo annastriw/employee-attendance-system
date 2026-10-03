@@ -204,6 +204,7 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 - Target: apps/attendance-service/, apps/attendance-web/
 
 ## T25 — Monitoring dan rekap
+- [x] Penerimaan manual pengguna 2026-10-03: monitoring dinyatakan oke. Scope sesuai laporan pengguna; tidak mengarang browser/perangkat atau mengulang suite.
 - [x] Selesai (2026-10-03; spesifikasi di docs/sdd/attendance-monitoring.md, unit/integration MySQL dan UI HRD lulus)
 - Acceptance: Dashboard dan daftar termasuk missing; historical eligibility benar; deleted dikecualikan.
 - Verification: Unit logika terkait wajib; integrasi cepat satu file/skenario bila perlu; UI/alur manual oleh pengguna, centang setelah konfirmasi oke. Bukti suite terdahulu di bawah tetap historis.
@@ -212,6 +213,7 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 - Target: apps/attendance-service/, apps/hr-web/
 
 ## T26 — Detail monitoring Leaflet
+- [x] Penerimaan manual pengguna 2026-10-03: detail absensi dinyatakan oke. Tidak mencentang recovery, UI lain atau live dari konfirmasi ini.
 - [x] Selesai (2026-10-03; spesifikasi di docs/sdd/attendance-leaflet-monitoring.md, gateway proxy, photo endpoint, dan UI Leaflet terverifikasi)
 - Acceptance: Dua lokasi, accuracy, waktu, alasan dan foto privat tampil sesuai akses.
 - Verification: Unit logika terkait wajib; integrasi cepat satu file/skenario bila perlu; UI/alur manual oleh pengguna, centang setelah konfirmasi oke. Bukti suite terdahulu di bawah tetap historis.
@@ -272,6 +274,7 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 - [x] Alur fase diverifikasi, batasan dicatat dan ditinjau.
 
 ## T30 — Artefak deploy dan runbook
+- Pelaksanaan pengguna: manual satu tahap per giliran, mulai [tahap 1 inventaris infra/schema](../docs/deployment/vps-production-manual.md). Menunggu output VPS; tidak reset atau deploy pada tahap ini.
 - [ ] Selesai
 - Acceptance: Satu repo GitHub, dua project Vercel terpisah, backend/MySQL/AIStor VPS Ubuntu, Cloudflare, migration/seed, healthcheck, backup/restore dan rollback siap; topologi mengikuti ADR-003.
 - Verification: Review konfigurasi tanpa secret; uji restore backup test.
