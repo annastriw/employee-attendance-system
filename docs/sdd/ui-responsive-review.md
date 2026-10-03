@@ -1,5 +1,7 @@
 # T28 — Review UI Responsif dan Aksesibilitas
 
+Frekuensi testing dan aturan centang: [workflow aktif](../testing/workflow.md). Resep/hasil suite lama di dokumen ini tidak menjadi gate rutin; bukti historis tetap dipertahankan.
+
 Status: Implementasi dan verifikasi T28 (Asia/Jakarta, 2026-10-03).
 Acuan: [Baseline Kebutuhan](../requirements/baseline.md), [Frontend Design System](frontend-design-system.md), [Frontend UI/UX](frontend-ui-ux.md), dan [Plan](../../tasks/plan.md).
 

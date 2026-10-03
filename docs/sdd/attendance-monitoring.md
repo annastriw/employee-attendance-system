@@ -1,5 +1,7 @@
 # Spesifikasi Modul — Monitoring dan Rekap Kehadiran HRD (T25)
 
+Frekuensi testing dan aturan centang: [workflow aktif](../testing/workflow.md). Resep/hasil suite lama di dokumen ini tidak menjadi gate rutin; bukti historis tetap dipertahankan.
+
 ## 1. Deskripsi dan Latar Belakang
 
 Modul Monitoring dan Rekap Kehadiran HRD (T25 / Layar H02) menyediakan visibilitas menyeluruh bagi HRD terhadap status kehadiran seluruh karyawan pada tanggal tertentu. Modul ini memenuhi kebutuhan operasional harian untuk memantau karyawan yang hadir tepat waktu, terlambat, pulang lebih awal, belum melakukan checkout, maupun karyawan yang tidak hadir (missing attendance).

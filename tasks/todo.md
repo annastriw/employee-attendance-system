@@ -1,3 +1,5 @@
+Aturan verifikasi aktif 2026-10-03: [unit wajib, integrasi cepat bila perlu, UI/UX manual pengguna](../docs/testing/workflow.md). Checkbox manual dan selesai penuh hanya setelah pengguna menyatakan oke untuk scope terkait. CI rilis unit sekali + lint/build/typecheck; integrasi terfokus bila perlu sebelum rilis, tanpa Playwright/suite penuh rutin. Hasil lama tetap bukti historis.
+
 # Daftar tugas implementasi
 
 Status: implementasi sebagian berjalan; checklist per-task dan subtask menunjukkan bukti yang telah selesai. Path pada task yang belum selesai merupakan target rencana. Checklist induk tidak otomatis selesai hanya karena subtask tertentu sudah tersedia. Task lintas beberapa service dipecah lagi sebelum implementasi agar sekitar 1–5 file per task.
@@ -67,7 +69,7 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 ## T09 — Login admin UI
 - [x] Selesai
 - Acceptance: Panel HRD login dan ganti password awal hingga dashboard kosong.
-- Verification: Component test dan Playwright login/ganti password.
+- Verification: Unit logika terkait wajib; integrasi cepat satu file/skenario bila perlu; UI/alur manual oleh pengguna, centang setelah konfirmasi oke. Bukti suite terdahulu di bawah tetap historis.
 - Dependencies: 8
 - Target: apps/hr-web/
 
@@ -89,7 +91,7 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 - [x] Selesai (2026-10-02; browser manual desktop/mobile lulus menurut laporan pengguna, bukti backend MySQL pada kontrak)
 - Kontrak dan bukti: [employee-provisioning](../docs/sdd/employee-provisioning.md). Spec Playwright ditambahkan; run otomatis ditunda karena RAM host.
 - Acceptance: Profil+akun dibuat terkoordinasi; password sementara tampil sekali; NIK/email unik.
-- Verification: Integration test konflik unik, kegagalan antarservice, retry dan sanitasi log.
+- Verification: Unit logika terkait wajib; integrasi cepat satu file/skenario bila perlu; UI/alur manual oleh pengguna, centang setelah konfirmasi oke. Bukti suite terdahulu di bawah tetap historis.
 - Dependencies: 11
 - Target: apps/{employee-service,auth-service}/, apps/hr-web/
 
@@ -108,7 +110,7 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 ## T14 — Perubahan dan lifecycle karyawan
 - [x] Selesai (2026-10-02; putaran A & B lulus manual pengguna dan tes otomatis; bukti di docs/sdd/employee-lifecycle.md)
 - Acceptance: Edit profil/email, nonaktif/arsip/restore; history dan revokasi konsisten.
-- Verification: Integration test restore nonaktif dan token lama ditolak.
+- Verification: Unit logika terkait wajib; integrasi cepat satu file/skenario bila perlu; UI/alur manual oleh pengguna, centang setelah konfirmasi oke. Bukti suite terdahulu di bawah tetap historis.
 - Dependencies: 13
 - Target: apps/{employee-service,auth-service}/, apps/hr-web/
 - [x] Putaran A — edit profil/email: kontrak sinkronisasi Employee–Auth, API dan form HR menggunakan pola yang ada; validasi master, konflik NIK/email termasuk nonaktif/arsip, serta konsistensi dan pemulihan perubahan lintas service. Test terkait dan satu checklist browser sesudah putaran lengkap.
@@ -153,7 +155,7 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 ## T19 — Foto privat backend
 - [x] Selesai
 - Acceptance: Upload tervalidasi ke MinIO AIStor Free, READY, checksum, pemilik/purpose, akses terotorisasi.
-- Verification: Integration test MinIO AIStor Free dan penolakan akses foto pengguna lain.
+- Verification: Unit logika terkait wajib; integrasi cepat satu file/skenario bila perlu; UI/alur manual oleh pengguna, centang setelah konfirmasi oke. Bukti suite terdahulu di bawah tetap historis.
 - Dependencies: 13
 - Target: apps/media-service/
 
@@ -168,7 +170,7 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 ## T21 — Check-in ujung ke ujung
 - [x] Selesai (2026-10-03; checklist manual diterima berdasarkan konfirmasi pengguna sampai T24)
 - Acceptance: Foto+lokasi wajib, waktu server, alasan late, snapshot, idempotency dan unique.
-- Verification: TDD/Supertest konkurensi, integrasi MySQL/AIStor; visual browser dan checklist manual per fitur sesuai tier test (E2E otomatis sebelum rilis).
+- Verification: Unit logika terkait wajib; integrasi cepat satu file/skenario bila perlu; UI/alur manual oleh pengguna, centang setelah konfirmasi oke. Bukti suite terdahulu di bawah tetap historis.
 - Implementasi/verifikasi teknis 2026-10-02: [check-in](../docs/sdd/attendance-checkin.md), 14 integrasi nyata + 22 unit Attendance + 6 unit/66 kontrak Gateway + 41 frontend + 8 visual lulus; schema/typecheck/lint/build terkait lulus. Checklist kamera/GPS/API browser nyata diterima pengguna 2026-10-03; T21 ditutup penuh.
 - Dependencies: 16,17,20
 - Target: apps/attendance-service/, apps/attendance-web/
@@ -180,7 +182,7 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 ## T22 — Check-out ujung ke ujung
 - [x] Selesai (2026-10-03; checklist manual diterima berdasarkan konfirmasi pengguna sampai T24)
 - Acceptance: Butuh check-in, alasan early, hari sama/cutoff, off-day tanpa late/early.
-- Verification: TDD boundary/hash, integrasi MySQL/AIStor, frontend terfokus; visual dan checklist browser manual sesuai tier test.
+- Verification: Unit logika terkait wajib; integrasi cepat satu file/skenario bila perlu; UI/alur manual oleh pengguna, centang setelah konfirmasi oke. Bukti suite terdahulu di bawah tetap historis.
 - Implementasi/verifikasi teknis 2026-10-02: [checkout](../docs/sdd/attendance-checkout.md), 21 integrasi termasuk tujuh checkout, enam unit policy/hash, tujuh unit Gateway dan 32 frontend lulus. Typecheck/lint/build terkait lulus; visual awal 12 lulus, lalu delapan verifikasi ulang beranda lulus setelah target sentuh disesuaikan menjadi 44 px. Manual kamera/GPS/API browser diterima pengguna 2026-10-03; T22 ditutup penuh.
 - Dependencies: 21
 - Target: apps/attendance-service/, apps/attendance-web/
@@ -188,7 +190,7 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 ## T23 — Soft delete dan restore absensi
 - [x] Selesai (2026-10-03; checklist manual diterima berdasarkan konfirmasi pengguna sampai T24)
 - Acceptance: Alasan/audit wajib, seluruh hari, tidak bisa absen ulang, restore data asli.
-- Verification: Integration test delete/retry/restore/concurrency dan UI HRD.
+- Verification: Unit logika terkait wajib; integrasi cepat satu file/skenario bila perlu; UI/alur manual oleh pengguna, centang setelah konfirmasi oke. Bukti suite terdahulu di bawah tetap historis.
 - Implementasi/verifikasi teknis 2026-10-03: [lifecycle absensi](../docs/sdd/attendance-lifecycle.md), 21 regresi check-in/checkout dan lima skenario T23 terverifikasi dalam run serial; delapan unit Gateway, 28 frontend terkait dan 12 visual lulus. Typecheck/lint/build package terkait lulus. Checklist manual HRD/backend browser diterima pengguna 2026-10-03; T23 ditutup penuh.
 - Dependencies: 22
 - Target: apps/attendance-service/, apps/hr-web/
@@ -196,7 +198,7 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 ## T24 — Riwayat pribadi
 - [x] Selesai (2026-10-03; checklist manual diterima berdasarkan konfirmasi pengguna sampai T24)
 - Acceptance: Pagination/filter; hanya milik sendiri, deleted label tanpa foto, waktu+alasan terlihat.
-- Verification: Otorisasi/integrasi MySQL/AIStor nyata, component test dan visual; alur browser backend nyata memakai checklist manual sesuai tier test.
+- Verification: Unit logika terkait wajib; integrasi cepat satu file/skenario bila perlu; UI/alur manual oleh pengguna, centang setelah konfirmasi oke. Bukti suite terdahulu di bawah tetap historis.
 - Implementasi/verifikasi teknis 2026-10-03: [riwayat pribadi](../docs/sdd/attendance-history.md), 28 integrasi gabungan termasuk dua skenario T24, 13 unit Gateway, 87 frontend dan tujuh tes riwayat ulang setelah penyesuaian urutan bukti lulus. Empat visual Home dan 12 riwayat 320/1440 terang/gelap serta typecheck/lint/build terkait lulus. Foto privat lazy 60 detik, data terhapus tanpa foto dan filter/kembali tersedia. Kendala CORS DELETE HRD diperbaiki pada commit terpisah. Manual T20–T24 diterima pengguna 2026-10-03; T24 ditutup penuh.
 - Dependencies: 23
 - Target: apps/attendance-service/, apps/attendance-web/
@@ -204,7 +206,7 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 ## T25 — Monitoring dan rekap
 - [x] Selesai (2026-10-03; spesifikasi di docs/sdd/attendance-monitoring.md, unit/integration MySQL dan UI HRD lulus)
 - Acceptance: Dashboard dan daftar termasuk missing; historical eligibility benar; deleted dikecualikan.
-- Verification: Integration test history, kalender dan gabungan late/early.
+- Verification: Unit logika terkait wajib; integrasi cepat satu file/skenario bila perlu; UI/alur manual oleh pengguna, centang setelah konfirmasi oke. Bukti suite terdahulu di bawah tetap historis.
 - Implementasi/verifikasi teknis 2026-10-03: [monitoring & rekap](../docs/sdd/attendance-monitoring.md), 12 integrasi MySQL nyata (`attendance-service/test/monitoring.e2e-spec.ts`), 66 unit service attendance, 40 unit API Gateway, 22 unit Employee Service, serta 75 unit/component tests HR Web (`hr-web/src/pages/MonitoringPage.test.tsx` 5 passed) lulus. Endpoint `GET /api/v1/monitoring/summary` dan `GET /api/v1/monitoring/employees` terverifikasi dengan evaluasi missing attendance dari eligibility historis, soft-deleted dikecualikan dari metrik aktif dan ditandai badge "Dihapus HRD", status ganda (terlambat & pulang cepat) dipertahankan, filter metrik/departemen/status/search berfungsi. Typecheck/lint/build semua service terkait lulus 100% tanpa error.
 - Dependencies: 24
 - Target: apps/attendance-service/, apps/hr-web/
@@ -212,7 +214,7 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 ## T26 — Detail monitoring Leaflet
 - [x] Selesai (2026-10-03; spesifikasi di docs/sdd/attendance-leaflet-monitoring.md, gateway proxy, photo endpoint, dan UI Leaflet terverifikasi)
 - Acceptance: Dua lokasi, accuracy, waktu, alasan dan foto privat tampil sesuai akses.
-- Verification: Browser test detail dan uji peta mobile.
+- Verification: Unit logika terkait wajib; integrasi cepat satu file/skenario bila perlu; UI/alur manual oleh pengguna, centang setelah konfirmasi oke. Bukti suite terdahulu di bawah tetap historis.
 - Implementasi/verifikasi teknis 2026-10-03: [detail monitoring Leaflet](../docs/sdd/attendance-leaflet-monitoring.md). Backend `attendance-service` endpoint `GET /api/v1/attendance/:id/events/:eventId/photo` menerbitkan signed URL foto privat 60 detik bagi HRD untuk absensi aktif maupun soft-deleted (baseline baris 53); `api-gateway` memvalidasi UUID v4 dan meneruskan foto (43 unit tests lulus); integrasi nyata MySQL/AIStor di `checkin.e2e-spec.ts` memverifikasi otorisasi dan akses foto; frontend `hr-web` mengintegrasikan Leaflet (`AttendanceMap.tsx`) dengan marker custom SVG + lingkaran akurasi dan atribusi OSM, `AttendanceEvidence.tsx` menyajikan dua bukti berdampingan (desktop) atau bertumpuk (mobile) dengan foto privat ber-timer 60 detik dan rincian tekstual lokasi (78 tests `hr-web` lulus). Typecheck, lint, dan production build seluruh package terkait lulus 100% tanpa error.
 - Dependencies: 25
 - Target: apps/hr-web/
@@ -248,10 +250,10 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 
 ## T29 — Validasi integrasi dan CI
 - [x] Selesai (2026-10-03; spesifikasi di docs/sdd/integration-validation-ci.md, workflow .github/workflows/ci.yml, pipeline lokal pnpm validate, skrip ci:setup/ci:grants, dan verifikasi seluruh suite test lulus)
-- Acceptance: Build/lint/test menjalankan skenario penting dengan env test terpisah; pipeline branch dev/main.
-- Verification: Run pipeline lokal/CI dan Playwright core journeys.
-- Implementasi/verifikasi teknis 2026-10-03: [validasi integrasi dan CI](../docs/sdd/integration-validation-ci.md).
-  1. **Konfigurasi Otomasi CI**: Workflow GitHub Actions (`.github/workflows/ci.yml`) dikonfigurasi untuk branch `dev` dan `main` (push dan PR) dengan tiga job terisolasi: `quality` (statis, lint, typecheck, build, unit test), `integration` (layanan kontainer MySQL 8.4.11 di port 3307 dan MinIO AIStor di port 9000/9001), serta `visual-e2e` (Playwright chromium headless).
+- Acceptance: PR dev ke main menjalankan lint/build/typecheck/unit test dan branch policy; UI/alur dicek manual. Suite integrasi/visual lama disimpan sebagai pemeriksaan tambahan, bukan gate deployment rutin.
+- Verification: Unit logika terkait wajib; integrasi cepat satu file/skenario bila perlu; UI/alur manual oleh pengguna, centang setelah konfirmasi oke. Bukti suite terdahulu di bawah tetap historis.
+- Implementasi/verifikasi teknis awal 2026-10-03: [validasi integrasi dan CI](../docs/sdd/integration-validation-ci.md). Riwayat di bawah berasal dari sebelum revisi branch/CI; verifikasi terbaru ada pada [checkpoint kebijakan CI/CD](progress.md#aturan-aktif-terbaru--unit-wajib-dan-manual-acceptance-pengguna). Actions terbaru belum diklaim lulus.
+  1. **Bukti historis sebelum revisi efisiensi 2026-10-03**: Workflow GitHub Actions (`.github/workflows/ci.yml`) dikonfigurasi untuk branch `dev` dan `main` (push dan PR) dengan tiga job terisolasi: `quality` (statis, lint, typecheck, build, unit test), `integration` (layanan kontainer MySQL 8.4.11 di port 3307 dan MinIO AIStor di port 9000/9001), serta `visual-e2e` (Playwright chromium headless).
   2. **Isolasi Database & Storage Testing**: Skrip otomasi `scripts/ci/setup-ci-environment.mjs` menginisialisasi database `attendance_dev`, `attendance_test`, `attendance_shadow`, akun runtime least-privilege, hak akses tabel per-service (`pnpm run ci:grants`), dan pembuatan bucket privat (`attendance-photos`, `attendance-photos-test`).
   3. **Verifikasi Constraint & Hak Akses**: `pnpm run db:verify` memvalidasi koneksi Prisma, zona waktu UTC (+00:00), constraint unik email/token (termasuk reservasi email akun arsip), foreign keys sesi, rollback transaksi, serta pencegahan akses runtime terhadap tabel migrasi atau penghapusan audit trail.
   4. **Perbaikan Hermeticity Test**: Penyempurnaan `policy-database.e2e-spec.ts` untuk membersihkan tanggal target sebelum evaluasi `REGULAR_WORKDAY`, serta penyesuaian Playwright channel (`process.env.CI ? undefined : "chrome"`) agar kompatibel lintas OS (Windows lokal dan Linux runner).
@@ -275,6 +277,7 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 - Verification: Review konfigurasi tanpa secret; uji restore backup test.
 - Dependencies: 29
 - Target: infra/, docs/deployment/
+- Revisi efisiensi 2026-10-03: hanya dev/main, uji lokal unit+manual, PR main dengan CI ringkas. CD target: image GitHub/GHCR cached/paralel → VPS pull/update → migration hanya bila baru → health → frontend main. Tanpa Playwright/integrasi penuh rutin, reset atau seed ulang. CD/akses/domain/backup/rollback belum selesai; lanjut setup VPS dari infra production, bukan reset lagi.
 
 ## T31 — Deployment dan verifikasi live
 - [ ] Selesai
@@ -358,7 +361,7 @@ Catatan: bagian database development dari T07 selesai berdasarkan laporan penggu
 ## T09c — Redesign visual ala Linear (menggantikan tema monokrom T09b)
 - [x] Selesai (persetujuan pengguna 2026-10-02; bukti terakhir T11 di docs/sdd/employee-positions.md)
 - Acceptance: Wajib untuk seluruh halaman yang tersedia maupun berikutnya (E01–E09/H01–H14), termasuk state/dialog. Token zinc + satu aksen emerald, mode terang/gelap mengikuti sistem, font Geist self-hosted, ikon Phosphor; radius tombol/field 8 px, panel 12 px. Login HR split-screen (form + panel kemampuan produk) >= 1024 px dan satu kolom di bawahnya; login Attendance satu kolom; workspace HR sidebar ikon, header, tombol akun inisial, empty state berikon. Alur auth, label, fokus keyboard, aria dan pesan tetap.
-- Verification: tsc kedua frontend, Vitest auth hr-web, Playwright design (test:ui) terang dan gelap pada 320/768/1024/1440 px, screenshot ditinjau. Checkpoint nyata terpenuhi: E2E Auth dari sesi sebelumnya serta jabatan/departemen desktop/mobile pada T11 (run per spec terpisah).
+- Verification: Unit logika terkait wajib; integrasi cepat satu file/skenario bila perlu; UI/alur manual oleh pengguna, centang setelah konfirmasi oke. Bukti suite terdahulu di bawah tetap historis.
 - Target: packages/ui/, apps/{attendance-web,hr-web}/, docs/sdd/frontend-design-system.md, docs/sdd/frontend-ui-ux.md
 
 ## Keterlacakan desain UI/UX dalam implementasi proyek
@@ -384,7 +387,7 @@ Catatan: bagian database development dari T07 selesai berdasarkan laporan penggu
 ### UX03 — Master, akun dan lifecycle
 - [x] Selesai (rekonsiliasi 2026-10-03 berdasarkan acceptance task terkait; bukan backlog tambahan)
 - Acceptance: E01/E02/E09 dan H01/H06–H12/H14 terintegrasi sesuai T10–T15: master aktif/nonaktif, profil+akun konsisten, password tampil sekali, restore Nonaktif, revokasi.
-- Verification: API/MySQL test, component tests dan E2E HR membuat karyawan hingga login/ganti password serta lifecycle/reset.
+- Verification: Unit logika terkait wajib; integrasi cepat satu file/skenario bila perlu; UI/alur manual oleh pengguna, centang setelah konfirmasi oke. Bukti suite terdahulu di bawah tetap historis.
 - Dependencies: UX01/UX02; T10–T15 berurutan.
 - Target: Employee/Auth/Gateway, kedua frontend, spec/tests.
 
@@ -399,7 +402,7 @@ Catatan: bagian database development dari T07 selesai berdasarkan laporan penggu
 - [ ] Selesai
 - T23/T24 diterima manual 2026-10-03; T25/T26 belum diimplementasikan sehingga pemetaan ini belum ditutup.
 - Acceptance: E07/E08/H02–H05 sesuai T23–T26; filter/pagination, foto terotorisasi, Leaflet kedua lokasi, soft delete/restore seluruh hari, deleted bukan missing.
-- Verification: API authorization/history, integration/MySQL/AIStor dan browser detail/filter/restore.
+- Verification: Unit logika terkait wajib; integrasi cepat satu file/skenario bila perlu; UI/alur manual oleh pengguna, centang setelah konfirmasi oke. Bukti suite terdahulu di bawah tetap historis.
 - Dependencies: UX04; T23–T26.
 - Target: Attendance/Media/Gateway, kedua frontend dan tests/spec.
 

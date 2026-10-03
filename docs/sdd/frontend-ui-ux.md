@@ -1,5 +1,7 @@
 # Spesifikasi UI/UX seluruh portal
 
+Frekuensi testing dan aturan centang: [workflow aktif](../testing/workflow.md). Resep/hasil suite lama di dokumen ini tidak menjadi gate rutin; bukti historis tetap dipertahankan.
+
 Status: arah desain hasil diskusi disetujui untuk ditulis sebagai acuan implementasi oleh pengguna pada 2026-10-01. Dokumen ini adalah spesifikasi target, bukan laporan fitur yang telah selesai.
 
 ## Acuan dan batas keputusan
@@ -174,8 +176,8 @@ Kedipan memicu auto capture, bukan pencocokan wajah/verifikasi identitas. Tidak 
 - [ ] Seluruh keluarga layar memakai token/komponen bersama dan Bahasa Indonesia konsisten.
 - [ ] Auth/master/provisioning/lifecycle/reset/capture/check-in/out/riwayat/monitoring/detail/restore memenuhi baseline.
 - [ ] Loading/empty/filter-empty/error/busy/success/expired/denied teruji pada halaman terkait.
-- [ ] Screenshot semua keluarga layar pada viewport sasaran ditinjau; mobile/keyboard terverifikasi.
-- [ ] Vitest/RTL memeriksa interaksi bermakna; Playwright core journeys memakai API nyata; test backend menguji bisnis/otorisasi/idempotensi.
+- [ ] Pengguna menerima tampilan/responsivitas/keyboard halaman terdampak secara manual; screenshot hanya bila membantu, tanpa tes screenshot otomatis.
+- [ ] Unit logika terkait lulus; integrasi cepat bila diperlukan. UI/core journeys lokal diuji manual pengguna dan dikonfirmasi oke; Playwright bukan gate rutin.
 - [ ] Kamera/blink/fallback/lokasi diuji perangkat nyata; hasil dibedakan dari simulasi.
 - [ ] Build/lint/test relevan lulus; task hanya dicentang dengan bukti/batasan jujur.
 - [ ] Runbook selaras; live hanya selesai setelah akses dan verifikasi nyata tersedia.

@@ -1,5 +1,7 @@
 # Perubahan dan lifecycle karyawan — T14
 
+Frekuensi testing dan aturan centang: [workflow aktif](../testing/workflow.md). Resep/hasil suite lama di dokumen ini tidak menjadi gate rutin; bukti historis tetap dipertahankan.
+
 Status: putaran A & B selesai; backend, gateway allowlist, MySQL nyata, UI H08, Vitest dan Playwright visual selesai diverifikasi. Checklist browser manual disiapkan untuk konfirmasi pengguna. Acuan: [baseline](../requirements/baseline.md), [provisioning T12](employee-provisioning.md), [UI/UX H08](frontend-ui-ux.md), [tier test](../../tasks/plan.md#tier-test-biaya-vs-nilai--disetujui-2026-10-02).
 
 ## Putaran A — profil dan email

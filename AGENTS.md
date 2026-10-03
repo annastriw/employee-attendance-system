@@ -8,15 +8,15 @@
 ## Commit dan push — instruksi pengguna
 - Setelah setiap perubahan logis lengkap dan verifikasi relevan lulus, buat satu commit dan push ke repository GitHub proyek. Gabungkan berkas kode/test/dokumentasi yang berkaitan dalam perubahan tersebut; hindari commit per berkas/potongan kecil.
 - Aturan mencakup kode, dokumentasi, konfigurasi, dan pengujian; jangan menumpuk perubahan yang tidak berkaitan.
-- Kerjakan development di branch dev. Branch main digunakan untuk production; jangan push hasil development langsung ke main.
+- Keputusan terbaru 2026-10-03: hanya branch dev dan main. Coding, commit dan push langsung ke dev; uji lokal lalu PR dev repository ini ke main saat siap rilis. Main untuk production, tanpa deployment dev/preview. Ikuti [workflow CI/CD](docs/development/ci-cd-workflow.md).
 - Gunakan pesan commit jelas dengan prefix feat, fix, docs, test, refactor, atau chore.
 - Periksa diff dan berkas yang akan di-stage sebelum commit. Stage hanya berkas terkait pekerjaan.
 - Jangan commit .env, kredensial, token, private key, backup, data/foto karyawan, dependency terinstal, atau hasil build.
 - Jalankan pemeriksaan sesuai perubahan. Untuk dokumentasi, periksa isi dan tautan; jangan mengklaim test aplikasi sudah berjalan bila belum tersedia.
 - Jangan force push atau menghapus perubahan pengguna.
 - Jika remote, autentikasi, atau Git belum tersedia, laporkan penghalangnya secara akurat. Jangan mengklaim commit/push berhasil.
-- Persetujuan commit dan push ke dev telah diberikan pengguna; tidak perlu meminta izin ulang untuk setiap perubahan.
-- Pengguna menentukan repository public [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system) pada 2026-10-02; origin memakai https://github.com/annastriw/employee-attendance-system.git. Setelah perubahan logis diverifikasi dan di-commit, push ke dev. Jangan membuat/memilih repository lain sendiri. Deployment dikerjakan terakhir sesuai tahap rilis, bukan setelah setiap push.
+- Persetujuan commit/push perubahan terverifikasi ke dev tetap berlaku; tidak perlu izin ulang. Merge/rilis main mengikuti instruksi rilis pengguna.
+- Repository public tetap [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system), origin https://github.com/annastriw/employee-attendance-system.git. Push perubahan development ke dev. Main hanya melalui PR rilis; CD belum aktif sampai artefak/akses T30 siap.
 - Promosi ke main mengikuti tahap rilis, verifikasi, dan instruksi pengguna.
 
 ## Cara kerja
@@ -30,7 +30,7 @@ Struktur tetap: satu monorepo, lima service NestJS (API Gateway, Auth, Employee,
 - Selesaikan satu fitur ujung ke ujung: schema/kontrak → API → UI → test → review → commit.
 - Pakai pola bersama untuk form, daftar, detail dan konfirmasi; pisah komponen Atomic Design hanya atas tanggung jawab atau reuse nyata. Tunda abstraksi generik.
 - Gunakan controller/DTO/service dan Prisma sesuai kepemilikan data; batasi outbox/retry pada alur konsistensi lintas service, tetap penuhi idempotensi/kompensasi/pemulihan baseline.
-- Ikuti [tier test revisi percepatan 2026-10-02](tasks/plan.md#tier-test-biaya-vs-nilai--disetujui-2026-10-02): typecheck/lint package terkait dan test perilaku terfokus. Hindari test baru yang hanya memeriksa teks/ikon/markup statis. Visual hanya halaman berubah pada 320/1440 px terang/gelap; tambah 768/1024 px jika breakpoint berubah. Selama development, E2E browser memakai checklist manual per fitur melalui backend nyata; E2E browser otomatis ditunda ke regresi sebelum rilis saat resource tersedia. Test integrasi MySQL/AIStor untuk bisnis, otorisasi/revokasi, constraint, idempotensi dan pemulihan tetap wajib. Build/test seluruh repo hanya pada checkpoint lintas package yang relevan dan sebelum main. Jangan ulang pemeriksaan lulus tanpa perubahan/risiko baru; simpan test lama. Suite berat serial, Playwright 1 worker; build dist backend yang berubah sebelum test memakai dist. Dokumentasi cukup module spec + acceptance dan progress; runbook diperbarui jika setup berubah.
+- Aturan testing terbaru 2026-10-03: [workflow testing](docs/testing/workflow.md) adalah acuan seluruh repo. Unit test wajib untuk logika kode berubah; jalankan package/file terdampak saja saat development. Integrasi mode cepat jika dibutuhkan (query/migration/grants, storage, login atau kontrak service): satu service/file/skenario relevan di lingkungan test lokal, tanpa suite penuh. UI/UX serta alur lokal diperiksa manual oleh pengguna; checkbox acceptance hanya dicentang setelah pengguna menyatakan oke untuk scope terkait. Jangan menambah Playwright/test screenshot/harness browser rutin. CI PR main menjalankan unit sekali ditambah lint/build/typecheck; integrasi yang perlu dibuktikan sebelum rilis secara terfokus, tidak diulang pada VPS. Deployment memakai build image, migration baru bila ada dan health operasional. Simpan test/bukti lama; jangan ulang hasil lulus tanpa perubahan/risiko baru. Dokumentasi saja cukup isi/tautan/diff.
 - Gunakan tooling yang ada; tunda broker/cache/orchestration/build system tanpa kebutuhan nyata.
 
 ## Object storage

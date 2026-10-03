@@ -1,4 +1,6 @@
 # Employee provisioning — T12
+
+Frekuensi testing dan aturan centang: [workflow aktif](../testing/workflow.md). Resep/hasil suite lama di dokumen ini tidak menjadi gate rutin; bukti historis tetap dipertahankan.
 Status: T12 selesai pada 2026-10-02 berdasarkan integrasi MySQL dan laporan uji browser manual pengguna; E2E Playwright otomatis ditunda karena RAM host. Acuan: [baseline](../requirements/baseline.md), [tooling](../architecture/adr-002-project-tooling.md), [Auth](auth-service.md), [UI/UX H07/H10](frontend-ui-ux.md) dan [tier test](../../tasks/plan.md#tier-test-biaya-vs-nilai--disetujui-2026-10-02).
 
 ## Tujuan dan batas

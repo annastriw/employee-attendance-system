@@ -1,4 +1,6 @@
 # Auth — kontrak database tahap fondasi
+
+Frekuensi testing dan aturan centang: [workflow aktif](../testing/workflow.md). Resep/hasil suite lama di dokumen ini tidak menjadi gate rutin; bukti historis tetap dipertahankan.
 Acuan: ../requirements/baseline.md dan ../architecture/adr-002-project-tooling.md.
 
 ## Scope

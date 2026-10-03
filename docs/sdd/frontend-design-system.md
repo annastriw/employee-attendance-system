@@ -1,4 +1,6 @@
 # Tema bersama Attendance Portal dan HR Portal
+
+Frekuensi testing dan aturan centang: [workflow aktif](../testing/workflow.md). Resep/hasil suite lama di dokumen ini tidak menjadi gate rutin; bukti historis tetap dipertahankan.
 Status: disetujui pengguna; revisi visual 2026-10-01 (arah "produk modern ala Linear", menggantikan tema monokrom charcoal). Berlaku untuk semua frontend sekarang dan berikutnya. Persetujuan T09c ditegaskan pengguna pada 2026-10-02.
 
 ## Kontrak desain
@@ -30,10 +32,10 @@ Token berada di packages/ui/src/theme.css dan menimpa variabel HeroUI v3 (--acce
 - Halaman berikutnya wajib memakai token dan komponen bersama, tanpa palet baru atau menyalin tema ke aplikasi.
 
 ## Verifikasi
-Ikuti [tier test revisi percepatan 2026-10-02](../../tasks/plan.md#tier-test-biaya-vs-nilai--disetujui-2026-10-02): typecheck/lint dan test validasi/interaksi pada package terdampak; hindari test baru yang hanya memeriksa teks, ikon atau markup statis. Saat layout/CSS berubah, periksa hanya halaman terdampak pada 320/1440 px terang/gelap; tambah 768/1024 px bila breakpoint berubah. Perubahan token/shell bersama mencakup pemakai terdampak. Gunakan test:ui terfilter atau browser manual tercatat; seluruh portal tidak diulang setiap checkpoint. E2E browser manual per fitur melalui API nyata selama development; regresi browser otomatis sebelum rilis saat resource tersedia. Periksa navigasi mobile, keyboard, menu akun, overflow dan screenshot sesuai perubahan.
-- pnpm --dir apps/hr-web run test:ui: layout tanpa database (sesi dimock untuk login, workspace serta master data).
-- pnpm --dir apps/hr-web run test:e2e: alur API nyata.
-- MCP Chrome DevTools untuk screenshot/accessibility tree; ukuran 320 px diuji melalui Playwright.
+Ikuti [workflow testing](../testing/workflow.md): unit untuk logika berubah; UI/layout/navigasi/mobile/desktop/keyboard/tema diperiksa manual oleh pengguna. Checklist baru dicentang setelah pengguna menyatakan oke. Tidak menjalankan Playwright/visual otomatis rutin; test lama tersedia sebagai alat opsional.
+- Opsional untuk diagnosis: pnpm --dir apps/hr-web run test:ui (fixture visual).
+- Opsional untuk diagnosis: pnpm --dir apps/hr-web run test:e2e (alur API nyata, fixture terisolasi).
+- Pemeriksaan manual browser/devtools untuk ukuran mobile/desktop, screenshot dan aksesibilitas; tidak perlu harness baru.
 
 Bukti terakhir (T11, 2026-10-02): 36 pemeriksaan visual kedua portal serta H11/H12 terang/gelap pada 320/768/1024/1440 px lulus dan screenshot ditinjau; 38 test komponen HR, build HR/backend, serta E2E jabatan/departemen desktop/mobile lulus. Bukti rinci di [modul jabatan](employee-positions.md) dan [progress](../../tasks/progress.md).
 

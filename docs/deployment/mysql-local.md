@@ -1,4 +1,6 @@
 # MySQL lokal — setup dan verifikasi
+
+Frekuensi testing dan aturan centang: [workflow aktif](../testing/workflow.md). Resep/hasil suite lama di dokumen ini tidak menjadi gate rutin; bukti historis tetap dipertahankan.
 Status: setup dan pengujian manual dikonfirmasi pengguna pada 2026-10-01 (Asia/Jakarta). Pengujian runtime tidak diulang oleh agent untuk commit ini.
 
 ## Konfigurasi

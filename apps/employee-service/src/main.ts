@@ -8,6 +8,6 @@ async function bootstrap() {
   configureApp(app);
   app.enableShutdownHooks();
   const config = app.get(EmployeeConfig);
-  await app.listen(config.port, '127.0.0.1');
+  await app.listen(config.port, process.env.HOST ?? '127.0.0.1');
 }
 void bootstrap();

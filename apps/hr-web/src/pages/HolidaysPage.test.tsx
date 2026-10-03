@@ -63,7 +63,7 @@ describe('HolidaysPage (H13)', () => {
     setup();
 
     const table = await screen.findByRole('grid', { name: 'Daftar hari libur' });
-    expect(within(table).getByText('Hari Raya Natal')).toBeInTheDocument();
+    expect(await within(table).findByText('Hari Raya Natal')).toBeInTheDocument();
     expect(within(table).getByText('Hari Kemerdekaan RI')).toBeInTheDocument();
 
     // Future holiday: edit and delete buttons are enabled

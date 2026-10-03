@@ -9,6 +9,6 @@ async function bootstrap() {
   });
   configureApp(app);
   app.enableShutdownHooks();
-  await app.listen(app.get(MediaConfig).port, '127.0.0.1');
+  await app.listen(app.get(MediaConfig).port, process.env.HOST ?? '127.0.0.1');
 }
 void bootstrap();

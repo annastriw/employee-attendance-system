@@ -2,9 +2,30 @@
 
 Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mulai/selesai task, sebelum sesi berganti atau kapasitas sesi habis. Status completion tetap di [todo](todo.md); dependency di [plan](plan.md); prosedur pada [alur implementasi](../docs/development/implementation-workflow.md).
 
-## Snapshot terakhir
+## Aturan aktif terbaru — unit wajib dan manual acceptance pengguna
 
-- Tanggal: 2026-10-03 (Asia/Jakarta), akhir increment T29. HEAD diverifikasi dengan `git log`; jangan anggap hash di sini sebagai HEAD.
+- Coding/commit/push langsung dev; main hanya melalui PR rilis pengguna. Lokal/remote tetap dev dan main, source terbaru di dev; tidak mempromosikan bootstrap main atau mengubah VPS pada increment dokumentasi ini.
+- Unit test logika berubah wajib. Integrasi cepat jika sambungan nyata perlu dibuktikan: satu service/file/skenario dengan layanan test lokal, bukan suite penuh. UI/UX dan alur lokal manual oleh pengguna; checkbox baru dicentang setelah pengguna menyatakan oke untuk scope terkait.
+- README dan docs/README merangkum alur. docs/testing/workflow.md menjadi satu acuan; spec/runbook lama diberi rujukan agar hasil/command historis tidak dianggap gate baru.
+- Script test/test:unit hanya unit terisolasi (Node/Jest/Vitest/RTL). CI PR main memakai test:unit sekali; publish main cached/paralel tidak mengulang suite. Integrasi perlu dilakukan terfokus sebelum rilis; pengiriman ke VPS belum disambungkan.
+- Bukti lama dan checkbox yang sudah diterima tetap disimpan. Increment ini tidak mencentang penerimaan UI/live baru, tidak menjalankan Playwright/integrasi atau mengulang suite aplikasi.
+- Verifikasi perubahan lulus: 4 unit kebijakan branch, Node syntax check, actionlint/YAML, kelima config Jest tidak memilih E2E, script unit-only, 253 tautan file dokumentasi dan diff. Suite aplikasi penuh tidak diulang. Scope runtime aplikasi/dependency tidak berubah.
+- Titik lanjut VPS tetap seperti catatan di bawah: /opt/attendance, MySQL production + AIStor/bucket/akun Media. Setup ditunda atas instruksi pengguna; berikut T30 backend/deploy/domain/TLS setelah pengguna melanjutkan, tanpa reset.
+
+## Titik lanjut VPS dan riwayat keputusan — 2026-10-03
+
+- Pengguna menggantikan flow feature/dev/main dengan hanya dev dan main. Coding/tes lokal dan commit/push langsung dev, PR dev ke main saat siap live. Tidak ada dev online.
+- Development: unit test logika berubah, lint/typecheck terkait, UI/responsivitas/alur aplikasi dicek manual. Tidak ada Playwright atau suite integrasi penuh wajib setiap fitur/deploy. Test lama dipertahankan untuk diagnosis opsional. Migration/grants lokal diperiksa saat schema berubah.
+- CI sekarang hanya PR main dari dev repository sendiri: branch policy, lint/Prisma/build/typecheck/unit tests, CI result. Workflow backend-images.yml pada main membangun/publish lima image cached/paralel ke GHCR, tanpa mengulang unit test. Publish baru dikonfigurasi, belum dieksekusi; pengiriman ke VPS belum diimplementasikan.
+- Commit image ad58ec5, fix test 7731142 dan paralelisasi 9e13517 diintegrasikan fast-forward ke dev; tidak ada commit hilang. Main bootstrap memakai commit dokumentasi awal 39d7795 untuk dasar PR rilis pertama tanpa mengaktifkan deployment. Branch codex/t30-production-images boleh dihapus hanya setelah ancestry dan push dev/main terverifikasi. Git lokal/remote aktual adalah bukti status, bukan snapshot lama di bawah.
+- Verifikasi increment: 4 unit test branch policy dan Node syntax check lulus; actionlint 1.7.12, parsing YAML/rantai job dan tautan lokal lulus; diff diperiksa sebelum commit. Suite aplikasi/integrasi/Playwright tidak diulang karena logika runtime tidak berubah.
+- VPS terakhir menurut output pengguna: /opt/attendance, secrets/licence privat, compose.infra.yml dengan attendance-prod-mysql-1 (attendance_prod, MySQL 8.4.11, healthy, loopback 3307) dan attendance-prod-aistor-1 (health/Console 200, loopback 9000/9001). Bucket privat dan akun Media terbatas: upload/download/delete lulus, akses di luar prefix/admin ditolak. UFW aktif, publik hanya 22/80/443. UKG lama dihapus pengguna; nginx host sebelumnya dihentikan. Lisensi/secret tidak dicatat di Git.
+- Status migration/schema/grants production backend setelah reset belum dibuktikan; jangan mengasumsikan setup demo lama berlaku pada attendance_prod. Tidak ada backend/frontend absensi live yang telah diverifikasi.
+- Setup VPS ditunda atas instruksi pengguna, dilanjutkan dari titik ini. Jangan reset/ulang bootstrap. Berikut T30: periksa konfigurasi repo/VPS aktual, siapkan backend Compose/GHCR/deploy health/rollback dan domain/TLS; Vercel main untuk dua portal. Aktivasi CD/rilis production belum dilakukan.
+- Tidak ada proses/port/VPS diubah oleh increment ini. Tooling lokal untracked tetap dipertahankan. Riwayat kebijakan/suite di bawah adalah bukti historis, bukan aturan terbaru.
+## Snapshot historis (aturan digantikan keputusan aktif di atas)
+
+- Tanggal: 2026-10-03 (Asia/Jakarta), setelah increment kebijakan CI/CD T30. HEAD diverifikasi dengan `git log`; jangan anggap hash di sini sebagai HEAD.
 - Tahap: fitur T08–T29 selesai dan diverifikasi; Checkpoint setelah T29 terpenuhi. Increment implementasi berikut T30 Artefak deploy dan runbook. Fondasi T01–T07/UX01–UX02 masih perlu rekonsiliasi status lama dan isolasi test; T30–T31 tetap belum selesai. T09c tetap menjadi acuan tema.
 - Commit sesi ini pada dev (lama ke baru): 93488ae, f423e47, aa34d48, 1b7b05d, e4a6782, 83537f1, 112d7fa, a485480 (lihat git log), lalu:
   - c2f98fe docs: switch frontend theme to Linear-style zinc + emerald, Geist, Phosphor, light/dark
@@ -33,15 +54,36 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T30 Artefak deploy dan runbook | Antigravity | infra/, docs/deployment/ | T29 selesai | MySQL 3307, AIStor 9000/9001 aktif | Berjalan |
+| T30 — aturan testing cepat dan penerimaan manual | Sesi ini (serial) | README/index/testing, AGENTS, spec/runbook, plan/todo/progress, script unit/CI | Keputusan terbaru pengguna | Tidak mengubah VPS/proses/port | Verifikasi/commit/push dev; main menunggu PR rilis |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
+
+## Increment T30 — build image backend (2026-10-03)
+
+- Branch aktif: `codex/t30-production-images`, dibuat dari `dev` pada HEAD `948c73e`.
+- Implementasi: Dockerfile multi-stage untuk lima service, `.dockerignore` yang mengecualikan secret/data lokal, file `dist` untuk paket runtime, dan konfigurasi `HOST` agar container mendengarkan pada interface container (default lokal tetap loopback). CI membangun kelima image paralel tanpa publish; integrasi menunggu gate build image. Runbook CI/CD diperbarui.
+- Verifikasi lokal: Prisma client generate serta build database dan kelima backend lulus; enam `package.json`, YAML workflow valid diparse, semua sumber `COPY` di Dockerfile ada, dan `git diff --check` lulus. Test tidak dijalankan manual.
+- Commit/push: `ad58ec5` (image gate) dan `7731142` (sinkronisasi test) pada `codex/t30-production-images`.
+- Run CI [37133223219](https://github.com/annastriw/employee-attendance-system/actions/runs/37133223219): branch policy, quality penuh, dan kelima build image (API Gateway, Auth, Employee, Attendance, Media) lulus. Integration gagal pada prasyarat secret CI AIStor yang belum tersedia; visual dilewati karena dependency itu. Ini bukan kegagalan image build.
+- Pengguna meminta percepatan setelah melihat durasi serial sekitar 12 menit. Matriks image kini diubah dari `max-parallel: 1` menjadi `5` karena kelima build independen di runner GitHub standar dan repo public. Perubahan ini menargetkan waktu tunggu sekitar durasi build terlama, dengan tambahan concurrent runners.
+- Batas verifikasi: Docker build tidak dapat dijalankan lokal karena daemon Windows tidak aktif/tidak dapat diakses. Pemanggilan `pnpm` terhalang izin lock global Corepack, sehingga `pnpm deploy --legacy` menunggu validasi CI. Integrasi GitHub tetap memerlukan secret lisensi khusus CI `AISTOR_CI_LICENSE`.
+- Berkas lokal `.agents/`, `.claude/`, `.kiro/`, `.windsurf/`, `skills-lock.json` tidak termasuk scope dan tidak boleh di-stage. Tidak ada VPS/service/port diubah.
+- Berikutnya: commit/push perubahan concurrency dan pantau CI. Setelah itu lanjutkan Compose production, publish GHCR, deployment dan runbook sebagai increment T30 berikutnya. Jangan promosi ke `main` atau deploy sampai seluruh acceptance/rilis disetujui.
 
 ## Perubahan yang belum di-commit
 
 Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .windsurf/ dan skills-lock.json adalah berkas lokal; jangan di-stage, dihapus atau diubah tanpa scope jelas. Rahasia dan data pribadi tetap ignored.
 
-## Checkpoint T29 — 2026-10-03
+## Checkpoint kebijakan CI/CD T30 — 2026-10-03
+
+- Keputusan terbaru: fitur/perbaikan → PR dev → PR dev repository sendiri ke main; hanya main untuk production awal 5 karyawan dan 1 HR. Tidak ada deployment dev/preview. Acuan: [workflow CI/CD](../docs/development/ci-cd-workflow.md).
+- Implementasi: gate sumber/tujuan PR, CI push semua branch, hasil agregat wajib `CI result`, job berat serial, Prisma generation sebelum typecheck/build, AIStor Free Compose berlisensi khusus CI dan migration disposable dev/test. Instruksi agen, baseline, ADR, plan, backlog dan template PR diselaraskan.
+- Verifikasi increment: 13 test kebijakan branch lulus; Node syntax check lulus; actionlint 1.7.12 tanpa temuan; parsing YAML/rantai gate lulus; tautan dokumen lokal valid; `git diff --check` lulus. Suite aplikasi/MySQL/AIStor dan Actions terbaru belum diklaim lulus dari pemeriksaan ini.
+- Pemeriksaan read-only GitHub: API daftar repository Actions secrets dan ruleset sama-sama kosong. `AISTOR_CI_LICENSE` belum tersedia; job integrasi akan gagal eksplisit sampai lisensi CI valid dikonfigurasi. API protection menyatakan dev tidak dilindungi dan main belum ditemukan. Bootstrap main pada tahap rilis, lalu aktifkan required PR/`CI result`; push langsung belum diblokir oleh pengaturan repository.
+- Increment transisi ini diselesaikan pada dev memakai otorisasi commit/push sebelumnya; development berikut menggunakan branch fitur. Commit/push diverifikasi melalui Git dan remote, bukan hash yang disalin ke dokumen.
+- CD belum diimplementasikan atau aktif. Tidak ada perubahan VPS, database, container, DNS maupun Vercel. Lanjut T30 dengan artefak lima backend, deployment production berurutan, backup/restore/rollback serta verifikasi kapasitas; jangan menutup T30/T31 hanya dari setup tutorial sebelumnya.
+
+## Checkpoint T29 — 2026-10-03 (riwayat sebelum revisi CI/CD)
 
 - Implementasi: [validasi integrasi dan CI](../docs/sdd/integration-validation-ci.md).
   1. **Konfigurasi Otomasi CI**: Workflow GitHub Actions (`.github/workflows/ci.yml`) dikonfigurasi untuk branch `dev` dan `main` (push dan PR) dengan tiga job terisolasi: `quality` (statis, lint, typecheck, build, unit test), `integration` (layanan kontainer MySQL 8.4.11 di port 3307 dan MinIO AIStor di port 9000/9001), serta `visual-e2e` (Playwright chromium headless).

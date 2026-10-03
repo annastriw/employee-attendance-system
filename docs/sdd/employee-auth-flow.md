@@ -1,5 +1,7 @@
 # Login karyawan (T13, layar E01/E02)
 
+Frekuensi testing dan aturan centang: [workflow aktif](../testing/workflow.md). Resep/hasil suite lama di dokumen ini tidak menjadi gate rutin; bukti historis tetap dipertahankan.
+
 > Status: T13 selesai. Frontend lolos pemeriksaan komponen, build, lint, serta visual. Pengguna melaporkan langkah manual 1–5 melalui Gateway/Auth/MySQL nyata lulus pada 2026-10-02.
 
 Acuan: [baseline](../requirements/baseline.md), [Auth Service](auth-service.md), [Auth database](auth-database.md), [HRD auth flow](hr-auth-flow.md) sebagai pola, [UI/UX E01](frontend-ui-ux.md), [design system](frontend-design-system.md).

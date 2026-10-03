@@ -1,96 +1,31 @@
-# Modul SDD — Validasi Integrasi dan CI (T29)
+# Validasi development dan CI (T29)
 
-Dokumen ini mendefinisikan spesifikasi arsitektur pengujian integrasi, isolasi lingkungan uji, dan otomasi quality gate CI (Continuous Integration) untuk monorepo sistem absensi karyawan.
+Frekuensi testing dan aturan centang: [workflow aktif](../testing/workflow.md). Resep/hasil suite lama di dokumen ini tidak menjadi gate rutin; bukti historis tetap dipertahankan.
 
-## 1. Tujuan dan Ruang Lingkup
+Revisi pengguna 2026-10-03 menggantikan pipeline integrasi/visual wajib sebelumnya. Struktur aplikasi dan suite pengujian yang sudah ada dipertahankan; frekuensi pemeriksaan disederhanakan.
 
-Memastikan tidak ada kode yang masuk ke branch `dev` maupun `main` tanpa melewati verifikasi statis, pengujian unit, integritas skema database, integrasi layanan nyata terhadap database/storage terisolasi, serta pengujian visual/E2E antarmuka.
+## Development
 
-Ruang lingkup mencakup:
-1. **Quality Gate Statis**: Linting (oxlint pada NestJS, eslint pada React), typechecking TypeScript (`tsc`), validasi skema Prisma (`prisma validate`).
-2. **Build Verifikasi**: Kompilasi distribusi TypeScript pada 5 backend NestJS (`api-gateway`, `auth-service`, `employee-service`, `attendance-service`, `media-service`) dan production build bundling pada 2 frontend React (`attendance-web`, `hr-web`).
-3. **Pengujian Unit & Komponen**: 344+ unit/komponen tests lintas `@attendance/database`, web apps, dan backend services.
-4. **Isolasi Integrasi Backend (MySQL & MinIO)**:
-   - Database terisolasi `attendance_test` pada port `127.0.0.1:3307`.
-   - Object storage privat terisolasi `attendance-photos-test` pada port `127.0.0.1:9000`.
-   - Penerapan migrasi otomatis (`prisma migrate deploy --config prisma.test.config.ts`).
-   - Penegakan hak akses least-privilege per-service (`scripts/ci/setup-ci-environment.mjs --grants`).
-   - Verifikasi runtime, UTC, constraint, foreign keys, dan rollback (`scripts/database/verify.ts`).
-5. **Otomasi CI (GitHub Actions)**: Workflow `.github/workflows/ci.yml` yang berjalan otomatis pada setiap pull request dan push ke branch `dev` dan `main`.
+Coding langsung dev, unit test logika terdampak, lint/typecheck package terkait, dan UI/alur API nyata diperiksa manual di lokal. Tidak menjalankan suite MySQL/AIStor penuh atau Playwright setiap fitur. Integrasi cepat diperlukan bila perubahan koneksi MySQL/AIStor/auth/kontrak service membutuhkan bukti nyata: jalankan satu service/file/skenario lokal terkait, bukan suite penuh. Schema berubah: verifikasi migration/grants lokal.
 
----
+## CI reguler
 
-## 2. Arsitektur Pipeline CI
+Hanya PR dev repository sendiri ke main memicu .github/workflows/ci.yml:
 
-```
-Push / PR (dev, main)
-       │
-       ├───► Job: quality (Ubuntu 24.04, Node 24, pnpm 10.28)
-       │     ├─ pnpm run lint (oxlint 5 services + eslint 2 frontends)
-       │     ├─ pnpm run db:validate (Prisma schema check)
-       │     ├─ pnpm run db:typecheck (TypeScript verify check)
-       │     ├─ pnpm run build (Semua dist backend & bundling frontend)
-       │     └─ pnpm run test (Unit tests seluruh monorepo)
-       │
-       ├───► Job: integration (MySQL 8.4.11 :3307 + MinIO :9000)
-       │     ├─ pnpm run db:generate
-       │     ├─ pnpm run build
-       │     ├─ pnpm run ci:setup (Database, users & bucket init)
-       │     ├─ pnpm run db:migrate:test (Schema migrations to attendance_test)
-       │     ├─ pnpm run ci:grants (Table privileges to runtime users)
-       │     ├─ pnpm run db:verify (Constraints, audit protection & UTC)
-       │     ├─ auth-service test:e2e (14 tests)
-       │     ├─ employee-service test:e2e (35 tests)
-       │     ├─ media-service test:e2e (20 tests)
-       │     ├─ attendance-service test:e2e (64 tests)
-       │     └─ api-gateway test:e2e (76 tests)
-       │
-       └───► Job: visual-e2e (Playwright Chromium)
-             ├─ hr-web test:ui (Layout & design 320/1440px light/dark)
-             └─ attendance-web test:ui (Layout & design 320/1440px light/dark)
-```
+branch policy → quality (lint, Prisma, build/typecheck, unit tests) → CI result
 
----
+Push dev tidak memicu deployment atau CI penuh. CI result wajib sukses sebelum merge main. Integrasi disposable dan Playwright tidak berada pada jalur rilis rutin. CI PR tidak publish/deploy. Workflow backend-images.yml setelah merge main membangun/publish lima image paralel ke GHCR; pengiriman ke VPS T30 masih perlu disiapkan sesuai [workflow](../development/ci-cd-workflow.md).
 
-## 3. Isolasi Lingkungan Uji
+## Suite dan lingkungan yang tersedia
 
-### 3.1. Database Testing Terisolasi (`attendance_test`)
-- Koneksi pengujian menggunakan port standar `127.0.0.1:3307`.
-- Skema terpisah `attendance_test` dijamin tidak bercampur dengan `attendance_dev` atau `attendance_shadow`.
-- Skrip migrasi test dikunci oleh assertion keamanan di `prisma.test.config.ts`:
-  ```typescript
-  if (url.hostname !== "127.0.0.1" || url.port !== "3307" || url.pathname !== "/attendance_test") {
-    throw new Error("Test migrations must target the isolated local attendance_test database.");
-  }
-  ```
-- Akun runtime least-privilege:
-  - `attendance_auth_test`: Akses hanya tabel auth (`auth_accounts`, `auth_sessions`, `auth_provisioning`, `auth_email_changes`, `auth_password_resets`, append-only `auth_audit_logs`).
-  - `attendance_employee_test`: Akses hanya tabel master & profil karyawan (`emp_departments`, `emp_positions`, `emp_employees`, `emp_provisioning`, `emp_email_changes`, `emp_lifecycle_changes`, `emp_audit_logs`, `emp_employee_history`).
-  - `attendance_media_test`: Akses hanya tabel metadata foto (`media_objects`, append-only `media_audit_logs`).
-  - `attendance_attendance_test`: Akses hanya tabel absensi (`att_work_policies`, `att_daily_records`, `att_events`, `att_idempotency_requests`, `att_outbox`, `att_holidays`, `att_audit_logs`).
-  - `attendance_migrator`: Akses penuh DDL untuk eksekusi migrasi skema.
+Jest/Vitest, suite integrasi backend dan Playwright tetap tersimpan. Unit logika terkait wajib; integrasi cepat selektif bila perlu sebelum rilis, bukan suite penuh atau pengujian terhadap data live. Gunakan fixture terisolasi: attendance_test, attendance-photos-test dan akun runtime terbatas; jangan memakai data/secrets production. AIStor Free memakai lisensi valid, bukan Community. Lisensi CI tidak diperlukan oleh workflow reguler sekarang.
 
-### 3.2. Object Storage Testing Terisolasi (`attendance-photos-test`)
-- Bucket `attendance-photos-test` terisolasi pada `127.0.0.1:9000`.
-- Akun pengujian `attendance-media-test` dibatasi oleh kebijakan IAM eksplisit hanya dapat menulis dan membaca objek dengan prefiks `arn:aws:s3:::attendance-photos-test/attendance/*`.
+Script root yang tersedia: lint, build, test, db:validate, db:generate, db:typecheck. Script ci:setup, ci:grants, db:verify, storage:setup dan db:migrate:test tetap ada untuk pemeriksaan tambahan. Setup/grants/migrate mengubah lingkungan target sehingga tidak dipakai sebagai audit read-only.
 
----
+## Acceptance
 
-## 4. Skrip Eksekusi Lokal & CI
-
-Tersedia perintah berikut pada root `package.json`:
-- `pnpm run validate`: Menjalankan rantai validasi statis lokal (lint -> db:validate -> db:typecheck -> build -> unit test).
-- `pnpm run ci:setup`: Mempersiapkan database, users, dan MinIO bucket secara deterministik.
-- `pnpm run ci:grants`: Menerapkan hak akses least-privilege pada tabel-tabel di `attendance_test`.
-- `pnpm run db:verify`: Menguji koneksi Prisma, zona waktu UTC, constraint email/token unik, reservasi akun arsip, dan proteksi append-only audit log.
-
----
-
-## 5. Kriteria Penerimaan (Acceptance Criteria)
-
-1. Pipeline CI terdefinisi pada `.github/workflows/ci.yml` dan tervalidasi sintaksnya.
-2. Seluruh quality gates (lint, typecheck, prisma schema validation, production build) lulus 100% tanpa error.
-3. Seluruh unit tests (344 tests) lulus 100%.
-4. Seluruh suite integrasi backend (209 tests lintas 5 service) lulus 100% terhadap MySQL dan MinIO.
-5. Konfigurasi Playwright mendukung eksekusi headless di lingkungan CI (`channel: process.env.CI ? undefined : "chrome"`).
-6. Lingkungan pengujian terisolasi penuh dari database dev/produksi.
+- PR dev repository sendiri ke main diterima; sumber lain ditolak.
+- Lint/build/typecheck/unit tests menjadi gate reguler tanpa Playwright/integrasi penuh.
+- Test lama tidak dihapus. UI/alur manual pengguna: checkbox hanya dicentang setelah konfirmasi oke dengan scope/tanggal; unit/build lulus bukan penerimaan manual.
+- Secrets/testing terpisah dari production; deployment hanya main setelah CD aktif.
+- Migration diperiksa saat schema berubah; deployment memakai health check dan smoke manual terkait.

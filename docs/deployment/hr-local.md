@@ -1,5 +1,7 @@
 # Portal HRD lokal
 
+Frekuensi testing dan aturan centang: [workflow aktif](../testing/workflow.md). Resep/hasil suite lama di dokumen ini tidak menjadi gate rutin; bukti historis tetap dipertahankan.
+
 ## Prasyarat
 MySQL development/test aktif dan migration telah diterapkan. Package database, Auth, Employee dan Gateway telah dibuild. Jalankan `pnpm provisioning:setup` setelah konfigurasi Auth lokal tersedia; script membuat key provisioning hanya dalam file ignored. Migration dev/test dan `pnpm db:grants` harus terbaru. Admin HRD sudah di-seed sesuai [panduan Auth](auth-local.md).
 

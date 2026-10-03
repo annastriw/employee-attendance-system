@@ -1,5 +1,7 @@
 # Employee Service: master jabatan (T11, layar H12)
 
+Frekuensi testing dan aturan centang: [workflow aktif](../testing/workflow.md). Resep/hasil suite lama di dokumen ini tidak menjadi gate rutin; bukti historis tetap dipertahankan.
+
 Acuan: [baseline](../requirements/baseline.md), [UI/UX H12](frontend-ui-ux.md), [design system](frontend-design-system.md).
 
 ## Kepemilikan dan akses

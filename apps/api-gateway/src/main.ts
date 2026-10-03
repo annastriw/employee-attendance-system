@@ -7,6 +7,6 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bodyParser: false });
   configureApp(app);
   app.enableShutdownHooks();
-  await app.listen(app.get(GatewayConfig).port, '127.0.0.1');
+  await app.listen(app.get(GatewayConfig).port, process.env.HOST ?? '127.0.0.1');
 }
 void bootstrap();

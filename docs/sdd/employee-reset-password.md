@@ -1,5 +1,7 @@
 # Reset password karyawan — T15
 
+Frekuensi testing dan aturan centang: [workflow aktif](../testing/workflow.md). Resep/hasil suite lama di dokumen ini tidak menjadi gate rutin; bukti historis tetap dipertahankan.
+
 Status: spesifikasi modul disetujui; siap implementasi dan verifikasi bertahap. Acuan: [baseline](../requirements/baseline.md), [login karyawan T13](employee-auth-flow.md), [lifecycle T14](employee-lifecycle.md), [UI/UX H08](frontend-ui-ux.md), [tier test](../../tasks/plan.md#tier-test-biaya-vs-nilai--disetujui-2026-10-02).
 
 ## Latar belakang dan kebutuhan baseline
