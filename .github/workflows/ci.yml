@@ -2,18 +2,44 @@ name: CI
 
 on:
   push:
-    branches: [dev, main]
+    branches: ['**']
   pull_request:
     branches: [dev, main]
+
+permissions:
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  branch-policy:
+    name: Branch policy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.15.0'
+      - name: Test branch routing
+        run: node --test scripts/ci/check-branch-policy.test.mjs
+      - name: Enforce feature → dev → main
+        env:
+          CI_EVENT_NAME: ${{ github.event_name }}
+          CI_BASE_REF: ${{ github.base_ref }}
+          CI_HEAD_REF: ${{ github.head_ref }}
+          CI_HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+        run: node scripts/ci/check-branch-policy.mjs
+
   quality:
     name: Lint, Typecheck & Unit Tests
     runs-on: ubuntu-latest
+    needs: branch-policy
+    # Schema/client tooling needs URLs but never connects in this job.
+    env:
+      DATABASE_URL: mysql://ci:ci@127.0.0.1:3307/attendance_dev
+      SHADOW_DATABASE_URL: mysql://ci:ci@127.0.0.1:3307/attendance_shadow
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -26,7 +52,7 @@ jobs:
       - name: Setup Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '24.15.0'
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -37,6 +63,9 @@ jobs:
 
       - name: Validate Prisma schema
         run: pnpm run db:validate
+
+      - name: Generate Prisma client
+        run: pnpm run db:generate
 
       - name: Typecheck database scripts
         run: pnpm run db:typecheck
@@ -50,6 +79,7 @@ jobs:
   integration:
     name: Backend MySQL & Storage Integration Tests
     runs-on: ubuntu-latest
+    needs: quality
     services:
       mysql:
         image: mysql:8.4.11
@@ -64,21 +94,6 @@ jobs:
           --health-timeout=5s
           --health-retries=5
 
-      minio:
-        image: minio/minio:RELEASE.2024-11-07T00-52-28Z
-        env:
-          MINIO_ROOT_USER: attendance-local-admin
-          MINIO_ROOT_PASSWORD: minio_ci_root_password_12345678
-        ports:
-          - 9000:9000
-          - 9001:9001
-        command: server /data --console-address ":9001"
-        options: >-
-          --health-cmd="curl -f http://127.0.0.1:9000/minio/health/live"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -91,13 +106,40 @@ jobs:
       - name: Setup Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '24.15.0'
           cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Start isolated AIStor Free (CI-only license required)
+        env:
+          AISTOR_CI_LICENSE: ${{ secrets.AISTOR_CI_LICENSE }}
+        run: |
+          set -eu
+          if [ -z "$AISTOR_CI_LICENSE" ]; then
+            echo '::error::Set AISTOR_CI_LICENSE to a valid CI-only AIStor license. Integration cannot be skipped or use Community storage.'
+            exit 1
+          fi
+          umask 077
+          mkdir -p .licenses
+          printf '%s' "$AISTOR_CI_LICENSE" > .licenses/minio.license
+          printf 'AISTOR_ROOT_USER=attendance-local-admin\nAISTOR_ROOT_PASSWORD=minio_ci_root_password_12345678\n' > .env.aistor
+          docker compose --env-file .env.aistor -f infra/compose.aistor.local.yml config --quiet
+          docker compose --env-file .env.aistor -f infra/compose.aistor.local.yml up -d
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:9000/minio/health/live >/dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo '::error::AIStor did not become available.'
+          exit 1
+
       - name: Generate Prisma client & build database package
+        env:
+          DATABASE_URL: mysql://ci:ci@127.0.0.1:3307/attendance_dev
+          SHADOW_DATABASE_URL: mysql://ci:ci@127.0.0.1:3307/attendance_shadow
         run: pnpm run db:generate
 
       - name: Build backend distributions for inter-service test imports
@@ -109,8 +151,13 @@ jobs:
           AISTOR_ROOT_PASSWORD: minio_ci_root_password_12345678
         run: pnpm run ci:setup
 
-      - name: Deploy migrations to isolated test database
-        run: pnpm run db:migrate:test
+      - name: Configure restricted AIStor dev/test users
+        run: pnpm run storage:setup
+
+      - name: Deploy migrations to disposable dev and test databases
+        run: |
+          pnpm run db:migrate
+          pnpm run db:migrate:test
 
       - name: Apply least-privilege table grants to test users
         env:
@@ -135,10 +182,20 @@ jobs:
       - name: API Gateway contracts and proxy E2E tests
         run: pnpm --filter api-gateway test:e2e
 
+      - name: Stop disposable CI storage
+        if: always()
+        run: |
+          if [ -f .env.aistor ] && [ -f .licenses/minio.license ]; then
+            docker compose --env-file .env.aistor -f infra/compose.aistor.local.yml down --volumes
+          fi
+
   visual-e2e:
     name: Playwright Visual & Layout Regressions
     runs-on: ubuntu-latest
-    needs: quality
+    needs: integration
+    env:
+      DATABASE_URL: mysql://ci:ci@127.0.0.1:3307/attendance_dev
+      SHADOW_DATABASE_URL: mysql://ci:ci@127.0.0.1:3307/attendance_shadow
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -151,7 +208,7 @@ jobs:
       - name: Setup Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '24.15.0'
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -161,7 +218,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Build shared packages
-        run: pnpm --filter @attendance/database build
+        run: pnpm run db:generate
 
       - name: Run HR Web visual tests (320/1440px light/dark)
         run: pnpm --filter hr-web test:ui
@@ -177,3 +234,24 @@ jobs:
           path: |
             apps/hr-web/test-results/
             apps/attendance-web/test-results/
+
+  ci-result:
+    name: CI result
+    if: always()
+    runs-on: ubuntu-latest
+    needs: [branch-policy, quality, integration, visual-e2e]
+    steps:
+      - name: Require every gate to succeed
+        env:
+          POLICY: ${{ needs.branch-policy.result }}
+          QUALITY: ${{ needs.quality.result }}
+          INTEGRATION: ${{ needs.integration.result }}
+          VISUAL: ${{ needs.visual-e2e.result }}
+        run: |
+          for result in "$POLICY" "$QUALITY" "$INTEGRATION" "$VISUAL"; do
+            if [ "$result" != success ]; then
+              echo '::error::A required CI gate failed, was cancelled, or was skipped.'
+              exit 1
+            fi
+          done
+          echo 'CI passed. This workflow does not deploy production.'

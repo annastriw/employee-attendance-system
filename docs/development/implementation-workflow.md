@@ -21,7 +21,7 @@ Setelah inventaris awal, baca hanya spec/source terkait putaran dan diff terbaru
 - Token/theme/AuthShell ada di packages/ui; pnpm workspace dan Atomic Design dipertahankan.
 - MySQL dev/test masih schema terpisah pada satu instance; container testing khusus belum tersedia. AIStor Compose ada; verifikasi layanan yang benar-benar aktif.
 - T08/T09 selesai; beberapa induk fondasi belum ditutup. Audit bukti source/test sebelum mencentang.
-- Branch dev; origin: [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system) (public, dipilih pengguna 2026-10-02). Push commit terverifikasi ke dev; deployment tetap tahap terakhir. Jangan membuat/memilih repository lain sendiri.
+- Branch fitur/perbaikan dari dev terbaru → PR ke dev → PR rilis dev ke main. Origin: [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system) (public, dipilih pengguna 2026-10-02). Push commit terverifikasi ke branch kerja. Satu production main tanpa deployment dev/preview; ikuti [workflow CI/CD](ci-cd-workflow.md). Jangan membuat/memilih repository lain sendiri.
 - Tabel status awal adalah snapshot, bukan asumsi permanen. Status terbaru dibaca dari Git, todo dan progress.
 
 ## Pelaksanaan serial sesuai dependensi
@@ -61,7 +61,7 @@ Checkpoint/trigger tidak memuat rahasia, signed URL atau data/foto pribadi. Tida
 - Implementasikan vertical slice dengan API/MySQL/AIStor nyata. Mock hanya untuk component tests/prototipe dengan konteks jelas.
 - Selesaikan detail teknis terbuka melalui spike/docs/test dan catat keputusan. Tanyakan spesifik hanya jika perubahan kebutuhan/akses dibutuhkan; lanjutkan task independen.
 - Pertahankan scope baseline: tanpa export/cuti/geofence/face matching/hard delete/admin tambahan/edit fakta absensi.
-- Satu perubahan logis lengkap: pemeriksaan relevan → review diff/stage berkas kode/test/dokumentasi terkait → satu commit berprefix dan push ke dev. Hindari commit per berkas/potongan kecil; jangan mencampur pekerjaan tidak berkaitan. Reuse pola yang ada dan tunda abstraksi/refactor/polesan yang tidak dibutuhkan acceptance.
+- Satu perubahan logis lengkap: pemeriksaan relevan → review diff/stage berkas kode/test/dokumentasi terkait → satu commit berprefix dan push branch kerja → PR ke dev. Hindari commit per berkas/potongan kecil; jangan mencampur pekerjaan tidak berkaitan. Reuse pola yang ada dan tunda abstraksi/refactor/polesan yang tidak dibutuhkan acceptance.
 - Catat acceptance di module spec dan update todo/progress secara ringkas. Update runbook hanya bila setup/perintah berubah; hindari dokumen per endpoint dan pengulangan bukti. Simpan test lama dan jangan menurunkan acceptance agar tampak selesai.
 - Teruskan task yang siap sampai seluruh plan terpenuhi. Kapasitas sesi habis ditangani dengan checkpoint, bukan perubahan scope menjadi frontend saja.
 

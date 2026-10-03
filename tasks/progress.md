@@ -4,7 +4,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 ## Snapshot terakhir
 
-- Tanggal: 2026-10-03 (Asia/Jakarta), akhir increment T29. HEAD diverifikasi dengan `git log`; jangan anggap hash di sini sebagai HEAD.
+- Tanggal: 2026-10-03 (Asia/Jakarta), setelah increment kebijakan CI/CD T30. HEAD diverifikasi dengan `git log`; jangan anggap hash di sini sebagai HEAD.
 - Tahap: fitur T08–T29 selesai dan diverifikasi; Checkpoint setelah T29 terpenuhi. Increment implementasi berikut T30 Artefak deploy dan runbook. Fondasi T01–T07/UX01–UX02 masih perlu rekonsiliasi status lama dan isolasi test; T30–T31 tetap belum selesai. T09c tetap menjadi acuan tema.
 - Commit sesi ini pada dev (lama ke baru): 93488ae, f423e47, aa34d48, 1b7b05d, e4a6782, 83537f1, 112d7fa, a485480 (lihat git log), lalu:
   - c2f98fe docs: switch frontend theme to Linear-style zinc + emerald, Geist, Phosphor, light/dark
@@ -33,7 +33,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T30 Artefak deploy dan runbook | Antigravity | infra/, docs/deployment/ | T29 selesai | MySQL 3307, AIStor 9000/9001 aktif | Siap mulai (menunggu instruksi) |
+| T30 — artefak CD dan runbook production | Agen berikutnya (serial) | infra/, .github/, docs/deployment/ | Kebijakan CI/CD selesai; akses/lisensi/artifak belum siap | Tidak menjalankan/mengubah service atau port pada increment kebijakan | Siap dimulai dari branch fitur; T30/T31 belum selesai |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 
@@ -41,7 +41,16 @@ Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increme
 
 Baca git status/diff sebagai sumber fakta. Folder .agents/, .claude/, .kiro/, .windsurf/ dan skills-lock.json adalah berkas lokal; jangan di-stage, dihapus atau diubah tanpa scope jelas. Rahasia dan data pribadi tetap ignored.
 
-## Checkpoint T29 — 2026-10-03
+## Checkpoint kebijakan CI/CD T30 — 2026-10-03
+
+- Keputusan terbaru: fitur/perbaikan → PR dev → PR dev repository sendiri ke main; hanya main untuk production awal 5 karyawan dan 1 HR. Tidak ada deployment dev/preview. Acuan: [workflow CI/CD](../docs/development/ci-cd-workflow.md).
+- Implementasi: gate sumber/tujuan PR, CI push semua branch, hasil agregat wajib `CI result`, job berat serial, Prisma generation sebelum typecheck/build, AIStor Free Compose berlisensi khusus CI dan migration disposable dev/test. Instruksi agen, baseline, ADR, plan, backlog dan template PR diselaraskan.
+- Verifikasi increment: 13 test kebijakan branch lulus; Node syntax check lulus; actionlint 1.7.12 tanpa temuan; parsing YAML/rantai gate lulus; tautan dokumen lokal valid; `git diff --check` lulus. Suite aplikasi/MySQL/AIStor dan Actions terbaru belum diklaim lulus dari pemeriksaan ini.
+- Pemeriksaan read-only GitHub: API daftar repository Actions secrets dan ruleset sama-sama kosong. `AISTOR_CI_LICENSE` belum tersedia; job integrasi akan gagal eksplisit sampai lisensi CI valid dikonfigurasi. API protection menyatakan dev tidak dilindungi dan main belum ditemukan. Bootstrap main pada tahap rilis, lalu aktifkan required PR/`CI result`; push langsung belum diblokir oleh pengaturan repository.
+- Increment transisi ini diselesaikan pada dev memakai otorisasi commit/push sebelumnya; development berikut menggunakan branch fitur. Commit/push diverifikasi melalui Git dan remote, bukan hash yang disalin ke dokumen.
+- CD belum diimplementasikan atau aktif. Tidak ada perubahan VPS, database, container, DNS maupun Vercel. Lanjut T30 dengan artefak lima backend, deployment production berurutan, backup/restore/rollback serta verifikasi kapasitas; jangan menutup T30/T31 hanya dari setup tutorial sebelumnya.
+
+## Checkpoint T29 — 2026-10-03 (riwayat sebelum revisi CI/CD)
 
 - Implementasi: [validasi integrasi dan CI](../docs/sdd/integration-validation-ci.md).
   1. **Konfigurasi Otomasi CI**: Workflow GitHub Actions (`.github/workflows/ci.yml`) dikonfigurasi untuk branch `dev` dan `main` (push dan PR) dengan tiga job terisolasi: `quality` (statis, lint, typecheck, build, unit test), `integration` (layanan kontainer MySQL 8.4.11 di port 3307 dan MinIO AIStor di port 9000/9001), serta `visual-e2e` (Playwright chromium headless).

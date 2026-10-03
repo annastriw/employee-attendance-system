@@ -248,9 +248,9 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 
 ## T29 — Validasi integrasi dan CI
 - [x] Selesai (2026-10-03; spesifikasi di docs/sdd/integration-validation-ci.md, workflow .github/workflows/ci.yml, pipeline lokal pnpm validate, skrip ci:setup/ci:grants, dan verifikasi seluruh suite test lulus)
-- Acceptance: Build/lint/test menjalankan skenario penting dengan env test terpisah; pipeline branch dev/main.
+- Acceptance: Build/lint/test menjalankan skenario penting dengan env test terpisah; CI push semua branch dan PR fitur ke dev/PR dev repository sendiri ke main, dengan hasil akhir seluruh gate wajib.
 - Verification: Run pipeline lokal/CI dan Playwright core journeys.
-- Implementasi/verifikasi teknis 2026-10-03: [validasi integrasi dan CI](../docs/sdd/integration-validation-ci.md).
+- Implementasi/verifikasi teknis awal 2026-10-03: [validasi integrasi dan CI](../docs/sdd/integration-validation-ci.md). Riwayat di bawah berasal dari sebelum revisi branch/CI; verifikasi terbaru ada pada [checkpoint kebijakan CI/CD](progress.md#checkpoint-kebijakan-cicd-t30--2026-10-03). Actions terbaru belum diklaim lulus.
   1. **Konfigurasi Otomasi CI**: Workflow GitHub Actions (`.github/workflows/ci.yml`) dikonfigurasi untuk branch `dev` dan `main` (push dan PR) dengan tiga job terisolasi: `quality` (statis, lint, typecheck, build, unit test), `integration` (layanan kontainer MySQL 8.4.11 di port 3307 dan MinIO AIStor di port 9000/9001), serta `visual-e2e` (Playwright chromium headless).
   2. **Isolasi Database & Storage Testing**: Skrip otomasi `scripts/ci/setup-ci-environment.mjs` menginisialisasi database `attendance_dev`, `attendance_test`, `attendance_shadow`, akun runtime least-privilege, hak akses tabel per-service (`pnpm run ci:grants`), dan pembuatan bucket privat (`attendance-photos`, `attendance-photos-test`).
   3. **Verifikasi Constraint & Hak Akses**: `pnpm run db:verify` memvalidasi koneksi Prisma, zona waktu UTC (+00:00), constraint unik email/token (termasuk reservasi email akun arsip), foreign keys sesi, rollback transaksi, serta pencegahan akses runtime terhadap tabel migrasi atau penghapusan audit trail.
@@ -275,6 +275,7 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 - Verification: Review konfigurasi tanpa secret; uji restore backup test.
 - Dependencies: 29
 - Target: infra/, docs/deployment/
+- Revisi 2026-10-03: [workflow CI/CD](../docs/development/ci-cd-workflow.md), satu production main untuk 5 karyawan + 1 HR; tanpa deployment dev/preview. CD berurutan: CI SHA main → image GHCR → migration sekali → backend/health → dua Vercel → smoke; tidak reset/seed ulang data. Artefak CD, ruleset GitHub, lisensi khusus CI, secrets, backup/restore/rollback dan kapasitas harus diverifikasi sebelum aktivasi.
 
 ## T31 — Deployment dan verifikasi live
 - [ ] Selesai

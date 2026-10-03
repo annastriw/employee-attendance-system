@@ -47,7 +47,7 @@ Script build/lint dan unit test scaffold tersedia. Script db:* menguji migration
 
 ## Batas pekerjaan
 Git lokal telah diinisialisasi pada dev. Dependency dan migration fondasi Auth sudah diterapkan lokal. Repository GitHub public telah dibuat atas pilihan pengguna pada 2026-10-02; deployment belum dilakukan. Database test terpisah schema, belum instance. Status commit/push dicatat melalui riwayat Git dan origin/dev.
-Pengguna telah mengotorisasi commit dan push setiap perubahan yang selesai dan diverifikasi pada branch dev. Remote origin ditetapkan ke [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system); commit terverifikasi dipush ke dev. Deployment tetap tahap terakhir. Branch main hanya untuk production.
+Revisi pengguna 2026-10-03: commit/push setiap increment terverifikasi pada branch fitur dari dev, integrasi melalui PR ke dev, lalu PR dev ke main untuk rilis production. Origin tetap [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system). Satu environment online main (5 karyawan + 1 HR), tanpa deployment dev/preview. [Workflow CI/CD](../docs/development/ci-cd-workflow.md) menetapkan gate dan status implementasi; CD masih bagian T30 yang belum aktif. Increment transisi kebijakan dari checkout dev memakai otorisasi sebelumnya; increment berikutnya menggunakan branch fitur.
 Rahasia tetap lokal, .env.example tanpa nilai asli, dokumentasi aman di GitHub.
 
 ## Penyederhanaan yang disetujui (revisi 2026-10-01)
@@ -72,7 +72,7 @@ Revisi percepatan disetujui pengguna pada 2026-10-02 setelah T13: RAM lokal terb
 | 4. Integrasi backend | API terhadap MySQL; AIStor bila digunakan | Setelah fitur lengkap atau saat perubahan memengaruhi constraint, transaksi, otorisasi, revokasi, idempotensi atau pemulihan. Bukti aturan bisnis dan data nyata tetap wajib. |
 | 5. Browser nyata | Checklist manual per fitur melalui backend nyata | Default selama development. Catat langkah, hasil, tanggal dan penguji; fitur ditutup setelah acceptance nyata lulus. E2E browser otomatis ditunda ke regresi sebelum rilis saat resource tersedia. |
 
-- Loop development: selesaikan perubahan logis → typecheck/lint + test perilaku terdampak → review → commit/push ke dev. Satu commit per perubahan logis lengkap, bukan per berkas atau potongan kecil. Perubahan berkaitan boleh mencakup kode, test dan dokumentasi; jangan mencampur pekerjaan yang tidak berkaitan.
+- Loop development: selesaikan perubahan logis → typecheck/lint + test perilaku terdampak → review → commit/push branch fitur → PR ke dev. Satu commit per perubahan logis lengkap, bukan per berkas atau potongan kecil. Perubahan berkaitan boleh mencakup kode, test dan dokumentasi; jangan mencampur pekerjaan yang tidak berkaitan.
 - Integrasi backend dan checklist browser dijalankan setelah fitur lengkap; bukan gate setiap commit. Gunakan fixture terpisah untuk test otomatis. Akun development hanya untuk checklist manual yang disetujui; jangan menjalankan cleanup fixture destructive pada development.
 - Jangan membuat atau memperluas harness E2E browser setiap fitur selama development. Simpan suite yang ada; siapkan cakupan regresi core journeys sebelum rilis. Hasil manual tidak boleh ditulis sebagai hasil Playwright.
 - Build package terkait saat bundling/startup berubah. Build dist backend yang berubah sebelum pengujian memakai dist. Build/lint/test seluruh monorepo hanya pada checkpoint yang relevan terhadap integrasi lintas package dan sebelum promosi main.
@@ -110,7 +110,7 @@ Ikuti UX01–UX07 dalam todo sebagai koordinasi lintas layar; dependensi T01–T
 
 Persetujuan arah desain dan kelanjutan implementasi telah diberikan; checkpoint rutin berarti memverifikasi dan mencatat bukti lalu melanjutkan. Jangan membuat gate persetujuan ulang untuk keputusan rutin dalam scope. Perubahan kebutuhan dan akses eksternal yang belum tersedia memerlukan penanganan spesifik.
 
-Definisi selesai lokal: seluruh capability frontend, backend, database/storage dan integrasi sesuai baseline, termasuk E01–E09/H01–H14, API nyata, keamanan/pemulihan, build/lint/test, CI dan runbook/artefak deployment. Artefak live disiapkan sampai akses/rilis tersedia; hasil live tidak diklaim sebelum pengujian nyata. Commit dan push tetap dev ke repository pilihan pengguna.
+Definisi selesai lokal: seluruh capability frontend, backend, database/storage dan integrasi sesuai baseline, termasuk E01–E09/H01–H14, API nyata, keamanan/pemulihan, build/lint/test, CI dan runbook/artefak deployment. Artefak live disiapkan sampai akses/rilis tersedia; hasil live tidak diklaim sebelum pengujian nyata. Commit/push branch fitur dan PR ke dev pada repository pilihan pengguna; rilis production melalui PR dev ke main.
 
 ## Pengerjaan serial dan kelanjutan lintas sesi
 Scope tetap seluruh T01–T31: dua frontend, lima service, kontrak/API/Swagger, database/storage, keamanan, testing, CI dan deployment. Pengguna menetapkan dua agen bergantian karena keterbatasan sesi; hanya satu agen aktif, tanpa subagen/coding paralel.

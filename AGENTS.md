@@ -8,15 +8,15 @@
 ## Commit dan push — instruksi pengguna
 - Setelah setiap perubahan logis lengkap dan verifikasi relevan lulus, buat satu commit dan push ke repository GitHub proyek. Gabungkan berkas kode/test/dokumentasi yang berkaitan dalam perubahan tersebut; hindari commit per berkas/potongan kecil.
 - Aturan mencakup kode, dokumentasi, konfigurasi, dan pengujian; jangan menumpuk perubahan yang tidak berkaitan.
-- Kerjakan development di branch dev. Branch main digunakan untuk production; jangan push hasil development langsung ke main.
+- Keputusan 2026-10-03: kerjakan development di branch fitur/perbaikan dari dev terbaru (default codex/<nama-fitur>), push branch kerja, lalu PR ke dev. PR rilis hanya dev repository ini ke main. Main digunakan untuk satu environment production (5 karyawan + 1 HR); tidak ada deployment dev/preview online. Ikuti [workflow CI/CD](docs/development/ci-cd-workflow.md).
 - Gunakan pesan commit jelas dengan prefix feat, fix, docs, test, refactor, atau chore.
 - Periksa diff dan berkas yang akan di-stage sebelum commit. Stage hanya berkas terkait pekerjaan.
 - Jangan commit .env, kredensial, token, private key, backup, data/foto karyawan, dependency terinstal, atau hasil build.
 - Jalankan pemeriksaan sesuai perubahan. Untuk dokumentasi, periksa isi dan tautan; jangan mengklaim test aplikasi sudah berjalan bila belum tersedia.
 - Jangan force push atau menghapus perubahan pengguna.
 - Jika remote, autentikasi, atau Git belum tersedia, laporkan penghalangnya secara akurat. Jangan mengklaim commit/push berhasil.
-- Persetujuan commit dan push ke dev telah diberikan pengguna; tidak perlu meminta izin ulang untuk setiap perubahan.
-- Pengguna menentukan repository public [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system) pada 2026-10-02; origin memakai https://github.com/annastriw/employee-attendance-system.git. Setelah perubahan logis diverifikasi dan di-commit, push ke dev. Jangan membuat/memilih repository lain sendiri. Deployment dikerjakan terakhir sesuai tahap rilis, bukan setelah setiap push.
+- Persetujuan commit/push perubahan terverifikasi tetap berlaku pada branch kerja; integrasi ke dev melalui PR sesuai keputusan terbaru. Tidak perlu meminta izin ulang untuk commit/push rutin. Merge/rilis ke main mengikuti keputusan rilis pengguna dan gate yang lulus.
+- Pengguna menentukan repository public [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system) pada 2026-10-02; origin memakai https://github.com/annastriw/employee-attendance-system.git. Setelah perubahan logis diverifikasi dan di-commit, push branch kerja dan integrasikan ke dev melalui PR. Jangan membuat/memilih repository lain sendiri. CD production hanya dari main setelah CI pada commit yang sama lulus; CI, feature dan dev tidak deploy. CD belum aktif sampai artefak/akses T30 diverifikasi.
 - Promosi ke main mengikuti tahap rilis, verifikasi, dan instruksi pengguna.
 
 ## Cara kerja

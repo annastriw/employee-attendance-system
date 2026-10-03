@@ -16,27 +16,31 @@ Ruang lingkup mencakup:
    - Penerapan migrasi otomatis (`prisma migrate deploy --config prisma.test.config.ts`).
    - Penegakan hak akses least-privilege per-service (`scripts/ci/setup-ci-environment.mjs --grants`).
    - Verifikasi runtime, UTC, constraint, foreign keys, dan rollback (`scripts/database/verify.ts`).
-5. **Otomasi CI (GitHub Actions)**: Workflow `.github/workflows/ci.yml` yang berjalan otomatis pada setiap pull request dan push ke branch `dev` dan `main`.
+5. **Otomasi CI (GitHub Actions)**: Revisi 2026-10-03: push semua branch, PR fitur ke dev dan PR dev repository sendiri ke main. Job branch-policy menegakkan alur; hasil `CI result` wajib sukses seluruh gate. CI tidak deploy. Satu production main tanpa deployment dev/preview mengikuti [workflow CI/CD](../development/ci-cd-workflow.md); CD T30 belum aktif.
 
 ---
 
 ## 2. Arsitektur Pipeline CI
 
 ```
-Push / PR (dev, main)
+Push semua branch / PR (fitur → dev, dev → main)
+       │
+       ▼ Branch policy → quality → integration → visual-e2e → CI result
        │
        ├───► Job: quality (Ubuntu 24.04, Node 24, pnpm 10.28)
        │     ├─ pnpm run lint (oxlint 5 services + eslint 2 frontends)
        │     ├─ pnpm run db:validate (Prisma schema check)
+       │     ├─ pnpm run db:generate (Prisma client dan paket database)
        │     ├─ pnpm run db:typecheck (TypeScript verify check)
        │     ├─ pnpm run build (Semua dist backend & bundling frontend)
        │     └─ pnpm run test (Unit tests seluruh monorepo)
        │
-       ├───► Job: integration (MySQL 8.4.11 :3307 + MinIO :9000)
+       ├───► Job: integration (MySQL 8.4.11 :3307 + AIStor Free :9000)
        │     ├─ pnpm run db:generate
        │     ├─ pnpm run build
        │     ├─ pnpm run ci:setup (Database, users & bucket init)
-       │     ├─ pnpm run db:migrate:test (Schema migrations to attendance_test)
+       │     ├─ pnpm run storage:setup (Akun Media terbatas dev/test)
+       │     ├─ pnpm run db:migrate + db:migrate:test (Schema dev/test)
        │     ├─ pnpm run ci:grants (Table privileges to runtime users)
        │     ├─ pnpm run db:verify (Constraints, audit protection & UTC)
        │     ├─ auth-service test:e2e (14 tests)
@@ -53,6 +57,8 @@ Push / PR (dev, main)
 ---
 
 ## 3. Isolasi Lingkungan Uji
+
+Revisi konfigurasi 2026-10-03: storage CI menggunakan Compose AIStor Free yang dipin proyek, bukan MinIO Community. Repository secret `AISTOR_CI_LICENSE` wajib tersedia dan valid untuk lingkungan uji; job gagal eksplisit jika tidak ada. Migrations diterapkan ke database disposable dev dan test sebelum grants/verify. Diagram job di atas menjelaskan isi job; job berat berjalan serial. Hasil lokal T29 tidak membuktikan Actions terbaru sudah lulus.
 
 ### 3.1. Database Testing Terisolasi (`attendance_test`)
 - Koneksi pengujian menggunakan port standar `127.0.0.1:3307`.
