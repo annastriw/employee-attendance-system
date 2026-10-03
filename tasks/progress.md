@@ -40,13 +40,14 @@ Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increme
 ## Increment T30 — build image backend (2026-10-03)
 
 - Branch aktif: `codex/t30-production-images`, dibuat dari `dev` pada HEAD `948c73e`.
-- Implementasi: Dockerfile multi-stage untuk lima service, `.dockerignore` yang mengecualikan secret/data lokal, file `dist` untuk paket runtime, dan konfigurasi `HOST` agar container mendengarkan pada interface container (default lokal tetap loopback). CI membangun kelima image secara serial tanpa publish; integrasi menunggu gate build image. Runbook CI/CD diperbarui.
+- Implementasi: Dockerfile multi-stage untuk lima service, `.dockerignore` yang mengecualikan secret/data lokal, file `dist` untuk paket runtime, dan konfigurasi `HOST` agar container mendengarkan pada interface container (default lokal tetap loopback). CI membangun kelima image paralel tanpa publish; integrasi menunggu gate build image. Runbook CI/CD diperbarui.
 - Verifikasi lokal: Prisma client generate serta build database dan kelima backend lulus; enam `package.json`, YAML workflow valid diparse, semua sumber `COPY` di Dockerfile ada, dan `git diff --check` lulus. Test tidak dijalankan manual.
-- Commit/push pertama: `ad58ec5` di `codex/t30-production-images`; CI run [37132966719](https://github.com/annastriw/employee-attendance-system/actions/runs/37132966719) gagal pada quality job: `HolidaysPage.test.tsx` mengasumsikan isi tabel tersedia segera setelah elemen tabel muncul ketika fetch masih loading. Lint, Prisma validation/generate, typecheck, dan build seluruh monorepo lulus. Build image dilewati karena quality gate gagal.
-- Perbaikan sinkronisasi tes kini menunggu baris async yang diuji; belum diverifikasi ulang oleh CI.
+- Commit/push: `ad58ec5` (image gate) dan `7731142` (sinkronisasi test) pada `codex/t30-production-images`.
+- Run CI [37133223219](https://github.com/annastriw/employee-attendance-system/actions/runs/37133223219): branch policy, quality penuh, dan kelima build image (API Gateway, Auth, Employee, Attendance, Media) lulus. Integration gagal pada prasyarat secret CI AIStor yang belum tersedia; visual dilewati karena dependency itu. Ini bukan kegagalan image build.
+- Pengguna meminta percepatan setelah melihat durasi serial sekitar 12 menit. Matriks image kini diubah dari `max-parallel: 1` menjadi `5` karena kelima build independen di runner GitHub standar dan repo public. Perubahan ini menargetkan waktu tunggu sekitar durasi build terlama, dengan tambahan concurrent runners.
 - Batas verifikasi: Docker build tidak dapat dijalankan lokal karena daemon Windows tidak aktif/tidak dapat diakses. Pemanggilan `pnpm` terhalang izin lock global Corepack, sehingga `pnpm deploy --legacy` menunggu validasi CI. Integrasi GitHub tetap memerlukan secret lisensi khusus CI `AISTOR_CI_LICENSE`.
 - Berkas lokal `.agents/`, `.claude/`, `.kiro/`, `.windsurf/`, `skills-lock.json` tidak termasuk scope dan tidak boleh di-stage. Tidak ada VPS/service/port diubah.
-- Berikutnya: commit/push perbaikan tes terpisah dan pantau Actions; bila build Docker lulus, lanjutkan Compose production, publish GHCR, deployment dan runbook sebagai increment T30 berikutnya. Jangan promosi ke `main` atau deploy sampai seluruh acceptance/rilis disetujui.
+- Berikutnya: commit/push perubahan concurrency dan pantau CI. Setelah itu lanjutkan Compose production, publish GHCR, deployment dan runbook sebagai increment T30 berikutnya. Jangan promosi ke `main` atau deploy sampai seluruh acceptance/rilis disetujui.
 
 ## Perubahan yang belum di-commit
 

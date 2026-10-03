@@ -33,7 +33,7 @@ Transisi repository saat keputusan dibuat: implementasi T01–T29 berada di `dev
 
 1. `Branch policy`: menguji dan menegakkan sumber/tujuan PR. Nama branch fitur tidak dibatasi; branch fork bernama `dev` tidak dianggap sumber rilis resmi.
 2. `Lint, Typecheck & Unit Tests`: lint, Prisma validate/generate, typecheck, build dan test unit/komponen.
-3. `Build backend production images`: membangun image untuk lima service secara berurutan dari Dockerfile bersama; image tidak dipublikasikan pada CI branch/PR.
+3. `Build backend production images`: membangun image lima service dari Dockerfile bersama, maksimal lima runner GitHub-hosted secara paralel; image tidak dipublikasikan pada CI branch/PR.
 4. `Backend MySQL & Storage Integration Tests`: MySQL disposable serta AIStor Free versi/digest yang sama dengan Compose proyek; migration dev/test, grants, constraint, storage dan test backend nyata.
 5. `Playwright Visual & Layout Regressions`: regresi visual setelah integrasi, mengikuti worker tunggal pada konfigurasi proyek.
 6. `CI result`: berhasil hanya jika semua job wajib berhasil; gagal/cancel/skip tidak diterima. CI tidak memegang akses deployment production dan tidak menjalankan CD.
@@ -71,7 +71,7 @@ Pada setup percobaan sebelumnya pengguna mengonfirmasi migration, akun MySQL, AI
 - CI mencakup nama branch fitur bebas, PR fitur → dev dan PR dev repository sendiri → main.
 - PR fitur → main, PR main/dev → dev, dan PR dev dari fork → main ditolak.
 - Semua gate wajib berkontribusi pada satu hasil akhir; tidak ada deployment dev/preview atau akses production pada CI.
-- CI membangun image lima backend, satu per satu, tanpa menerbitkan image dari branch fitur/`dev`/PR.
+- CI membangun image lima backend secara paralel tanpa menerbitkan image dari branch fitur/`dev`/PR.
 - Baseline, ADR, instruksi kerja dan backlog merujuk keputusan yang sama; status target CD dibedakan dari implementasi yang aktif.
 - Aktivasi ruleset, secret lisensi CI, hasil Actions nyata dan CD/live diverifikasi tersendiri; tidak diklaim dari test kebijakan lokal.
 

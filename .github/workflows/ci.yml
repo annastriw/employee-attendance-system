@@ -82,7 +82,7 @@ jobs:
     needs: quality
     strategy:
       fail-fast: false
-      max-parallel: 1
+      max-parallel: 5
       matrix:
         service:
           - api-gateway
