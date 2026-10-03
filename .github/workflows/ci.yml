@@ -54,8 +54,8 @@ jobs:
         run: pnpm run db:typecheck
       - name: Build packages and applications
         run: pnpm run build
-      - name: Run unit and component tests
-        run: pnpm run test
+      - name: Run isolated unit tests (no browser, database or storage suite)
+        run: pnpm run test:unit
 
   ci-result:
     name: CI result

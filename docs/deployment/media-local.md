@@ -1,5 +1,7 @@
 # Media Service lokal (T19)
 
+Frekuensi testing dan aturan centang: [workflow aktif](../testing/workflow.md). Resep/hasil suite lama di dokumen ini tidak menjadi gate rutin; bukti historis tetap dipertahankan.
+
 Media Service berjalan pada 127.0.0.1:3004. Foto disimpan di AIStor, metadata dan audit di MySQL. Kontrak: [foto privat](../sdd/media-photos.md).
 
 ## Setup dari root proyek

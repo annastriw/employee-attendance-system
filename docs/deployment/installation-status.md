@@ -1,4 +1,6 @@
 # Status instalasi AIStor lokal
+
+Frekuensi testing dan aturan centang: [workflow aktif](../testing/workflow.md). Resep/hasil suite lama di dokumen ini tidak menjadi gate rutin; bukti historis tetap dipertahankan.
 Tanggal: 2026-10-01 (Asia/Jakarta).
 
 ## Instalasi dan konfigurasi yang diperiksa agent

@@ -1,5 +1,7 @@
 # HRD authentication flow (T09)
 
+Frekuensi testing dan aturan centang: [workflow aktif](../testing/workflow.md). Resep/hasil suite lama di dokumen ini tidak menjadi gate rutin; bukti historis tetap dipertahankan.
+
 ## Acceptance
 Login email/password HRD melalui Gateway. Akun dengan mustChangePassword wajib melihat form ganti password, belum dashboard. Password baru minimal 12 karakter dan maksimal 72 byte UTF-8; konfirmasi harus sama; password lama tidak boleh dipakai kembali. Setelah perubahan berhasil, sesi dicabut backend dan pengguna login ulang. Dashboard awal hanya ringkasan kosong dan logout; data domain belum dibuat.
 

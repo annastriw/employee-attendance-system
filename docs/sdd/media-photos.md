@@ -1,5 +1,7 @@
 # T19 — Foto absensi privat
 
+Frekuensi testing dan aturan centang: [workflow aktif](../testing/workflow.md). Resep/hasil suite lama di dokumen ini tidak menjadi gate rutin; bukti historis tetap dipertahankan.
+
 ## Kontrak dan batas
 
 Media Service (3004) memiliki media_objects dan media_audit_logs. Tidak membaca tabel Auth/Employee/Attendance. Gateway (3000) meneruskan satu endpoint upload; Auth /me memverifikasi sesi setiap request. Karyawan dengan password awal yang belum diganti ditolak. HRD tidak mengunggah atas nama karyawan.

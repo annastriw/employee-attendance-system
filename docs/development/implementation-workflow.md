@@ -1,32 +1,22 @@
-# Alur development dan kelanjutan pekerjaan
+# Alur development
 
-Revisi pengguna 2026-10-03: proses dibuat sederhana. Aturan ini menggantikan gate development otomatis yang lebih berat sebelumnya.
+Acuan: [baseline](../requirements/baseline.md), [plan](../../tasks/plan.md), [todo](../../tasks/todo.md), [progress](../../tasks/progress.md), dan [testing](../testing/workflow.md). Baca spec/source terkait saja; jaga lima backend, dua frontend dan Atomic Design.
 
-## Sumber kerja
+## Satu increment di dev
 
-Baca [instruksi proyek](../../AGENTS.md), [baseline](../requirements/baseline.md), [plan](../../tasks/plan.md), [todo](../../tasks/todo.md) dan [progress](../../tasks/progress.md). Setelah itu cukup baca spec/source terkait perubahan. Ikuti [UI/UX](../sdd/frontend-ui-ux.md) dan [design system](../sdd/frontend-design-system.md). Tidak perlu dokumen/harness baru untuk setiap perubahan kecil.
+1. Implementasikan perubahan ujung ke ujung, reuse pola/tooling yang ada.
+2. Unit test logika terdampak wajib; jalankan file/package terkait. Lint/typecheck terkait, build hanya jika dibutuhkan.
+3. Integrasi mode cepat jika diperlukan: satu service/file/skenario untuk koneksi MySQL, AIStor, auth atau kontrak antarservice yang berubah. Reuse layanan lokal test dan build valid; jangan memakai data production.
+4. Siapkan checklist UI/responsivitas/alur lokal yang singkat untuk pengguna. Tidak menambah Playwright atau test screenshot/harness otomatis rutin.
+5. Review diff; commit/push berkas terkait langsung dev. Implementasi boleh disimpan saat menunggu manual acceptance, tetapi fitur belum ditutup penuh.
+6. Setelah pengguna menyatakan oke, catat scope/tanggal/hasil pengguna lalu centang acceptance terkait. Jangan mencentang hanya karena unit atau build lulus.
 
-## Loop harian
+Dokumentasi saja cukup isi/tautan/diff. Jangan menjalankan semua suite setiap perubahan kecil atau mengulang hasil lulus tanpa perubahan/risiko terkait. Test lama dan bukti historis disimpan, bukan gate rutin.
 
-1. Bekerja langsung pada dev terbaru, satu increment yang dapat digunakan.
-2. Ubah schema/kontrak bila diperlukan, lalu API dan UI terkait. Tetap lima backend terpisah serta dua frontend; reuse pola yang sudah ada.
-3. Jalankan unit test logika terdampak serta lint/typecheck package terkait. Build package hanya bila diperlukan untuk runtime/bundling/test yang memakai dist.
-4. Periksa UI, responsivitas dan alur fitur secara manual pada aplikasi lokal. Catat hasil/batasnya ringkas; hasil manual bukan hasil Playwright.
-5. Review diff, commit/push berkas terkait langsung ke dev. Dokumentasi saja cukup isi/tautan/diff. Jangan stage secrets, foto/data, backup, hasil build atau tooling lokal.
-6. Saat fitur siap live, PR dev repository ini ke main; CI ringkas lulus lalu keputusan merge/rilis oleh pengguna.
+## Rilis dan kelanjutan
 
-Tidak ada branch fitur wajib atau PR untuk masuk dev. Push dev tidak deploy. Satu agen aktif secara serial; tanpa subagen/coding paralel.
+PR dev → main setelah unit dan manual acceptance pengguna siap. CI lint/build/typecheck/unit sekali; integrasi cepat bila diperlukan diselesaikan sebelum rilis. Deployment tidak mengulang unit atau menjalankan suite browser/integrasi penuh pada VPS. [Rilis singkat](ci-cd-workflow.md).
 
-## Pemeriksaan yang diperlukan
+Hanya dev/main, tanpa branch fitur wajib atau deployment dev. Satu agen aktif serial; tanpa subagen/coding paralel. Scope tetap seluruh T01–T31. Catat satu task aktif, scope/hasil/proses/port dan titik lanjut pada progress. Secrets/lisensi/foto/backup/build tidak di-stage. Promosi main mengikuti instruksi rilis pengguna.
 
-Unit test baru untuk logika/aturan bisnis berubah, bukan teks/ikon/markup. Test lama disimpan. Integrasi MySQL/AIStor, visual otomatis dan Playwright bukan kewajiban setiap fitur atau deployment; gunakan untuk diagnosis khusus atau atas permintaan pengguna.
-
-UI/layout/alur FE/BE diperiksa manual termasuk state/error/izin yang relevan. Bila schema berubah, verifikasi migration/grants pada database lokal. Jangan menjalankan fixture cleanup pada production. Backup sebelum migration production, gunakan migration kompatibel, jangan reset/seed ulang setiap deployment.
-
-PR main menjalankan branch policy, lint, validasi/generate Prisma, build/typecheck, unit/component tests yang tersedia. Tidak ada gate browser/integrasi penuh. Deployment target: image GHCR, VPS pull/update, migration baru bila ada, health check dan smoke manual fitur terkait. [Workflow CI/CD](ci-cd-workflow.md) membedakan target dari CD yang belum aktif.
-
-## Titik lanjut dan definisi selesai
-
-Catat satu task aktif, scope, pemeriksaan, proses/port dan langkah berikut pada progress. Jangan mengulang bukti lulus tanpa perubahan/failure relevan. Selesaikan satu increment sebelum commit/push dev. Pengguna menentukan promosi main dan waktu berganti agen.
-
-Fitur selesai bila kebutuhan terpenuhi, unit test relevan dan cek manual lulus, serta acceptance tercatat. Live hanya diklaim setelah deployment diverifikasi. Setup VPS dilanjutkan dari infra production yang telah disiapkan; jangan reset atau mengulang bootstrap.
+Setup VPS tetap ditunda dan dilanjutkan dari infra production yang sudah disiapkan. Jangan reset/ulang bootstrap. Live hanya diklaim setelah benar-benar diverifikasi.

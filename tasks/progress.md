@@ -2,7 +2,17 @@
 
 Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mulai/selesai task, sebelum sesi berganti atau kapasitas sesi habis. Status completion tetap di [todo](todo.md); dependency di [plan](plan.md); prosedur pada [alur implementasi](../docs/development/implementation-workflow.md).
 
-## Keputusan aktif dan titik lanjut — 2026-10-03
+## Aturan aktif terbaru — unit wajib dan manual acceptance pengguna
+
+- Coding/commit/push langsung dev; main hanya melalui PR rilis pengguna. Lokal/remote tetap dev dan main, source terbaru di dev; tidak mempromosikan bootstrap main atau mengubah VPS pada increment dokumentasi ini.
+- Unit test logika berubah wajib. Integrasi cepat jika sambungan nyata perlu dibuktikan: satu service/file/skenario dengan layanan test lokal, bukan suite penuh. UI/UX dan alur lokal manual oleh pengguna; checkbox baru dicentang setelah pengguna menyatakan oke untuk scope terkait.
+- README dan docs/README merangkum alur. docs/testing/workflow.md menjadi satu acuan; spec/runbook lama diberi rujukan agar hasil/command historis tidak dianggap gate baru.
+- Script test/test:unit hanya unit terisolasi (Node/Jest/Vitest/RTL). CI PR main memakai test:unit sekali; publish main cached/paralel tidak mengulang suite. Integrasi perlu dilakukan terfokus sebelum rilis; pengiriman ke VPS belum disambungkan.
+- Bukti lama dan checkbox yang sudah diterima tetap disimpan. Increment ini tidak mencentang penerimaan UI/live baru, tidak menjalankan Playwright/integrasi atau mengulang suite aplikasi.
+- Verifikasi perubahan lulus: 4 unit kebijakan branch, Node syntax check, actionlint/YAML, kelima config Jest tidak memilih E2E, script unit-only, 253 tautan file dokumentasi dan diff. Suite aplikasi penuh tidak diulang. Scope runtime aplikasi/dependency tidak berubah.
+- Titik lanjut VPS tetap seperti catatan di bawah: /opt/attendance, MySQL production + AIStor/bucket/akun Media. Setup ditunda atas instruksi pengguna; berikut T30 backend/deploy/domain/TLS setelah pengguna melanjutkan, tanpa reset.
+
+## Titik lanjut VPS dan riwayat keputusan — 2026-10-03
 
 - Pengguna menggantikan flow feature/dev/main dengan hanya dev dan main. Coding/tes lokal dan commit/push langsung dev, PR dev ke main saat siap live. Tidak ada dev online.
 - Development: unit test logika berubah, lint/typecheck terkait, UI/responsivitas/alur aplikasi dicek manual. Tidak ada Playwright atau suite integrasi penuh wajib setiap fitur/deploy. Test lama dipertahankan untuk diagnosis opsional. Migration/grants lokal diperiksa saat schema berubah.
@@ -44,7 +54,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T30 — penyederhanaan development/CI dan branch | Sesi ini (serial) | AGENTS, workflow CI, branch policy, baseline/ADR/spec development, plan/todo/progress | Instruksi terbaru pengguna | Tidak mengubah VPS/proses/port | Review dan commit/push dev; setup VPS ditunda |
+| T30 — aturan testing cepat dan penerimaan manual | Sesi ini (serial) | README/index/testing, AGENTS, spec/runbook, plan/todo/progress, script unit/CI | Keputusan terbaru pengguna | Tidak mengubah VPS/proses/port | Verifikasi/commit/push dev; main menunggu PR rilis |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 

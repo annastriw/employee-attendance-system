@@ -1,5 +1,7 @@
 # Database lokal — Prisma 7 dan MySQL
 
+Frekuensi testing dan aturan centang: [workflow aktif](../testing/workflow.md). Resep/hasil suite lama di dokumen ini tidak menjadi gate rutin; bukti historis tetap dipertahankan.
+
 ## Kepemilikan dan batas
 Satu schema/migration terpusat di prisma/. Gateway dan frontend tidak mengakses database.
 Runtime Auth memakai akun attendance_auth; migration memakai attendance_migrator.

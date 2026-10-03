@@ -1,4 +1,6 @@
 # Tema bersama Attendance Portal dan HR Portal
+
+Frekuensi testing dan aturan centang: [workflow aktif](../testing/workflow.md). Resep/hasil suite lama di dokumen ini tidak menjadi gate rutin; bukti historis tetap dipertahankan.
 Status: disetujui pengguna; revisi visual 2026-10-01 (arah "produk modern ala Linear", menggantikan tema monokrom charcoal). Berlaku untuk semua frontend sekarang dan berikutnya. Persetujuan T09c ditegaskan pengguna pada 2026-10-02.
 
 ## Kontrak desain
@@ -30,7 +32,7 @@ Token berada di packages/ui/src/theme.css dan menimpa variabel HeroUI v3 (--acce
 - Halaman berikutnya wajib memakai token dan komponen bersama, tanpa palet baru atau menyalin tema ke aplikasi.
 
 ## Verifikasi
-Ikuti [tier test yang direvisi 2026-10-03](../../tasks/plan.md#tier-test-biaya-vs-nilai--disetujui-2026-10-02): unit test hanya untuk logika/interaksi yang berubah dan lint/typecheck terkait. UI/layout, navigasi, keyboard, menu, overflow, mobile/desktop serta terang/gelap diperiksa manual pada halaman terdampak. Tidak perlu test visual/Playwright otomatis setiap fitur atau rilis; suite lama disimpan sebagai alat diagnosis opsional.
+Ikuti [workflow testing](../testing/workflow.md): unit untuk logika berubah; UI/layout/navigasi/mobile/desktop/keyboard/tema diperiksa manual oleh pengguna. Checklist baru dicentang setelah pengguna menyatakan oke. Tidak menjalankan Playwright/visual otomatis rutin; test lama tersedia sebagai alat opsional.
 - Opsional untuk diagnosis: pnpm --dir apps/hr-web run test:ui (fixture visual).
 - Opsional untuk diagnosis: pnpm --dir apps/hr-web run test:e2e (alur API nyata, fixture terisolasi).
 - Pemeriksaan manual browser/devtools untuk ukuran mobile/desktop, screenshot dan aksesibilitas; tidak perlu harness baru.

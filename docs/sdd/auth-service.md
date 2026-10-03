@@ -1,4 +1,6 @@
 # Auth Service — backend fondasi dan login
+
+Frekuensi testing dan aturan centang: [workflow aktif](../testing/workflow.md). Resep/hasil suite lama di dokumen ini tidak menjadi gate rutin; bukti historis tetap dipertahankan.
 Acuan: baseline.md; auth-database.md. Scope ini melanjutkan kebutuhan yang telah disetujui.
 Asumsi implementasi lokal: admin seed memakai admin@example.test; password acak hanya lokal.
 TTL access JWT 15 menit, refresh 7 hari; bcrypt salt acak cost 12.

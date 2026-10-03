@@ -1,5 +1,7 @@
 # Aturan Waktu dan Eligibility Absensi — T16
 
+Frekuensi testing dan aturan centang: [workflow aktif](../testing/workflow.md). Resep/hasil suite lama di dokumen ini tidak menjadi gate rutin; bukti historis tetap dipertahankan.
+
 Status: spesifikasi modul disetujui; siap implementasi dan verifikasi bertahap. Acuan: [baseline](../requirements/baseline.md), [plan](../../tasks/plan.md#tier-test-biaya-vs-nilai--disetujui-2026-10-02), [todo](../../tasks/todo.md), [lifecycle karyawan](employee-lifecycle.md).
 
 ## 1. Latar Belakang dan Keputusan Baseline

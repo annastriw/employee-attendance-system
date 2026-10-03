@@ -1,5 +1,7 @@
 # AIStor lokal
 
+Frekuensi testing dan aturan centang: [workflow aktif](../testing/workflow.md). Resep/hasil suite lama di dokumen ini tidak menjadi gate rutin; bukti historis tetap dipertahankan.
+
 ## Konfigurasi
 - Compose: infra/compose.aistor.local.yml.
 - Image resmi dipin ke RELEASE.2026-09-19T17-05-25Z.hotfix.4ef74f03d6f2 dan digest registry.

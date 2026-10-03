@@ -1,5 +1,7 @@
 # API Gateway lokal
 
+Frekuensi testing dan aturan centang: [workflow aktif](../testing/workflow.md). Resep/hasil suite lama di dokumen ini tidak menjadi gate rutin; bukti historis tetap dipertahankan.
+
 Gateway adalah alamat API yang dipakai frontend. Auth tetap memiliki aturan autentikasi dan database.
 
 ## Menjalankan

@@ -1,5 +1,7 @@
 # Spesifikasi Modul: Outbox, Deduplikasi Event, Kompensasi, dan Pembersihan Orphan (T27)
 
+Frekuensi testing dan aturan centang: [workflow aktif](../testing/workflow.md). Resep/hasil suite lama di dokumen ini tidak menjadi gate rutin; bukti historis tetap dipertahankan.
+
 ## 1. Konteks & Tujuan
 Dokumen ini mendefinisikan spesifikasi teknis untuk increment **T27 — Outbox dan pemulihan kegagalan** sesuai dengan:
 - [Baseline](../../docs/requirements/baseline.md) baris 39 (*"MySQL dan MinIO AIStor Free tidak satu transaksi: upload READY, transaksi attendance, outbox, retry dan cleanup orphan"*), baris 71 (*"Binding foto/event unik, intent ber-state dan outbox durable"*), dan baris 75 (*"Outbox dan deduplikasi event antarservice; retry/kompensasi pembuatan profil+akun; hanya foto READY dapat dikaitkan"*).

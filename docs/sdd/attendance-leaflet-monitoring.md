@@ -1,5 +1,7 @@
 # Spesifikasi Modul: Detail Monitoring Absensi & Peta Leaflet (T26)
 
+Frekuensi testing dan aturan centang: [workflow aktif](../testing/workflow.md). Resep/hasil suite lama di dokumen ini tidak menjadi gate rutin; bukti historis tetap dipertahankan.
+
 ## 1. Konteks & Tujuan
 Dokumen ini mendefinisikan spesifikasi teknis untuk increment **T26 — Detail monitoring Leaflet** sesuai dengan [baseline](../../docs/requirements/baseline.md) (baris 51, 53, 57), [konsep UI/UX](../../docs/sdd/frontend-ui-ux.md) (Layar H04 baris 110, 128–130), dan [rencana implementasi](../../tasks/plan.md).
 

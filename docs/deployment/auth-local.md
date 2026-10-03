@@ -1,5 +1,7 @@
 # Auth Service lokal
 
+Frekuensi testing dan aturan centang: [workflow aktif](../testing/workflow.md). Resep/hasil suite lama di dokumen ini tidak menjadi gate rutin; bukti historis tetap dipertahankan.
+
 ## Menjalankan
 Dari root proyek, Docker Desktop dan MySQL harus aktif:
 ```powershell

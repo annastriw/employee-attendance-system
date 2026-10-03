@@ -1,5 +1,7 @@
 # Integrasi Gateway untuk autentikasi (T09a)
 
+Frekuensi testing dan aturan centang: [workflow aktif](../testing/workflow.md). Resep/hasil suite lama di dokumen ini tidak menjadi gate rutin; bukti historis tetap dipertahankan.
+
 ## Tujuan dan batas
 Portal HRD memakai API Gateway port 3000 untuk mengakses Auth Service port 3001. Gateway tidak mengakses database dan tidak menerbitkan JWT. Validasi akun, password, sesi dan role tetap dimiliki Auth.
 

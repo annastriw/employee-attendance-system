@@ -1,18 +1,16 @@
 ## Perubahan dan alasan
 
-Jelaskan perilaku sebelum/sesudah dan kaitan FE/BE/DB bila ada.
+Jelaskan scope fitur/logika/UI yang berubah dan kaitan FE/BE/DB bila ada.
 
-## Jalur rilis
+## Verifikasi rilis dev → main
 
-Coding/tes lokal dan commit/push langsung dev. PR rilis hanya dev repository ini ke main. Push dev tidak deploy; CD production belum aktif sampai T30 siap.
+- [ ] Unit test logika terkait lulus; catat command dan scope.
+- [ ] Integrasi cepat bila diperlukan: satu service/file/skenario lokal, catat alasan/hasil; jika tidak perlu tulis alasannya.
+- [ ] Pengguna menguji UI/alur lokal dan menyatakan oke untuk scope rilis; catat konfirmasi.
+- [ ] CI result (lint/build/typecheck/unit) lulus; unit tidak diulang pada langkah deploy.
+- [ ] Jika migration baru: penerapan lokal/grants diperiksa, backup/rollback disiapkan.
+- [ ] Keputusan rilis pengguna tersedia; health operasional dan penerimaan manual live dicatat setelah deploy.
 
-## Verifikasi
+Checkbox manual tidak dicentang hanya karena test otomatis/build lulus. Tidak ada Playwright atau suite integrasi penuh rutin.
 
-- [ ] CI result (lint/build/typecheck/unit) lulus.
-- [ ] UI/alur berubah dicek manual lokal; catat hasil dan batasnya.
-- [ ] Jika schema berubah: migration lokal/grants diperiksa, backup dan rollback tersedia.
-- [ ] Keputusan merge/rilis diberikan pengguna; health/smoke manual setelah deploy.
-
-Tidak perlu gate Playwright atau suite integrasi penuh setiap rilis.
-
-Acuan: [workflow CI/CD](../docs/development/ci-cd-workflow.md).
+Coding/commit/push langsung dev; production hanya main. Auto-deploy VPS belum aktif sampai T30 siap. [Testing](../docs/testing/workflow.md) dan [rilis singkat](../docs/development/ci-cd-workflow.md).
