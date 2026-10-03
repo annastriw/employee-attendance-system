@@ -33,9 +33,10 @@ Transisi repository saat keputusan dibuat: implementasi T01–T29 berada di `dev
 
 1. `Branch policy`: menguji dan menegakkan sumber/tujuan PR. Nama branch fitur tidak dibatasi; branch fork bernama `dev` tidak dianggap sumber rilis resmi.
 2. `Lint, Typecheck & Unit Tests`: lint, Prisma validate/generate, typecheck, build dan test unit/komponen.
-3. `Backend MySQL & Storage Integration Tests`: MySQL disposable serta AIStor Free versi/digest yang sama dengan Compose proyek; migration dev/test, grants, constraint, storage dan test backend nyata.
-4. `Playwright Visual & Layout Regressions`: regresi visual setelah integrasi, mengikuti worker tunggal pada konfigurasi proyek.
-5. `CI result`: berhasil hanya jika semua job wajib berhasil; gagal/cancel/skip tidak diterima. CI tidak memegang akses deployment production dan tidak menjalankan CD.
+3. `Build backend production images`: membangun image untuk lima service secara berurutan dari Dockerfile bersama; image tidak dipublikasikan pada CI branch/PR.
+4. `Backend MySQL & Storage Integration Tests`: MySQL disposable serta AIStor Free versi/digest yang sama dengan Compose proyek; migration dev/test, grants, constraint, storage dan test backend nyata.
+5. `Playwright Visual & Layout Regressions`: regresi visual setelah integrasi, mengikuti worker tunggal pada konfigurasi proyek.
+6. `CI result`: berhasil hanya jika semua job wajib berhasil; gagal/cancel/skip tidak diterima. CI tidak memegang akses deployment production dan tidak menjalankan CD.
 
 Prasyarat job integrasi: repository secret **`AISTOR_CI_LICENSE`**, berisi lisensi valid yang diizinkan untuk runner testing. Lisensi dan kredensial CI harus terpisah dari production. Jika secret belum tersedia (termasuk PR fork tanpa akses secret), job gagal secara eksplisit; jangan mengganti storage dengan MinIO Community atau melewati gate agar bisa merge. Kredensial fixture CI yang telah ada hanya untuk runner disposable dan tidak boleh dipakai ulang pada VPS.
 
@@ -43,7 +44,7 @@ Pemilik repository perlu mengaktifkan ruleset/protection untuk **`dev` dan `main
 
 ## Kontrak CD production — pekerjaan T30
 
-**Belum diimplementasikan/diaktifkan.** Tidak ada workflow deploy, Dockerfile backend, atau script rilis production pada saat kebijakan ini dicatat. Jangan menganggap push `main` sudah memperbarui VPS/Vercel. Artefak tersebut dibuat dan diverifikasi dalam increment T30 berikutnya.
+**Belum diimplementasikan/diaktifkan.** Dockerfile multi-stage untuk membangun lima backend dan gate build image sedang disiapkan pada increment T30. Workflow publish/deploy, Compose production backend, dan script rilis masih perlu dibuat serta diverifikasi. Jangan menganggap push `main` sudah memperbarui VPS/Vercel.
 
 Implementasi CD wajib mengikuti kontrak berikut:
 
@@ -70,6 +71,7 @@ Pada setup percobaan sebelumnya pengguna mengonfirmasi migration, akun MySQL, AI
 - CI mencakup nama branch fitur bebas, PR fitur → dev dan PR dev repository sendiri → main.
 - PR fitur → main, PR main/dev → dev, dan PR dev dari fork → main ditolak.
 - Semua gate wajib berkontribusi pada satu hasil akhir; tidak ada deployment dev/preview atau akses production pada CI.
+- CI membangun image lima backend, satu per satu, tanpa menerbitkan image dari branch fitur/`dev`/PR.
 - Baseline, ADR, instruksi kerja dan backlog merujuk keputusan yang sama; status target CD dibedakan dari implementasi yang aktif.
 - Aktivasi ruleset, secret lisensi CI, hasil Actions nyata dan CD/live diverifikasi tersendiri; tidak diklaim dari test kebijakan lokal.
 

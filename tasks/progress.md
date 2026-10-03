@@ -33,9 +33,18 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T30 — artefak CD dan runbook production | Agen berikutnya (serial) | infra/, .github/, docs/deployment/ | Kebijakan CI/CD selesai; akses/lisensi/artifak belum siap | Tidak menjalankan/mengubah service atau port pada increment kebijakan | Siap dimulai dari branch fitur; T30/T31 belum selesai |
+| T30 — artefak image backend production | Sesi ini (serial) | `.dockerignore`, `infra/Dockerfile.backend`, lima `apps/*/src/main.ts` dan `package.json`, `.github/workflows/ci.yml`, `docs/development/ci-cd-workflow.md` | Kebijakan CI/CD selesai; build image harus terverifikasi di GitHub Actions | Tidak mengubah service/port VPS; image tidak dipublish | Implementasi lokal di branch `codex/t30-production-images`; belum commit |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
+
+## Increment T30 — build image backend (2026-10-03)
+
+- Branch aktif: `codex/t30-production-images`, dibuat dari `dev` pada HEAD `948c73e`.
+- Implementasi: Dockerfile multi-stage untuk lima service, `.dockerignore` yang mengecualikan secret/data lokal, file `dist` untuk paket runtime, dan konfigurasi `HOST` agar container mendengarkan pada interface container (default lokal tetap loopback). CI membangun kelima image secara serial tanpa publish; integrasi menunggu gate build image. Runbook CI/CD diperbarui.
+- Verifikasi: Prisma client generate serta build database dan kelima backend lulus; enam `package.json` valid; `git diff --check` lulus. Tidak menjalankan test.
+- Batas verifikasi: Docker build tidak dapat dijalankan lokal karena daemon Windows tidak aktif/tidak dapat diakses. Pemanggilan `pnpm` juga terhalang izin lock global Corepack, jadi Dockerfile aktual dan `pnpm deploy --legacy` menunggu validasi CI. Workflow YAML belum memiliki parser lokal. Integrasi GitHub yang diketahui tetap memerlukan secret lisensi khusus CI `AISTOR_CI_LICENSE`.
+- Berkas lokal `.agents/`, `.claude/`, `.kiro/`, `.windsurf/`, `skills-lock.json` tidak termasuk scope dan tidak boleh di-stage. Tidak ada VPS/service/port diubah.
+- Berikutnya: validasi parsing workflow dan tautan/diff, tinjau perubahan; setelah aman commit dan push hanya berkas scope ke branch fitur, lalu tunggu CI image-build. Lanjutkan Compose production, publish GHCR, deployment dan runbook sebagai increment T30 berikutnya; jangan promosi ke `main` atau deploy sampai seluruh acceptance/rilis disetujui.
 
 ## Perubahan yang belum di-commit
 
