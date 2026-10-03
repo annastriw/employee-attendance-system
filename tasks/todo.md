@@ -1,3 +1,5 @@
+Aturan verifikasi aktif 2026-10-03: development unit test logika terkait + UI/alur manual, CI PR main lint/build/typecheck/unit, deployment health check. Rincian integrasi/Playwright di task lama adalah bukti/alat historis dan tidak menjadi gate rutin; lihat [workflow](../docs/development/ci-cd-workflow.md).
+
 # Daftar tugas implementasi
 
 Status: implementasi sebagian berjalan; checklist per-task dan subtask menunjukkan bukti yang telah selesai. Path pada task yang belum selesai merupakan target rencana. Checklist induk tidak otomatis selesai hanya karena subtask tertentu sudah tersedia. Task lintas beberapa service dipecah lagi sebelum implementasi agar sekitar 1–5 file per task.
@@ -248,10 +250,10 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 
 ## T29 — Validasi integrasi dan CI
 - [x] Selesai (2026-10-03; spesifikasi di docs/sdd/integration-validation-ci.md, workflow .github/workflows/ci.yml, pipeline lokal pnpm validate, skrip ci:setup/ci:grants, dan verifikasi seluruh suite test lulus)
-- Acceptance: Build/lint/test menjalankan skenario penting dengan env test terpisah; CI push semua branch dan PR fitur ke dev/PR dev repository sendiri ke main, dengan hasil akhir seluruh gate wajib.
-- Verification: Run pipeline lokal/CI dan Playwright core journeys.
-- Implementasi/verifikasi teknis awal 2026-10-03: [validasi integrasi dan CI](../docs/sdd/integration-validation-ci.md). Riwayat di bawah berasal dari sebelum revisi branch/CI; verifikasi terbaru ada pada [checkpoint kebijakan CI/CD](progress.md#checkpoint-kebijakan-cicd-t30--2026-10-03). Actions terbaru belum diklaim lulus.
-  1. **Konfigurasi Otomasi CI**: Workflow GitHub Actions (`.github/workflows/ci.yml`) dikonfigurasi untuk branch `dev` dan `main` (push dan PR) dengan tiga job terisolasi: `quality` (statis, lint, typecheck, build, unit test), `integration` (layanan kontainer MySQL 8.4.11 di port 3307 dan MinIO AIStor di port 9000/9001), serta `visual-e2e` (Playwright chromium headless).
+- Acceptance: PR dev ke main menjalankan lint/build/typecheck/unit test dan branch policy; UI/alur dicek manual. Suite integrasi/visual lama disimpan sebagai pemeriksaan tambahan, bukan gate deployment rutin.
+- Verification: Validasi workflow/branch policy, unit test dan cek manual terkait; tanpa gate Playwright.
+- Implementasi/verifikasi teknis awal 2026-10-03: [validasi integrasi dan CI](../docs/sdd/integration-validation-ci.md). Riwayat di bawah berasal dari sebelum revisi branch/CI; verifikasi terbaru ada pada [checkpoint kebijakan CI/CD](progress.md#keputusan-aktif-dan-titik-lanjut--2026-10-03). Actions terbaru belum diklaim lulus.
+  1. **Bukti historis sebelum revisi efisiensi 2026-10-03**: Workflow GitHub Actions (`.github/workflows/ci.yml`) dikonfigurasi untuk branch `dev` dan `main` (push dan PR) dengan tiga job terisolasi: `quality` (statis, lint, typecheck, build, unit test), `integration` (layanan kontainer MySQL 8.4.11 di port 3307 dan MinIO AIStor di port 9000/9001), serta `visual-e2e` (Playwright chromium headless).
   2. **Isolasi Database & Storage Testing**: Skrip otomasi `scripts/ci/setup-ci-environment.mjs` menginisialisasi database `attendance_dev`, `attendance_test`, `attendance_shadow`, akun runtime least-privilege, hak akses tabel per-service (`pnpm run ci:grants`), dan pembuatan bucket privat (`attendance-photos`, `attendance-photos-test`).
   3. **Verifikasi Constraint & Hak Akses**: `pnpm run db:verify` memvalidasi koneksi Prisma, zona waktu UTC (+00:00), constraint unik email/token (termasuk reservasi email akun arsip), foreign keys sesi, rollback transaksi, serta pencegahan akses runtime terhadap tabel migrasi atau penghapusan audit trail.
   4. **Perbaikan Hermeticity Test**: Penyempurnaan `policy-database.e2e-spec.ts` untuk membersihkan tanggal target sebelum evaluasi `REGULAR_WORKDAY`, serta penyesuaian Playwright channel (`process.env.CI ? undefined : "chrome"`) agar kompatibel lintas OS (Windows lokal dan Linux runner).
@@ -275,7 +277,7 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 - Verification: Review konfigurasi tanpa secret; uji restore backup test.
 - Dependencies: 29
 - Target: infra/, docs/deployment/
-- Revisi 2026-10-03: [workflow CI/CD](../docs/development/ci-cd-workflow.md), satu production main untuk 5 karyawan + 1 HR; tanpa deployment dev/preview. CD berurutan: CI SHA main → image GHCR → migration sekali → backend/health → dua Vercel → smoke; tidak reset/seed ulang data. Artefak CD, ruleset GitHub, lisensi khusus CI, secrets, backup/restore/rollback dan kapasitas harus diverifikasi sebelum aktivasi.
+- Revisi efisiensi 2026-10-03: hanya dev/main, uji lokal unit+manual, PR main dengan CI ringkas. CD target: image GitHub/GHCR cached/paralel → VPS pull/update → migration hanya bila baru → health → frontend main. Tanpa Playwright/integrasi penuh rutin, reset atau seed ulang. CD/akses/domain/backup/rollback belum selesai; lanjut setup VPS dari infra production, bukan reset lagi.
 
 ## T31 — Deployment dan verifikasi live
 - [ ] Selesai

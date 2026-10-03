@@ -1,10 +1,8 @@
 name: CI
 
 on:
-  push:
-    branches: ['**']
   pull_request:
-    branches: [dev, main]
+    branches: [main]
 
 permissions:
   contents: read
@@ -15,16 +13,14 @@ concurrency:
 
 jobs:
   branch-policy:
-    name: Branch policy
+    name: Release must come from dev
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '24.15.0'
-      - name: Test branch routing
-        run: node --test scripts/ci/check-branch-policy.test.mjs
-      - name: Enforce feature → dev → main
+      - name: Check release source
         env:
           CI_EVENT_NAME: ${{ github.event_name }}
           CI_BASE_REF: ${{ github.base_ref }}
@@ -33,257 +29,48 @@ jobs:
         run: node scripts/ci/check-branch-policy.mjs
 
   quality:
-    name: Lint, Typecheck & Unit Tests
+    name: Quality (lint, build, unit tests)
     runs-on: ubuntu-latest
     needs: branch-policy
-    # Schema/client tooling needs URLs but never connects in this job.
     env:
       DATABASE_URL: mysql://ci:ci@127.0.0.1:3307/attendance_dev
       SHADOW_DATABASE_URL: mysql://ci:ci@127.0.0.1:3307/attendance_shadow
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
         with:
           version: 10.28.0
-
-      - name: Setup Node.js 24
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '24.15.0'
-          cache: 'pnpm'
-
+          cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Lint all packages (oxlint & eslint)
+      - name: Lint
         run: pnpm run lint
-
-      - name: Validate Prisma schema
-        run: pnpm run db:validate
-
-      - name: Generate Prisma client
-        run: pnpm run db:generate
-
+      - name: Validate and generate Prisma client
+        run: pnpm run db:validate && pnpm run db:generate
       - name: Typecheck database scripts
         run: pnpm run db:typecheck
-
-      - name: Build all packages and applications
+      - name: Build packages and applications
         run: pnpm run build
-
-      - name: Run unit & component tests across monorepo
+      - name: Run unit and component tests
         run: pnpm run test
-
-  backend-images:
-    name: Build backend production images (${{ matrix.service }})
-    runs-on: ubuntu-latest
-    needs: quality
-    strategy:
-      fail-fast: false
-      max-parallel: 5
-      matrix:
-        service:
-          - api-gateway
-          - auth-service
-          - employee-service
-          - attendance-service
-          - media-service
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build production image without publishing
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: infra/Dockerfile.backend
-          push: false
-          tags: attendance/${{ matrix.service }}:ci
-          build-args: SERVICE=${{ matrix.service }}
-          cache-from: type=gha,scope=backend-${{ matrix.service }}
-          cache-to: type=gha,mode=max,scope=backend-${{ matrix.service }}
-
-  integration:
-    name: Backend MySQL & Storage Integration Tests
-    runs-on: ubuntu-latest
-    needs: [quality, backend-images]
-    services:
-      mysql:
-        image: mysql:8.4.11
-        env:
-          MYSQL_ROOT_PASSWORD: ci_root_password
-          MYSQL_DATABASE: attendance_dev
-        ports:
-          - 3307:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pci_root_password"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.28.0
-
-      - name: Setup Node.js 24
-        uses: actions/setup-node@v4
-        with:
-          node-version: '24.15.0'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Start isolated AIStor Free (CI-only license required)
-        env:
-          AISTOR_CI_LICENSE: ${{ secrets.AISTOR_CI_LICENSE }}
-        run: |
-          set -eu
-          if [ -z "$AISTOR_CI_LICENSE" ]; then
-            echo '::error::Set AISTOR_CI_LICENSE to a valid CI-only AIStor license. Integration cannot be skipped or use Community storage.'
-            exit 1
-          fi
-          umask 077
-          mkdir -p .licenses
-          printf '%s' "$AISTOR_CI_LICENSE" > .licenses/minio.license
-          printf 'AISTOR_ROOT_USER=attendance-local-admin\nAISTOR_ROOT_PASSWORD=minio_ci_root_password_12345678\n' > .env.aistor
-          docker compose --env-file .env.aistor -f infra/compose.aistor.local.yml config --quiet
-          docker compose --env-file .env.aistor -f infra/compose.aistor.local.yml up -d
-          for attempt in $(seq 1 60); do
-            if curl --fail --silent http://127.0.0.1:9000/minio/health/live >/dev/null; then
-              exit 0
-            fi
-            sleep 2
-          done
-          echo '::error::AIStor did not become available.'
-          exit 1
-
-      - name: Generate Prisma client & build database package
-        env:
-          DATABASE_URL: mysql://ci:ci@127.0.0.1:3307/attendance_dev
-          SHADOW_DATABASE_URL: mysql://ci:ci@127.0.0.1:3307/attendance_shadow
-        run: pnpm run db:generate
-
-      - name: Build backend distributions for inter-service test imports
-        run: pnpm run build
-
-      - name: Setup CI databases, users and MinIO buckets
-        env:
-          MYSQL_ROOT_PASSWORD: ci_root_password
-          AISTOR_ROOT_PASSWORD: minio_ci_root_password_12345678
-        run: pnpm run ci:setup
-
-      - name: Configure restricted AIStor dev/test users
-        run: pnpm run storage:setup
-
-      - name: Deploy migrations to disposable dev and test databases
-        run: |
-          pnpm run db:migrate
-          pnpm run db:migrate:test
-
-      - name: Apply least-privilege table grants to test users
-        env:
-          MYSQL_ROOT_PASSWORD: ci_root_password
-        run: pnpm run ci:grants
-
-      - name: Verify database constraints, grants and UTC persistence
-        run: pnpm run db:verify
-
-      - name: Auth Service E2E tests
-        run: pnpm --filter auth-service test:e2e
-
-      - name: Employee Service E2E tests
-        run: pnpm --filter employee-service test:e2e
-
-      - name: Media Service E2E tests
-        run: pnpm --filter media-service test:e2e
-
-      - name: Attendance Service E2E tests
-        run: pnpm --filter attendance-service test:e2e
-
-      - name: API Gateway contracts and proxy E2E tests
-        run: pnpm --filter api-gateway test:e2e
-
-      - name: Stop disposable CI storage
-        if: always()
-        run: |
-          if [ -f .env.aistor ] && [ -f .licenses/minio.license ]; then
-            docker compose --env-file .env.aistor -f infra/compose.aistor.local.yml down --volumes
-          fi
-
-  visual-e2e:
-    name: Playwright Visual & Layout Regressions
-    runs-on: ubuntu-latest
-    needs: integration
-    env:
-      DATABASE_URL: mysql://ci:ci@127.0.0.1:3307/attendance_dev
-      SHADOW_DATABASE_URL: mysql://ci:ci@127.0.0.1:3307/attendance_shadow
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.28.0
-
-      - name: Setup Node.js 24
-        uses: actions/setup-node@v4
-        with:
-          node-version: '24.15.0'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Install Playwright Chromium with dependencies
-        run: npx playwright install --with-deps chromium
-
-      - name: Build shared packages
-        run: pnpm run db:generate
-
-      - name: Run HR Web visual tests (320/1440px light/dark)
-        run: pnpm --filter hr-web test:ui
-
-      - name: Run Attendance Web visual tests (320/1440px light/dark)
-        run: pnpm --filter attendance-web test:ui
-
-      - name: Upload Playwright test results artifact on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-visual-results
-          path: |
-            apps/hr-web/test-results/
-            apps/attendance-web/test-results/
 
   ci-result:
     name: CI result
     if: always()
     runs-on: ubuntu-latest
-    needs: [branch-policy, quality, backend-images, integration, visual-e2e]
+    needs: [branch-policy, quality]
     steps:
-      - name: Require every gate to succeed
+      - name: Require release checks to pass
         env:
           POLICY: ${{ needs.branch-policy.result }}
           QUALITY: ${{ needs.quality.result }}
-          BACKEND_IMAGES: ${{ needs.backend-images.result }}
-          INTEGRATION: ${{ needs.integration.result }}
-          VISUAL: ${{ needs.visual-e2e.result }}
         run: |
-          for result in "$POLICY" "$QUALITY" "$BACKEND_IMAGES" "$INTEGRATION" "$VISUAL"; do
+          for result in "$POLICY" "$QUALITY"; do
             if [ "$result" != success ]; then
-              echo '::error::A required CI gate failed, was cancelled, or was skipped.'
+              echo '::error::A required release check failed, was cancelled, or was skipped.'
               exit 1
             fi
           done

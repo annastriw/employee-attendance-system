@@ -32,8 +32,8 @@ pnpm workspace, Prisma dengan migration terpusat untuk satu database, HTTP inter
 Auth mendasari otorisasi. Employee membutuhkan akun; Attendance menggunakan kelayakan Employee dan Auth. Media memverifikasi otorisasi; Attendance mengaitkan foto READY. Gateway hanya routing/kontrol umum. Kontrak event ownership/retry harus ditetapkan sebelum integrasi, tidak membuat query lintas tabel service.
 
 ## Pemeriksaan
-Per-task: unit/API/component test yang relevan. Per-checkpoint: build, lint, test terfokus, dan alur manual atau Playwright. Tidak menganggap mock cukup untuk MySQL/MinIO AIStor Free/kamera nyata. TDD untuk aturan bisnis; tidak menulis test yang hanya meniru implementasi UI.
-Script build/lint dan unit test scaffold tersedia. Script db:* menguji migration dan constraint MySQL. Harness Vitest/RTL dan Playwright HRD serta test aturan Auth tersedia; domain absensi belum diimplementasikan.
+Per-task: unit test logika berubah, lint/typecheck package terkait dan pemeriksaan manual UI/alur lokal. Sebelum rilis: CI lint/build/unit; setelah deploy: health check dan smoke manual. Tidak perlu suite integrasi penuh atau Playwright rutin.
+Script build/lint/unit tersedia. Suite MySQL/AIStor dan Playwright lama tetap disimpan; source/todo terbaru menjadi acuan fitur yang sudah selesai.
 
 ## Risiko dan mitigasi
 - MySQL dan MinIO AIStor Free tidak satu transaksi: upload READY, transaksi attendance, outbox, retry dan cleanup orphan.
@@ -47,7 +47,7 @@ Script build/lint dan unit test scaffold tersedia. Script db:* menguji migration
 
 ## Batas pekerjaan
 Git lokal telah diinisialisasi pada dev. Dependency dan migration fondasi Auth sudah diterapkan lokal. Repository GitHub public telah dibuat atas pilihan pengguna pada 2026-10-02; deployment belum dilakukan. Database test terpisah schema, belum instance. Status commit/push dicatat melalui riwayat Git dan origin/dev.
-Revisi pengguna 2026-10-03: commit/push setiap increment terverifikasi pada branch fitur dari dev, integrasi melalui PR ke dev, lalu PR dev ke main untuk rilis production. Origin tetap [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system). Satu environment online main (5 karyawan + 1 HR), tanpa deployment dev/preview. [Workflow CI/CD](../docs/development/ci-cd-workflow.md) menetapkan gate dan status implementasi; CD masih bagian T30 yang belum aktif. Increment transisi kebijakan dari checkout dev memakai otorisasi sebelumnya; increment berikutnya menggunakan branch fitur.
+Revisi terbaru 2026-10-03: coding serta tes lokal di dev, commit/push langsung dev, PR dev ke main untuk rilis. Hanya dua branch. UI/alur dicek manual, unit test logika terdampak; CI rilis cukup lint, build/typecheck dan unit test, tanpa gate integrasi penuh/Playwright. Origin tetap annastriw/employee-attendance-system. CD masih T30; VPS dilanjutkan dari infra production yang sudah disiapkan pengguna. [Workflow](../docs/development/ci-cd-workflow.md).
 Rahasia tetap lokal, .env.example tanpa nilai asli, dokumentasi aman di GitHub.
 
 ## Penyederhanaan yang disetujui (revisi 2026-10-01)
@@ -59,35 +59,27 @@ Pengguna menyetujui penyederhanaan pelaksanaan dengan syarat struktur proyek tet
 - Gunakan pola bersama untuk form, daftar, detail dan konfirmasi. Komponen Atomic Design dipisah hanya berdasarkan tanggung jawab atau penggunaan ulang nyata, bukan abstraksi dini.
 - Tunda abstraksi generik; gunakan controller/DTO/service dan Prisma sesuai kepemilikan data tiap service.
 - Outbox/retry dibatasi pada alur yang membutuhkan konsistensi lintas service (provisioning akun+profil, media READY→attendance). Idempotensi, kompensasi dan pemulihan yang diwajibkan baseline tetap dipenuhi.
-- Test terfokus per perubahan; browser manual per fitur selama development. Suite seluruh repo hanya checkpoint lintas package yang relevan/rilis; regresi browser otomatis sebelum rilis saat resource tersedia. Prioritas: aturan bisnis, otorisasi, revokasi, lokasi wajib, pemulihan.
+- Unit test logika berubah; UI/alur manual di lokal. Tidak ada gate integrasi penuh/Playwright rutin. CI PR main hanya lint/build/typecheck/unit .
 
 ### Tier test (biaya vs nilai) — disetujui 2026-10-02
-Revisi percepatan disetujui pengguna pada 2026-10-02 setelah T13: RAM lokal terbatas dan pengulangan suite memperlambat development. Aturan berikut menjadi acuan; test yang sudah ada tetap disimpan.
 
-| Tier | Isi | Kapan dijalankan |
-| --- | --- | --- |
-| 1. Statis | Typecheck dan lint package/berkas terkait | Sebelum commit perubahan kode/config terkait. Dokumentasi saja cukup isi, tautan dan diff. |
-| 2. Test terfokus | Unit, komponen atau kontrak HTTP untuk logika dan interaksi terdampak | Saat mengubah perilaku; sertakan pemakai/dependensi yang berisiko. Test baru menguji validasi, transisi state dan aturan bisnis, bukan hanya teks, ikon atau markup statis. |
-| 3. Visual | Halaman yang berubah pada 320/1440 px, terang/gelap | Hanya saat layout/CSS berubah; tambah 768/1024 px jika breakpoint berubah. Gunakan test:ui terfilter atau pemeriksaan browser tercatat. Shell/token bersama mencakup pemakai terdampak. Seluruh portal tidak diulang pada setiap fitur/checkpoint. |
-| 4. Integrasi backend | API terhadap MySQL; AIStor bila digunakan | Setelah fitur lengkap atau saat perubahan memengaruhi constraint, transaksi, otorisasi, revokasi, idempotensi atau pemulihan. Bukti aturan bisnis dan data nyata tetap wajib. |
-| 5. Browser nyata | Checklist manual per fitur melalui backend nyata | Default selama development. Catat langkah, hasil, tanggal dan penguji; fitur ditutup setelah acceptance nyata lulus. E2E browser otomatis ditunda ke regresi sebelum rilis saat resource tersedia. |
+Direvisi pengguna 2026-10-03; aturan berikut menggantikan frekuensi otomatis sebelumnya.
 
-- Loop development: selesaikan perubahan logis → typecheck/lint + test perilaku terdampak → review → commit/push branch fitur → PR ke dev. Satu commit per perubahan logis lengkap, bukan per berkas atau potongan kecil. Perubahan berkaitan boleh mencakup kode, test dan dokumentasi; jangan mencampur pekerjaan yang tidak berkaitan.
-- Integrasi backend dan checklist browser dijalankan setelah fitur lengkap; bukan gate setiap commit. Gunakan fixture terpisah untuk test otomatis. Akun development hanya untuk checklist manual yang disetujui; jangan menjalankan cleanup fixture destructive pada development.
-- Jangan membuat atau memperluas harness E2E browser setiap fitur selama development. Simpan suite yang ada; siapkan cakupan regresi core journeys sebelum rilis. Hasil manual tidak boleh ditulis sebagai hasil Playwright.
-- Build package terkait saat bundling/startup berubah. Build dist backend yang berubah sebelum pengujian memakai dist. Build/lint/test seluruh monorepo hanya pada checkpoint yang relevan terhadap integrasi lintas package dan sebelum promosi main.
-- Jangan mengulang pemeriksaan lulus tanpa perubahan source/dependensi/config/lingkungan terkait, kegagalan atau risiko baru. Reuse bukti yang masih berlaku dan catat scope hasil.
-- Suite berat serial. Periksa resource_status bila tersedia atau RAM OS; Playwright satu worker. Regresi E2E browser otomatis dijalankan sebelum rilis ketika resource memadai, per spec agar limit Auth tidak terkena gabungan suite. Limit login/refresh tidak dilonggarkan.
-- Ketika schema berubah, verifikasi migration/schema/constraint/grants tetap wajib: diff migrations→schema exit 0 dan penerapan dev/test sesuai runbook.
-- Dokumentasi cukup module spec + acceptance dan progress singkat. Perbarui runbook bila perintah/setup berubah; hindari dokumen per endpoint dan penyalinan bukti ke banyak tempat.
-- Reuse pola form/daftar/detail yang ada. Tunda abstraksi generik, refactor, polesan tambahan dan tooling baru yang tidak diperlukan acceptance fitur.
+| Saat | Pemeriksaan |
+| --- | --- |
+| Development logika | Unit test terdampak serta lint/typecheck package terkait |
+| UI/layout/alur aplikasi | Manual di lokal, termasuk responsivitas dan API nyata yang berubah |
+| Schema/migration | Penerapan migration dan grants pada DB lokal; jangan reset data production |
+| PR dev → main | Lint, validasi Prisma, build/typecheck dan unit/component tests yang sudah ada |
+| Deployment | Build image dengan cache/paralel, migration baru bila ada, health check |
+| Setelah deployment | Smoke manual fitur penting atau yang berubah |
 
-Bukti kritis tetap wajib: aturan bisnis absensi (late/early/cutoff), otorisasi role, revokasi sesi, unik/konflik data, lokasi wajib, keamanan foto, idempotensi check-in/out/provisioning, pemulihan/kompensasi. Pertahankan test otomatis untuk aturan tersebut. Acceptance MySQL/AIStor dan kamera/lokasi memakai layanan/perangkat nyata sesuai fitur. Test lama tidak dihapus; frekuensi eksekusi dan test baru yang redundan dikurangi.
-
-- Gunakan tooling yang ada; tunda tambahan broker/cache/orchestration/build system tanpa kebutuhan nyata.
-- Spike kamera/lokasi (T18) dijadwalkan lebih awal secara serial setelah prasyarat T07 siap.
-
-Catatan struktur aktual: packages/contracts dan packages/config belum dibuat; dibuat saat task pertama yang membutuhkannya (kontrak Employee pada T10). packages/ui dan packages/database sudah ada.
+- Simpan suite lama; integrasi MySQL/AIStor dan Playwright tidak menjadi gate rutin development/rilis. Jalankan tambahan untuk diagnosis masalah khusus atau atas permintaan pengguna.
+- Test baru hanya untuk logika/aturan bisnis yang berubah; jangan membuat test teks/ikon/markup atau harness browser rutin.
+- Jangan mengulang seluruh suite yang lulus setiap increment. Dokumentasi saja cukup review isi, tautan dan diff.
+- Commit/push satu perubahan logis langsung ke dev; PR dev ke main saat sekumpulan fitur siap live.
+- Backup sebelum migration production; health check tidak menggantikan pemeriksaan manual fitur.
+- Pertahankan arsitektur lima backend/dua frontend dan aturan data/otorisasi baseline. Penyederhanaan proses tidak mengubah kebutuhan produk.
 
 ### Pelaksanaan per putaran — disetujui 2026-10-02
 
@@ -110,11 +102,11 @@ Ikuti UX01–UX07 dalam todo sebagai koordinasi lintas layar; dependensi T01–T
 
 Persetujuan arah desain dan kelanjutan implementasi telah diberikan; checkpoint rutin berarti memverifikasi dan mencatat bukti lalu melanjutkan. Jangan membuat gate persetujuan ulang untuk keputusan rutin dalam scope. Perubahan kebutuhan dan akses eksternal yang belum tersedia memerlukan penanganan spesifik.
 
-Definisi selesai lokal: seluruh capability frontend, backend, database/storage dan integrasi sesuai baseline, termasuk E01–E09/H01–H14, API nyata, keamanan/pemulihan, build/lint/test, CI dan runbook/artefak deployment. Artefak live disiapkan sampai akses/rilis tersedia; hasil live tidak diklaim sebelum pengujian nyata. Commit/push branch fitur dan PR ke dev pada repository pilihan pengguna; rilis production melalui PR dev ke main.
+Definisi selesai lokal: perilaku sesuai baseline, unit test relevan serta alur/UI manual lulus, spec dan acceptance ringkas diperbarui. Commit/push dev; rilis melalui PR dev ke main. Artefak dan hasil live tidak diklaim sebelum deployment nyata.
 
 ## Pengerjaan serial dan kelanjutan lintas sesi
 Scope tetap seluruh T01–T31: dua frontend, lima service, kontrak/API/Swagger, database/storage, keamanan, testing, CI dan deployment. Pengguna menetapkan dua agen bergantian karena keterbatasan sesi; hanya satu agen aktif, tanpa subagen/coding paralel.
 
-Kerjakan satu increment sesuai dependensi: kontrak/schema terkait → API → UI → test/integrasi → review/commit. Pilih task berikut yang siap setelah increment ditutup. Jika terhalang akses, catat kendala lalu kerjakan satu task lain yang siap. Spike kamera/lokasi boleh dijadwalkan lebih awal secara serial setelah fondasi terkait siap.
+Kerjakan satu increment sesuai dependensi: kontrak/schema → API → UI → unit test terkait dan cek manual → review/commit dev. Tidak perlu harness atau gate tambahan tanpa kebutuhan nyata.
 
 Sebelum batas sesi, update [progress](progress.md) dan berikan prompt trigger ringkas sesuai [alur implementasi](../docs/development/implementation-workflow.md). Pengguna memilih waktu pindah. Agen berikut memeriksa checkpoint/Git/source/proses dan meneruskan progres tanpa mengulang proyek. Jangan mengarang kuota ketika informasi kapasitas tidak tersedia.

@@ -2,7 +2,18 @@
 
 Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mulai/selesai task, sebelum sesi berganti atau kapasitas sesi habis. Status completion tetap di [todo](todo.md); dependency di [plan](plan.md); prosedur pada [alur implementasi](../docs/development/implementation-workflow.md).
 
-## Snapshot terakhir
+## Keputusan aktif dan titik lanjut — 2026-10-03
+
+- Pengguna menggantikan flow feature/dev/main dengan hanya dev dan main. Coding/tes lokal dan commit/push langsung dev, PR dev ke main saat siap live. Tidak ada dev online.
+- Development: unit test logika berubah, lint/typecheck terkait, UI/responsivitas/alur aplikasi dicek manual. Tidak ada Playwright atau suite integrasi penuh wajib setiap fitur/deploy. Test lama dipertahankan untuk diagnosis opsional. Migration/grants lokal diperiksa saat schema berubah.
+- CI sekarang hanya PR main dari dev repository sendiri: branch policy, lint/Prisma/build/typecheck/unit tests, CI result. Workflow backend-images.yml pada main membangun/publish lima image cached/paralel ke GHCR, tanpa mengulang unit test. Publish baru dikonfigurasi, belum dieksekusi; pengiriman ke VPS belum diimplementasikan.
+- Commit image ad58ec5, fix test 7731142 dan paralelisasi 9e13517 diintegrasikan fast-forward ke dev; tidak ada commit hilang. Main bootstrap memakai commit dokumentasi awal 39d7795 untuk dasar PR rilis pertama tanpa mengaktifkan deployment. Branch codex/t30-production-images boleh dihapus hanya setelah ancestry dan push dev/main terverifikasi. Git lokal/remote aktual adalah bukti status, bukan snapshot lama di bawah.
+- Verifikasi increment: 4 unit test branch policy dan Node syntax check lulus; actionlint 1.7.12, parsing YAML/rantai job dan tautan lokal lulus; diff diperiksa sebelum commit. Suite aplikasi/integrasi/Playwright tidak diulang karena logika runtime tidak berubah.
+- VPS terakhir menurut output pengguna: /opt/attendance, secrets/licence privat, compose.infra.yml dengan attendance-prod-mysql-1 (attendance_prod, MySQL 8.4.11, healthy, loopback 3307) dan attendance-prod-aistor-1 (health/Console 200, loopback 9000/9001). Bucket privat dan akun Media terbatas: upload/download/delete lulus, akses di luar prefix/admin ditolak. UFW aktif, publik hanya 22/80/443. UKG lama dihapus pengguna; nginx host sebelumnya dihentikan. Lisensi/secret tidak dicatat di Git.
+- Status migration/schema/grants production backend setelah reset belum dibuktikan; jangan mengasumsikan setup demo lama berlaku pada attendance_prod. Tidak ada backend/frontend absensi live yang telah diverifikasi.
+- Setup VPS ditunda atas instruksi pengguna, dilanjutkan dari titik ini. Jangan reset/ulang bootstrap. Berikut T30: periksa konfigurasi repo/VPS aktual, siapkan backend Compose/GHCR/deploy health/rollback dan domain/TLS; Vercel main untuk dua portal. Aktivasi CD/rilis production belum dilakukan.
+- Tidak ada proses/port/VPS diubah oleh increment ini. Tooling lokal untracked tetap dipertahankan. Riwayat kebijakan/suite di bawah adalah bukti historis, bukan aturan terbaru.
+## Snapshot historis (aturan digantikan keputusan aktif di atas)
 
 - Tanggal: 2026-10-03 (Asia/Jakarta), setelah increment kebijakan CI/CD T30. HEAD diverifikasi dengan `git log`; jangan anggap hash di sini sebagai HEAD.
 - Tahap: fitur T08–T29 selesai dan diverifikasi; Checkpoint setelah T29 terpenuhi. Increment implementasi berikut T30 Artefak deploy dan runbook. Fondasi T01–T07/UX01–UX02 masih perlu rekonsiliasi status lama dan isolasi test; T30–T31 tetap belum selesai. T09c tetap menjadi acuan tema.
@@ -33,7 +44,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T30 — artefak image backend production | Sesi ini (serial) | `.dockerignore`, `infra/Dockerfile.backend`, lima `apps/*/src/main.ts` dan `package.json`, `.github/workflows/ci.yml`, `docs/development/ci-cd-workflow.md` | Kebijakan CI/CD selesai; build image harus terverifikasi di GitHub Actions | Tidak mengubah service/port VPS; image tidak dipublish | Implementasi lokal di branch `codex/t30-production-images`; belum commit |
+| T30 — penyederhanaan development/CI dan branch | Sesi ini (serial) | AGENTS, workflow CI, branch policy, baseline/ADR/spec development, plan/todo/progress | Instruksi terbaru pengguna | Tidak mengubah VPS/proses/port | Review dan commit/push dev; setup VPS ditunda |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 

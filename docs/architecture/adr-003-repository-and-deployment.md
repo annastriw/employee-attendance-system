@@ -4,7 +4,7 @@ Status: disetujui pengguna.
 
 ## Keputusan
 - Satu repository GitHub berbentuk monorepo untuk kedua frontend, seluruh service backend, package bersama, dokumentasi, pengujian dan infra.
-- Revisi pengguna 2026-10-03: branch fitur/perbaikan dari dev → PR dev → PR dev ke main → rilis production. Repository public [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system) tetap sama. Satu environment online dari main untuk 5 karyawan + 1 HR; tidak deploy dev/preview. [Workflow CI/CD dan status aktivasi](../development/ci-cd-workflow.md) menjadi acuan.
+- Revisi terbaru 2026-10-03: coding/tes lokal dan push langsung dev, PR dev ke main untuk rilis. Hanya dua branch dev dan main. Satu production main; tanpa deployment dev/preview. [Workflow CI/CD](../development/ci-cd-workflow.md) menetapkan pemeriksaan ringkas dan status CD.
 - Attendance Portal menjadi satu project Vercel tersendiri, dengan sumber apps/attendance-web dan domain attendance.annastriwidagdo.me.
 - HR Portal menjadi project Vercel lain, dengan sumber apps/hr-web dan domain hr.annastriwidagdo.me.
 - Kedua project Vercel terhubung ke repository yang sama, tetapi memiliki konfigurasi environment dan deployment masing-masing.

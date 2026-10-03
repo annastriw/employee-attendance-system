@@ -175,7 +175,7 @@ Kedipan memicu auto capture, bukan pencocokan wajah/verifikasi identitas. Tidak 
 - [ ] Auth/master/provisioning/lifecycle/reset/capture/check-in/out/riwayat/monitoring/detail/restore memenuhi baseline.
 - [ ] Loading/empty/filter-empty/error/busy/success/expired/denied teruji pada halaman terkait.
 - [ ] Screenshot semua keluarga layar pada viewport sasaran ditinjau; mobile/keyboard terverifikasi.
-- [ ] Vitest/RTL memeriksa interaksi bermakna; Playwright core journeys memakai API nyata; test backend menguji bisnis/otorisasi/idempotensi.
+- [ ] Revisi 2026-10-03: unit test logika/interaksi bermakna; tampilan dan core journeys dicek manual melalui API lokal nyata. Playwright/integrasi otomatis bukan gate rutin.
 - [ ] Kamera/blink/fallback/lokasi diuji perangkat nyata; hasil dibedakan dari simulasi.
 - [ ] Build/lint/test relevan lulus; task hanya dicentang dengan bukti/batasan jujur.
 - [ ] Runbook selaras; live hanya selesai setelah akses dan verifikasi nyata tersedia.

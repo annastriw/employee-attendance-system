@@ -8,29 +8,20 @@ const release = {
   headRepository: 'annastriw/employee-attendance-system',
 };
 
-for (const headRef of ['codex/new-feature', 'feature/profile', 'fix/login', 'my-own-branch']) {
-  test(`${headRef} can integrate through dev`, () => {
-    assert.doesNotThrow(() => checkBranchPolicy({ ...release, baseRef: 'dev', headRef }));
-  });
-  test(`${headRef} cannot bypass dev to release`, () => {
-    assert.throws(() => checkBranchPolicy({ ...release, headRef }));
-  });
-}
 test('release accepts dev from the same repository', () => {
   assert.doesNotThrow(() => checkBranchPolicy(release));
 });
-test('a fork branch named dev cannot act as the release source', () => {
-  assert.throws(() => checkBranchPolicy({ ...release, headRepository: 'other/fork' }));
-});
-test('main and dev cannot be used as feature PR sources to dev', () => {
-  for (const headRef of ['main', 'dev', '']) {
-    assert.throws(() => checkBranchPolicy({ ...release, baseRef: 'dev', headRef }));
+test('only dev can propose a production release', () => {
+  for (const headRef of ['main', 'codex/feature', 'feature/profile', '']) {
+    assert.throws(() => checkBranchPolicy({ ...release, headRef }));
   }
 });
-test('unknown PR target and event fail closed', () => {
+test('release PR must target main in this repository', () => {
   assert.throws(() => checkBranchPolicy({ ...release, baseRef: 'other' }));
-  assert.throws(() => checkBranchPolicy({ ...release, eventName: 'workflow_dispatch' }));
+  assert.throws(() => checkBranchPolicy({ ...release, headRepository: 'other/fork' }));
 });
-test('pushes run CI without claiming PR provenance or deployment', () => {
-  assert.doesNotThrow(() => checkBranchPolicy({ eventName: 'push' }));
+test('pushes and unsupported events are not release candidates', () => {
+  for (const eventName of ['push', 'workflow_dispatch']) {
+    assert.throws(() => checkBranchPolicy({ ...release, eventName }));
+  }
 });
