@@ -5,10 +5,14 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tooling
-COPY migrator/package.json migrator/package-lock.json ./
+COPY infra/migrator/package.json infra/migrator/package-lock.json ./
 RUN npm ci --no-audit --no-fund && npm cache clean --force
-COPY prisma-migrator.config.ts ./infra/prisma-migrator.config.ts
+COPY infra/prisma-migrator.config.ts ./infra/prisma-migrator.config.ts
+COPY infra/migrator/entrypoint.sh ./entrypoint.sh
+COPY prisma/schema.prisma ./prisma/schema.prisma
+COPY prisma/migrations ./prisma/migrations
+RUN chmod 755 /tooling/entrypoint.sh
 
 USER node
-ENTRYPOINT ["/tooling/node_modules/.bin/prisma"]
+ENTRYPOINT ["/tooling/entrypoint.sh"]
 CMD ["--help"]

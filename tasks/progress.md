@@ -2,7 +2,16 @@
 
 Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mulai/selesai task, sebelum sesi berganti atau kapasitas sesi habis. Status completion tetap di [todo](todo.md); dependency di [plan](plan.md); prosedur pada [alur implementasi](../docs/development/implementation-workflow.md).
 
-## Titik lanjut aktif — seed HR lulus, konfigurasi Vercel Attendance 7B (2026-10-04)
+## Task aktif — VPS auto-deploy main (2026-10-04)
+
+- Pengguna menyetujui workflow sederhana: coding di dev → PR main → deploy otomatis; Vercel sudah mengarah ke main, VPS tidak perlu SSH rutin setelah setup satu kali.
+- Implementasi lokal: `.github/workflows/backend-images.yml` menerbitkan 5 image backend + image Prisma migrator berdasarkan SHA main, mendeteksi perubahan migration, dan menambahkan deploy job production yang nonaktif sampai repo variable `VPS_AUTO_DEPLOY_ENABLED=true`.
+- Mekanisme VPS: SSH forced-command menerima hanya `deploy <40-char SHA> <true|false>`, wrapper tidak menyediakan shell dan menjalankan satu script sudo root-owned. Script serializes deploy, backup DB hanya untuk migration, migrate deploy saat diperlukan, switch Compose ke SHA persis, health check 5 backend, rollback image aplikasi jika health gagal. Migration/data tidak di-rollback otomatis.
+- File terkait: `.github/workflows/backend-images.yml`, `infra/Dockerfile.migrator`, `infra/prisma-migrator.config.ts`, `infra/migrator/entrypoint.sh`, `infra/vps/attendance-deploy-ssh.py`, `scripts/deployment/attendance-deploy.sh`, unit test wrapper, `docs/deployment/vps-auto-deploy.md`, `docs/deployment/vps-production-manual.md`, `docs/development/ci-cd-workflow.md`, baseline, todo, dan checkpoint ini.
+- Verifikasi: Python deployment unit 5/5 lulus, Bash syntax untuk dua script lulus, YAML parse untuk `backend-images.yml` dan `ci.yml` lulus, Markdown link check/diff whitespace lulus. Docker daemon lokal tidak tersedia sehingga image build tidak dijalankan. Implementasi commit `6830d47` sudah dipush ke `origin/dev`. Belum deploy ke VPS, mengubah GitHub secrets/environment, mengaktifkan variable, membuka PR atau merge main. Setup manual awal tetap menunggu pengguna.
+- Setelah source masuk main, tutorial manual berikutnya adalah setup key forced-command dan GitHub environment secrets; aktivasi `VPS_AUTO_DEPLOY_ENABLED` paling akhir setelah uji no-op serta kesehatan VPS dikonfirmasi.
+
+## Arsip checkpoint — seed HR lulus, konfigurasi Vercel Attendance 7B (2026-10-04)
 
 - Output VPS pengguna: MySQL 8.4.11 healthy, AIStor running, loopback 3307/9000/9001, network attendance-prod-backend. RAM available 2 GiB, disk available 46 GB, swap terpakai 540 MiB. attendance_prod nol tabel.
 - Nginx saat ini aktif pada 80/443; konfigurasi/domain aktual perlu diperiksa sebelum perubahan. Port backend 3000–3004 tidak tampil pada hasil listener.

@@ -281,6 +281,7 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 - Dependencies: 29
 - Target: infra/, docs/deployment/
 - Revisi efisiensi 2026-10-03: hanya dev/main, uji lokal unit+manual, PR main dengan CI ringkas. CD target: image GitHub/GHCR cached/paralel → VPS pull/update → migration hanya bila baru → health → frontend main. Tanpa Playwright/integrasi penuh rutin, reset atau seed ulang. CD/akses/domain/backup/rollback belum selesai; lanjut setup VPS dari infra production, bukan reset lagi.
+- Implementasi artefak auto-deploy 2026-10-04 tersedia di [panduan deploy otomatis](../docs/deployment/vps-auto-deploy.md): GHCR image SHA untuk lima backend + migrator, migration detector, forced-command SSH, backup sebelum migration, health check dan rollback app. Job VPS sengaja nonaktif sampai user melakukan setup key/Environment/secret satu kali dan mengaktifkan `VPS_AUTO_DEPLOY_ENABLED`. Belum menganggap CD aktif atau T30/T31 selesai; belum membuktikan restore backup atau setup VPS.
 
 ## T31 — Deployment dan verifikasi live
 - [ ] Selesai
