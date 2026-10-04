@@ -191,7 +191,7 @@ Bagian ini dilakukan di browser GitHub, bukan SSH VPS:
 3. Buat PR dan tunggu pemeriksaan CI. Target CI result success; CI menjalankan unit sekali dan lint/build/typecheck, tanpa Playwright atau integrasi penuh. Jika GitHub meminta persetujuan workflow, izinkan workflow PR milik repository ini berjalan.
 4. Kirim URL PR dan hasil CI. Jangan merge pada sub-tahap ini; hasil diperiksa dahulu. Jangan klik Delete branch setelah merge nantinya karena dev dipertahankan.
 
-Tidak perlu perintah VPS pada tahap 3A. Image GHCR baru dibangun setelah merge main; PR sendiri belum deploy/migrate. Proteksi main/required CI result perlu dipastikan sebelum merge. Pengguna tetap menjalankan tutorial bertahap; agen tidak membuat atau merge PR pada increment ini.
+Tidak perlu perintah VPS pada tahap 3A. Image GHCR baru dibangun setelah merge main; PR sendiri belum deploy/migrate. Proteksi main-production sudah aktif: PR dan CI result wajib, tanpa bypass; detail pada [workflow rilis](../development/ci-cd-workflow.md). Pengguna tetap menjalankan tutorial bertahap; agen tidak membuat atau merge PR pada increment ini.
 
 ## Status langkah berikutnya
 
