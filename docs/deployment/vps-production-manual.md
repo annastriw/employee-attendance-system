@@ -135,6 +135,51 @@ Jalankan satu block pada SSH VPS. Folder tujuan baru; jika sudah ada, berhenti t
 
 Kirim output block ini. Jangan install dependency, build semua service, menjalankan db:setup/db push/migrate reset atau menyalin secret ke source. Berikutnya siapkan tooling migrate deploy sesuai source rilis; konfigurasi lokal memerlukan shadow database dan tidak dipakai langsung untuk production.
 
+## Tahap 2C — tooling migration dan validasi schema
+
+Tahap 2B diterima dari output pengguna: source ffe1365 tersedia dengan 10 migration. Belum ada migration yang diterapkan. Tooling tersendiri menggunakan Prisma 7.10.0 dengan npm lockfile; tidak menginstal dependency seluruh monorepo atau build backend. Konfigurasi ini menerima DATABASE_URL dari environment, tanpa membaca file lokal atau membutuhkan shadow database, sesuai [Prisma Config](https://www.prisma.io/docs/orm/v7/reference/prisma-config-reference).
+
+Jalankan block berikut pada SSH VPS. Fetch tidak mengubah checkout source migration; git archive hanya mengambil file tooling dari commit dev yang dicatat. Jangan menyalin secret ke folder tooling. Jika command gagal, berhenti dan kirim error.
+
+```sh
+(
+  set -eu
+  set -o pipefail
+  source_dir=/opt/attendance/releases/source-ffe1365
+  tooling_dir=/opt/attendance/releases/migration-tooling
+
+  [ ! -e "$tooling_dir" ] || {
+    echo 'STOP: folder tooling sudah ada; kirim hasil ini'
+    exit 1
+  }
+  [ "$(git -C "$source_dir" rev-parse HEAD)" = ffe136562717f4944051e51061f56bec015ff42c ]
+  git -C "$source_dir" fetch origin dev
+  tooling_commit=$(git -C "$source_dir" rev-parse FETCH_HEAD)
+  mkdir "$tooling_dir"
+  git -C "$source_dir" archive "$tooling_commit" \
+    infra/Dockerfile.migrator infra/prisma-migrator.config.ts infra/migrator |
+    tar -x -C "$tooling_dir"
+  printf '%s\n' "$tooling_commit" > "$tooling_dir/source-commit.txt"
+
+  sudo docker build --progress=plain \
+    -f "$tooling_dir/infra/Dockerfile.migrator" \
+    -t attendance-migrator:prisma-7.10.0 "$tooling_dir/infra"
+
+  sudo docker run --rm --network none --memory 512m \
+    --mount "type=bind,src=$source_dir/prisma,dst=/tooling/prisma,readonly" \
+    -e DATABASE_URL=mysql://validation:validation@127.0.0.1:1/attendance_validation \
+    attendance-migrator:prisma-7.10.0 \
+    validate --config /tooling/infra/prisma-migrator.config.ts
+
+  printf 'Tooling commit: %s\n' "$tooling_commit"
+  echo 'PASS: tooling dan schema siap; database belum diubah'
+)
+```
+
+URL validation adalah nilai dummy, bukan kredensial production. Container tidak memiliki network atau secret; validate hanya memeriksa schema. Build pertama mengunduh Node/dependency tooling; layer Docker dipakai ulang berikutnya. Default image menampilkan help, tidak otomatis menjalankan migration.
+
+Kirim bagian akhir build/validasi dan PASS atau error. Berikutnya cocokkan source migration dengan rilis main dan terapkan migrate deploy memakai akun migrator. Build Docker belum diuji oleh agen karena daemon lokal tidak tersedia; hasil build VPS masih menunggu pengguna. Verifikasi lokal: Prisma validate dengan config baru lulus tanpa koneksi database.
+
 ## Status langkah berikutnya
 
 Bootstrap migration/akun runtime, image rilis main/GHCR, Compose backend, domain/TLS dan frontend dikerjakan setelah inventaris tahap 1. Unit rilis dijalankan sekali pada PR; integrasi cepat bila perlu sebelum rilis. Pengiriman otomatis ke VPS belum aktif. T30/T31 belum dicentang dari pemeriksaan infra saja.
