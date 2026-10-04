@@ -1,5 +1,25 @@
 # Progres dan titik lanjut
 
+## Acceptance refresh production — kedua role aman (2026-10-05)
+
+- Pengguna menyatakan: "sudah aman semua ketika refresh, semua role" setelah
+  deployment fix Vercel `4db848c`. Acceptance ini mencakup refresh production HR
+  dan Karyawan, termasuk penghalang NOT_FOUND HR yang dilaporkan sebelumnya.
+- [x] Refresh production aman pada kedua role, diterima pengguna.
+- [ ] Logout lalu refresh kembali ke login pada kedua role: belum dikonfirmasi.
+- [ ] Rewrite cookie proxy localhost: tidak diuji production; tidak diklaim lulus
+  runtime lokal. Unit 6/6 dan build/lint sudah terbukti CI; implementasi di dev.
+- Klarifikasi status: T1 implementasi dan refresh production selesai; checkbox
+  task penuh tetap terbuka karena logout dan verifikasi proxy lokal belum dilaporkan.
+  Tidak menandai detail/foto/filter sebagai diterima dari laporan refresh saja.
+- File dokumentasi terkait: `tasks/redesign-sprint.md`, progress ini. Tidak ada
+  kode atau backend berubah; verifikasi dokumentasi/diff saja, tanpa dev server.
+- Perlu PR+deploy: tidak ada perubahan backend.
+- Lanjut: **T2 diagnosis** — bukti runtime diminta untuk detail HR dari Absensi/
+  Ringkasan dan riwayat/detail/foto Karyawan; minta URL/status/Response Network
+  dan error Console tanpa Cookie/token bila gagal. Konfirmasi logout T1 juga
+  diminta. Jangan memperbaiki validator berdasarkan hipotesis tanpa bukti.
+
 ## Bug aktif — refresh path HR 404 Vercel (2026-10-05)
 
 - Pengguna melaporkan refresh `https://hr.annastriwidagdo.me/absensi`

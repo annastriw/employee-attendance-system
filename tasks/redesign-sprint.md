@@ -179,6 +179,10 @@ Status `[x]` = selesai & di-push. Fase A (sudah selesai):
 Fase B:
 
 ### T1 `[ ]` Bug: sesi hilang saat refresh (semua role) — AKAR MASALAH TERKONFIRMASI
+- **Status 2026-10-05**: implementasi di-push (`98f5c12`), unit/lint/build terbukti
+  CI; pengguna menyatakan refresh aman semua role di production setelah fix
+  fallback Vercel (`4db848c`). Refresh production diterima. Logout → refresh dan
+  rewrite proxy localhost belum dikonfirmasi; tidak disimpulkan dari cek production.
 - **Bukti pengguna**: `POST /api/v1/auth/refresh` → **401** di 5173 dan 5174 setelah refresh.
 - **Akar masalah** (source): production Auth membaca cookie `__Host-auth_refresh_<admin|employee>`
   (`apps/auth-service/src/auth/auth.controller.ts` `cookieName()` + baris ~162
