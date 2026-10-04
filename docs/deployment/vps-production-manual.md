@@ -585,6 +585,16 @@ Jalankan satu block pada SSH VPS. Masukkan email HR ketika diminta, bukan passwo
 
 Target pesan Admin HRD created; initial password change is required. Jika Existing admin retained, password baru di file bukan bukti password akun existing: berhenti dan rekonsiliasi, jangan mencoba reset otomatis. Jika seed gagal, file dipertahankan untuk diagnosis/retry terarah. Kirim pesan seed/PASS atau error saja, jangan isi file. Pengambilan password dilakukan privat saat frontend siap; setelah login dan perubahan password, file bootstrap dapat dihapus sesuai tahap selanjutnya. Berikutnya dua frontend Vercel dari main.
 
+## Tahap 7B — konfigurasi project Attendance di Vercel
+
+Output seed diterima: Admin HRD created; initial password change is required, PASS. Jangan seed ulang. Siapkan Attendance dulu, HR project terpisah berikutnya. Vercel Add New→Project→import annastriw/employee-attendance-system. Project attendance-web, framework Vite, Root Directory apps/attendance-web, Include source files outside Root Directory enabled untuk packages/ui, Build Command pnpm run build, Output dist, Install pnpm install --frozen-lockfile, Node24.x. Build hanya frontend terkait, tidak root build/validate/unit ulang.
+
+Environment Production: VITE_API_BASE_URL=https://attendance-api.annastriwidagdo.me/api/v1, ENABLE_EXPERIMENTAL_COREPACK=1 untuk packageManager pnpm10.28.0 di root repo. URL frontend publik, bukan secret. Tidak memasukkan kredensial DB/S3/JWT/seed ke Vercel.
+
+Sebelum Deploy, konfirmasi source branch main; default repository sebelumnya dev sehingga jangan menganggap import otomatis main. Jika branch tidak dapat dipilih pada form import, kirim tampilan/options yang ada sebelum lanjut agar project production main dapat dikonfigurasi tanpa sengaja deploy dev. Production Branch main dan pencegahan preview dev harus diselesaikan sebelum auto deployment dipakai. Saat ini hanya konfigurasi project, belum klik Deploy atau menambahkan DNS domain. URL vercel.app tidak di allowlist backend; login diuji setelah domain attendance.annastriwidagdo.me terpasang. Berikut build Attendance dari main lalu domain sesuai record yang diberikan Vercel, bukan IP VPS.
+
+Acuan [build settings Vercel](https://vercel.com/docs/builds/configure-a-build), [monorepo outside-root](https://vercel.com/docs/monorepos/monorepo-faq), [Git production branch](https://vercel.com/docs/git). Pengguna melakukan langkah dashboard manual; agen belum membuat project/deploy frontend.
+
 ## Status langkah berikutnya
 
 Bootstrap migration/akun runtime, image rilis main/GHCR, Compose backend, domain/TLS dan frontend dikerjakan setelah inventaris tahap 1. Unit rilis dijalankan sekali pada PR; integrasi cepat bila perlu sebelum rilis. Pengiriman otomatis ke VPS belum aktif. T30/T31 belum dicentang dari pemeriksaan infra saja.
