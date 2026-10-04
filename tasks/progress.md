@@ -1,5 +1,36 @@
 # Progres dan titik lanjut
 
+## Pivot — overhaul penuh frontend + rewrite sprint (2026-10-05)
+
+Pengguna memperluas scope dari lanjutan R06 menjadi **overhaul penuh dua portal +
+perbaikan bug fungsional + boleh ubah backend**, metode **task tanpa iterasi** (tiap
+task DONE lalu lanjut), testing manual oleh pengguna, push semua ke `dev` (PR `main`
+oleh pengguna). `tasks/redesign-sprint.md` ditulis ulang: fase A (R00–R05 selesai)
+dilipat; fase B (X1–X10) baru.
+
+Audit codebase (baca-saja, memori CRITICAL — tanpa build/dev server):
+- **Dua bug "tidak berfungsi" belum di-root-cause-kan secara runtime** (butuh dev
+  server + memori lega). Hipotesis dari source:
+  - *Logout saat refresh*: `restore()` → `/auth/refresh` bergantung cookie
+    `__Host-auth_refresh_*` (Secure, path `/`). Lewat proxy localhost HTTP, cookie
+    harus di-rewrite (`__Host-`/`Secure`/`Domain` dilucuti) **pada response refresh**.
+    Perlu verifikasi apakah rewrite berlaku untuk endpoint refresh / SameSite menolak.
+  - *HR detail absensi*: `AttendancePage` me-render `AttendanceDetailPage` saat
+    `?id=` ada (bukan route terpisah) — perlu reproduksi apakah link/param hilang
+    di bawah path routing R01, atau validasi data melempar.
+  - *Karyawan riwayat*: `HistoryPage` ada & terwire via hash route `#riwayat`;
+    attendance-web MASIH hash routing. Perlu reproduksi error aktual (validasi
+    `attendance-history.ts` ketat — bisa melempar `invalid()` bila bentuk data beda).
+- Struktur aktual: hr-web sudah React Router + Atomic Design sebagian; attendance-web
+  masih hash routing + ada `spikes/` dan `WelcomePage` (dead code kandidat hapus).
+- HeroUI v3.2.6: punya `DatePicker/DateRangePicker/SearchField/Drawer/Select` —
+  cukup untuk date-range, search-saat-ketik, sidebar hideable, dropdown departemen.
+  **Tidak punya chart** → keputusan chart (Recharts vs SVG/Meter) ditandai di X7.
+
+Lanjut: **X1 — perbaikan bug kritis** (butuh dev server saat memori lega untuk
+reproduksi; mulai dari root-cause cookie refresh). Belum ada kode diubah di sesi ini
+selain dokumen sprint + progress.
+
 ## R05 — HR list pages: pill konsisten + fix link routing (2026-10-05)
 
 Selesai dan diterima pengguna lewat cek manual. Halaman list HR disamakan ke pola GitHub list dengan pill status konsisten dan link yang benar di bawah path routing.
