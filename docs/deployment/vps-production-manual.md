@@ -505,6 +505,49 @@ getent ahostsv4 attendance-storage.annastriwidagdo.me || echo 'DNS storage belum
 
 Target IP43.157.243.37. Jika belum terlihat, tunggu cache DNS tanpa mengubah server. Kirim hasil DNS, serta list sites/grep directive6A yang belum terlihat. Pernyataan situs fe terhapus jam23 belum dibuktikan; expiry sertifikat bukan jadwal penghapusan. Jangan hapus/ubah fe/dev.ihealthedu.site atau mengasumsikan cleanup-nya aman bagi Nginx; audit timer/cron terpisah bila perlu. Agen tidak mengubah DNS atau server pada tahap ini.
 
+## Tahap 6C — reverse proxy HTTP API dan S3
+
+Output pengguna6A/6B lengkap diterima: hanya question-scanner.conf aktif (fe/dev.ihealthedu.site→4310 dengan SSL sertifikat sendiri), kedua DNS absensi43.157.243.37. Tambahkan attendance.conf, jangan mengubah question-scanner/sertifikat/domain lain. HTTP hanya bootstrap health sebelum HTTPS; jangan login/upload/data karyawan melalui HTTP.
+
+Template [attendance-http.conf](../../infra/nginx/attendance-http.conf) mengarahkan API→3000, S3→9000, tidak mempublikasikan Console9001. Host/path/query asli dijaga untuk signature S3; access log storage dimatikan agar URL presigned tidak tercatat sebagai log akses. Request body10MiB sesuai foto aplikasi; aplikasi tetap memvalidasi ukuran/tipe sendiri. [NGINX proxy_pass](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_pass).
+
+Jalankan satu block di SSH VPS. File baru tidak menimpa konfigurasi existing. Reload hanya setelah nginx -t sukses. Jika gagal, stop/kirim error; jangan menghapus konfigurasi lama atau restart server. Jika file baru sudah dibuat sebagian, simpan dan rekonsiliasi sebelum mengulang.
+
+```sh
+(
+  set -eu
+  set -o pipefail
+  umask 077
+  config_dir=/opt/attendance/releases/nginx-http-config
+  source_dir=/opt/attendance/releases/source-ffe1365
+  [ ! -e "$config_dir" ] || { echo 'STOP: folder config sudah ada'; exit 1; }
+  sudo test ! -e /etc/nginx/sites-available/attendance.conf
+  sudo test ! -L /etc/nginx/sites-available/attendance.conf
+  sudo test ! -e /etc/nginx/sites-enabled/attendance.conf
+  sudo test ! -L /etc/nginx/sites-enabled/attendance.conf
+  git -C "$source_dir" fetch origin dev
+  config_commit=$(git -C "$source_dir" rev-parse FETCH_HEAD)
+  mkdir "$config_dir"
+  git -C "$source_dir" archive "$config_commit" infra/nginx/attendance-http.conf |
+    tar -x -C "$config_dir"
+  printf '%s\n' "$config_commit" > "$config_dir/source-commit.txt"
+
+  sudo install -o root -g root -m 644 \
+    "$config_dir/infra/nginx/attendance-http.conf" /etc/nginx/sites-available/attendance.conf
+  sudo ln -s /etc/nginx/sites-available/attendance.conf /etc/nginx/sites-enabled/attendance.conf
+  sudo nginx -t
+  sudo systemctl reload nginx
+
+  curl --max-time 10 -fsS -o /dev/null -w 'API HTTP %{http_code}\n' \
+    http://attendance-api.annastriwidagdo.me/health
+  curl --max-time 10 -fsS -o /dev/null -w 'Storage HTTP %{http_code}\n' \
+    http://attendance-storage.annastriwidagdo.me/minio/health/live
+  echo 'PASS: reverse proxy HTTP siap; berikutnya HTTPS'
+)
+```
+
+Target nginx -t sukses, kedua HTTP200, PASS. Kirim hasil atau error saja. Jangan mengulang template ini setelah Certbot menambahkan SSL karena dapat menghapus SSL yang sudah dibuat. HTTP health dari VPS belum membuktikan akses dari internet; tahap HTTPS diuji eksternal. Template belum diuji nginx binary oleh agen (tidak tersedia lokal); nginx -t VPS menjadi pemeriksaan sebelum reload. Berikut6D Certbot hanya kedua domain absensi, kemudian HTTPS sebelum penggunaan akun/data.
+
 ## Status langkah berikutnya
 
 Bootstrap migration/akun runtime, image rilis main/GHCR, Compose backend, domain/TLS dan frontend dikerjakan setelah inventaris tahap 1. Unit rilis dijalankan sekali pada PR; integrasi cepat bila perlu sebelum rilis. Pengiriman otomatis ke VPS belum aktif. T30/T31 belum dicentang dari pemeriksaan infra saja.
