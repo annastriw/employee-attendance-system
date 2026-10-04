@@ -1,5 +1,20 @@
 # Progres dan titik lanjut
 
+## R03 — Patokan EmployeeDetail HR (2026-10-05)
+
+Selesai dan diterima pengguna lewat cek manual. EmployeeDetail HR menjadi patokan bahasa visual (GitHub/Primer): breadcrumb + underline tabs + pill status + aksi lifecycle via ConfirmDialog.
+
+- Primitives R02 dipakai ulang: `PageHeader` + `Breadcrumb` (`Karyawan / <Nama>`), `UnderlineTabs` (Detail/Riwayat/Sesi). `Breadcrumb`/`PageHeader` diberi opsi `onNavigate(href)` agar crumb bernavigasi dalam SPA (bukan reload); backward compatible (href-only tetap jalan).
+- Header: judul = nama + pill status; aksi = Kembali, Lihat absensi (navigate `/absensi?employeeId=`), dan tombol lifecycle (Reset/Nonaktifkan/Aktifkan/Arsipkan/Restore) via `ConfirmDialog`.
+- `StatusBadge` hr-web diperluas ke ACTIVE/INACTIVE/ARCHIVED (pill `.status-archived`), menggantikan hack inline "Arsip".
+- Tabs: Detail = `EmployeeForm` (aria 'Edit profil karyawan') + bagian Akun/email; Riwayat = timeline (kini `role=tabpanel`, aria 'Riwayat perubahan karyawan') + badge jumlah; Sesi = penjelasan sesi/akun yang merujuk aksi Reset di header. Default tab = Detail.
+- Logika, copy ConfirmDialog, label tombol, notice, alur API, idempotency, dan polling pending TIDAK berubah. Banner pending (lifecycle/email) tetap di luar tab agar selalu terlihat.
+- Dihapus: link hash lama `#absensi?employeeId=` + CSS orphan `.attendance-history-link`. Halaman kini memakai `useNavigate` (butuh Router) — test membungkus render dengan `MemoryRouter`.
+- Test: `displays history timeline` dan reset-password kini membuka tab Riwayat lalu query `tabpanel`; assertion perilaku lain tetap. Verifikasi: hr-web build/typecheck OK, lint bersih, 79/79 unit test lulus.
+- File: `packages/ui/src/molecules/Breadcrumb.tsx`, `packages/ui/src/organisms/PageHeader.tsx`, `apps/hr-web/src/components/molecules/StatusBadge.tsx`, `apps/hr-web/src/pages/EmployeeDetailPage.tsx`, `apps/hr-web/src/pages/EmployeeDetailPage.test.tsx`, `apps/hr-web/src/index.css`.
+- Catatan: `ConfirmDialog`/`StatusBadge`/`Notice`/`PasswordField` masih di hr-web (penyatuan ke `packages/ui` ditunda R05/R07).
+- Lanjut: R04 — Shell HR (sidebar + header + breadcrumb + command palette ⌘-K + shortcuts).
+
 ## R01 — Fondasi routing HR (2026-10-05)
 
 Selesai dan diterima pengguna lewat cek manual dev server (route lancar). HR portal pindah dari hash routing ke React Router path routing.

@@ -161,6 +161,8 @@
 .status-active .status-dot { background: var(--accent); }
 .status-inactive { color: var(--muted); }
 .status-inactive .status-dot { background: var(--field-border); }
+.status-archived { color: var(--foreground); }
+.status-archived .status-dot { background: var(--muted); }
 
 .list-pager { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .list-pager-range { color: var(--muted); font-size: 0.8125rem; }
@@ -234,6 +236,10 @@
 @media (max-width: 639px) { .employee-extra { display: none; } .employee-table th:last-child { width: 4.75rem; } }
 
 .employee-detail { display: grid; gap: 1.5rem; max-width: 48rem; }
+.employee-detail-title { display: inline-flex; align-items: center; gap: .625rem; flex-wrap: wrap; }
+.employee-detail-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.detail-panel { display: grid; gap: 1.5rem; }
+.employee-sessions { display: grid; gap: .75rem; }
 .employee-detail-header { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
 .employee-detail-header h2 { font-size: 1.125rem; font-weight: 600; }
 .employee-name { min-width: 0; max-width: 100%; padding: 0; height: auto; white-space: normal; text-align: left; justify-content: flex-start; }
@@ -265,7 +271,6 @@
 .attendance-event-time span { font-size: .75rem; color: var(--muted); }
 .attendance-reason { font-size: .8125rem; overflow-wrap: anywhere; white-space: pre-wrap; }
 .attendance-deletion { display: grid; gap: .375rem; padding-top: 1rem; border-top: 1px solid var(--border); }
-.attendance-history-link { display: inline-flex; min-height: 2.75rem; align-items: center; font-size: .8125rem; color: var(--accent); }
 .attendance-page .button, .attendance-detail .button { min-height: 2.75rem; }
 
 .attendance-lifecycle-dialog .button { min-height: 2.75rem; }
