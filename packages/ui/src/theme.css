@@ -342,3 +342,49 @@ textarea:focus-visible {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ---------- Theme toggle (light / dark / system) ---------- */
+.theme-toggle {
+  display: inline-flex;
+  gap: 0.125rem;
+  padding: 0.1875rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface-secondary);
+}
+.theme-toggle__option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 2rem;
+  padding: 0 0.625rem;
+  border: 0;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+.theme-toggle__option:hover { color: var(--foreground); }
+.theme-toggle__option[data-active="true"] {
+  background: var(--surface);
+  color: var(--foreground);
+  box-shadow: var(--field-shadow);
+}
+.theme-toggle__option:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+/* Icon-only below the smallest layouts to save space. */
+@media (max-width: 400px) {
+  .theme-toggle__label { display: none; }
+  .theme-toggle__option { padding: 0 0.5rem; min-width: 2rem; justify-content: center; }
+}
+.auth-theme-corner {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
+}

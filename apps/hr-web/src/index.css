@@ -50,6 +50,7 @@
   background: var(--background);
 }
 .header-title { display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
+.header-actions { display: flex; align-items: center; gap: 0.75rem; }
 .dashboard-header h1 { font-size: 1.125rem; letter-spacing: -0.02em; }
 
 .dashboard-content { padding: 1.5rem; max-width: 75rem; }
@@ -188,6 +189,8 @@
   .dashboard-header { padding: 0 0.75rem; }
   .dashboard-content { padding: 1rem; }
   .mobile-menu-toggle { display: inline-flex; }
+  .header-actions .theme-toggle__label { display: none; }
+  .header-actions .theme-toggle__option { padding: 0 0.5rem; min-width: 2rem; justify-content: center; }
   .status-filter .toggle-button { min-height: 2.75rem; }
   .mobile-navigation:not([hidden]) {
     display: grid;

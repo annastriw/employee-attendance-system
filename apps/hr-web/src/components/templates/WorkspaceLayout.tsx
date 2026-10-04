@@ -12,6 +12,7 @@ import {
 } from "@phosphor-icons/react";
 import { Brand, PageTitle } from "../atoms/Brand";
 import { AccountMenu } from "../molecules/AccountMenu";
+import { ThemeToggle } from "@attendance/ui";
 import type { View } from "../../lib/use-hash-route";
 
 // Only destinations that exist in this increment are listed (spec: no dead links).
@@ -116,7 +117,10 @@ export function WorkspaceLayout({
             </Button>
             <PageTitle key={view}>{title}</PageTitle>
           </div>
-          <AccountMenu email={email} busy={busy} onLogout={onLogout} />
+          <div className="header-actions">
+            <ThemeToggle />
+            <AccountMenu email={email} busy={busy} onLogout={onLogout} />
+          </div>
         </header>
         <nav
           id="mobile-navigation"
