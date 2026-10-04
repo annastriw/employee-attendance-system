@@ -480,6 +480,31 @@ done
 
 Kirim output domain/sertifikat/port di atas; jangan kirim private key/token/file env. DNS IP Cloudflare proxy dapat berbeda dari IP VPS sehingga tidak otomatis berarti salah; record di dashboard akan dikonfirmasi pada langkah domain. Setelah inventaris diterima, buat/ubah reverse proxy API→127.0.0.1:3000 dan S3→127.0.0.1:9000 sesuai konfigurasi aktual. Console9001 tidak dibuka publik. Domain frontend tetap Vercel. Backend HTTP200 saja belum membuktikan API/storage HTTPS/public atau frontend live.
 
+## Tahap 6B — DNS Cloudflare API dan storage
+
+Pengguna menyatakan domain absensi belum diatur di Cloudflare. Pilih zone annastriwidagdo.me yang statusnya Active (nameserver sudah sesuai), buka DNS→Records→Add record. [Panduan Cloudflare](https://developers.cloudflare.com/dns/manage-dns-records/how-to/create-dns-records/).
+
+| Type | Name | IPv4 | Proxy status | TTL |
+| --- | --- | --- | --- | --- |
+| A | attendance-api | 43.157.243.37 | DNS only (awan abu-abu) | Auto |
+| A | attendance-storage | 43.157.243.37 | DNS only (awan abu-abu) | Auto |
+
+IP adalah alamat SSH VPS yang diberikan pengguna. Jangan memakai IP private10.11.21.149 atau menyertakan port. Jika nama persis sudah memiliki A/CNAME/AAAA, periksa record itu sebelum menambah duplikat; jangan mengubah record domain lain. Frontend attendance/hr diatur sesuai instruksi Vercel nanti, bukan diarahkan ke VPS.
+
+DNS only dipakai selama setup agar validasi DNS/origin/sertifikat jelas. Request langsung ke VPS; HTTPS belum siap hanya karena record ada. Jangan mengubah SSL zone-wide sekarang, karena domain lain mungkin menggunakannya. Jika API kelak diproxy setelah sertifikat origin valid, gunakan Full (strict) sesuai [Cloudflare SSL](https://developers.cloudflare.com/ssl/origin-configuration/ssl-modes/full-strict/). Storage boleh tetap DNS only dengan HTTPS Nginx dan bucket privat.
+
+Setelah Save, cek satu per satu pada SSH VPS:
+
+```sh
+getent ahostsv4 attendance-api.annastriwidagdo.me || echo 'DNS API belum ditemukan'
+```
+
+```sh
+getent ahostsv4 attendance-storage.annastriwidagdo.me || echo 'DNS storage belum ditemukan'
+```
+
+Target IP43.157.243.37. Jika belum terlihat, tunggu cache DNS tanpa mengubah server. Kirim hasil DNS, serta list sites/grep directive6A yang belum terlihat. Pernyataan situs fe terhapus jam23 belum dibuktikan; expiry sertifikat bukan jadwal penghapusan. Jangan hapus/ubah fe/dev.ihealthedu.site atau mengasumsikan cleanup-nya aman bagi Nginx; audit timer/cron terpisah bila perlu. Agen tidak mengubah DNS atau server pada tahap ini.
+
 ## Status langkah berikutnya
 
 Bootstrap migration/akun runtime, image rilis main/GHCR, Compose backend, domain/TLS dan frontend dikerjakan setelah inventaris tahap 1. Unit rilis dijalankan sekali pada PR; integrasi cepat bila perlu sebelum rilis. Pengiriman otomatis ke VPS belum aktif. T30/T31 belum dicentang dari pemeriksaan infra saja.
