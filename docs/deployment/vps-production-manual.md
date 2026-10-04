@@ -548,6 +548,43 @@ Jalankan satu block di SSH VPS. File baru tidak menimpa konfigurasi existing. Re
 
 Target nginx -t sukses, kedua HTTP200, PASS. Kirim hasil atau error saja. Jangan mengulang template ini setelah Certbot menambahkan SSL karena dapat menghapus SSL yang sudah dibuat. HTTP health dari VPS belum membuktikan akses dari internet; tahap HTTPS diuji eksternal. Template belum diuji nginx binary oleh agen (tidak tersedia lokal); nginx -t VPS menjadi pemeriksaan sebelum reload. Berikut6D Certbot hanya kedua domain absensi, kemudian HTTPS sebelum penggunaan akun/data.
 
+## Tahap 6D — HTTPS diterima
+
+Pengguna menjalankan Certbot Nginx untuk attendance-api/storage dengan cert-name attendance-production dan redirect HTTP. Backup konfigurasi sebelum perubahan disarankan. Output pengguna: API HTTPS200 dan Storage HTTPS200 dengan curl tanpa -k. TLS kedua endpoint valid dari VPS; belum bukti login/frontend atau pengujian eksternal. Jangan menimpa attendance.conf dengan template HTTP lagi. Pemeriksaan jadwal renewal dan backup/restore tetap pending sebelum acceptance live.
+
+## Tahap 7A — akun HR pertama
+
+Gunakan seed aplikasi yang sudah ada di image Auth main, bukan INSERT manual atau akun migrator. AdminSeedService memvalidasi email/password, menulis akun dan audit dalam transaksi, mengharuskan perubahan password pertama, dan mempertahankan akun existing tanpa mengubah password/status. Tidak restart container atau membuka port baru. Seed tidak menjalankan HTTP listener.
+
+Jalankan satu block pada SSH VPS. Masukkan email HR ketika diminta, bukan password. File admin-seed.env hanya untuk bootstrap, tidak ditambahkan ke environment service permanen. Jika file sudah ada, jangan regenerate/overwrite; rekonsiliasi hasil seed dulu. Password hex64 karakter (64 byte) memenuhi batas12–72 byte bcrypt aplikasi.
+
+```sh
+(
+  set -eu
+  set -o noclobber
+  umask 077
+  cd /opt/attendance
+  [ ! -e .secrets/admin-seed.env ] && [ ! -L .secrets/admin-seed.env ] || {
+    echo 'STOP: file seed sudah ada; jangan mengganti password'
+    exit 1
+  }
+  read -r -p 'Email akun HR: ' hr_email
+  case "$hr_email" in
+    ''|*[!a-zA-Z0-9@._+-]*) echo 'STOP: gunakan email biasa tanpa spasi'; exit 1 ;;
+  esac
+  hr_password=$(openssl rand -hex 32)
+  printf 'ADMIN_SEED_EMAIL=%s\nADMIN_SEED_PASSWORD=%s\n' \
+    "$hr_email" "$hr_password" > .secrets/admin-seed.env
+  unset hr_password
+  chmod 600 .secrets/admin-seed.env
+  sudo docker exec --env-file .secrets/admin-seed.env \
+    attendance-backend-prod-auth-service-1 node dist/auth/seed-admin.js
+  echo 'PASS: seed HR selesai; password tersimpan privat'
+)
+```
+
+Target pesan Admin HRD created; initial password change is required. Jika Existing admin retained, password baru di file bukan bukti password akun existing: berhenti dan rekonsiliasi, jangan mencoba reset otomatis. Jika seed gagal, file dipertahankan untuk diagnosis/retry terarah. Kirim pesan seed/PASS atau error saja, jangan isi file. Pengambilan password dilakukan privat saat frontend siap; setelah login dan perubahan password, file bootstrap dapat dihapus sesuai tahap selanjutnya. Berikutnya dua frontend Vercel dari main.
+
 ## Status langkah berikutnya
 
 Bootstrap migration/akun runtime, image rilis main/GHCR, Compose backend, domain/TLS dan frontend dikerjakan setelah inventaris tahap 1. Unit rilis dijalankan sekali pada PR; integrasi cepat bila perlu sebelum rilis. Pengiriman otomatis ke VPS belum aktif. T30/T31 belum dicentang dari pemeriksaan infra saja.
