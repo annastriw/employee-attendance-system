@@ -96,14 +96,14 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 - Pengguna mengotorisasi pengisian data sintetis di database `attendance_prod` untuk technical test yang tidak dipakai secara operasional. Akun/demo memakai Test Company; lima akun `DEMO001`–`DEMO005` aktif, provisioning selesai, dan password awal telah diganti berdasarkan output VPS pengguna.
 - Hari libur historis Agustus 2026 tercatat 17 dan 25 Agustus, diverifikasi pengguna. Tidak ada libur nasional September. Tidak ada kebijakan kerja aktif di DB; service memakai kebijakan default Senin–Jumat 08.00–17.00 WIB.
 - Seed demo diterapkan pengguna di VPS dari commit `b8196a5`: 195 rekap, 390 event, 390 foto; SQL verifikasi lulus, semua media READY/terikat, batch tercatat satu kali. Pemeriksaan detail UI masih menunggu hasil manual pengguna.
-- Bug aktif: detail HR `/api/v1/attendance/:id` merespons 400 karena importer menghasilkan UUID v5 sedangkan Gateway dan Attendance Controller hanya menerima v4. Increment perbaikan: terima UUID RFC valid versi 1–8 pada route attendance Gateway, pakai ParseUUIDPipe default pada detail/foto/lifecycle; tambah tes kontrak UUID v5 pada dua Gateway controller specs.
+- Fix detail HR `/api/v1/attendance/:id` 400: importer menghasilkan UUID v5 sedangkan Gateway dan Attendance Controller hanya menerima v4. Commit `b742d19` dipush ke dev; tes kontrak Gateway 26/26 lulus dan ParseUUIDPipe default diuji langsung menerima UUID v5. Buat PR dev→main dan promosi/redeploy backend Gateway + Attendance setelah CI lulus. PR belum dibuat: gh token lokal invalid dan koneksi API GitHub dari sesi ini diblokir. Verifikasi manual UI tetap menunggu pengguna.
 - Jangan stage `.agents/`, `.claude/`, `.kiro/`, `.windsurf/`, `skills-lock.json`, atau secrets.
 
 ## Satu pekerjaan aktif
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| Detail attendance gagal 400 untuk UUID seed v5 | Sesi ini (serial) | Attendance Gateway proxy/specs; Attendance Service history/lifecycle controllers; tasks/progress.md | Seed production lulus; request detail memberikan 400 dan ID record UUID v5 | Tidak ada port/proses baru; deployment prod belum dilakukan | Tes reproduksi RED lalu 26 test Gateway fokus GREEN; verifikasi service pipe v5, lanjut build/lint fokus dan commit/push dev |
+| Detail attendance gagal 400 untuk UUID seed v5 | Sesi ini (serial) | Attendance Gateway proxy/specs; Attendance Service history/lifecycle controllers; tasks/progress.md | Seed production lulus; request detail memberikan 400 dan ID record UUID v5 | Tidak ada port/proses baru; deployment prod belum dilakukan | Fix `b742d19` sudah di dev; unit 26/26 lulus; PR/release menunggu akses GitHub pulih dan pemeriksaan manual UI |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 
