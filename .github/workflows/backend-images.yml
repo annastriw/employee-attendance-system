@@ -15,6 +15,8 @@ concurrency:
 jobs:
   backend-images:
     name: Publish image (${{ matrix.service }})
+    needs: [release-metadata]
+    if: needs.release-metadata.outputs.backend_changed == 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -51,6 +53,8 @@ jobs:
 
   migration-image:
     name: Publish migration image
+    needs: [release-metadata]
+    if: needs.release-metadata.outputs.backend_changed == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -78,38 +82,24 @@ jobs:
     name: Inspect release changes
     runs-on: ubuntu-latest
     outputs:
-      migrations_changed: ${{ steps.migrations.outputs.changed }}
+      backend_changed: ${{ steps.changes.outputs.backend_changed }}
+      migrations_changed: ${{ steps.changes.outputs.migrations_changed }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Detect database migration changes
-        id: migrations
+      - name: Detect backend and migration changes
+        id: changes
         env:
           BEFORE_SHA: ${{ github.event.before }}
           RELEASE_SHA: ${{ github.sha }}
         run: |
-          if [[ ! "$RELEASE_SHA" =~ ^[0-9a-f]{40}$ ]]; then
-            echo 'Invalid release SHA' >&2
-            exit 1
-          fi
-          if [[ ! "$BEFORE_SHA" =~ ^[0-9a-f]{40}$ ]]; then
-            echo 'changed=true' >> "$GITHUB_OUTPUT"
-          else
-            if git diff --quiet "$BEFORE_SHA" "$RELEASE_SHA" -- prisma/migrations/; then
-              echo 'changed=false' >> "$GITHUB_OUTPUT"
-            else
-              result=$?
-              if [[ $result -ne 1 ]]; then
-                exit "$result"
-              fi
-              echo 'changed=true' >> "$GITHUB_OUTPUT"
-            fi
-          fi
+          python3 scripts/deployment/detect-release-changes.py \
+            "$BEFORE_SHA" "$RELEASE_SHA" >> "$GITHUB_OUTPUT"
 
   deploy-production:
     name: Deploy VPS production
-    if: vars.VPS_AUTO_DEPLOY_ENABLED == 'true'
+    if: vars.VPS_AUTO_DEPLOY_ENABLED == 'true' && needs.release-metadata.outputs.backend_changed == 'true'
     needs: [backend-images, migration-image, release-metadata]
     runs-on: ubuntu-latest
     timeout-minutes: 20

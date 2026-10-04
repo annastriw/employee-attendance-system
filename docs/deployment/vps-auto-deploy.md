@@ -1,6 +1,6 @@
 # Deploy VPS otomatis dari main
 
-Setelah setup satu kali ini selesai, alur rilisnya: PR `dev → main` lulus CI dan disetujui pengguna → merge → GitHub Actions membangun lima backend dan image migrator → deploy backend VPS dari SHA merge → Vercel menerbitkan frontend dari `main`. Push ke `dev` tidak menerbitkan apa pun. Deploy VPS dapat dibiarkan nonaktif sampai semua tahap setup selesai.
+Setelah setup satu kali ini selesai, alur rilisnya: PR `dev → main` lulus CI dan disetujui pengguna → merge → perubahan backend/database membangun lima backend dan image migrator → deploy backend VPS dari SHA merge; Vercel menerbitkan frontend dari `main`. Perubahan frontend saja hanya memicu deployment Vercel dan tidak menyentuh VPS. Push ke `dev` tidak menerbitkan production. Deploy VPS dapat dibiarkan nonaktif sampai semua tahap setup selesai.
 
 ## Pengamanan dan batas perubahan
 
