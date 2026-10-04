@@ -91,11 +91,19 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 - Host memory sering CRITICAL (1-2 GB). Jalankan suite berat satu per satu; Playwright 1 worker terbukti stabil.
 - Pemeriksaan handoff 2026-10-02: container Docker MySQL 127.0.0.1:3307 dan AIStor 127.0.0.1:9000-9001 aktif. Port proyek: MySQL 3307, Gateway 3000, Auth 3001, Employee 3002, Attendance 3003, Media 3004, Attendance Web 5173, HR Web 5174.
 
+## Titik lanjut seed demo production — 2026-10-04
+
+- Pengguna mengotorisasi pengisian data sintetis di database `attendance_prod` untuk technical test yang tidak dipakai secara operasional. Akun/demo memakai Test Company; lima akun `DEMO001`–`DEMO005` aktif, provisioning selesai, dan password awal telah diganti berdasarkan output VPS pengguna.
+- Hari libur historis Agustus 2026 tercatat 17 dan 25 Agustus, diverifikasi pengguna. Tidak ada libur nasional September. Tidak ada kebijakan kerja aktif di DB; service memakai kebijakan default Senin–Jumat 08.00–17.00 WIB.
+- Seed demo diterapkan pengguna di VPS dari commit `b8196a5`: 195 rekap, 390 event, 390 foto; SQL verifikasi lulus, semua media READY/terikat, batch tercatat satu kali. Pemeriksaan detail UI masih menunggu hasil manual pengguna.
+- Bug aktif: detail HR `/api/v1/attendance/:id` merespons 400 karena importer menghasilkan UUID v5 sedangkan Gateway dan Attendance Controller hanya menerima v4. Increment perbaikan: terima UUID RFC valid versi 1–8 pada route attendance Gateway, pakai ParseUUIDPipe default pada detail/foto/lifecycle; tambah tes kontrak UUID v5 pada dua Gateway controller specs.
+- Jangan stage `.agents/`, `.claude/`, `.kiro/`, `.windsurf/`, `skills-lock.json`, atau secrets.
+
 ## Satu pekerjaan aktif
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T30 — tutorial manual VPS tahap 2A | Sesi ini (serial) | runbook VPS, progress/todo | Tahap 1: MySQL/AIStor/network tersedia, DB nol tabel | Tidak mengubah VPS/proses/port | Menunggu output pembuatan/login migrator sebelum migration |
+| Detail attendance gagal 400 untuk UUID seed v5 | Sesi ini (serial) | Attendance Gateway proxy/specs; Attendance Service history/lifecycle controllers; tasks/progress.md | Seed production lulus; request detail memberikan 400 dan ID record UUID v5 | Tidak ada port/proses baru; deployment prod belum dilakukan | Tes reproduksi RED lalu 26 test Gateway fokus GREEN; verifikasi service pipe v5, lanjut build/lint fokus dan commit/push dev |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 

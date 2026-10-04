@@ -37,8 +37,8 @@ export class AttendanceLifecycleController {
     return this.service.list(query, req.requestId);
   }
   @Get(':id/events/:eventId/photo') photo(
-    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-    @Param('eventId', new ParseUUIDPipe({ version: '4' })) eventId: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('eventId', new ParseUUIDPipe()) eventId: string,
     @Req() req: AttendanceRequest,
   ) {
     this.noQuery(req);
@@ -51,14 +51,14 @@ export class AttendanceLifecycleController {
     );
   }
   @Get(':id') detail(
-    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Req() req: AttendanceRequest,
   ) {
     this.noQuery(req);
     return this.service.detail(id, req.requestId);
   }
   @Delete(':id') delete(
-    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() body: DeleteAttendanceDto,
     @Req() req: AttendanceRequest,
   ) {
@@ -75,7 +75,7 @@ export class AttendanceLifecycleController {
   @Post(':id/restore')
   @HttpCode(200)
   restore(
-    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() body: AttendanceVersionDto,
     @Req() req: AttendanceRequest,
   ) {
