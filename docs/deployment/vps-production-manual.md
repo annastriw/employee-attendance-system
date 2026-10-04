@@ -180,6 +180,19 @@ URL validation adalah nilai dummy, bukan kredensial production. Container tidak 
 
 Kirim bagian akhir build/validasi dan PASS atau error. Berikutnya cocokkan source migration dengan rilis main dan terapkan migrate deploy memakai akun migrator. Build Docker belum diuji oleh agen karena daemon lokal tidak tersedia; hasil build VPS masih menunggu pengguna. Verifikasi lokal: Prisma validate dengan config baru lulus tanpa koneksi database.
 
+## Tahap 3A — PR rilis pertama dev ke main
+
+Pengguna menyatakan tahap 2C lancar semua pada 2026-10-04: build tooling dan validasi schema diterima berdasarkan laporan tersebut. Database belum dimigrasikan. Main remote diperiksa masih 39d7795 (dasar dokumentasi), tidak ada PR dev ke main terbuka saat pemeriksaan. Siapkan rilis sebelum migration agar schema dan backend memakai source main yang sama.
+
+Bagian ini dilakukan di browser GitHub, bukan SSH VPS:
+
+1. Buka [perbandingan main dengan dev](https://github.com/annastriw/employee-attendance-system/compare/main...dev).
+2. Pastikan base main dan compare dev. Klik Create pull request. Judul: `Release: deployment production pertama`. Deskripsi: `Rilis source aplikasi dan workflow production dari dev. Infra MySQL/AIStor dan tooling migration VPS sudah siap; migration serta deployment backend dilanjutkan manual setelah rilis.`
+3. Buat PR dan tunggu pemeriksaan CI. Target CI result success; CI menjalankan unit sekali dan lint/build/typecheck, tanpa Playwright atau integrasi penuh. Jika GitHub meminta persetujuan workflow, izinkan workflow PR milik repository ini berjalan.
+4. Kirim URL PR dan hasil CI. Jangan merge pada sub-tahap ini; hasil diperiksa dahulu. Jangan klik Delete branch setelah merge nantinya karena dev dipertahankan.
+
+Tidak perlu perintah VPS pada tahap 3A. Image GHCR baru dibangun setelah merge main; PR sendiri belum deploy/migrate. Proteksi main/required CI result perlu dipastikan sebelum merge. Pengguna tetap menjalankan tutorial bertahap; agen tidak membuat atau merge PR pada increment ini.
+
 ## Status langkah berikutnya
 
 Bootstrap migration/akun runtime, image rilis main/GHCR, Compose backend, domain/TLS dan frontend dikerjakan setelah inventaris tahap 1. Unit rilis dijalankan sekali pada PR; integrasi cepat bila perlu sebelum rilis. Pengiriman otomatis ke VPS belum aktif. T30/T31 belum dicentang dari pemeriksaan infra saja.

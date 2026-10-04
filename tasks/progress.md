@@ -2,14 +2,15 @@
 
 Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mulai/selesai task, sebelum sesi berganti atau kapasitas sesi habis. Status completion tetap di [todo](todo.md); dependency di [plan](plan.md); prosedur pada [alur implementasi](../docs/development/implementation-workflow.md).
 
-## Titik lanjut aktif — source VPS 2B diterima, tooling 2C (2026-10-04)
+## Titik lanjut aktif — tooling VPS 2C diterima, PR rilis 3A (2026-10-04)
 
 - Output VPS pengguna: MySQL 8.4.11 healthy, AIStor running, loopback 3307/9000/9001, network attendance-prod-backend. RAM available 2 GiB, disk available 46 GB, swap terpakai 540 MiB. attendance_prod nol tabel.
 - Nginx saat ini aktif pada 80/443; konfigurasi/domain aktual perlu diperiksa sebelum perubahan. Port backend 3000–3004 tidak tampil pada hasil listener.
 - Runbook ditambah tahap 2A: membuat file kredensial privat tanpa overwrite, akun attendance_migrator dengan grant hanya attendance_prod, lalu login/SHOW GRANTS. Pengguna menjalankan manual; hasil diterima berdasarkan laporan pengguna.
 - Pengguna menyatakan tahap 2A lancar semua; akun/login migrator diterima berdasarkan laporan tersebut. Tidak mencatat secret atau mengklaim verifikasi VPS oleh agen.
 - Output tahap 2B diterima: source pinned ffe136562717f4944051e51061f56bec015ff42c tersedia dengan 10 migration. Belum migration/deployment. Cocokkan migration dengan rilis main sebelum menerapkannya; jangan memakai script setup dev production.
-- Increment aktif: infra/Dockerfile.migrator, infra/migrator/package.json + npm lockfile, infra/prisma-migrator.config.ts dan runbook 2C. Image hanya tooling Prisma, config tanpa shadow/local env, source migration dimount read-only. Default help; tidak otomatis migrate. Menunggu pengguna build/validate di VPS, tanpa akses DB atau perubahan proses/port oleh agen.
+- Pengguna menyatakan tahap 2C lancar semua; build tooling/validasi schema diterima berdasarkan laporan pengguna. Image hanya tooling Prisma, config tanpa shadow/local env, source migration dimount read-only. Default help; tidak otomatis migrate. Belum migration/database/backend live.
+- Increment aktif dokumentasi: tahap 3A PR manual dev ke main, tunggu CI result, kirim URL/hasil sebelum merge. Main remote diperiksa masih 39d7795, daftar PR terbuka dev ke main kosong. Agen tidak membuat/merge PR atau menjalankan deployment. Proteksi main perlu dipastikan sebelum merge.
 - Verifikasi: Prisma validate config baru lulus lokal dengan URL dummy; Docker daemon lokal tidak tersedia sehingga build image belum diuji agen. Tidak ada unit bisnis baru karena hanya konfigurasi/tooling; tidak menjalankan suite aplikasi.
 - Verifikasi increment dokumentasi: Bash -n untuk snippet tutorial, review SQL/grant/quoting, 51 tautan lokal dan diff lulus. Tidak ada perubahan VPS oleh agen, deployment, rilis main atau suite aplikasi baru.
 
