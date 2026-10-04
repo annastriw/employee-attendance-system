@@ -1,5 +1,24 @@
 # Progres dan titik lanjut
 
+## T8 teknis selesai - Profil dan keamanan dua role (2026-10-05)
+
+- Endpoint diri `GET /api/v1/me/profile` memverifikasi sesi lewat Auth Service,
+  hanya mengambil profil berdasarkan `employeeId` dari sesi, mengembalikan `data:null`
+  bagi HR tanpa employeeId, dan tidak mengizinkan data profil diubah sendiri.
+- HR mendapat `/profil` dari menu akun; Karyawan mendapat Profil dari layar Hari ini.
+  Keduanya menampilkan data diri read-only, status profil, tab Profil/Keamanan,
+  fallback email+role saat endpoint 404, serta satu form password bersama. Sukses
+  ganti password menghapus sesi dan meminta login ulang.
+- Perlu PR+deploy sebelum profil karyawan aktif di production: Employee Service +
+  API Gateway, endpoint di atas, tanpa migration. Aksi ganti password memakai Auth
+  Service yang sudah ada. PR ke main dibuat pengguna.
+- Verifikasi: HR unit 7/7, lint/typecheck lulus; Karyawan unit 8/8, lint/typecheck
+  lulus; Employee Service unit 10/10, lint/typecheck lulus; API Gateway unit 3/3,
+  lint/typecheck lulus. Build dilewati karena resource_status tidak tersedia dan
+  RAM bebas terakhir sekitar 2.1 GiB. Acceptance UI manual masih pending.
+- Lanjut: T9 overhaul responsif portal Karyawan, termasuk layar desktop/tablet
+  proporsional, bukan hanya tampilan mobile. T8 akan di-commit/push ke `dev`.
+
 ## T7 teknis selesai - Ringkasan HR dengan tren dan detail inline (2026-10-05)
 
 - Ringkasan HR kini memakai DateRangeField default 7 hari, grafik tren responsif

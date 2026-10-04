@@ -6,7 +6,8 @@ export type View =
   | "beranda"
   | "foto-checkin"
   | "foto-checkout"
-  | "riwayat";
+  | "riwayat"
+  | "profil";
 const views: View[] = [
   "masuk",
   "ganti-password",
@@ -14,6 +15,7 @@ const views: View[] = [
   "foto-checkin",
   "foto-checkout",
   "riwayat",
+  "profil",
 ];
 
 function read() {

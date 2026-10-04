@@ -19,6 +19,7 @@ interface Props {
   onCapture: (purpose: AttendancePurpose) => void;
   onSessionExpired: () => void;
   onHistory: () => void;
+  onProfile: () => void;
 }
 export function HomePage({
   client,
@@ -29,6 +30,7 @@ export function HomePage({
   onCapture,
   onSessionExpired,
   onHistory,
+  onProfile,
 }: Props) {
   const today = useToday(client, onSessionExpired);
   const d = today.data,
@@ -172,6 +174,7 @@ export function HomePage({
       >
         Riwayat absensi
       </Button>
+      <Button variant="ghost" className="today-action" onPress={onProfile}>Profil &amp; keamanan akun</Button>
       <Button
         variant="ghost"
         className="primary-button today-action"

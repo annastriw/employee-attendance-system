@@ -126,10 +126,8 @@ export function WorkspaceLayout() {
   const menuToggle = useRef<HTMLButtonElement>(null);
   const paletteTrigger = useRef<HTMLButtonElement>(null);
 
-  const active =
-    NAV.find((item) => location.pathname.startsWith(viewPath(item.view)))
-      ?.view ?? "ringkasan";
-  const title = TITLES[active];
+  const active = NAV.find((item) => location.pathname.startsWith(viewPath(item.view)))?.view;
+  const title = location.pathname === "/profil" ? "Profil" : TITLES[active ?? "ringkasan"];
 
   useEffect(() => { writeSidebarCollapsed(window.localStorage, sidebarCollapsed); }, [sidebarCollapsed]);
 
@@ -201,7 +199,7 @@ export function WorkspaceLayout() {
   return (
     <div className="dashboard-layout" data-sidebar-collapsed={sidebarCollapsed}>
       <SidebarShell brand={<Brand />} navigation={<NavLinks onNavigate={() => setMenuOpen(false)} />}
-        footer={<><ThemeToggle /><AccountMenu email={user?.email ?? ""} busy={busy} onLogout={logout} /></>}
+        footer={<><ThemeToggle /><AccountMenu email={user?.email ?? ""} busy={busy} onLogout={logout} onProfile={() => navigate("/profil")} /></>}
         collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(value => !value)}
         open={drawerOpen} onOpenChange={(open) => {
           setMenuOpenedAtPath(location.pathname);
@@ -223,7 +221,7 @@ export function WorkspaceLayout() {
             >
               <List size={20} aria-hidden="true" />
             </Button>
-            <PageTitle key={active}>{title}</PageTitle>
+              <PageTitle key={active ?? "profil"}>{title}</PageTitle>
           </div>
           <div className="header-actions">
             <button

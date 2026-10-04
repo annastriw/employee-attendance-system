@@ -11,6 +11,7 @@ import { useHashRoute, type View } from "./lib/use-hash-route";
 import { ChangePasswordPage } from "./pages/ChangePasswordPage";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
+import { ProfilePage } from "./pages/ProfilePage";
 
 import { clearPendingCheckIn } from "./features/checkin/use-check-in";
 const HistoryPage = lazy(() => import("./pages/HistoryPage"));
@@ -59,7 +60,7 @@ export function App({ client = authClient }: { client?: AuthClient }) {
       view !== required &&
       !(
         required === "beranda" &&
-        ["foto-checkin", "foto-checkout", "riwayat"].includes(view)
+        ["foto-checkin", "foto-checkout", "riwayat", "profil"].includes(view)
       )
     )
       navigate(required);
@@ -153,6 +154,15 @@ export function App({ client = authClient }: { client?: AuthClient }) {
           />
         </Suspense>
       );
+    if (view === "profil")
+      return <ProfilePage client={client} user={user} busy={busy} error={error}
+        onHome={() => navigate("beranda")} onLogout={logout}
+        onSessionExpired={sessionExpired}
+        onChangePassword={(current, replacement) => act(async () => {
+          await client.changePassword(current, replacement);
+          setUser(null);
+          setMessage("Password berhasil diperbarui. Silakan masuk dengan password baru.");
+        })} />;
     if (["foto-checkin", "foto-checkout"].includes(view))
       return (
         <Suspense
@@ -183,6 +193,7 @@ export function App({ client = authClient }: { client?: AuthClient }) {
         error={error}
         onLogout={logout}
         onHistory={() => navigate("riwayat")}
+        onProfile={() => navigate("profil")}
         onCapture={(purpose) =>
           navigate(purpose === "CHECK_OUT" ? "foto-checkout" : "foto-checkin")
         }

@@ -1,5 +1,5 @@
 import { Button, Dropdown, Label } from "@heroui/react";
-import { SignOut } from "@phosphor-icons/react";
+import { SignOut, UserCircle } from "@phosphor-icons/react";
 
 function initials(email: string) {
   const local = email.split("@")[0] ?? "";
@@ -8,10 +8,11 @@ function initials(email: string) {
   return letters.toUpperCase() || "A";
 }
 
-export function AccountMenu({ email, busy, onLogout }: {
+export function AccountMenu({ email, busy, onLogout, onProfile }: {
   email: string;
   busy: boolean;
   onLogout: () => Promise<void>;
+  onProfile: () => void;
 }) {
   return (
     <Dropdown>
@@ -26,7 +27,11 @@ export function AccountMenu({ email, busy, onLogout }: {
             <span className="account-email">{email}</span>
           </div>
         </div>
-        <Dropdown.Menu aria-label="Tindakan akun" onAction={() => { void onLogout(); }}>
+        <Dropdown.Menu aria-label="Tindakan akun" onAction={key => { if (key === "profile") onProfile(); else if (key === "logout") void onLogout(); }}>
+          <Dropdown.Item id="profile" textValue="Profil">
+            <UserCircle size={16} aria-hidden="true" />
+            <Label>Profil</Label>
+          </Dropdown.Item>
           <Dropdown.Item id="logout" textValue="Keluar">
             <SignOut size={16} aria-hidden="true" />
             <Label>{busy ? "Keluar…" : "Keluar"}</Label>

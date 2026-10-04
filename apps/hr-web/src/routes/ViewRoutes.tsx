@@ -4,6 +4,7 @@ import { DepartmentsPage } from "../pages/DepartmentsPage";
 import { PositionsPage } from "../pages/PositionsPage";
 import { HolidaysPage } from "../pages/HolidaysPage";
 import { MonitoringPage } from "../pages/MonitoringPage";
+import { ProfilePage } from "../pages/ProfilePage";
 import { useAuth } from "./auth-context";
 import { useRouteParams } from "./routes";
 
@@ -25,6 +26,12 @@ export function RingkasanRoute() {
       onSessionExpired={sessionExpired}
     />
   );
+}
+
+export function ProfileRoute() {
+  const { client, user, busy, error, changePassword, logout, sessionExpired } = useAuth();
+  if (!user) return null;
+  return <ProfilePage client={client} user={user} busy={busy} error={error} onChangePassword={changePassword} onLogout={logout} onSessionExpired={sessionExpired} />;
 }
 
 export function KaryawanRoute() {

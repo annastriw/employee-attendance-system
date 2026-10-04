@@ -41,3 +41,5 @@ export { ChartContainer } from "./charts/ChartContainer";
 export { ChartTooltip, type ChartSeriesConfig } from "./charts/ChartTooltip";
 export { ChartLegend } from "./charts/ChartLegend";
 export { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, Tooltip, XAxis, YAxis } from "recharts";
+export { ChangePasswordForm } from "./molecules/ChangePasswordForm";
+export { passwordChangeError } from "./lib/password-change";

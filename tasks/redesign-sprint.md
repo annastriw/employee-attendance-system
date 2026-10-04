@@ -308,6 +308,11 @@ Fase B:
 - **DoD**: chart responsif & ikut tema; tooltip berbahasa Indonesia; fallback aman.
 
 ### T8 `[ ]` Profil (lihat) + ganti password tiap role  *(backend kecil)*
+- Status 2026-10-05: profil diri dan ganti password bersama sudah diimplementasikan;
+  role tanpa `employeeId` menerima `data: null`, dan endpoint belum live ditangani
+  fallback. Lint/typecheck/unit fokus lulus. UI visual masih menunggu acceptance
+  manual pengguna. Backend perlu PR+deploy (Employee Service + API Gateway),
+  `GET /api/v1/me/profile`, tanpa migration.
 - **Backend** (employee-service + api-gateway): `GET /api/v1/me/profile` read-only —
   data karyawan milik akun (nama, NIK, telepon, departemen, jabatan, tanggal mulai,
   status) berdasarkan `employeeId` sesi; ADMIN_HRD tanpa `employeeId` → `data: null`.

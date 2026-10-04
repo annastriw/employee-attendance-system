@@ -153,7 +153,7 @@ export function MonitoringPage({
     let active = true;
     const query = new URLSearchParams({ startDate: trendRange.startDate, endDate: trendRange.endDate });
     client.api<{ data: MonitoringTrendPoint[] }>(`monitoring/trend?${query}`)
-      .then(result => { if (active) { setTrend(result.data); setTrendError(null); } })
+      .then(result => { if (active) { setTrend(Array.isArray(result?.data) ? result.data : []); setTrendError(null); } })
       .catch((e: unknown) => {
         if (active) setTrendError({ key: trendKey, status: e instanceof AuthError ? e.status : undefined, message: handle(e) });
       })

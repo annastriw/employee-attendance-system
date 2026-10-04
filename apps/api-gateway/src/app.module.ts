@@ -15,7 +15,7 @@ import { AppService } from './app.service';
 import { GatewayConfig } from './gateway.config';
 import { AuthProxyService } from './auth-proxy.service';
 import { AuthProxyController } from './auth-proxy.controller';
-import { EmployeeProxyController } from './employee-proxy.controller';
+import { EmployeeProxyController, EmployeeSelfProfileProxyController } from './employee-proxy.controller';
 import { HolidaysProxyController } from './holidays-proxy.controller';
 
 import { AttendanceProxyController } from './attendance-proxy.controller';
@@ -25,6 +25,7 @@ import { MonitoringProxyController } from './monitoring-proxy.controller';
     AppController,
     AuthProxyController,
     EmployeeProxyController,
+    EmployeeSelfProfileProxyController,
     EmployeesProxyController,
     EmployeeProvisioningProxyController,
     EmployeeEmailChangesProxyController,

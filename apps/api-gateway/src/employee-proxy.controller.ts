@@ -35,3 +35,17 @@ export class EmployeeProxyController {
   @Post(':id/activate') activate(@Req() req: Request, @Res() res: Response) { return this.employee('POST', req, res); }
   @Post(':id/deactivate') deactivate(@Req() req: Request, @Res() res: Response) { return this.employee('POST', req, res); }
 }
+
+@Controller('api/v1/me/profile')
+export class EmployeeSelfProfileProxyController {
+  constructor(private readonly proxy: AuthProxyService) {}
+  @Get()
+  async profile(@Req() request: Request, @Res() response: Response) {
+    const url = new URL(request.originalUrl, 'http://gateway.local');
+    if (url.pathname !== '/api/v1/me/profile' || url.search) throw new BadRequestException('Request tidak valid.');
+    const headers: Record<string, string> = { 'X-Request-ID': String(response.getHeader('X-Request-ID')) };
+    if (typeof request.headers.authorization === 'string') headers.authorization = request.headers.authorization;
+    const result = await this.proxy.forward(url.pathname, 'GET', headers, undefined, 'employee');
+    response.status(result.status).json(result.payload);
+  }
+}

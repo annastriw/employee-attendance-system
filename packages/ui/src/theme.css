@@ -487,6 +487,20 @@ textarea:focus-visible {
 .chart-tooltip__row strong { font-variant-numeric: tabular-nums; }
 .chart-legend { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; margin: .25rem 0 0; padding: 0; list-style: none; color: var(--muted); font-size: .75rem; }
 .chart-legend li { display: inline-flex; align-items: center; gap: .375rem; }
+.profile-page { display: grid; gap: 1rem; min-width: 0; }
+.profile-panel, .employee-profile-panel { min-width: 0; padding: var(--ui-card-padding); border: 1px solid var(--border); border-radius: var(--ui-card-radius); background: var(--surface); }
+.profile-panel h2, .employee-profile-panel h2 { margin: 0 0 .75rem; font-size: var(--ui-section-title); font-weight: 600; }
+.profile-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; margin: 0; }
+.profile-fields > div { min-width: 0; padding: .625rem .75rem; border: 1px solid var(--border); border-radius: .5rem; background: var(--background); }
+.profile-fields dt { margin-bottom: .25rem; color: var(--muted); font-size: .75rem; }
+.profile-fields dd { overflow-wrap: anywhere; margin: 0; font-size: .8125rem; font-weight: 500; }
+.profile-guidance { margin: .75rem 0 0; color: var(--muted); font-size: .8125rem; }
+.profile-security .auth-form { max-width: 30rem; }
+.profile-skeleton { display: grid; gap: .625rem; }
+.profile-skeleton > * { height: 2.5rem; border-radius: .5rem; }
+.employee-profile-top { display: flex; justify-content: space-between; align-items: center; gap: .5rem; margin-bottom: 1rem; color: var(--muted); font-size: .8125rem; }
+.employee-profile-panel { margin-top: .75rem; }
+@media (max-width: 767px) { .profile-fields { grid-template-columns: minmax(0, 1fr); } }
 
 /* ---------- Skeleton ---------- */
 .skeleton {
