@@ -193,6 +193,69 @@ Bagian ini dilakukan di browser GitHub, bukan SSH VPS:
 
 Tidak perlu perintah VPS pada tahap 3A. Image GHCR baru dibangun setelah merge main; PR sendiri belum deploy/migrate. Proteksi main-production sudah aktif: PR dan CI result wajib, tanpa bypass; detail pada [workflow rilis](../development/ci-cd-workflow.md). Pengguna tetap menjalankan tutorial bertahap; agen tidak membuat atau merge PR pada increment ini.
 
+## Tahap 4A — migration database production
+
+Rilis pertama main 1c27c9062ac04ee4213b19225e8a70e159aca3cc terverifikasi 2026-10-04: PR #1 merged, CI run 37193755926 lulus dan kelima image pada run 37193965079 sukses. Prisma source rilis sama dengan ffe1365 yang divalidasi pengguna. Tahap ini memang mengubah schema attendance_prod; akun runtime dibuat setelah hasil diterima. [Prisma 7 migrate deploy](https://www.prisma.io/docs/orm/v7/prisma-migrate/workflows/development-and-production) menerapkan migration tersimpan tanpa reset/shadow/seed.
+
+Jalankan block utuh di SSH VPS. Jika command gagal, berhenti: jangan reset, restore atau resolve sendiri. Jangan kirim isi backup/secret. Folder source baru tidak ditimpa, backup privat diperiksa sebelum migration.
+
+```sh
+(
+  set -eu
+  set -o pipefail
+  umask 077
+  cd /opt/attendance
+  release_commit=1c27c9062ac04ee4213b19225e8a70e159aca3cc
+  release_dir=/opt/attendance/releases/source-1c27c90
+
+  [ ! -e "$release_dir" ] || {
+    echo 'STOP: folder rilis sudah ada; kirim hasil ini'
+    exit 1
+  }
+  git clone --branch main --single-branch \
+    https://github.com/annastriw/employee-attendance-system.git "$release_dir"
+  git -C "$release_dir" checkout --detach "$release_commit"
+  [ "$(git -C "$release_dir" rev-parse HEAD)" = "$release_commit" ]
+
+  backup_file="/opt/attendance/backups/before-migration-$(date -u +%Y%m%dT%H%M%S%NZ).sql.gz"
+  sudo docker exec attendance-prod-mysql-1 sh -c '
+    export MYSQL_PWD="$(cat /run/secrets/mysql_root_password)"
+    exec mysqldump -uroot --single-transaction --no-tablespaces \
+      --set-gtid-purged=OFF attendance_prod
+  ' | gzip > "$backup_file"
+  gzip -t "$backup_file"
+  echo 'PASS: backup sebelum migration tersimpan'
+
+  sudo docker run --rm --memory 512m \
+    --network attendance-prod-backend \
+    --env-file /opt/attendance/.secrets/migrator.env \
+    --mount "type=bind,src=$release_dir/prisma,dst=/tooling/prisma,readonly" \
+    --entrypoint sh attendance-migrator:prisma-7.10.0 -c '
+      set -eu
+      case "$MIGRATOR_PASSWORD" in
+        ""|*[!0-9a-f]*) echo "STOP: format password tidak sesuai"; exit 1 ;;
+      esac
+      [ "${#MIGRATOR_PASSWORD}" -eq 64 ]
+      export DATABASE_URL="mysql://attendance_migrator:${MIGRATOR_PASSWORD}@attendance-prod-mysql-1:3306/attendance_prod"
+      exec /tooling/node_modules/.bin/prisma migrate deploy \
+        --config /tooling/infra/prisma-migrator.config.ts
+    '
+
+  sudo docker exec attendance-prod-mysql-1 sh -c '
+    export MYSQL_PWD="$(cat /run/secrets/mysql_root_password)"
+    exec mysql -uroot attendance_prod --batch -e "
+      SELECT COUNT(*) AS jumlah_tabel FROM information_schema.tables
+        WHERE table_schema = DATABASE();
+      SELECT migration_name, finished_at IS NOT NULL AS selesai
+        FROM _prisma_migrations ORDER BY started_at;
+    "
+  '
+  echo 'PASS: migration production selesai'
+)
+```
+
+Target: all migrations successfully applied, 10 baris migration masing-masing selesai=1, jumlah tabel lebih dari nol. Kirim output migration/SELECT/PASS saja, tanpa password/isi backup. Belum deploy backend, seed admin atau membuat runtime grants. Akun migrator hanya tooling, tidak dipakai backend. Setelah hasil diterima, lanjut 4B akun runtime tiap service.
+
 ## Status langkah berikutnya
 
 Bootstrap migration/akun runtime, image rilis main/GHCR, Compose backend, domain/TLS dan frontend dikerjakan setelah inventaris tahap 1. Unit rilis dijalankan sekali pada PR; integrasi cepat bila perlu sebelum rilis. Pengiriman otomatis ke VPS belum aktif. T30/T31 belum dicentang dari pemeriksaan infra saja.
