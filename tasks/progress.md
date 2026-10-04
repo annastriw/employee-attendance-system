@@ -1,6 +1,6 @@
 # Progres dan titik lanjut
 
-## Aktif — perapian repository
+## Selesai — perapian repository
 
 Keputusan pengguna 2026-10-04–05: README Inggris, SDD/panduan Indonesia, docs/ERD/fitur/local setup, GitHub About, audit secret, hapus duplikasi/artefak tidak penting dan kurasi history dev/main. Kerja serial tanpa subagen. [Plan](../docs/temporary/task/plan.md), [checklist](../docs/temporary/task/checklist.md), [handoff](../docs/temporary/task/handoff.md).
 
@@ -20,6 +20,8 @@ Sebelum cleanup, perubahan 2bac3b4 menambah RELEASE_SHA Docker/Actions dan field
 Backup Git lengkap dan metadata tanggal disimpan di .local/repository-cleanup, ignored. Audit awal 1.196 blob branch dev/main tidak menemukan pola token/private key atau match secret lokal aktif; batas pemeriksaan ada di [security](../docs/security.md).
 
 Source bisnis, tests, migration, scripts operasional dan asset model runtime dipertahankan. Dokumen lama digabung, tujuh scaffold README dan enam asset React/Vite tanpa referensi dihapus. Semua untracked tooling pengguna tetap tidak disentuh. Tidak menjalankan/stop service lokal/VPS pada tahap dokumentasi.
+
+C01–C10 selesai. Main lama 145 commit dikurasi menjadi 26 milestone bertanggal sumber asli, lalu satu commit penutupan aktual. Dev/main lokal dan remote sama; GitHub About dan default main sesuai, ruleset main-production asli aktif kembali. Workflow kurasi sukses dan melewati build/deploy VPS karena business source/migration tidak berubah. Relative links, kedua build frontend dan tujuh unit detector lulus. Audit sesudah kurasi mencakup 898 blob tanpa match/path sensitif tracked; lihat batas audit. Handoff memuat bukti dan cara melanjutkan tanpa force push.
 
 ## Batas dan izin
 

@@ -2,7 +2,7 @@
 
 ## Aktif
 
-C01–C08 selesai. Berikut C09 kurasi history dan C10 sinkronisasi dev/main. Agent tunggal, tanpa delegasi.
+C01–C10 selesai. Tidak ada increment perapian tersisa. Agent tunggal, tanpa delegasi. Kerja berikut mengikuti dev lokal → PR main → auto deployment.
 
 ## Kondisi awal
 
@@ -19,7 +19,11 @@ C01–C08 selesai. Berikut C09 kurasi history dan C10 sinkronisasi dev/main. Age
 - Build Attendance dan HR lulus setelah asset unused dihapus. Tujuh unit detector lulus (red/green kasus service README cleanup).
 - Business source/migrations sama dengan main awal; hanya README/asset tanpa referensi dihapus pada apps. Detector mengabaikan markdown agar cleanup tidak memicu backend deployment.
 - Backup/model/source/test runtime tidak dihapus. Tidak menjalankan service/DB/VPS dari perapian.
+- History main lama 145 commit menjadi 26 snapshot milestone, dengan tree dan seluruh metadata author/committer sumber sama; ditambah satu commit penutupan bertanggal aktual. Bundle lengkap dan mapping pemulihan ada di `.local/repository-cleanup/` dan tidak dipush.
+- Dev/main lokal dan remote sama; default main, hanya dua branch remote. Ruleset main-production dipulihkan persis ke konfigurasi aktif semula, tanpa bypass baru.
+- Workflow Production images pada snapshot kurasi `c54a306` berhasil: Inspect release changes sukses; image/migration/deploy VPS skipped. Fetch commit sebelumnya ditambahkan agar perbandingan tetap bekerja setelah rewrite.
+- Audit setelah kurasi: 898 blob reachable, tidak ditemukan match secret maupun path sensitif tracked; batas tetap berlaku. Akun demo README adalah pengecualian yang disetujui.
 
 ## Cara lanjut
 
-Baca plan/checklist, status Git dan diff aktual. Selesaikan satu tahap, catat hasil serta command yang benar-benar dijalankan, lalu commit/push dev. Tahap rewrite merupakan pengecualian eksplisit sekali terhadap aturan normal main melalui PR. Backup dan mapping SHA disimpan privat di `.local/`, tidak dipush.
+Baca status Git dan diff aktual sebelum pekerjaan baru. Selesaikan satu increment, verifikasi sesuai perubahan, lalu commit/push dev dan PR main. Pengecualian rewrite sudah selesai; jangan mengulang force push. Checkout lain yang masih memakai history lama sebaiknya clone ulang setelah menyimpan pekerjaan lokalnya. Jangan merge history lama kembali ke dev/main. Backup dan mapping SHA disimpan privat di `.local/`, tidak dipush.

@@ -20,6 +20,8 @@ Environment aktif, lisensi, token, SSH private key, backup DB dan data storage t
 
 Pemeriksaan sebelum cleanup mencakup 1.196 blob unik yang reachable dari dev/origin-dev/origin-main, nama file sensitif yang tracked, pola private key/token GitHub/AWS/Slack, dan pencocokan nilai dengan secret lokal aktif dari file ignored. Tidak ditemukan match pada pemeriksaan ini. Secret tidak dicetak dalam laporan.
 
+Pemeriksaan sesudah kurasi pada 2026-10-05 mencakup 898 blob reachable dengan aturan yang sama; tidak ditemukan match atau path sensitif tracked. Bundle/mapping pemulihan tetap privat dan ignored.
+
 Batas: regex tidak menjamin semua format token atau secret lama yang sudah diganti terdeteksi. GitHub Environment secrets, isi VPS, dan percakapan di luar Git tidak termasuk audit blob. Audit dependency/security sebelumnya bukan jaminan keadaan dependency saat ini. Jika ada secret aktif yang terungkap, rotasi di penerbitnya diperlukan; menghapus history saja tidak membatalkan credential.
 
 Kredensial storage demo lama pernah ditempelkan dalam percakapan setup. Infrastruktur demo lama kemudian dihapus/reset menurut output pengguna. Jika nilainya dipakai ulang di lingkungan lain, credential tersebut perlu diganti; nilainya tidak disalin ke dokumentasi ini.
