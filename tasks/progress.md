@@ -1,6 +1,23 @@
 # Progres dan titik lanjut
 
-## T5 aktif - shell HR responsif (2026-10-05)
+## T6 aktif - halaman detail HR dan aksi baris (2026-10-05)
+
+- Detail Absensi memakai PageHeader + breadcrumb Absensi/tanggal/nama, status dan
+  aksi lifecycle di header, serta tab Bukti/Riwayat perubahan. Peta memiliki loading
+  skeleton, tampilan koordinat dan tautan OpenStreetMap jika tile gagal/timeout,
+  dan filter tile untuk tema gelap; peta tetap mengizinkan zoom gestur di kanvas.
+- Seluruh baris daftar HR membuka target: Absensi/Dihapus ke detail, Karyawan ke
+  detail profil, Master ke dialog ubah, Hari Libur ke edit atau tampilan baca-saja
+  untuk tanggal lampau, Ringkasan ke detail absensi atau karyawan. Tombol aksi di
+  dalam baris tetap terpisah dan tabel tetap dapat dinavigasi dengan keyboard.
+- Verifikasi: 57/57 unit lintas 8 file, lint HR dan typecheck HR lulus. Build tidak
+  dijalankan; resource_status tidak tersedia dan catatan terakhir RAM bebas ~2.1
+  GiB (<3 GiB). UI visual dan peta menunggu acceptance manual pengguna.
+- Tidak ada perubahan endpoint, service, atau migration. PR+deploy frontend setelah
+  acceptance.
+- Lanjut: T7 tren Ringkasan (endpoint backend + chart + detail inline).
+
+## T5 diimplementasikan - shell HR responsif (2026-10-05)
 
 - Task aktif: T5, shell HR pada semua halaman. `SidebarShell` kini shared di
   `packages/ui`: rail desktop bisa ciut/perluas (state disimpan), grup navigasi,
@@ -12,7 +29,7 @@
   GiB (<3 GiB). Manual UI belum diperiksa pengguna.
 - T5 mengubah shell responsive, tidak mengubah backend/endpoint/database. PR+deploy
   frontend dibutuhkan setelah acceptance.
-- Lanjut: T6 halaman detail HR setelah commit/push T5 ke dev.
+- Lanjut: T6 diimplementasikan di atas commit/push T5 `f8e8527`.
 
 ## T4 diimplementasikan — kontrol dan filter seragam (2026-10-05)
 

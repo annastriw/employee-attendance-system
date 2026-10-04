@@ -36,6 +36,14 @@ describe("Departments page", () => {
     expect(screen.getByText("1-1 dari 1")).toBeInTheDocument();
   });
 
+  it("opens the edit dialog by activating a row", async () => {
+    const { user } = setup();
+    const table = await screen.findByRole("grid", { name: "Daftar departemen" });
+    await user.click(within(table).getByText("FIN"));
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByLabelText("Nama", { exact: false })).toHaveValue("Keuangan");
+  });
+
   it("separates a first-run empty state from a filter with no results", async () => {
     setup([]);
     expect(await screen.findByText("Belum ada departemen")).toBeInTheDocument();

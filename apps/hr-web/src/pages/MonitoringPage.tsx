@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button, Skeleton } from "@heroui/react";
 import {
   CaretLeft,
@@ -76,6 +76,7 @@ export function MonitoringPage({
   onParamsChange: (next: Params) => void;
   onSessionExpired: () => void;
 }) {
+  const navigate = useNavigate();
   const handle = useFailure(onSessionExpired);
 
   const todayStr = getTodayWIB();
@@ -547,7 +548,18 @@ export function MonitoringPage({
             </thead>
             <tbody>
               {items.map((item: MonitoringEmployeeItem) => (
-                <tr key={item.employeeId}>
+                <tr key={item.employeeId} data-interactive-row="true" tabIndex={0}
+                  aria-label={`Buka detail ${item.name}`}
+                  onClick={event => {
+                    if (event.target instanceof Element && event.target.closest("a, button")) return;
+                    navigate(item.recordId ? `/absensi?id=${encodeURIComponent(item.recordId)}` : `/karyawan?employee=${encodeURIComponent(item.employeeId)}`);
+                  }}
+                  onKeyDown={event => {
+                    if (event.target === event.currentTarget && event.key === "Enter") {
+                      event.preventDefault();
+                      navigate(item.recordId ? `/absensi?id=${encodeURIComponent(item.recordId)}` : `/karyawan?employee=${encodeURIComponent(item.employeeId)}`);
+                    }
+                  }}>
                   <td>
                     <div className="table-cell-title">{item.name}</div>
                     <div className="table-cell-subtitle">{item.nik}</div>

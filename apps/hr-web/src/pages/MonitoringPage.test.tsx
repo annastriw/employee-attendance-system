@@ -1,12 +1,17 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, useLocation } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MonitoringPage } from "./MonitoringPage";
 import type {
   MonitoringEmployeesResult,
   MonitoringSummary,
 } from "../lib/monitoring";
+
+function LocationProbe() {
+  const location = useLocation();
+  return <output aria-label="current-route">{location.pathname}{location.search}</output>;
+}
 
 describe("MonitoringPage (Layar H02 Monitoring & Rekap)", () => {
   beforeEach(() => {
@@ -147,6 +152,7 @@ describe("MonitoringPage (Layar H02 Monitoring & Rekap)", () => {
           onParamsChange={onParamsChange}
           onSessionExpired={onSessionExpired}
         />
+        <LocationProbe />
       </MemoryRouter>,
     );
     return { api, onParamsChange, onSessionExpired, user, rendered };
@@ -178,6 +184,15 @@ describe("MonitoringPage (Layar H02 Monitoring & Rekap)", () => {
     const viewLinks = screen.getAllByRole("link", { name: /Lihat/i });
     expect(viewLinks.length).toBe(3); // emp-1, emp-2, emp-4
     expect(viewLinks[0]).toHaveAttribute("href", "/absensi?id=rec-1");
+  });
+
+  it("opens attendance or employee detail from the whole summary row", async () => {
+    const { user } = setup();
+    await screen.findByText("Karyawan Aktif");
+    await user.click(screen.getByRole("row", { name: "Buka detail Aditya Pratama" }));
+    expect(screen.getByLabelText("current-route")).toHaveTextContent("/absensi?id=rec-1");
+    await user.click(screen.getByRole("row", { name: "Buka detail Citra Dewi" }));
+    expect(screen.getByLabelText("current-route")).toHaveTextContent("/karyawan?employee=emp-3");
   });
 
   it("clicking metric card triggers status filtering", async () => {

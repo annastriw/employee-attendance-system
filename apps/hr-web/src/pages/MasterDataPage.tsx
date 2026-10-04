@@ -4,6 +4,7 @@ import { Buildings, CaretLeft, CaretRight, PencilSimple, Plus, Power } from "@ph
 import { Notice, StatusBadge, ConfirmDialog, SearchInput } from "@attendance/ui";
 
 import { MasterFormDialog } from "../components/organisms/MasterFormDialog";
+import { InteractiveTableRow } from "../components/molecules/InteractiveTableRow";
 import { AuthError, type AuthClient } from "../lib/auth-client";
 import { masterDataApi, PAGE_SIZE, type MasterRecord, type MasterRecordPage, type MasterStatus } from "../lib/master-data";
 
@@ -153,24 +154,25 @@ export function MasterDataPage({ client, params, onParamsChange, onSessionExpire
                 </Table.Header>
                 <Table.Body>
                   {items.map((record) => (
-                    <Table.Row key={record.id} id={record.id}>
+                    <InteractiveTableRow key={record.id} id={record.id}
+                      label={`Ubah ${record.name}`} onActivate={() => openForm(record)}>
                       <Table.Cell className="cell-strong">{record.name}</Table.Cell>
                       <Table.Cell className="col-code"><span className="code-pill tabular">{record.code}</span></Table.Cell>
                       <Table.Cell><StatusBadge status={record.status} /></Table.Cell>
                       <Table.Cell className="col-actions">
                         <div className="row-actions">
                           <Button variant="ghost" size="sm" aria-label={`Ubah ${record.name}`} isDisabled={busy}
-                            onPress={() => openForm(record)}>
+                            onClick={event => event.stopPropagation()} onPress={() => openForm(record)}>
                             <PencilSimple size={16} aria-hidden="true" /><span className="action-label">Ubah</span>
                           </Button>
-                          <Button variant="ghost" size="sm" isDisabled={busy} onPress={() => toggle(record)}
+                          <Button variant="ghost" size="sm" isDisabled={busy} onClick={event => event.stopPropagation()} onPress={() => void toggle(record)}
                             aria-label={`${record.status === "ACTIVE" ? "Nonaktifkan" : "Aktifkan"} ${record.name}`}>
                             <Power size={16} aria-hidden="true" />
                             <span className="action-label">{record.status === "ACTIVE" ? "Nonaktifkan" : "Aktifkan"}</span>
                           </Button>
                         </div>
                       </Table.Cell>
-                    </Table.Row>
+                    </InteractiveTableRow>
                   ))}
                 </Table.Body>
               </Table.Content>

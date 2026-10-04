@@ -159,6 +159,9 @@
 .data-table th { font-size: 0.75rem; font-weight: 500; color: var(--muted); }
 .data-table td { font-size: 0.8125rem; }
 .cell-strong { font-weight: 500; }
+.data-table [data-interactive-row="true"] { cursor: pointer; }
+.data-table [data-interactive-row="true"]:hover { background: var(--surface-secondary); }
+.data-table [data-interactive-row="true"]:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
 .col-actions { width: 1%; white-space: nowrap; text-align: right; }
 .row-actions { display: inline-flex; gap: 0.25rem; }
 
@@ -466,6 +469,8 @@
   color: var(--foreground);
 }
 .attendance-map-wrapper {
+  position: relative;
+  z-index: 1;
   border-radius: 0.5rem;
   overflow: hidden;
   border: 1px solid var(--border);
@@ -474,19 +479,31 @@
   height: 200px;
   width: 100%;
   position: relative;
-  z-index: 1;
+  z-index: 0;
 }
+.table-responsive tbody tr[data-interactive-row="true"] { cursor: pointer; }
+.table-responsive tbody tr[data-interactive-row="true"]:hover { background: var(--surface-secondary); }
+.table-responsive tbody tr[data-interactive-row="true"]:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
 .attendance-map-fallback {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  background: var(--panel);
+  gap: .5rem;
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: color-mix(in srgb, var(--panel) 94%, transparent);
   color: var(--muted);
   font-size: 0.8125rem;
   text-align: center;
   padding: 1rem;
 }
+.attendance-map-fallback code { color: var(--foreground); font-size: .75rem; }
+.attendance-map-fallback a { color: var(--accent); font-size: .8125rem; font-weight: 500; text-decoration: underline; text-underline-offset: .2em; }
+.attendance-map-loading { position: absolute; inset: 0; z-index: 2; padding: .5rem; pointer-events: none; }
+.attendance-map-skeleton { width: 100%; height: 100%; border-radius: .375rem; }
+[data-theme="dark"] .attendance-map-container .leaflet-tile { filter: brightness(.72) contrast(1.12) saturate(.8); }
 .attendance-location-specs {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));

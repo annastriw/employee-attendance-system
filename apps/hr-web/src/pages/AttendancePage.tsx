@@ -5,6 +5,7 @@ import { Notice, StatusPill, attendanceTone, listDateRange } from "@attendance/u
 
 import { AttendanceFilters } from "../components/organisms/AttendanceFilters";
 import { AttendanceDetailPage } from "./AttendanceDetailPage";
+import { InteractiveTableRow } from "../components/molecules/InteractiveTableRow";
 import { AuthError, type AuthClient } from "../lib/auth-client";
 import {
   attendanceDate,
@@ -171,7 +172,9 @@ export function AttendancePage({
                 </Table.Header>
                 <Table.Body>
                   {data.data.map((row) => (
-                    <Table.Row id={row.id} key={row.id}>
+                    <InteractiveTableRow id={row.id} key={row.id}
+                      label={`Buka absensi ${row.employee.name} ${attendanceDate(row.attendanceDate)}`}
+                      onActivate={() => update({ id: row.id })}>
                       <Table.Cell>
                         <Button
                           variant="tertiary"
@@ -182,6 +185,7 @@ export function AttendancePage({
                             " " +
                             attendanceDate(row.attendanceDate)
                           }
+                          onClick={event => event.stopPropagation()}
                           onPress={() => update({ id: row.id })}
                         >
                           {row.employee.name}
@@ -214,7 +218,7 @@ export function AttendancePage({
                           label={attendanceStatus(row)}
                         />
                       </Table.Cell>
-                    </Table.Row>
+                    </InteractiveTableRow>
                   ))}
                 </Table.Body>
               </Table.Content>

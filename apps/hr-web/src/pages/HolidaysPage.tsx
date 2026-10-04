@@ -15,6 +15,7 @@ import {
 import { Notice, StatusPill, ConfirmDialog, SearchInput, DateRangeField, listDateRange, rangeQuery } from "@attendance/ui";
 
 import { HolidayFormDialog } from '../components/organisms/HolidayFormDialog';
+import { InteractiveTableRow } from '../components/molecules/InteractiveTableRow';
 import { AuthError, type AuthClient } from '../lib/auth-client';
 import {
   holidaysApi,
@@ -274,7 +275,9 @@ export function HolidaysPage({
                       const isToday = record.holidayDate === todayWIB;
 
                       return (
-                        <Table.Row key={record.id} id={record.id}>
+                        <InteractiveTableRow key={record.id} id={record.id}
+                          label={`Lihat hari libur ${formatted}`}
+                          onActivate={() => { setActionError(''); setForm({ record }); }}>
                           <Table.Cell className="cell-strong tabular">
                             {formatted}
                           </Table.Cell>
@@ -296,6 +299,7 @@ export function HolidaysPage({
                                 size="sm"
                                 aria-label={`Ubah ${record.description}`}
                                 isDisabled={busy || isPast}
+                                onClick={event => event.stopPropagation()}
                                 onPress={() => {
                                   setActionError('');
                                   setForm({ record });
@@ -309,6 +313,7 @@ export function HolidaysPage({
                                 size="sm"
                                 isDisabled={busy || isPast}
                                 aria-label={`Hapus ${record.description}`}
+                                onClick={event => event.stopPropagation()}
                                 onPress={() => {
                                   setActionError('');
                                   setToDelete(record);
@@ -319,7 +324,7 @@ export function HolidaysPage({
                               </Button>
                             </div>
                           </Table.Cell>
-                        </Table.Row>
+                        </InteractiveTableRow>
                       );
                     })}
                   </Table.Body>
@@ -362,6 +367,7 @@ export function HolidaysPage({
         <HolidayFormDialog
           open
           record={form.record}
+          readOnly={form.record ? form.record.holidayDate < todayWIB : false}
           todayWIB={todayWIB}
           busy={busy}
           error={actionError}

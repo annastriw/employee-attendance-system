@@ -37,6 +37,11 @@ describe('Employee creation and one-time password UI', () => {
     await user.click(screen.getByRole('radio', { name: 'Nonaktif' }));
     expect(onParamsChange).toHaveBeenCalledWith(expect.objectContaining({ status: 'INACTIVE', page: undefined, search: 'Test' }));
   });
+  it('opens employee detail by activating the row body', async () => {
+    const { user, onParamsChange } = setup();
+    await user.click(await screen.findByText('EMP-01'));
+    expect(onParamsChange).toHaveBeenCalledWith(expect.objectContaining({ employee: id, operation: undefined }));
+  });
   it('validates required fields without creating an account', async () => {
     const { user, api } = setup(); await user.click(await screen.findByRole('button', { name: 'Tambah' })); await screen.findByLabelText('NIK');
     await user.click(screen.getByRole('button', { name: 'Buat karyawan' }));

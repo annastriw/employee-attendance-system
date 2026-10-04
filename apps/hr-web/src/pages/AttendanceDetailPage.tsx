@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Button, Label, TextArea } from "@heroui/react";
-import { ArrowLeft, Trash, ArrowCounterClockwise } from "@phosphor-icons/react";
-import { Notice, ConfirmDialog } from "@attendance/ui";
+import { Trash, ArrowCounterClockwise } from "@phosphor-icons/react";
+import { Notice, ConfirmDialog, PageHeader, StatusPill, UnderlineTabs } from "@attendance/ui";
 
 import { AttendanceEvidence } from "../components/organisms/AttendanceEvidence";
 import { AuthError, type AuthClient } from "../lib/auth-client";
@@ -36,6 +36,7 @@ export function AttendanceDetailPage({
   const [reasonError, setReasonError] = useState("");
   const [busy, setBusy] = useState(false);
   const [mustRefresh, setMustRefresh] = useState(false);
+  const [activeTab, setActiveTab] = useState("evidence");
   const submitting = useRef(false);
   const loading = loaded !== reload;
   useEffect(() => {
@@ -108,13 +109,23 @@ export function AttendanceDetailPage({
   }
   return (
     <div className="attendance-detail">
-      <div className="employee-detail-header">
-        <Button variant="tertiary" onPress={onBack} isDisabled={busy}>
-          <ArrowLeft size={16} aria-hidden="true" />
-          Kembali
-        </Button>
-        <h2>Detail absensi</h2>
-      </div>
+      <PageHeader
+        breadcrumb={[{ label: "Absensi", href: "/absensi" },
+          { label: data ? attendanceDate(data.attendanceDate) : "Tanggal" },
+          { label: data?.employee.name ?? "Detail" }]}
+        onNavigate={() => onBack()}
+        title={data?.employee.name ?? "Detail absensi"}
+        description={data ? `${attendanceDate(data.attendanceDate)} · ${data.department} · ${data.position}` : undefined}
+        actions={data && <>
+          <StatusPill tone={data.deletedAt ? "archived" : data.checkOut ? "active" : "inactive"} label={attendanceStatus(data)} />
+          <Button variant="secondary" isDisabled={busy || mustRefresh} onPress={() => {
+            setConfirm(data); setReason(""); setReasonError(""); setActionError("");
+          }}>
+            {data.deletedAt ? <ArrowCounterClockwise size={16} aria-hidden="true" /> : <Trash size={16} aria-hidden="true" />}
+            {data.deletedAt ? "Pulihkan absensi" : "Hapus absensi"}
+          </Button>
+        </>}
+      />
       {notice && <Notice message={notice} success />}
       {actionError && !confirm && <Notice message={actionError} />}
       {mustRefresh && !confirm && (
@@ -134,21 +145,13 @@ export function AttendanceDetailPage({
       ) : (
         data && (
           <>
+            <UnderlineTabs items={[
+              { id: "evidence", label: "Bukti" },
+              { id: "history", label: "Riwayat perubahan", count: data.history?.length ?? 0 },
+            ]} active={activeTab} onSelect={setActiveTab} />
+            {activeTab === "evidence" ? <>
             <section className="form-section">
-              <div className="attendance-detail-identity">
-                <div>
-                  <h2>{data.employee.name}</h2>
-                  <p className="employee-secondary">
-                    {attendanceDate(data.attendanceDate)} · {data.department}
-                  </p>
-                  {data.employee.status === "ARCHIVED" && (
-                    <span className="employee-secondary">Karyawan arsip</span>
-                  )}
-                </div>
-                <span className="status-badge status-inactive">
-                  {attendanceStatus(data)}
-                </span>
-              </div>
+              {data.employee.status === "ARCHIVED" && <p className="employee-secondary">Karyawan arsip</p>}
               <div className="attendance-evidence-grid">
                 <AttendanceEvidence
                   client={client}
@@ -178,30 +181,11 @@ export function AttendanceDetailPage({
                   <p className="attendance-reason">{data.deleteReason}</p>
                 </div>
               )}
-              <div className="form-actions">
-                <Button
-                  variant="secondary"
-                  isDisabled={busy || mustRefresh}
-                  onPress={() => {
-                    setConfirm(data);
-                    setReason("");
-                    setReasonError("");
-                    setActionError("");
-                  }}
-                >
-                  {data.deletedAt ? (
-                    <ArrowCounterClockwise size={16} aria-hidden="true" />
-                  ) : (
-                    <Trash size={16} aria-hidden="true" />
-                  )}
-                  {data.deletedAt ? "Pulihkan absensi" : "Hapus absensi"}
-                </Button>
-              </div>
             </section>
-            {!!data.history?.length && (
+            </> : (
               <section className="form-section">
                 <h2>Riwayat perubahan</h2>
-                <ol className="history-list">
+                {data.history?.length ? <ol className="history-list">
                   {data.history.map((item) => (
                     <li key={item.id} className="history-item">
                       <p className="cell-strong">
@@ -218,7 +202,7 @@ export function AttendanceDetailPage({
                       )}
                     </li>
                   ))}
-                </ol>
+                </ol> : <p className="evidence-muted">Belum ada perubahan untuk absensi ini.</p>}
               </section>
             )}
           </>

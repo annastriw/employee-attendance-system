@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
+import { Skeleton } from "@attendance/ui";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { openStreetMapUrl } from "../../lib/map-link";
 
 interface AttendanceMapProps {
   latitude: number;
@@ -54,11 +56,15 @@ export function AttendanceMap({
 }: AttendanceMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [mapError, setMapError] = useState(false);
+  const [tilesLoading, setTilesLoading] = useState(true);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
     let mapInstance: L.Map | null = null;
+    let tileTimeout: ReturnType<typeof setTimeout> | undefined;
+    setMapError(false);
+    setTilesLoading(true);
 
     try {
       // In jsdom or SSR, L.map might not have client dimensions
@@ -79,10 +85,20 @@ export function AttendanceMap({
         },
       );
 
+      tileLayer.on("load", () => {
+        setTilesLoading(false);
+        if (tileTimeout) clearTimeout(tileTimeout);
+      });
       tileLayer.on("tileerror", () => {
-        // Tile loading failed (e.g. offline/network failure). We retain the container and text.
+        setMapError(true);
+        setTilesLoading(false);
+        if (tileTimeout) clearTimeout(tileTimeout);
       });
 
+      tileTimeout = setTimeout(() => {
+        setMapError(true);
+        setTilesLoading(false);
+      }, 10000);
       tileLayer.addTo(map);
 
       // Add accuracy circle
@@ -108,6 +124,7 @@ export function AttendanceMap({
     } catch {
       queueMicrotask(() => {
         setMapError(true);
+        setTilesLoading(false);
       });
     }
 
@@ -115,6 +132,7 @@ export function AttendanceMap({
       if (mapInstance) {
         mapInstance.remove();
       }
+      if (tileTimeout) clearTimeout(tileTimeout);
     };
   }, [latitude, longitude, accuracyMeters]);
 
@@ -128,12 +146,13 @@ export function AttendanceMap({
         role="region"
         aria-label={`Peta ${label}: koordinat ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`}
       >
-        {mapError && (
-          <div className="attendance-map-fallback">
-            <p>Peta interaktif belum dapat dimuat.</p>
-          </div>
-        )}
       </div>
+      {tilesLoading && <div className="attendance-map-loading" role="status" aria-label="Memuat peta"><Skeleton className="attendance-map-skeleton" /></div>}
+      {mapError && <div className="attendance-map-fallback" role="status">
+        <p>Peta tidak dapat dimuat. Koordinat tetap tersedia.</p>
+        <code>{latitude.toFixed(6)}, {longitude.toFixed(6)}</code>
+        <a href={openStreetMapUrl(latitude, longitude)} target="_blank" rel="noopener noreferrer">Buka di OpenStreetMap</a>
+      </div>}
     </div>
   );
 }

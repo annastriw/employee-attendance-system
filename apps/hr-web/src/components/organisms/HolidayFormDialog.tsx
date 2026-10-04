@@ -34,6 +34,7 @@ function validate(holidayDate: string, description: string, todayWIB: string): E
 export function HolidayFormDialog({
   open,
   record,
+  readOnly = false,
   todayWIB,
   busy,
   error,
@@ -42,6 +43,7 @@ export function HolidayFormDialog({
 }: {
   open: boolean;
   record?: HolidayRecord | null;
+  readOnly?: boolean;
   todayWIB: string;
   busy: boolean;
   error: string;
@@ -87,7 +89,7 @@ export function HolidayFormDialog({
             <Modal.Body className="dialog-body">
               <CalendarField label="Tanggal Libur" value={holidayDate}
                 onChange={value => { setHolidayDate(value); setErrors({ ...errors, holidayDate: undefined }); }}
-                disabled={busy} required min={todayWIB} error={shown.holidayDate}
+                disabled={busy || readOnly} required min={todayWIB} error={shown.holidayDate}
                 hint="Pilih tanggal hari ini atau mendatang (WIB)." />
 
               <TextField
@@ -98,7 +100,7 @@ export function HolidayFormDialog({
                   setErrors({ ...errors, description: undefined });
                 }}
                 isRequired
-                isDisabled={busy}
+                isDisabled={busy || readOnly}
                 isInvalid={Boolean(shown.description)}
                 validationBehavior="aria"
                 autoFocus={Boolean(record)}
@@ -118,9 +120,8 @@ export function HolidayFormDialog({
               <Button variant="tertiary" isDisabled={busy} onPress={onClose}>
                 Batal
               </Button>
-              <Button type="submit" variant="primary" isDisabled={busy}>
-                {busy ? 'Menyimpan…' : 'Simpan'}
-              </Button>
+              {readOnly ? <Button variant="primary" onPress={onClose}>Tutup</Button> :
+                <Button type="submit" variant="primary" isDisabled={busy}>{busy ? 'Menyimpan…' : 'Simpan'}</Button>}
             </Modal.Footer>
           </form>
         </Modal.Dialog>

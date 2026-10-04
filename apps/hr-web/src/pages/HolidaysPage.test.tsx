@@ -83,6 +83,15 @@ describe('HolidaysPage (H13)', () => {
     expect(within(table).getByText('Lampau')).toBeInTheDocument();
   });
 
+  it('opens a past holiday in a read-only view from its row', async () => {
+    const { user } = setup([pastHoliday]);
+    const table = await screen.findByRole('grid', { name: 'Daftar hari libur' });
+    await user.click(within(table).getByText('Hari Kemerdekaan RI'));
+    const dialog = await screen.findByRole('dialog');
+    expect(within(dialog).getByLabelText('Keterangan', { exact: false })).toBeDisabled();
+    expect(within(dialog).getByRole('button', { name: 'Tutup' })).toBeEnabled();
+  });
+
   it('separates a first-run empty state from a filter with no results', async () => {
     setup([]);
     expect(await screen.findByText('Tidak ada hari libur yang cocok')).toBeInTheDocument();
