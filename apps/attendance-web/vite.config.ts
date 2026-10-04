@@ -2,6 +2,7 @@ import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 import tailwindcss from "@tailwindcss/vite";
 const VPS_API = "https://attendance-api.annastriwidagdo.me";
+const PROD_ORIGIN = "https://attendance.annastriwidagdo.me";
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
@@ -11,6 +12,10 @@ export default defineConfig({
         changeOrigin: true,
         secure: true,
         configure(proxy) {
+          proxy.on("proxyReq", (proxyReq) => {
+            proxyReq.setHeader("origin", PROD_ORIGIN);
+            proxyReq.setHeader("referer", PROD_ORIGIN + "/");
+          });
           proxy.on("proxyRes", (proxyRes) => {
             const cookies = proxyRes.headers["set-cookie"];
             if (Array.isArray(cookies)) {
