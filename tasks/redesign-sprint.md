@@ -35,25 +35,24 @@
 | D1 | Bug runtime | Pengguna mengirim console/Network error bila diminta; agen beri instruksi cek spesifik. |
 | D2 | Chart | shadcn chart (Recharts). Dua chart di Ringkasan: **tren kehadiran harian** (rentang) + **donut hadir/terlambat/belum hadir hari ini**. Backend boleh ditambah. |
 | D3 | Sidebar | Collapsible **rail ikon** di desktop + **Drawer** di mobile/tablet; state tersimpan `localStorage`. |
-| D4 | Profil | Tiap role bisa **lihat dan edit profil** + ganti password (lihat batas field D10). |
+| D4 | Profil | Tiap role punya halaman Profil: **lihat data diri (read-only) + ganti password**. Tidak ada edit data profil oleh diri sendiri (revisi pengguna 2026-10-05: "cukup ubah password, itu yang penting"). |
 | D5 | Rentang tanggal | HeroUI `DateRangePicker` + preset Hari ini / 7 hari / 30 hari / Bulan ini; default **30 hari terakhir** (list). Ringkasan default hari ini. |
 | D6 | Search | Trigger saat ketik, debounce **300 ms**, tanpa tombol Cari; kosong = semua. |
 | D7 | Backend | Boleh diubah. **Langsung push `dev` + beri tahu pengguna** (sebut service, endpoint, migration bila ada). Pengguna PR ke `main` lalu cek di production. |
 | D8 | "Tanpa iterasi" | Tiap task diserahkan utuh (build/lint/test hijau). Penyesuaian rasa dari pengguna = finishing normal, bukan task gagal. |
 | D9 | Testing | Manual oleh pengguna. Agen: typecheck/build + lint + unit untuk logika murni berubah (bagian 5). Tanpa Playwright/E2E/screenshot. |
-| D10 | Field profil yang bisa diedit | Lihat bagian 3 — **default dipakai sampai pengguna mengubah**. |
+| D10 | Edit profil | Tidak ada (lihat D4). Data profil tetap dikelola HR sesuai baseline — tidak perlu ubah baseline. |
+| D11 | Layar fixed, tanpa zoom | App shell fixed (`100dvh`, header/sidebar/bottom-nav tetap, konten scroll di dalam area), responsif semua layar; **cegah pinch/double-tap zoom** di mobile/tablet dan auto-zoom input iOS. Detail & batas di bagian 4 "Layar fixed". |
 
-## 3. Batas edit profil (D10) — default
+## 3. Halaman Profil (D4/D10)
 
-Baseline: data profil karyawan dimiliki HR (`docs/requirements/baseline.md` §profil).
-Self-edit adalah perubahan baseline → **perbarui baseline dulu** (commit docs terpisah)
-sebelum kode X8.
-- **Karyawan**: boleh edit **telepon** (opsional). Lihat-saja: nama, NIK, email,
-  departemen, jabatan, tanggal mulai, status. Alasan: nama/NIK/penugasan memengaruhi
-  snapshot absensi & audit; email punya alur outbox milik HR.
-- **HR (akun ADMIN_HRD, `employeeId` bisa null)**: lihat email/role; bila punya
-  `employeeId`, telepon boleh diedit seperti karyawan. Email lihat-saja.
-- Bila pengguna ingin nama juga bisa diedit: ubah tabel ini + baseline, lalu ikuti.
+Data profil dimiliki HR (`docs/requirements/baseline.md` §profil) — tidak berubah.
+- **Karyawan**: lihat nama, NIK, email, telepon, departemen, jabatan, tanggal mulai,
+  status (read-only) + **Ganti password** (password lama + baru + konfirmasi, aturan
+  kekuatan sama dengan ChangePasswordPage; sukses → logout & login ulang).
+- **HR (ADMIN_HRD, `employeeId` bisa null)**: lihat email + role (dan data karyawan
+  bila punya `employeeId`) + Ganti password, perilaku sama.
+- Tidak ada form edit data diri; perubahan data minta ke HR (tulis satu baris petunjuk).
 
 ## 4. Konvensi
 
@@ -82,6 +81,22 @@ src/
   `cursor:pointer`, hover background, focus ring, Enter/Space membuka. Elemen non-klik
   tidak boleh punya hover seperti tombol.
 - **States** tiap data view: Skeleton berbentuk, EmptyState dengan aksi, error Notice + "Muat ulang".
+
+### Layar fixed & tanpa zoom (D11)
+- `index.html` kedua portal: `<meta name="viewport" content="width=device-width,
+  initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">`.
+- CSS global (`packages/ui/src/theme.css`): `html,body,#root{height:100dvh;overflow:hidden}`,
+  `overscroll-behavior:none`, `touch-action:manipulation` (matikan double-tap zoom),
+  `-webkit-text-size-adjust:100%`; area konten utama `overflow-y:auto` (satu scroller
+  per layar); safe-area inset untuk bottom-nav/notch.
+- Semua input/select/textarea `font-size ≥ 16px` di < 768 px (iOS tidak auto-zoom saat fokus).
+- Gesture pinch iOS Safari: tambahkan listener `gesturestart` → `preventDefault` di
+  `packages/ui/src/theme/viewport.ts`, dipanggil dari `main.tsx` kedua portal.
+- **Batas teknis (jujur)**: zoom browser desktop (Ctrl +/−, menu browser) dan opsi
+  aksesibilitas OS tidak dapat diblokir secara andal. Keputusan yang dipakai lihat
+  bagian 9 (pertanyaan terbuka); tanpa jawaban, default = layout tetap rapi saat
+  zoom desktop (tidak diblokir), mobile/tablet dikunci seperti di atas.
+- Peta Leaflet tetap boleh pinch-zoom di dalam kanvas peta (gesture milik peta).
 
 ### Git
 - Commit per task: `feat(hr-web): …`, `feat(attendance-web): …`, `feat(ui): …`,
@@ -131,21 +146,22 @@ Status `[x]` = selesai & di-push. Fase A (sudah selesai):
 
 Fase B:
 
-### T1 `[ ]` Bug: sesi hilang saat refresh (semua role)
-- **Gejala**: refresh halaman → kembali ke login.
-- **File**: `apps/*/vite.config.ts` (proxy `configure`), `apps/*/src/lib/auth-client.ts`
-  (`restore`), `apps/auth-service/src/auth/auth.controller.ts` (cookie options, baris ~32–44).
-- **Langkah**: (1) minta pengguna: DevTools → Network → request `auth/refresh` setelah
-  refresh: status, request header `Cookie`, dan response `Set-Cookie` saat login;
-  Application → Cookies `localhost`. (2) Hipotesis urut: cookie tidak tersimpan (rewrite
-  tidak melucuti semua atribut / `Path` / SameSite); cookie tersimpan tapi nama
-  `__Host-` dilucuti sehingga server tidak mengenali nama saat dikirim balik
-  (proxy harus **menambahkan kembali** prefix `__Host-` di header `Cookie` request);
-  dua panel memakai nama cookie berbeda (`auth_refresh_{role}`) — cek panel benar.
-  (3) Perbaiki di proxy (frontend-only) bila memungkinkan; ubah backend hanya bila perlu.
-- **DoD**: login → refresh 3× → tetap masuk, di kedua portal; logout tetap berfungsi.
-  Unit untuk fungsi rewrite cookie (ekstrak ke `apps/*/proxy-cookie.ts` atau satu file
-  bersama di root `scripts/`/`packages/ui`-node bila dipakai dua config).
+### T1 `[ ]` Bug: sesi hilang saat refresh (semua role) — AKAR MASALAH TERKONFIRMASI
+- **Bukti pengguna**: `POST /api/v1/auth/refresh` → **401** di 5173 dan 5174 setelah refresh.
+- **Akar masalah** (source): production Auth membaca cookie `__Host-auth_refresh_<admin|employee>`
+  (`apps/auth-service/src/auth/auth.controller.ts` `cookieName()` + baris ~162
+  `request.cookies?.[this.cookieName(role)]`). Proxy Vite (`proxyRes`) **melucuti prefix
+  `__Host-`** agar cookie bisa disimpan di `http://localhost`, sehingga browser menyimpan
+  dan mengirim balik `auth_refresh_<role>` → server tidak menemukan nama `__Host-…` → 401.
+- **Perbaikan (frontend-only, tanpa backend)**: di `proxyReq` kedua `vite.config.ts`,
+  tulis-ulang header `Cookie` request: `auth_refresh_(admin|employee)=` →
+  `__Host-auth_refresh_$1=` (hanya nama cookie refresh, jangan cookie lain). Ekstrak
+  logika rewrite (Set-Cookie response + Cookie request) ke satu modul murni bersama
+  (mis. `scripts/dev-proxy-cookies.ts` diimport kedua config) + unit test-nya.
+  Pastikan `Path=/` tetap, `SameSite=Lax` aman untuk same-origin localhost.
+- **DoD**: login → refresh 3× → tetap masuk di kedua portal; logout menghapus cookie
+  (Set-Cookie clear juga direwrite) lalu refresh → ke halaman login; unit rewrite lulus.
+  Pengguna cek manual (restart dev server — `vite.config.ts` tidak hot-reload).
 
 ### T2 `[ ]` Bug: HR "lihat detail absensi" & Karyawan "riwayat" tidak berfungsi
 - **File HR**: `pages/AttendancePage.tsx` (detail via `?id=`),
@@ -172,6 +188,9 @@ Fase B:
   `SearchInput` (HeroUI `SearchField` + hook `useDebouncedValue` 300 ms),
   `DataList` row clickable (pola bagian 4), `SidebarShell` (rail+drawer D3) bisa
   menunggu T5 bila lebih rapi.
+- **Layar fixed & tanpa zoom (D11)**: terapkan viewport meta, CSS app-shell `100dvh`
+  satu scroller, `touch-action`, font input ≥16px mobile, dan `viewport.ts` (gesturestart)
+  sesuai bagian 4 di kedua portal.
 - **Bersihkan**: `apps/attendance-web/src/spikes/` (+ entry Vite bila ada),
   `pages/WelcomePage.tsx`, css per-halaman pindah ke `styles/`. Pastikan tidak ada
   import yatim (grep) sebelum hapus.
@@ -232,20 +251,19 @@ Fase B:
   sheet di mobile) berisi status hari ini + tautan "Buka detail absensi".
 - **DoD**: chart responsif & ikut tema; tooltip berbahasa Indonesia; fallback aman.
 
-### T8 `[ ]` Profil + ganti password tiap role  *(backend)*
-- **Docs dulu**: perbarui baseline/PRD sesuai bagian 3 (commit `docs:` terpisah).
-- **Backend** (employee-service + gateway): `GET /api/v1/me/profile` (gabung data
-  employee + email dari token/Auth `auth/me`), `PATCH /api/v1/me/profile` body `{ phone, version }`
-  dengan validasi, optimistic version, audit history (actor = diri sendiri). Guard:
-  karyawan hanya profil sendiri; ADMIN_HRD tanpa `employeeId` → profil akun saja.
-  Unit service. Push dev, beri tahu pengguna.
+### T8 `[ ]` Profil (lihat) + ganti password tiap role  *(backend kecil)*
+- **Backend** (employee-service + api-gateway): `GET /api/v1/me/profile` read-only —
+  data karyawan milik akun (nama, NIK, telepon, departemen, jabatan, tanggal mulai,
+  status) berdasarkan `employeeId` sesi; ADMIN_HRD tanpa `employeeId` → `data: null`.
+  Tanpa PATCH. Unit service. Push dev, beri tahu pengguna (D7).
 - **Frontend HR**: route `/profil` (breadcrumb `Profil`), tabs Profil · Keamanan;
-  Keamanan = ganti password (pakai `client.changePassword`, lalu login ulang).
-- **Frontend Karyawan**: halaman Profil dari Home (avatar/menu), sama isinya, layout mobile.
-- Fallback bila endpoint belum live: tampilkan data dari `auth/me` (email/role) read-only
-  + pesan "Edit profil tersedia setelah rilis backend"; ganti password tetap jalan.
-- **DoD**: lihat & edit telepon berhasil (setelah deploy), ganti password berhasil di
-  kedua portal; unit backend service + validator frontend.
+  Keamanan = ganti password (`client.changePassword`, lalu login ulang).
+- **Frontend Karyawan**: `/profil` dari avatar/bottom nav, isi sama, layout mobile;
+  ganti password memakai form yang sama dengan `ChangePasswordPage` (komponen dipakai ulang).
+- Fallback sebelum endpoint live (404): tampilkan email + role dari `auth/me`, sembunyikan
+  bagian data karyawan dengan catatan singkat; ganti password tetap jalan.
+- **DoD**: profil tampil read-only; ganti password berhasil di kedua portal lalu wajib
+  login ulang; unit backend service + validator form password.
 
 ### T9 `[ ]` Portal Karyawan overhaul (eks-R07)
 - Migrasi `use-hash-route.ts` → `react-router-dom@7.18.4` (pinned, sama dengan HR):
@@ -284,8 +302,15 @@ HeroUI: T3/T4 · rapikan offset: T4/T10 · search langsung: T3/T4 · dropdown se
 departemen: T4 · grafik Ringkasan: T7 · jangan mudah logout: T1 · rentang waktu: T3/T4 ·
 detail absensi HR rusak: T2 · full layar tanpa space kosong: T5/T9/T10 · sidebar
 hideable: T5 · Atomic/struktur rapi: T3 + konvensi · tata letak tombol: konvensi/T4 ·
-naluriah klik: T6 · profil + ganti password tiap role: T8 · riwayat karyawan rusak: T2 ·
-saran unit test cepat: bagian 5.
+naluriah klik: T6 · profil (lihat) + ganti password tiap role: T8 · riwayat karyawan rusak: T2 ·
+layar fixed tanpa zoom: T3/T10 · saran unit test cepat: bagian 5.
+
+## 9. Pertanyaan terbuka (agen: pakai default bila belum dijawab)
+
+- **Q1 Zoom desktop** (Ctrl +/−): tidak bisa diblokir andal di browser. Default:
+  **tidak diblokir**, layout dijamin tetap rapi/responsif saat zoom. Opsi lain:
+  tangkap Ctrl/⌘ + `+`/`-`/`0`/wheel lalu `preventDefault` (hanya mencegah shortcut,
+  menu browser tetap bisa zoom; menurunkan aksesibilitas).
 
 ## 8. Ketentuan pindah agen
 

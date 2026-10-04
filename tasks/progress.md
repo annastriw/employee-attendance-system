@@ -38,9 +38,15 @@ Temuan backend: `auth/me` sudah diproksikan; `monitoring/summary` ada; **belum a
 
 Perlu PR+deploy: (belum ada perubahan backend).
 
-Lanjut: **T1 — sesi hilang saat refresh**. Langkah pertama: minta pengguna kirim
-Network `auth/refresh` (status, header Cookie request, Set-Cookie saat login) dan
-daftar cookie `localhost`.
+Revisi 2026-10-05 (lanjutan): D4 → profil read-only + ganti password (tanpa edit data
+diri, baseline tetap); D11 → layar fixed `100dvh` + cegah zoom mobile/tablet.
+T1 root cause terkonfirmasi dari source + bukti Network pengguna (refresh 401 di 5173/5174):
+proxy melucuti prefix `__Host-` dari Set-Cookie, padahal Auth production membaca
+`__Host-auth_refresh_<role>`; perbaikan = proxy menambahkan kembali prefix pada header
+`Cookie` request.
+
+Lanjut: **T1** — implementasi rewrite Cookie request di kedua `vite.config.ts` (modul
+bersama + unit), lalu minta pengguna restart dev server dan cek refresh 3×.
 
 ## R05 — HR list pages: pill konsisten + fix link routing (2026-10-05)
 
