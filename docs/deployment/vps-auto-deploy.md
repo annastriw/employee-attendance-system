@@ -109,6 +109,6 @@ Setelah itu pastikan environment secrets lengkap, migrator password file `.secre
 1. Coding dan push ke `dev`; unit test terdampak wajib, integrasi cepat bila perlu.
 2. Periksa UI/alur secara manual. Setelah siap, buat PR `dev → main` dan tunggu CI.
 3. Setelah merge yang diinstruksikan, Actions membangun image dan deploy VPS; Vercel deploy frontend dari `main`.
-4. Periksa status workflow **Production images** dan buka frontend live untuk pemeriksaan manual. Jika gagal, jangan ulang deploy membabi buta; baca log. App image otomatis kembali ke SHA sebelumnya untuk kegagalan health, tetapi migration perlu penanganan database terpisah.
+4. Untuk rilis backend, periksa workflow **Production images** sampai `Deploy VPS production` selesai, lalu buka `https://attendance-api.annastriwidagdo.me/health` dan cocokkan properti `release` dengan SHA merge `main`. Perubahan frontend saja diperiksa melalui deployment Vercel dan tidak memicu VPS. Jika gagal, baca log sebelum mengulang; image aplikasi otomatis kembali ke SHA sebelumnya untuk kegagalan health, tetapi migration perlu penanganan database terpisah.
 
 Perubahan ini tidak mengaktifkan workflow sampai secret, akses forced-command, environment dan repository variable disiapkan. Lihat [alur CI/CD](../development/ci-cd-workflow.md).

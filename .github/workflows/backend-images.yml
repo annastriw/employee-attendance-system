@@ -47,7 +47,9 @@ jobs:
           labels: |
             org.opencontainers.image.source=https://github.com/annastriw/employee-attendance-system
             org.opencontainers.image.revision=${{ github.sha }}
-          build-args: SERVICE=${{ matrix.service }}
+          build-args: |
+            SERVICE=${{ matrix.service }}
+            RELEASE_SHA=${{ github.sha }}
           cache-from: type=gha,scope=backend-${{ matrix.service }}
           cache-to: type=gha,mode=max,scope=backend-${{ matrix.service }}
 

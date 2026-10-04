@@ -11,6 +11,15 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 - VPS auto-deploy setup diselesaikan manual oleh pengguna: GitHub variable `VPS_AUTO_DEPLOY_ENABLED=true` dilaporkan sudah disimpan, verifier lulus untuk SHA aktif, dan preflight file/service/resource lulus. Rilis backend otomatis pasca-aktivasi belum dibuktikan; frontend login sudah diterima pengguna di live melalui alur Vercel.
 - Commit `f79cf94 feat: align employee login with HR split layout` sudah dipush ke `dev`; pengguna telah menerima tampilan live. Perubahan frontend ini tidak memicu VPS. Belum ada increment coding berikut yang dipilih.
 
+## Increment aktif — verifikasi rilis backend melalui health SHA (2026-10-04)
+
+- Pengguna menyetujui perubahan operasional kecil untuk membuktikan deployment VPS: API Gateway `/health` akan menyertakan SHA image yang sedang berjalan.
+- Sebelum implementasi, `dev` diselaraskan dengan `origin/main` `9bf34c2` melalui merge biasa `32a678a`; tidak ada perubahan tracked pengguna yang tertunda. Untracked `.agents/`, `.claude/`, `.kiro/`, `.windsurf/`, dan `skills-lock.json` tetap tidak disentuh.
+- File target: `apps/api-gateway/src/release-metadata.ts` + unit, `apps/api-gateway/src/auth-proxy.controller.ts` + unit, `infra/Dockerfile.backend`, `.github/workflows/backend-images.yml`, runbook auto-deploy dan checkpoint ini.
+- Kebijakan: image production menerima `RELEASE_SHA` dari build Actions; health mempertahankan `status/service/auth` lalu menambah SHA penuh. Lokal/fallback menampilkan `local`. Tidak ada migration/database/frontend.
+- RED/GREEN: test baru awalnya gagal karena helper dan field release belum tersedia; sesudah implementasi dua suite unit, 3/3 test lulus. ESLint package API Gateway dan build API Gateway lulus. Belum dilakukan UI/manual test karena tidak ada frontend.
+- Berikut: periksa diff dan pastikan detector mengklasifikasikan rilis sebagai backend berubah tanpa migration; commit/push ke `dev`. Deployment baru sesudah PR `main` dan instruksi rilis pengguna; perubahan ini akan membangun lima image dan tidak menjalankan migration.
+
 ## Arsip checkpoint — seed HR lulus, konfigurasi Vercel Attendance 7B (2026-10-04)
 
 - Output VPS pengguna: MySQL 8.4.11 healthy, AIStor running, loopback 3307/9000/9001, network attendance-prod-backend. RAM available 2 GiB, disk available 46 GB, swap terpakai 540 MiB. attendance_prod nol tabel.

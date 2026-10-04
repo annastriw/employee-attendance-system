@@ -37,8 +37,10 @@ RUN DATABASE_URL=mysql://ci:ci@127.0.0.1:3307/attendance_build \
     && cp -a "apps/$SERVICE/dist/." /runtime/dist/
 
 FROM node:24.15.0-bookworm-slim AS runtime
+ARG RELEASE_SHA
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
+ENV RELEASE_SHA=${RELEASE_SHA}
 WORKDIR /app
 
 COPY --from=build --chown=node:node /runtime/ ./
