@@ -1,5 +1,205 @@
 # Progres dan titik lanjut
 
+## T8 teknis selesai - Profil dan keamanan dua role (2026-10-05)
+
+- Endpoint diri `GET /api/v1/me/profile` memverifikasi sesi lewat Auth Service,
+  hanya mengambil profil berdasarkan `employeeId` dari sesi, mengembalikan `data:null`
+  bagi HR tanpa employeeId, dan tidak mengizinkan data profil diubah sendiri.
+- HR mendapat `/profil` dari menu akun; Karyawan mendapat Profil dari layar Hari ini.
+  Keduanya menampilkan data diri read-only, status profil, tab Profil/Keamanan,
+  fallback email+role saat endpoint 404, serta satu form password bersama. Sukses
+  ganti password menghapus sesi dan meminta login ulang.
+- Perlu PR+deploy sebelum profil karyawan aktif di production: Employee Service +
+  API Gateway, endpoint di atas, tanpa migration. Aksi ganti password memakai Auth
+  Service yang sudah ada. PR ke main dibuat pengguna.
+- Verifikasi: HR unit 7/7, lint/typecheck lulus; Karyawan unit 8/8, lint/typecheck
+  lulus; Employee Service unit 10/10, lint/typecheck lulus; API Gateway unit 3/3,
+  lint/typecheck lulus. Build dilewati karena resource_status tidak tersedia dan
+  RAM bebas terakhir sekitar 2.1 GiB. Acceptance UI manual masih pending.
+- Lanjut: T9 overhaul responsif portal Karyawan, termasuk layar desktop/tablet
+  proporsional, bukan hanya tampilan mobile. T8 akan di-commit/push ke `dev`.
+
+## T7 teknis selesai - Ringkasan HR dengan tren dan detail inline (2026-10-05)
+
+- Ringkasan HR kini memakai DateRangeField default 7 hari, grafik tren responsif
+  dan berwarna token tema, donut ringkasan tanggal terpilih, tooltip/legenda Bahasa
+  Indonesia, state skeleton/kosong/error, serta fallback 404 "Grafik tren tersedia
+  setelah rilis backend". Klik baris membuka Drawer detail; desktop panel kanan,
+  mobile sheet bawah, fokus kembali ke baris, dan ada tautan ke bukti absensi/profil.
+- Backend Attendance Service + API Gateway menyediakan
+  `GET /api/v1/monitoring/trend?startDate&endDate`, rentang inklusif maks. 92 hari,
+  data historis per hari dan penanda jadwal/libur. Tidak ada migration.
+- Perlu PR+deploy sebelum endpoint grafik aktif di production: Attendance Service,
+  API Gateway, endpoint di atas, tanpa migration. Frontend aman saat endpoint belum
+  live. PR ke main dibuat pengguna sesuai alur.
+- Verifikasi: HR unit 8/8, lint dan typecheck lulus; Attendance Service unit
+  terfokus 11/11, lint dan typecheck lulus; API Gateway unit 7/7, lint dan typecheck
+  lulus. Build dilewati karena resource_status tidak tersedia; catatan RAM terakhir
+  sekitar 2.1 GiB bebas. UI visual menunggu acceptance manual pengguna.
+- Lanjut: T8 profil read-only dan ganti password tiap role. T7 sudah di-commit/push
+  ke `dev`; acceptance visual tetap belum dicentang.
+
+## T6 aktif - halaman detail HR dan aksi baris (2026-10-05)
+
+- Detail Absensi memakai PageHeader + breadcrumb Absensi/tanggal/nama, status dan
+  aksi lifecycle di header, serta tab Bukti/Riwayat perubahan. Peta memiliki loading
+  skeleton, tampilan koordinat dan tautan OpenStreetMap jika tile gagal/timeout,
+  dan filter tile untuk tema gelap; peta tetap mengizinkan zoom gestur di kanvas.
+- Seluruh baris daftar HR membuka target: Absensi/Dihapus ke detail, Karyawan ke
+  detail profil, Master ke dialog ubah, Hari Libur ke edit atau tampilan baca-saja
+  untuk tanggal lampau, Ringkasan ke detail absensi atau karyawan. Tombol aksi di
+  dalam baris tetap terpisah dan tabel tetap dapat dinavigasi dengan keyboard.
+- Verifikasi: 57/57 unit lintas 8 file, lint HR dan typecheck HR lulus. Build tidak
+  dijalankan; resource_status tidak tersedia dan catatan terakhir RAM bebas ~2.1
+  GiB (<3 GiB). UI visual dan peta menunggu acceptance manual pengguna.
+- Tidak ada perubahan endpoint, service, atau migration. PR+deploy frontend setelah
+  acceptance.
+- Lanjut: T7 tren Ringkasan (endpoint backend + chart + detail inline).
+
+## T5 diimplementasikan - shell HR responsif (2026-10-05)
+
+- Task aktif: T5, shell HR pada semua halaman. `SidebarShell` kini shared di
+  `packages/ui`: rail desktop bisa ciut/perluas (state disimpan), grup navigasi,
+  header sticky, dan Drawer HeroUI untuk tablet/mobile. Footer drawer memuat tema
+  dan akun; navigasi menutup drawer. Shortcut `[` tidak mengambil alih input,
+  textarea, select atau contenteditable; Ctrl/Cmd-K tetap tersedia.
+- Verifikasi: test shell/auth 6/6, lint HR lulus, typecheck HR lulus. Build tidak
+  dijalankan; resource_status tidak tersedia dan catatan terakhir RAM bebas ~2.1
+  GiB (<3 GiB). Manual UI belum diperiksa pengguna.
+- T5 mengubah shell responsive, tidak mengubah backend/endpoint/database. PR+deploy
+  frontend dibutuhkan setelah acceptance.
+- Lanjut: T6 diimplementasikan di atas commit/push T5 `f8e8527`.
+
+## T4 diimplementasikan — kontrol dan filter seragam (2026-10-05)
+
+- Task aktif: T4, seri satu per satu. Scope: shared CalendarField/FilterSelect,
+  default/preset/date query utilities, semua filter Absensi/Ringkasan/Hari Libur/
+  Karyawan HR dan Riwayat Karyawan; Employee Service list filter; test dan docs.
+- Semua tanggal native diganti DateRangeField/CalendarField HeroUI; pencarian
+  memakai SearchInput debounce 300 ms tanpa tombol Cari/Terapkan. Rentang list
+  30 hari default WIB, dapat pilih preset, rentang khusus, atau Semua tanggal.
+  Query tanggal/page/detail tetap terjaga saat navigasi.
+- Filter master memuat semua page (pageSize 100), urut nama Indonesia dan memberi
+  label Nonaktif. Form penugasan tetap hanya menawarkan master ACTIVE sesuai
+  aturan bisnis. Pilihan Semua menjadi default. Daftar karyawan mendapat filter
+  departemen/jabatan di Employee Service; API list memakai predicates yang sama
+  untuk hasil dan total.
+- Perubahan backend: Employee Service `GET /api/v1/employees` menerima optional
+  `departmentId`/`positionId`; tidak ada migration. Push dev lalu pengguna PR+
+  deploy sebelum filter backend aktif production.
+- Verifikasi: unit logika baru 12/12, Riwayat Karyawan 7/7, Employee Service
+  filter murni 2/2; HR fokus 61/61 lintas 8 file. Lint HR/Employee Service dan
+  typecheck kedua portal lulus. Build kedua portal menunggu CI.
+- Build tidak dijalankan: RAM bebas ~2.1 GiB (<3 GiB). UI acceptance tetap manual
+  pengguna setelah merge/deploy, termasuk date picker/preset, pencarian, filter
+  master, desktop/tablet/mobile serta tema terang/gelap.
+- Lanjut: `e34e06d` sudah commit/push ke dev; visual acceptance pengguna masih tertunda. T5 shell HR aktif.
+
+## T3 implementasi selesai — fondasi UI bersama (2026-10-05)
+
+- Notice, PasswordField, ConfirmDialog, StatusBadge/Pill dipindahkan ke UI bersama;
+  FormField, DateRangeField, SearchInput, dan DataList ditambahkan.
+- D11/D12 diterapkan lintas kedua portal. Lint/typecheck kedua portal lulus; unit
+  HR 90/90, Karyawan 40/40. Fixture capture lama tetap dijalankan di test/legacy.
+- Build dan dev server tidak dijalankan karena RAM bebas <3 GiB. UI manual desktop,
+  tablet, mobile dan zoom peta masih menunggu pengguna setelah rilis.
+- Perlu PR+deploy: frontend dua portal; tidak ada backend/migration.
+- Lanjut: T4 kontrol/filter. Commit/push `c4b8e66`.
+
+## T2 aktif — validator riwayat Karyawan menolak UUID demo v5 (2026-10-05)
+
+- [x] Pengguna mengonfirmasi detail HR dari Absensi dan Ringkasan sudah berfungsi.
+  Tidak mengasumsikan Back/filter diterima dari laporan detail saja.
+- Bukti runtime pengguna: `GET /api/v1/me/attendance?page=1&pageSize=20` = 200,
+  payload memiliki UUID v5 untuk record/checkIn/checkOut, metadata WIB valid.
+  Frontend `attendance-history.ts` sebelumnya menerima UUID v4 saja sehingga
+  melempar AuthError 503 lokal meskipun request HTTP berhasil.
+- Backend controller history sudah memakai ParseUUIDPipe tanpa batas v4;
+  tidak membutuhkan perubahan service/endpoint/migration.
+- File terkait: `apps/attendance-web/src/lib/attendance-history.ts` dan `.test.ts`,
+  sprint dan progress ini. Validator hanya diperluas untuk UUID v4/v5, sesuai
+  ID normal dan seed demo. Tetap menolak format/variant invalid, bukti lokasi
+  invalid dan detail milik ID berbeda; validasi metadata/tanggal/foto tetap.
+- Verifikasi: 2 unit regresi list/detail v5 gagal sebelum fix. Setelah fix,
+  unit util 8/8 + HistoryPage 7/7 lulus (15 total); lint attendance-web lulus.
+  Build lokal tidak dijalankan karena RAM bebas ~1,63 GiB, mengikuti keputusan
+  pengguna push dev lalu build CI PR main. Tidak memulai dev server 5173/5174.
+- [ ] Pengguna setelah PR/deploy: Riwayat Karyawan menampilkan daftar, pagination
+  dan filter; klik detail, lihat foto, kembali ke daftar dengan filter tetap.
+  Jika list berhasil tetapi detail gagal, kirim URL/status/Response endpoint
+  `me/attendance/<id>` dan pesan Console; jangan kirim Cookie/token.
+- Perlu PR+deploy: frontend Attendance saja; tidak ada perubahan backend.
+- Lanjut: push T2 fix ke dev, pengguna PR main dan cek riwayat/detail/foto.
+  Setelah acceptance T2, centang sprint lalu **T3** fondasi bersama + D11/D12.
+  T1 logout→refresh masih menunggu konfirmasi; proxy localhost hanya terbukti unit.
+
+## Acceptance refresh production — kedua role aman (2026-10-05)
+
+- Pengguna menyatakan: "sudah aman semua ketika refresh, semua role" setelah
+  deployment fix Vercel `4db848c`. Acceptance ini mencakup refresh production HR
+  dan Karyawan, termasuk penghalang NOT_FOUND HR yang dilaporkan sebelumnya.
+- [x] Refresh production aman pada kedua role, diterima pengguna.
+- [ ] Logout lalu refresh kembali ke login pada kedua role: belum dikonfirmasi.
+- [ ] Rewrite cookie proxy localhost: tidak diuji production; tidak diklaim lulus
+  runtime lokal. Unit 6/6 dan build/lint sudah terbukti CI; implementasi di dev.
+- Klarifikasi status: T1 implementasi dan refresh production selesai; checkbox
+  task penuh tetap terbuka karena logout dan verifikasi proxy lokal belum dilaporkan.
+  Tidak menandai detail/foto/filter sebagai diterima dari laporan refresh saja.
+- File dokumentasi terkait: `tasks/redesign-sprint.md`, progress ini. Tidak ada
+  kode atau backend berubah; verifikasi dokumentasi/diff saja, tanpa dev server.
+- Perlu PR+deploy: tidak ada perubahan backend.
+- Lanjut: **T2 diagnosis** — bukti runtime diminta untuk detail HR dari Absensi/
+  Ringkasan dan riwayat/detail/foto Karyawan; minta URL/status/Response Network
+  dan error Console tanpa Cookie/token bila gagal. Konfirmasi logout T1 juga
+  diminta. Jangan memperbaiki validator berdasarkan hipotesis tanpa bukti.
+
+## Bug aktif — refresh path HR 404 Vercel (2026-10-05)
+
+- Pengguna melaporkan refresh `https://hr.annastriwidagdo.me/absensi`
+  menghasilkan Vercel NOT_FOUND; Karyawan aman. Reproduksi read-only HTTP:
+  root HR `/` = 200, `/absensi` = 404.
+- Akar masalah: HR sudah memakai BrowserRouter tetapi tidak memiliki fallback
+  SPA pada Vercel; server mencari resource `/absensi` sebelum React dimuat.
+  Karyawan masih hash routing, fragmen tidak dikirim ke server.
+- File terkait: `apps/hr-web/vercel.json`, `docs/deployment.md`, progress ini.
+  Tambahkan rewrite `/(.*)` → `/index.html` mengikuti panduan resmi Vercel Vite,
+  pada root project HR (`apps/hr-web`). React route guard tetap menangani auth.
+- Verifikasi: parse JSON konfigurasi, review pola rewrite terhadap dokumentasi
+  resmi, tautan lokal dokumentasi dan diff. Tidak ada logika aplikasi berubah;
+  tidak menambah unit yang hanya mencerminkan config. Build/lint aplikasi sudah
+  lulus CI 37233478898 untuk source sebelumnya; tidak diulang lokal pada RAM
+  CRITICAL. Config routing baru baru terbukti runtime sesudah deploy Vercel.
+- [ ] Pengguna: setelah PR main + deploy frontend HR, buka langsung `/absensi`,
+  refresh 3×, coba `/ringkasan` dan `/absensi?id=<id-valid>`; periksa halaman,
+  query dan aset termuat, tanpa error NOT_FOUND Vercel.
+- Perlu PR+deploy: frontend HR saja; tidak ada service/endpoint/migration backend.
+  Tidak menjalankan dev server 5173/5174.
+- Lanjut: push fix ke dev, pengguna PR ke main; verifikasi refresh path HR live.
+  T1 acceptance localhost tetap tertunda; lanjut diagnosis T2 dari bukti runtime
+  detail absensi HR/riwayat Karyawan setelah penghalang routing ini teratasi.
+
+## Perbaikan CI PR #9 — setup tema pada test Karyawan (2026-10-05)
+
+- Log [CI 37233159248](https://github.com/annastriw/employee-attendance-system/actions/runs/37233159248)
+  dibaca langsung melalui GitHub CLI. Lint, typecheck database dan build seluruh
+  aplikasi lulus pada commit T1 `98f5c12`; unit rewrite cookie 6/6 juga lulus CI.
+  Build T1 kini terbukti di CI, tanpa build lokal pada RAM CRITICAL.
+- CI gagal pada 18 test di `attendance-web`: `window.matchMedia is not a function`
+  dari shared theme hook. Setup jsdom Karyawan belum menyediakan stub API ini,
+  sedangkan setup HR sudah memilikinya.
+- File berubah: `apps/attendance-web/src/test/setup.ts`, progress ini.
+  Menambahkan stub matchMedia dengan metode listener, mengikuti setup HR;
+  tidak mengubah kode aplikasi/theme atau perilaku production.
+- Verifikasi terfokus lokal: `HistoryPage.test.tsx` + `LoginPage.test.tsx`
+  10/10 lulus; `App.test.tsx` 8/8 lulus. Semua 18 test yang gagal CI kini lulus;
+  lint attendance-web dan pemeriksaan diff lulus.
+  Build ulang lokal tidak dijalankan (RAM bebas ~0,93 GiB); tidak ada dev server
+  yang dimulai. CI PR memverifikasi ulang setelah push perbaikan.
+- Perlu PR+deploy: tidak ada perubahan backend.
+- Lanjut: pantau CI baru PR #9 setelah push ke dev. T1 acceptance refresh/logout
+  localhost tetap belum dikonfirmasi; T2 menunggu bukti Network/console pengguna
+  untuk detail HR dan riwayat Karyawan. T1–T11 belum dianggap selesai penuh.
+
 ## T1 aktif — rewrite cookie proxy lokal (2026-10-05)
 
 - Mulai dari `dev` HEAD `f5719b5`, tree bersih; fetch origin berhasil. Tidak ada

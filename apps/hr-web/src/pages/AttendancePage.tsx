@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Skeleton, Table } from "@heroui/react";
 import { CaretLeft, CaretRight, Clock } from "@phosphor-icons/react";
-import { Notice } from "../components/molecules/Notice";
-import { StatusPill } from "../components/molecules/StatusPill";
-import { attendanceTone } from "../components/molecules/status-pill";
+import { Notice, StatusPill, attendanceTone, listDateRange } from "@attendance/ui";
+
 import { AttendanceFilters } from "../components/organisms/AttendanceFilters";
 import { AttendanceDetailPage } from "./AttendanceDetailPage";
+import { InteractiveTableRow } from "../components/molecules/InteractiveTableRow";
 import { AuthError, type AuthClient } from "../lib/auth-client";
 import {
   attendanceDate,
@@ -42,8 +42,9 @@ export function AttendancePage({
 }) {
   const handle = useFailure(onSessionExpired);
   const id = params.get("id");
-  const startDate = params.get("startDate") ?? "",
-    endDate = params.get("endDate") ?? "",
+  const range = listDateRange(params);
+  const startDate = range?.startDate ?? "",
+    endDate = range?.endDate ?? "",
     employeeId = params.get("employeeId") ?? "";
   const page = Math.max(1, Math.min(1000000, Number(params.get("page")) || 1));
   const [data, setData] = useState<AttendancePageResult | null>(null);
@@ -57,6 +58,7 @@ export function AttendancePage({
       startDate: startDate || undefined,
       endDate: endDate || undefined,
       employeeId: employeeId || undefined,
+      period: params.get("period") ?? undefined,
       page: page > 1 ? String(page) : undefined,
       id: undefined,
       ...next,
@@ -170,7 +172,9 @@ export function AttendancePage({
                 </Table.Header>
                 <Table.Body>
                   {data.data.map((row) => (
-                    <Table.Row id={row.id} key={row.id}>
+                    <InteractiveTableRow id={row.id} key={row.id}
+                      label={`Buka absensi ${row.employee.name} ${attendanceDate(row.attendanceDate)}`}
+                      onActivate={() => update({ id: row.id })}>
                       <Table.Cell>
                         <Button
                           variant="tertiary"
@@ -181,6 +185,7 @@ export function AttendancePage({
                             " " +
                             attendanceDate(row.attendanceDate)
                           }
+                          onClick={event => event.stopPropagation()}
                           onPress={() => update({ id: row.id })}
                         >
                           {row.employee.name}
@@ -213,7 +218,7 @@ export function AttendancePage({
                           label={attendanceStatus(row)}
                         />
                       </Table.Cell>
-                    </Table.Row>
+                    </InteractiveTableRow>
                   ))}
                 </Table.Body>
               </Table.Content>

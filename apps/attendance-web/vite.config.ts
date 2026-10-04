@@ -34,7 +34,7 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     setupFiles: ["./src/test/setup.ts"],
-    include: ["src/**/*.test.{ts,tsx}"],
+    include: ["src/**/*.test.{ts,tsx}", "test/legacy/**/*.test.tsx"],
     css: false,
     maxWorkers: 1,
     fileParallelism: false,

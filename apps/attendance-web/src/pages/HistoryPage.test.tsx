@@ -101,28 +101,12 @@ describe("Personal attendance history", () => {
     expect(api.mock.calls[0][0]).toContain("me/attendance?");
     expect(api.mock.calls[0][0]).not.toContain("employeeId");
   });
-  it("applies date filters and rejects a reversed range without a request", async () => {
-    const { user, onParamsChange } = setup();
-    await screen.findByRole("button", { name: "Buka absensi 2 Okt 2026" });
-    await user.type(screen.getByLabelText("Dari tanggal"), "2026-10-03");
-    await user.type(screen.getByLabelText("Sampai tanggal"), "2026-10-01");
-    await user.click(screen.getByRole("button", { name: "Terapkan" }));
-    expect(
-      await screen.findByText(
-        "Tanggal awal harus sebelum atau sama dengan tanggal akhir.",
-      ),
-    ).toBeInTheDocument();
-    expect(onParamsChange).not.toHaveBeenCalled();
-    await user.clear(screen.getByLabelText("Sampai tanggal"));
-    await user.type(screen.getByLabelText("Sampai tanggal"), "2026-10-04");
-    await user.click(screen.getByRole("button", { name: "Terapkan" }));
-    expect(onParamsChange).toHaveBeenCalledWith(
-      expect.objectContaining({
-        startDate: "2026-10-03",
-        endDate: "2026-10-04",
-        page: undefined,
-      }),
-    );
+  it("applies date presets immediately and resets pagination", async () => {
+    const { user, onParamsChange } = setup("page=2");
+    await user.click(screen.getByRole("button", { name: "7 hari" }));
+    expect(onParamsChange).toHaveBeenCalledWith(expect.objectContaining({ page: undefined, id: undefined, startDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/) }));
+    await user.click(screen.getByRole("button", { name: "Semua tanggal" }));
+    expect(onParamsChange).toHaveBeenLastCalledWith(expect.objectContaining({ period: "ALL", startDate: undefined, endDate: undefined }));
   });
   it("shows original evidence and deletion reason without offering or requesting any photo", async () => {
     const deleted = {
@@ -212,6 +196,8 @@ describe("Personal attendance history", () => {
     expect(screen.queryByRole("img")).not.toBeInTheDocument();
   });
   it("hides old rows when a new period fails and handles an expired session", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-10-05T05:00:00+07:00"));
     const { client, rerender, onParamsChange, onHome, onSessionExpired, api } =
       setup();
     await screen.findByRole("button", { name: "Buka absensi 2 Okt 2026" });
@@ -219,7 +205,7 @@ describe("Personal attendance history", () => {
     rerender(
       <HistoryPage
         client={client}
-        params={new URLSearchParams("startDate=2026-10-03")}
+        params={new URLSearchParams("startDate=2026-10-03&endDate=2026-10-04")}
         onParamsChange={onParamsChange}
         onHome={onHome}
         onSessionExpired={onSessionExpired}
@@ -229,5 +215,6 @@ describe("Personal attendance history", () => {
     expect(
       screen.queryByRole("button", { name: "Buka absensi 2 Okt 2026" }),
     ).not.toBeInTheDocument();
+    vi.useRealTimers();
   });
 });

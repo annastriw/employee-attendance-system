@@ -5,6 +5,7 @@ import { DatabaseService } from '../database/database.module';
 import { EmployeeConfig } from '../config/employee.config';
 import { ProvisioningAuthClient, type AccountReceipt } from './provisioning-auth.client';
 import type { CreateEmployeeDto, ListEmployeesQuery, CredentialRequestDto, RetryEmployeeDto } from './employees.dto';
+import { employeeListFilter } from './employee-list-filter';
 type Tx = Prisma.TransactionClient;
 interface Actor { accountId: string; requestId?: string }
 export function employeePayloadHash(input: CreateEmployeeDto) {
@@ -80,7 +81,7 @@ export class EmployeesService implements OnModuleInit, OnModuleDestroy {
     return this.accounts.call<{ email: string; temporaryPassword: string }>(id, 'credentials', body, actor.requestId, authorization);
   }
   async list(query: ListEmployeesQuery) {
-    const where: Prisma.EmpEmployeeWhereInput = { ready: true, provisioning: { status: 'COMPLETED' }, ...(query.status ? { status: query.status } : {}), ...(query.search ? { OR: [{ name: { contains: query.search } }, { nik: { contains: query.search } }] } : {}) };
+    const where: Prisma.EmpEmployeeWhereInput = employeeListFilter(query);
     const [items, total] = await this.database.client.$transaction([this.database.client.empEmployee.findMany({ where, include: { department: true, position: true, provisioning: { select: { email: true } } }, orderBy: [{ name: 'asc' }, { id: 'asc' }], skip: (query.page - 1) * query.pageSize, take: query.pageSize }), this.database.client.empEmployee.count({ where })]);
     return { items: items.map(row => ({ id: row.id, nik: row.nik, name: row.name, phone: row.phone, email: row.accountEmail ?? row.provisioning?.email, department: row.department.name, position: row.position.name, startDate: row.startDate.toISOString().slice(0, 10), status: row.status })), total, page: query.page, pageSize: query.pageSize };
   }

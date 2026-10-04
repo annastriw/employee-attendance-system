@@ -1,7 +1,7 @@
 import { Button, Spinner } from "@heroui/react";
 import { Clock, CheckCircle, SignOut, ArrowRight } from "@phosphor-icons/react";
-import { AuthShell } from "@attendance/ui";
-import { Notice } from "../components/molecules/Notice";
+import { AuthShell, Notice } from "@attendance/ui";
+
 import type { AuthClient, EmployeeUser } from "../lib/auth-client";
 import { clockLabel, type AttendancePurpose } from "../lib/attendance-client";
 import { useToday } from "../features/checkin/use-today";
@@ -9,7 +9,7 @@ import {
   hasPendingCheckIn,
   pendingAttendancePurpose,
 } from "../features/checkin/use-check-in";
-import "./home-page.css";
+import "../styles/home-page.css";
 interface Props {
   client: AuthClient;
   user: EmployeeUser;
@@ -19,6 +19,7 @@ interface Props {
   onCapture: (purpose: AttendancePurpose) => void;
   onSessionExpired: () => void;
   onHistory: () => void;
+  onProfile: () => void;
 }
 export function HomePage({
   client,
@@ -29,6 +30,7 @@ export function HomePage({
   onCapture,
   onSessionExpired,
   onHistory,
+  onProfile,
 }: Props) {
   const today = useToday(client, onSessionExpired);
   const d = today.data,
@@ -172,6 +174,7 @@ export function HomePage({
       >
         Riwayat absensi
       </Button>
+      <Button variant="ghost" className="today-action" onPress={onProfile}>Profil &amp; keamanan akun</Button>
       <Button
         variant="ghost"
         className="primary-button today-action"

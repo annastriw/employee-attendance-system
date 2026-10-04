@@ -17,6 +17,10 @@
   },
   "dependencies": {
     "@fontsource-variable/geist": "5.3.0",
-    "@fontsource-variable/geist-mono": "5.3.0"
+    "@fontsource-variable/geist-mono": "5.3.0",
+    "@heroui/react": "3.2.6",
+    "@internationalized/date": "3.12.4",
+    "react-aria-components": "1.21.1",
+    "recharts": "3.10.1"
   }
 }

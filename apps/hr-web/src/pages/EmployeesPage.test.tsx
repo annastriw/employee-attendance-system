@@ -23,7 +23,12 @@ function setup(params = '', override?: (path: string, init?: { body?: unknown; m
 async function fill(user: ReturnType<typeof userEvent.setup>) {
   await user.click(await screen.findByRole('button', { name: 'Tambah' }));
   await user.type(await screen.findByLabelText('NIK'), 'emp-02'); await user.type(screen.getByLabelText('Nama', { exact: true }), '  New Employee  '); await user.type(screen.getByLabelText('Email', { exact: true }), 'New@example.test');
-  await user.type(screen.getByLabelText('Mulai bekerja'), '2026-10-02');
+  const dateField = within(screen.getByRole('group', { name: 'Mulai bekerja' }));
+  const segments = dateField.getAllByRole('spinbutton');
+  await user.click(segments[0]);
+  await user.keyboard('02');
+  await user.keyboard('10');
+  await user.keyboard('2026');
   for (const label of ['departemen', 'jabatan']) { await user.click(screen.getByRole('button', { name: 'Pilih ' + label })); await user.click(await screen.findByRole('menuitemradio', { name: 'Operasional' })); }
 }
 describe('Employee creation and one-time password UI', () => {
@@ -31,6 +36,11 @@ describe('Employee creation and one-time password UI', () => {
     const { user, onParamsChange } = setup('search=Test&page=2'); await screen.findByText('Test Employee');
     await user.click(screen.getByRole('radio', { name: 'Nonaktif' }));
     expect(onParamsChange).toHaveBeenCalledWith(expect.objectContaining({ status: 'INACTIVE', page: undefined, search: 'Test' }));
+  });
+  it('opens employee detail by activating the row body', async () => {
+    const { user, onParamsChange } = setup();
+    await user.click(await screen.findByText('EMP-01'));
+    expect(onParamsChange).toHaveBeenCalledWith(expect.objectContaining({ employee: id, operation: undefined }));
   });
   it('validates required fields without creating an account', async () => {
     const { user, api } = setup(); await user.click(await screen.findByRole('button', { name: 'Tambah' })); await screen.findByLabelText('NIK');

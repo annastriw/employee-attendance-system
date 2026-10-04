@@ -20,6 +20,17 @@ Live memakai dua project Vercel untuk Attendance/HR, satu VPS Ubuntu untuk lima 
 
 Production branch main, output dist, build aplikasi terkait dari workspace pnpm. Aktifkan Include source files outside of the Root Directory karena packages/ui digunakan bersama. `VITE_API_BASE_URL=https://attendance-api.annastriwidagdo.me/api/v1` pada environment Production. Nilai ini build-time; setelah mengubahnya harus redeploy. Arah branch/detil setting dapat diperiksa pada project Vercel masing-masing.
 
+HR menggunakan BrowserRouter: [vercel.json](../apps/hr-web/vercel.json) pada root
+project HR menyediakan rewrite SPA ke `/index.html`, sesuai
+[panduan Vite Vercel](https://vercel.com/docs/frameworks/frontend/vite#using-vite-to-make-spas).
+Ini memungkinkan refresh atau membuka langsung `/absensi`, `/masuk`, dan path
+lain; React Router menangani halaman setelah aplikasi dimuat. Jangan mengaktifkan
+`cleanUrls` tanpa menyesuaikan destination rewrite. API production memakai domain
+VPS tersendiri, bukan rewrite ini. Sesudah rilis, cek akses langsung/refresh route
+berserta query filter dan pastikan JS/CSS tetap termuat. Portal Karyawan masih
+hash routing; saat migrasi ke BrowserRouter (redesign T9), tambahkan fallback SPA
+pada root project Attendance juga.
+
 ## VPS dan GitHub
 
 Root deployment `/opt/attendance`. Compose infra memuat MySQL/AIStor; Compose backend memuat lima image. Secret per-service dan lisensi berada pada folder privat VPS, tidak Git. Port service 3000–3004, DB 3307, S3 9000 dan Console 9001 bind loopback.

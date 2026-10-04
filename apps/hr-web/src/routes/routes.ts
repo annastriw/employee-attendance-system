@@ -31,6 +31,7 @@ export const viewPath = (view: View): string => `/${view}`;
 /** Authentication screens live outside the workspace shell. */
 export const LOGIN_PATH = "/masuk";
 export const CHANGE_PASSWORD_PATH = "/ganti-password";
+export const PROFILE_PATH = "/profil";
 
 /**
  * Adapts React Router search params to the `{ params, onParamsChange }`

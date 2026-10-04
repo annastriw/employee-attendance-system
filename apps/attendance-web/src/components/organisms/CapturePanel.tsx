@@ -19,7 +19,7 @@ import {
 } from "../../features/capture/photo-upload";
 import { useCheckIn } from "../../features/checkin/use-check-in";
 import { clockLabel } from "../../lib/attendance-client";
-import "./capture-panel.css";
+import "../../styles/capture-panel.css";
 
 interface Props {
   client: AuthClient;

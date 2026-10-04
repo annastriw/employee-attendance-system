@@ -12,7 +12,7 @@ export function MasterAssignmentSelect({ label, records, current, onChange, disa
   disabled?: boolean;
 }) {
   const descriptionId = useId();
-  const active = records.filter(record => record.status === 'ACTIVE');
+  const active = records.filter(record => record.status === 'ACTIVE').sort((a, b) => a.name.localeCompare(b.name, 'id'));
   return (
     <div className="form-field">
       <Dropdown>

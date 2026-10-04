@@ -1,0 +1,49 @@
+.today-date {
+  color: var(--muted);
+  font-size: 0.8125rem;
+  margin: 24px 0 12px;
+}
+.today-card {
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--ui-card-radius);
+  background: var(--surface);
+  margin-bottom: 24px;
+}
+.today-card-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+.today-checkin {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 24px 0 16px;
+  font-size: 0.875rem;
+}
+.today-checkin strong {
+  font-size: 1.75rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+}
+.today-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+.today-status.recorded {
+  color: var(--accent);
+}
+
+.auth-content .today-action {
+  min-height: var(--ui-control-height);
+}

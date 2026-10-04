@@ -8,7 +8,7 @@ import {
   Modal,
   TextField,
 } from '@heroui/react';
-import { Notice } from '../molecules/Notice';
+import { Notice, CalendarField } from "@attendance/ui";
 import type { HolidayRecord } from '../../lib/holidays';
 
 type Errors = { holidayDate?: string; description?: string };
@@ -34,6 +34,7 @@ function validate(holidayDate: string, description: string, todayWIB: string): E
 export function HolidayFormDialog({
   open,
   record,
+  readOnly = false,
   todayWIB,
   busy,
   error,
@@ -42,6 +43,7 @@ export function HolidayFormDialog({
 }: {
   open: boolean;
   record?: HolidayRecord | null;
+  readOnly?: boolean;
   todayWIB: string;
   busy: boolean;
   error: string;
@@ -85,26 +87,10 @@ export function HolidayFormDialog({
               </Modal.Heading>
             </Modal.Header>
             <Modal.Body className="dialog-body">
-              <TextField
-                className="form-field"
-                value={holidayDate}
-                onChange={(value) => {
-                  setHolidayDate(value);
-                  setErrors({ ...errors, holidayDate: undefined });
-                }}
-                isRequired
-                isDisabled={busy}
-                isInvalid={Boolean(shown.holidayDate)}
-                validationBehavior="aria"
-              >
-                <Label>Tanggal Libur</Label>
-                <Input type="date" min={todayWIB} autoFocus={!record} />
-                {shown.holidayDate ? (
-                  <FieldError>{shown.holidayDate}</FieldError>
-                ) : (
-                  <Description>Pilih tanggal hari ini atau mendatang (WIB).</Description>
-                )}
-              </TextField>
+              <CalendarField label="Tanggal Libur" value={holidayDate}
+                onChange={value => { setHolidayDate(value); setErrors({ ...errors, holidayDate: undefined }); }}
+                disabled={busy || readOnly} required min={todayWIB} error={shown.holidayDate}
+                hint="Pilih tanggal hari ini atau mendatang (WIB)." />
 
               <TextField
                 className="form-field"
@@ -114,7 +100,7 @@ export function HolidayFormDialog({
                   setErrors({ ...errors, description: undefined });
                 }}
                 isRequired
-                isDisabled={busy}
+                isDisabled={busy || readOnly}
                 isInvalid={Boolean(shown.description)}
                 validationBehavior="aria"
                 autoFocus={Boolean(record)}
@@ -134,9 +120,8 @@ export function HolidayFormDialog({
               <Button variant="tertiary" isDisabled={busy} onPress={onClose}>
                 Batal
               </Button>
-              <Button type="submit" variant="primary" isDisabled={busy}>
-                {busy ? 'Menyimpan…' : 'Simpan'}
-              </Button>
+              {readOnly ? <Button variant="primary" onPress={onClose}>Tutup</Button> :
+                <Button type="submit" variant="primary" isDisabled={busy}>{busy ? 'Menyimpan…' : 'Simpan'}</Button>}
             </Modal.Footer>
           </form>
         </Modal.Dialog>

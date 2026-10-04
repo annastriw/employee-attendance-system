@@ -18,8 +18,9 @@ import {
   JabatanRoute,
   KaryawanRoute,
   RingkasanRoute,
+  ProfileRoute,
 } from "./routes/ViewRoutes";
-import { CHANGE_PASSWORD_PATH, LOGIN_PATH, viewPath } from "./routes/routes";
+import { CHANGE_PASSWORD_PATH, LOGIN_PATH, PROFILE_PATH, viewPath } from "./routes/routes";
 import type { AuthClient } from "./lib/auth-client";
 
 /** The route tree, shared between the real app and tests. */
@@ -44,6 +45,7 @@ function AppRoutes() {
           <Route path={viewPath("departemen")} element={<DepartemenRoute />} />
           <Route path={viewPath("jabatan")} element={<JabatanRoute />} />
           <Route path={viewPath("hari-libur")} element={<HariLiburRoute />} />
+          <Route path={PROFILE_PATH} element={<ProfileRoute />} />
         </Route>
       </Route>
       <Route path="*" element={<NotFoundRoute />} />

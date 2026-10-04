@@ -20,6 +20,18 @@ export class MonitoringSummaryQueryDto {
   date?: string;
 }
 
+export class MonitoringTrendQueryDto {
+  @ApiPropertyOptional({ format: 'date', example: '2026-10-01', required: true })
+  @Matches(/^\d{4}-\d{2}-\d{2}$/)
+  @IsISO8601({ strict: true })
+  startDate!: string;
+
+  @ApiPropertyOptional({ format: 'date', example: '2026-10-07', required: true })
+  @Matches(/^\d{4}-\d{2}-\d{2}$/)
+  @IsISO8601({ strict: true })
+  endDate!: string;
+}
+
 export const MONITORING_STATUSES = [
   'ALL',
   'CHECKED_IN',

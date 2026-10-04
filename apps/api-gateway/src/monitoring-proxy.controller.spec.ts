@@ -70,6 +70,22 @@ describe('MonitoringProxyController Gateway contract', () => {
     );
   });
 
+  it('forwards /api/v1/monitoring/trend with the date range', async () => {
+    await controller.trend(req('/trend?startDate=2026-10-01&endDate=2026-10-07'), res());
+    expect(forward).toHaveBeenCalledWith(
+      '/api/v1/monitoring/trend?startDate=2026-10-01&endDate=2026-10-07',
+      'GET',
+      { authorization: 'Bearer admin-token', 'X-Request-ID': reqId },
+      undefined,
+      'attendance',
+    );
+  });
+
+  it('rejects extra trend query parameters', async () => {
+    await expect(controller.trend(req('/trend?startDate=2026-10-01&endDate=2026-10-07&page=2'), res()))
+      .rejects.toThrow(BadRequestException);
+  });
+
   it('rejects disallowed query params on summary', async () => {
     const request = req('/summary?unknownParam=true');
     await expect(controller.summary(request, res())).rejects.toThrow(

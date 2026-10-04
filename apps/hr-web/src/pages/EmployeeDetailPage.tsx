@@ -16,10 +16,8 @@ import {
 } from '../lib/employees';
 import type { MasterRecord } from '../lib/master-data';
 import { EmployeeForm } from '../components/organisms/EmployeeForm';
-import { ConfirmDialog } from '../components/organisms/ConfirmDialog';
+import { ConfirmDialog, Notice, StatusBadge } from "@attendance/ui";
 import { TemporaryPasswordDialog } from '../components/organisms/TemporaryPasswordDialog';
-import { Notice } from '../components/molecules/Notice';
-import { StatusBadge } from '../components/molecules/StatusBadge';
 
 const failure = (reason: unknown) =>
   reason instanceof Error ? reason.message : 'Terjadi kesalahan. Coba lagi.';

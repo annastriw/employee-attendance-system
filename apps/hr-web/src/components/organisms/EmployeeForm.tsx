@@ -1,7 +1,7 @@
 import { useState, type SubmitEvent } from 'react';
 import { Button, FieldError, Input, Label, TextField, ToggleButton, ToggleButtonGroup } from '@heroui/react';
 import { MasterAssignmentSelect } from '../molecules/MasterAssignmentSelect';
-import { Notice } from '../molecules/Notice';
+import { Notice, CalendarField } from "@attendance/ui";
 import type { MasterRecord } from '../../lib/master-data';
 import type { EmployeeInput } from '../../lib/employees';
 export function EmployeeForm({ departments, positions, busy, error, onSubmit, onCancel, initial, editing = false }: { departments: MasterRecord[]; positions: MasterRecord[]; busy: boolean; error: string; onSubmit: (input: EmployeeInput) => void; onCancel: () => void; initial?: EmployeeInput; editing?: boolean }) {
@@ -22,7 +22,7 @@ export function EmployeeForm({ departments, positions, busy, error, onSubmit, on
     setErrors(found); if (!Object.keys(found).length) onSubmit(value);
   }
   const conflict = error.startsWith('NIK') ? 'nik' : error.startsWith('Email') ? 'email' : undefined;
-  const field = (key: 'nik' | 'name' | 'phone' | 'email' | 'startDate', label: string, type: 'text' | 'email' | 'tel' | 'date' = 'text') => {
+  const field = (key: 'nik' | 'name' | 'phone' | 'email', label: string, type: 'text' | 'email' | 'tel' = 'text') => {
     const own = errors[key] || (conflict === key ? error : '');
     return <TextField className="form-field" value={input[key] ?? ''} onChange={value => set(key, value)} isRequired={key !== 'phone'} isDisabled={busy} isInvalid={Boolean(own)} validationBehavior="aria">
       <Label>{label}</Label><Input type={type} autoComplete={key === 'email' ? 'off' : undefined} maxLength={key === 'nik' ? 40 : key === 'name' ? 120 : key === 'phone' ? 30 : undefined} /><FieldError>{own}</FieldError>
@@ -30,7 +30,7 @@ export function EmployeeForm({ departments, positions, busy, error, onSubmit, on
   };
   return <form className="employee-form" onSubmit={submit} noValidate aria-busy={busy} aria-label={editing ? "Edit profil karyawan" : "Tambah karyawan"}>
     <div className="form-section"><h2>Data karyawan</h2><div className="employee-form-grid">
-      {field('nik', 'NIK')}{field('name', 'Nama')}{field('phone', 'Telepon (opsional)', 'tel')}{field('startDate', 'Mulai bekerja', 'date')}
+      {field('nik', 'NIK')}{field('name', 'Nama')}{field('phone', 'Telepon (opsional)', 'tel')}<CalendarField label="Mulai bekerja" value={input.startDate} onChange={value => set('startDate', value)} disabled={busy} required error={errors.startDate} />
       <div><p className="form-label">Departemen</p><MasterAssignmentSelect label="Departemen" records={departments} current={departments.find(row => row.id === input.departmentId)} onChange={value => set('departmentId', value)} disabled={busy} />{errors.departmentId && <p className="field-validation" role="alert">{errors.departmentId}</p>}</div>
       <div><p className="form-label">Jabatan</p><MasterAssignmentSelect label="Jabatan" records={positions} current={positions.find(row => row.id === input.positionId)} onChange={value => set('positionId', value)} disabled={busy} />{errors.positionId && <p className="field-validation" role="alert">{errors.positionId}</p>}</div>
     </div>{!editing && <div className="employee-status"><p className="form-label">Status awal</p><ToggleButtonGroup aria-label="Status awal" className="status-filter" selectionMode="single" disallowEmptySelection selectedKeys={[input.status]} isDisabled={busy} onSelectionChange={keys => { const [key] = [...keys]; if (key) set('status', String(key)); }}><ToggleButton id="ACTIVE">Aktif</ToggleButton><ToggleButton id="INACTIVE"><ToggleButtonGroup.Separator />Nonaktif</ToggleButton></ToggleButtonGroup></div>}</div>

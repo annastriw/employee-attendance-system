@@ -11,6 +11,7 @@ import { AttendanceMonitoringService } from './attendance-monitoring.service';
 import {
   MonitoringEmployeesQueryDto,
   MonitoringSummaryQueryDto,
+  MonitoringTrendQueryDto,
 } from './attendance-monitoring.dto';
 
 @ApiTags('HRD monitoring')
@@ -26,6 +27,14 @@ export class AttendanceMonitoringController {
     @Req() req: AttendanceRequest,
   ) {
     return this.service.getSummary(query, req.requestId);
+  }
+
+  @Get('trend')
+  trend(
+    @Query() query: MonitoringTrendQueryDto,
+    @Req() req: AttendanceRequest,
+  ) {
+    return this.service.getTrend(query, req.requestId);
   }
 
   @Get('employees')

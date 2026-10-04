@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Headers, HttpCode, Module, Param, ParseUUIDPipe, Patch, Post, Query, Req, UseGuards, BadRequestException } from '@nestjs/common';
 import { isUUID } from 'class-validator';
-import { AdminGuard, AuthClient, type EmployeeRequest } from '../auth/admin.guard';
+import { AdminGuard, AuthClient, UserSessionGuard, type EmployeeRequest } from '../auth/admin.guard';
 import { CreateEmployeeDto, ListEmployeesQuery, CredentialRequestDto, RetryEmployeeDto, UpdateEmployeeDto, ChangeEmailDto, ChangeLifecycleDto } from './employees.dto';
 import { EmployeesService } from './employees.service';
 import { EmployeeProfileService } from './employee-profile.service';
@@ -37,6 +37,15 @@ export class EmployeesController {
     return this.service.create(operationKey(key), body, actor(req));
   }
 }
+@Controller('me/profile') @UseGuards(UserSessionGuard)
+export class EmployeeSelfProfileController {
+  constructor(private readonly profiles: EmployeeProfileService) {}
+  @Get() profile(@Req() req: EmployeeRequest) {
+    const actor = req.actor!;
+    if (actor.role === 'EMPLOYEE' && !actor.employeeId) throw new BadRequestException('Profil akun karyawan tidak tersedia.');
+    return this.profiles.myProfile(actor.role === 'EMPLOYEE' ? actor.employeeId! : actor.employeeId ?? null);
+  }
+}
 @Controller('employee-provisioning') @UseGuards(AdminGuard)
 export class EmployeeProvisioningController {
   constructor(private readonly service: EmployeesService) {}
@@ -56,5 +65,5 @@ export class EmployeeLifecycleController {
   @Get(':id') get(@Param('id', ParseUUIDPipe) id: string, @Req() req: EmployeeRequest) { return this.service.operation(id, actor(req)); }
   @Post(':id/retry') @HttpCode(200) retry(@Param('id', ParseUUIDPipe) id: string, @Req() req: EmployeeRequest) { return this.service.retry(id, actor(req)); }
 }
-@Module({ controllers: [AttendanceProfileController, EmployeesController, EmployeeProvisioningController, EmployeeEmailChangesController, EmployeeLifecycleController], providers: [EmployeesService, EmployeeProfileService, EmployeeEmailChangesService, EmployeeLifecycleService, EmployeeResetPasswordService, ProvisioningAuthClient, AuthClient, AdminGuard] })
+@Module({ controllers: [AttendanceProfileController, EmployeesController, EmployeeSelfProfileController, EmployeeProvisioningController, EmployeeEmailChangesController, EmployeeLifecycleController], providers: [EmployeesService, EmployeeProfileService, EmployeeEmailChangesService, EmployeeLifecycleService, EmployeeResetPasswordService, ProvisioningAuthClient, AuthClient, AdminGuard, UserSessionGuard] })
 export class EmployeesModule {}

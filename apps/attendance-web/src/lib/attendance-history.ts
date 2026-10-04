@@ -29,8 +29,9 @@ export interface HistoryResult {
   meta: { total: number; page: number; pageSize: number };
 }
 export type HistoryParams = Record<string, string | undefined>;
+// Live records use random UUID v4; deterministic demo records/events use UUID v5.
 const uuid =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[45][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const wib = (value: unknown): value is string =>
   typeof value === "string" &&
   /\+07:00$/.test(value) &&

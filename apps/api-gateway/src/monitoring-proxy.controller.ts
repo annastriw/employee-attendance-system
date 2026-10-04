@@ -9,6 +9,7 @@ import type { Request, Response } from 'express';
 import { AuthProxyService } from './auth-proxy.service';
 
 const SUMMARY_QUERIES = new Set(['date']);
+const TREND_QUERIES = new Set(['startDate', 'endDate']);
 const EMPLOYEES_QUERIES = new Set([
   'date',
   'departmentId',
@@ -69,5 +70,14 @@ export class MonitoringProxyController {
       throw new BadRequestException('Request tidak valid.');
     }
     return this.forward(req, res, EMPLOYEES_QUERIES);
+  }
+
+  @Get('trend')
+  trend(@Req() req: Request, @Res() res: Response) {
+    const url = new URL(req.originalUrl, 'http://gateway.local');
+    if (url.pathname !== '/api/v1/monitoring/trend') {
+      throw new BadRequestException('Request tidak valid.');
+    }
+    return this.forward(req, res, TREND_QUERIES);
   }
 }

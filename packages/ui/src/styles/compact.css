@@ -1,0 +1,136 @@
+/* D11/D12: one fixed viewport, compact dimensions shared by both portals. */
+:root {
+  --ui-text: 14px;
+  --ui-line-height: 1.45;
+  --ui-title: 18px;
+  --ui-section-title: 15px;
+  --ui-control-height: 40px;
+  --ui-control-font: 14px;
+  --ui-control-padding: 12px;
+  --ui-icon-button: 36px;
+  --ui-icon: 18px;
+  --ui-row-height: 40px;
+  --ui-cell-y: 8px;
+  --ui-cell-x: 12px;
+  --ui-badge-height: 20px;
+  --ui-badge-font: 12px;
+  --ui-card-padding: 12px;
+  --ui-metric-font: 20px;
+  --ui-nav-height: 40px;
+  --ui-control-radius: 6px;
+  --ui-card-radius: 8px;
+  --ui-dialog-width: 440px;
+  --ui-detail-width: 560px;
+  --ui-page-padding: 16px;
+  --ui-section-gap: 24px;
+  --ui-field-gap: 16px;
+}
+@media (min-width: 768px) {
+  :root {
+    --ui-title: 20px;
+    --ui-control-height: 32px;
+    --ui-control-font: 13px;
+    --ui-control-padding: 10px;
+    --ui-icon-button: 32px;
+    --ui-icon: 16px;
+    --ui-card-padding: 16px;
+    --ui-metric-font: 24px;
+    --ui-nav-height: 32px;
+    --ui-page-padding: 24px;
+  }
+}
+@media (min-width: 1024px) { :root { --ui-page-padding: 32px; } }
+
+html, body, #root {
+  height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: pan-x pan-y;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+:root body { font-size: var(--ui-text); line-height: var(--ui-line-height); }
+:root h1, :root .page-header__title { font-size: var(--ui-title); }
+:root h2, :root .dialog-title { font-size: var(--ui-section-title); }
+:root .button {
+  min-height: var(--ui-control-height);
+  height: var(--ui-control-height);
+  padding-inline: var(--ui-control-padding);
+  font-size: var(--ui-control-font);
+  border-radius: var(--ui-control-radius);
+}
+:root :is(.input, .input-group, .select__trigger, .search-field__group, .date-field__group, .date-input-group) {
+  min-height: var(--ui-control-height);
+  height: var(--ui-control-height);
+  font-size: var(--ui-control-font);
+  border-radius: var(--ui-control-radius);
+}
+:root :is(.input-group__input, .search-field__input, .date-field__input, .date-input-group__input) { font-size: var(--ui-control-font); }
+:root :is(.password-toggle, .account-trigger, .mobile-menu-toggle, .button--icon-only) {
+  min-width: var(--ui-icon-button);
+  width: var(--ui-icon-button);
+  min-height: var(--ui-icon-button);
+  height: var(--ui-icon-button);
+  padding: 0;
+}
+:root .password-toggle svg, :root .button--icon-only svg { width: var(--ui-icon); height: var(--ui-icon); }
+:root .employee-name, :root .history-date-button { height: auto; white-space: normal; }
+:root :is(.form-field > .input, .form-field > .input-group, .primary-button) { min-height: var(--ui-control-height); }
+:root :is(.auth-form, .dialog-body) { gap: var(--ui-field-gap); }
+:root .status-badge { min-height: var(--ui-badge-height); font-size: var(--ui-badge-font); }
+:root .dialog { border-radius: var(--ui-card-radius); max-width: var(--ui-dialog-width); }
+:root .dialog-footer .button { min-height: var(--ui-control-height); }
+:root :is(.today-card, .status-card) { padding: var(--ui-card-padding); border-radius: var(--ui-card-radius); }
+:root .today-checkin strong { font-size: var(--ui-metric-font); }
+:root .nav-link { min-height: var(--ui-nav-height); }
+:root :is(.cmdk-trigger, .toggle-button) { min-height: var(--ui-control-height); font-size: var(--ui-control-font); }
+:root .monitoring-metric-card { padding: var(--ui-card-padding); border-radius: var(--ui-card-radius); }
+:root :is(.metric-value, .attendance-event-time, .capture-success-time) { font-size: var(--ui-metric-font); }
+:root :is(.table__cell, .table__column, td, th) { padding: var(--ui-cell-y) var(--ui-cell-x); font-size: var(--ui-text); }
+:root tr { height: var(--ui-row-height); }
+:root .theme-toggle__option { min-height: var(--ui-icon-button); }
+:root .utabs__tab { min-height: var(--ui-control-height); }
+
+/* Legacy shells share fixed sizing now; their new navigation follows in T5/T9. */
+:root .dashboard-layout { height: 100dvh; min-height: 0; overflow: hidden; }
+:root .dashboard-main { height: 100dvh; min-height: 0; display: flex; flex-direction: column; }
+:root .dashboard-sidebar { min-height: 0; overflow-y: auto; }
+:root .dashboard-header { flex-shrink: 0; z-index: 30; }
+:root .dashboard-content {
+  flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden;
+  max-width: none; width: 100%; padding: var(--ui-page-padding);
+}
+:root .auth-main {
+  height: 100dvh; min-height: 0; overflow-y: auto; overflow-x: hidden;
+  padding: max(var(--ui-page-padding), env(safe-area-inset-top)) var(--ui-page-padding) max(var(--ui-page-padding), env(safe-area-inset-bottom));
+  align-items: safe center;
+}
+:root .auth-split { padding: 0; overflow: hidden; align-items: stretch; }
+:root .auth-form-column { min-height: 0; overflow-y: auto; align-items: safe center; }
+:root .auth-showcase { min-height: 0; overflow: hidden; }
+:root .capture-page {
+  height: 100dvh; overflow-y: auto; overflow-x: hidden;
+  padding: max(var(--ui-page-padding), env(safe-area-inset-top)) var(--ui-page-padding) max(var(--ui-page-padding), env(safe-area-inset-bottom));
+}
+:root .mobile-navigation { flex-shrink: 0; max-height: 50dvh; overflow-y: auto; }
+[data-allow-zoom], [data-allow-zoom] * { touch-action: auto; }
+
+.date-range-field { min-width: 0; display: grid; gap: 8px; }
+.date-range-presets { display: flex; flex-wrap: wrap; gap: 4px; }
+.shared-search { min-width: 0; }
+.data-list { list-style: none; padding: 0; margin: 0; border: 1px solid var(--border); border-radius: var(--ui-card-radius); overflow: hidden; }
+.data-list > li + li { border-top: 1px solid var(--border); }
+:root .data-list-row { display: flex; width: 100%; height: auto; min-height: var(--ui-row-height); justify-content: flex-start; text-align: left; white-space: normal; padding: var(--ui-cell-y) var(--ui-cell-x); border-radius: 0; cursor: pointer; }
+.data-list-row:hover { background: var(--default); }
+@media (max-width: 767px) {
+  :root .dialog { max-width: 100%; width: 100%; border-radius: var(--ui-card-radius) var(--ui-card-radius) 0 0; }
+  :root .modal__container { justify-content: flex-end; align-items: center; width: 100%; padding: 0 0 env(safe-area-inset-bottom); }
+  :root .data-list-row { padding: var(--ui-card-padding); }
+}
+
+:root .date-picker__trigger, :root .date-range-picker__trigger { width: var(--ui-icon-button); height: var(--ui-control-height); padding: 0; }
+.attendance-filters, .list-toolbar, .monitoring-filters-toolbar { align-items: end; gap: var(--ui-field-gap); }
+.attendance-filters { display: flex; flex-wrap: wrap; }
+.shared-search { flex: 1; min-width: min(220px, 100%); }
+.date-input-group { max-width: 100%; }
+@media (max-width: 767px) { .date-range-field, .attendance-employee-filter, .shared-search { width: 100%; } }

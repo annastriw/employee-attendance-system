@@ -179,6 +179,10 @@ Status `[x]` = selesai & di-push. Fase A (sudah selesai):
 Fase B:
 
 ### T1 `[ ]` Bug: sesi hilang saat refresh (semua role) — AKAR MASALAH TERKONFIRMASI
+- **Status 2026-10-05**: implementasi di-push (`98f5c12`), unit/lint/build terbukti
+  CI; pengguna menyatakan refresh aman semua role di production setelah fix
+  fallback Vercel (`4db848c`). Refresh production diterima. Logout → refresh dan
+  rewrite proxy localhost belum dikonfirmasi; tidak disimpulkan dari cek production.
 - **Bukti pengguna**: `POST /api/v1/auth/refresh` → **401** di 5173 dan 5174 setelah refresh.
 - **Akar masalah** (source): production Auth membaca cookie `__Host-auth_refresh_<admin|employee>`
   (`apps/auth-service/src/auth/auth.controller.ts` `cookieName()` + baris ~162
@@ -196,6 +200,11 @@ Fase B:
   Pengguna cek manual (restart dev server — `vite.config.ts` tidak hot-reload).
 
 ### T2 `[ ]` Bug: HR "lihat detail absensi" & Karyawan "riwayat" tidak berfungsi
+- **Status 2026-10-05**: pengguna mengonfirmasi detail HR dari Absensi dan Ringkasan
+  berfungsi. Response list Karyawan 200 memakai UUID v5 (seed demo), ditolak
+  validator frontend yang hanya menerima v4. Validator diperbaiki menerima v4/v5;
+  unit regresi list/detail + test HistoryPage lulus. Acceptance riwayat/detail/foto
+  Karyawan dan Back/filter HR tetap menunggu cek pengguna setelah rilis.
 - **File HR**: `pages/AttendancePage.tsx` (detail via `?id=`),
   `pages/AttendanceDetailPage.tsx`, `pages/MonitoringPage.tsx` (link `/absensi?id=`),
   `routes/routes.ts` (`useRouteParams`).
@@ -211,6 +220,9 @@ Fase B:
   detail + foto. Unit untuk validator yang diubah.
 
 ### T3 `[ ]` Fondasi bersama `packages/ui` + rapikan struktur
+- Status 2026-10-05: implementasi selesai; lint/typecheck kedua portal dan unit
+  terdampak HR 90/90 + Karyawan 40/40 lulus. Build CI PR dan acceptance manual
+  pengguna masih menunggu; checkbox DoD tetap terbuka.
 - **Angkat** dari hr-web/attendance-web ke `packages/ui`: `Notice`, `PasswordField`,
   `ConfirmDialog`, `StatusBadge`, `StatusPill` (+ `status-pill.ts`). Hapus duplikat,
   update import kedua portal, CSS-nya pindah ke `packages/ui/src/theme.css` atau
@@ -231,6 +243,12 @@ Fase B:
   unit: `useDebouncedValue`, util range tanggal/preset.
 
 ### T4 `[ ]` Sistem kontrol & filter seragam (semua halaman)
+- Status 2026-10-05: implementasi teknis selesai; HR 61/61 test fokus, Riwayat
+  Karyawan 7/7, helper filter Employee Service 2/2; lint kedua portal/Employee
+  Service dan typecheck kedua portal/Employee Service lulus. Build menunggu CI;
+  acceptance visual manual menunggu pengguna, jadi checkbox tetap terbuka.
+- Backend: Employee Service `GET /api/v1/employees` menerima filter optional
+  `departmentId`/`positionId`; tanpa migration. Perlu PR+deploy sebelum production.
 - Ganti semua `<Input type="date">` → `DateRangeField` (HR: Absensi, Absensi-dihapus,
   Ringkasan bila relevan, Hari Libur filter; Karyawan: Riwayat). Query param tetap
   `startDate`/`endDate` (backend sudah menerima).
@@ -270,6 +288,11 @@ Fase B:
 - **DoD**: semua baris list membuka target yang benar; detail punya breadcrumb kembali.
 
 ### T7 `[ ]` Ringkasan HR: chart + detail inline  *(backend)*
+- Status 2026-10-05: implementasi teknis selesai dan di-push pada commit T7; lint,
+  typecheck, dan unit terfokus lulus (HR 8/8, Attendance Service 11/11, Gateway
+  7/7). Checklist UI tetap terbuka sampai acceptance manual. Backend perlu PR+deploy:
+  Attendance Service + API Gateway, `GET /api/v1/monitoring/trend?startDate&endDate`,
+  tanpa migration.
 - **Backend** (attendance-service + api-gateway): `GET /api/v1/monitoring/trend?startDate&endDate`
   → `[{ date, present, late, absent, onLeave? }]` per hari (WIB, maks 92 hari, hari libur
   ditandai). Admin guard sama dengan `monitoring/summary`. Unit service. Push dev,
@@ -285,6 +308,11 @@ Fase B:
 - **DoD**: chart responsif & ikut tema; tooltip berbahasa Indonesia; fallback aman.
 
 ### T8 `[ ]` Profil (lihat) + ganti password tiap role  *(backend kecil)*
+- Status 2026-10-05: profil diri dan ganti password bersama sudah diimplementasikan;
+  role tanpa `employeeId` menerima `data: null`, dan endpoint belum live ditangani
+  fallback. Lint/typecheck/unit fokus lulus. UI visual masih menunggu acceptance
+  manual pengguna. Backend perlu PR+deploy (Employee Service + API Gateway),
+  `GET /api/v1/me/profile`, tanpa migration.
 - **Backend** (employee-service + api-gateway): `GET /api/v1/me/profile` read-only —
   data karyawan milik akun (nama, NIK, telepon, departemen, jabatan, tanggal mulai,
   status) berdasarkan `employeeId` sesi; ADMIN_HRD tanpa `employeeId` → `data: null`.

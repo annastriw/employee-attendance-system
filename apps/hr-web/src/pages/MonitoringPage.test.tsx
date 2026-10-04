@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -116,7 +116,7 @@ describe("MonitoringPage (Layar H02 Monitoring & Rekap)", () => {
     },
   };
 
-  const mockDepartments = {
+  const mockDepartments = { total: 2, page: 1, pageSize: 100,
     items: [
       { id: "dept-1", name: "Teknologi Informasi" },
       { id: "dept-2", name: "Sumber Daya Manusia" },
@@ -130,6 +130,12 @@ describe("MonitoringPage (Layar H02 Monitoring & Rekap)", () => {
       }
       if (url.startsWith("monitoring/summary")) {
         return { data: mockSummary };
+      }
+      if (url.startsWith("monitoring/trend")) {
+        return { data: [
+          { date: "2026-10-01", present: 3, late: 1, absent: 1, scheduleType: "REGULAR_WORKDAY", holiday: null },
+          { date: "2026-10-02", present: 4, late: 0, absent: 0, scheduleType: "REGULAR_WORKDAY", holiday: null },
+        ] };
       }
       if (url.startsWith("monitoring/employees")) {
         return mockEmployees;
@@ -165,7 +171,7 @@ describe("MonitoringPage (Layar H02 Monitoring & Rekap)", () => {
     });
 
     // Check metric card values
-    expect(screen.getByText("5")).toBeInTheDocument(); // activeEmployees
+    expect(screen.getAllByText("5")[0]).toBeInTheDocument(); // activeEmployees
     expect(screen.getByText("3")).toBeInTheDocument(); // checkedIn
 
     // Check badges
@@ -178,6 +184,34 @@ describe("MonitoringPage (Layar H02 Monitoring & Rekap)", () => {
     const viewLinks = screen.getAllByRole("link", { name: /Lihat/i });
     expect(viewLinks.length).toBe(3); // emp-1, emp-2, emp-4
     expect(viewLinks[0]).toHaveAttribute("href", "/absensi?id=rec-1");
+  });
+
+  it("opens inline employee details and links to attendance evidence", async () => {
+    const { user } = setup();
+    await screen.findByText("Karyawan Aktif");
+    await user.click(screen.getByRole("row", { name: "Buka detail Aditya Pratama" }));
+    expect(await screen.findByRole("dialog", { name: "Detail Aditya Pratama" })).toBeInTheDocument();
+    const detail = screen.getByRole("dialog", { name: "Detail Aditya Pratama" });
+    expect(detail).toHaveTextContent("Teknologi Informasi");
+    expect(within(detail).getByRole("link", { name: /Buka detail absensi/i })).toHaveAttribute("href", "/absensi?id=rec-1");
+    await user.click(screen.getByRole("button", { name: "Tutup detail" }));
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "Detail Aditya Pratama" })).not.toBeInTheDocument());
+    await user.click(screen.getByRole("row", { name: "Buka detail Citra Dewi" }));
+    expect(await screen.findByRole("dialog", { name: "Detail Citra Dewi" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Buka profil karyawan" })).toHaveAttribute("href", "/karyawan?employee=emp-3");
+  });
+
+  it("shows the pending-release fallback when the trend endpoint is unavailable", async () => {
+    const api = vi.fn(async (url: string) => {
+      if (url.startsWith("departments")) return mockDepartments;
+      if (url.startsWith("monitoring/summary")) return { data: mockSummary };
+      if (url.startsWith("monitoring/employees")) return mockEmployees;
+      if (url.startsWith("monitoring/trend")) throw new (await import("../lib/auth-client")).AuthError(404, "Tidak ditemukan");
+      throw new Error("Unknown URL: " + url);
+    });
+    render(<MemoryRouter><MonitoringPage client={{ api: api as never }} params={new URLSearchParams("date=2026-10-05")} onParamsChange={vi.fn()} onSessionExpired={vi.fn()} /></MemoryRouter>);
+    expect(await screen.findByText("Grafik tren tersedia setelah rilis backend")).toBeInTheDocument();
+    expect(screen.getByText(/Komposisi/)).toBeInTheDocument();
   });
 
   it("clicking metric card triggers status filtering", async () => {
@@ -245,7 +279,8 @@ describe("MonitoringPage (Layar H02 Monitoring & Rekap)", () => {
     });
 
     const deptSelect = screen.getByLabelText("Filter Departemen");
-    await user.selectOptions(deptSelect, "dept-1");
+    await user.click(deptSelect);
+    await user.click(await screen.findByRole("menuitemradio", { name: "Teknologi Informasi" }));
 
     expect(onParamsChange).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -255,7 +290,7 @@ describe("MonitoringPage (Layar H02 Monitoring & Rekap)", () => {
     );
   });
 
-  it("submits search form for employee name or NIK", async () => {
+  it("debounces search for employee name or NIK", async () => {
     const { onParamsChange, user } = setup();
 
     await waitFor(() => {
@@ -265,14 +300,11 @@ describe("MonitoringPage (Layar H02 Monitoring & Rekap)", () => {
     const searchInput = screen.getByLabelText("Cari nama atau NIK");
     await user.type(searchInput, "Aditya");
 
-    const searchBtn = screen.getByRole("button", { name: "Cari" });
-    await user.click(searchBtn);
-
-    expect(onParamsChange).toHaveBeenCalledWith(
+    await waitFor(() => expect(onParamsChange).toHaveBeenCalledWith(
       expect.objectContaining({
         date: "2026-10-05",
         search: "Aditya",
       }),
-    );
+    ));
   });
 });

@@ -13,6 +13,25 @@ const snapshot = (row: EmpEmployee) => ({
 @Injectable()
 export class EmployeeProfileService {
   constructor(private readonly database: DatabaseService) {}
+  async myProfile(id: string | null) {
+    if (!id) return { data: null };
+    const row = await this.database.client.empEmployee.findUnique({
+      where: { id },
+      include: { department: true, position: true, provisioning: true },
+    });
+    if (!row || !row.ready || row.provisioning?.status !== 'COMPLETED') throw new NotFoundException('Profil karyawan tidak ditemukan.');
+    return { data: {
+      id: row.id,
+      name: row.name,
+      nik: row.nik,
+      email: row.accountEmail ?? row.provisioning.email,
+      phone: row.phone,
+      department: row.department.name,
+      position: row.position.name,
+      startDate: row.startDate.toISOString().slice(0, 10),
+      status: row.status,
+    } };
+  }
   async detail(id: string) {
     const row = await this.database.client.empEmployee.findUnique({
       where: { id }, include: { department: true, position: true, provisioning: true, emailChanges: { orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], take: 1 }, lifecycleChanges: { orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], take: 1 } },
