@@ -256,6 +256,97 @@ Jalankan block utuh di SSH VPS. Jika command gagal, berhenti: jangan reset, rest
 
 Target: all migrations successfully applied, 10 baris migration masing-masing selesai=1, jumlah tabel lebih dari nol. Kirim output migration/SELECT/PASS saja, tanpa password/isi backup. Belum deploy backend, seed admin atau membuat runtime grants. Akun migrator hanya tooling, tidak dipakai backend. Setelah hasil diterima, lanjut 4B akun runtime tiap service.
 
+## Tahap 4B — akun database runtime
+
+Output pengguna tahap 4A diterima: backup PASS, 10 migration selesai=1, 24 tabel. Berikut membuat empat akun runtime dengan grants sama seperti kepemilikan tabel pada setup lokal, hanya untuk attendance_prod. Gateway tidak memakai database. Jangan menjalankan script setup lokal pada production.
+
+### 1. Buat file password privat
+
+```sh
+cd /opt/attendance
+(
+  set -eu
+  set -o noclobber
+  umask 077
+  {
+    for service in AUTH EMPLOYEE ATTENDANCE MEDIA; do
+      password=$(openssl rand -hex 32)
+      printf '%s_DB_PASSWORD=%s\n' "$service" "$password"
+    done
+  } > .secrets/database-runtime.env
+  echo 'PASS: kredensial runtime tersimpan'
+)
+ls -l .secrets/database-runtime.env
+```
+
+Jika file sudah ada/gagal, berhenti; jangan lanjut block berikut atau overwrite. Target mode 600. Jangan kirim isi file.
+
+### 2. Buat akun/grants dan cek akses
+
+```sh
+sudo docker exec -i --env-file .secrets/database-runtime.env attendance-prod-mysql-1 sh -s <<'SH'
+set -eu
+for password in "$AUTH_DB_PASSWORD" "$EMPLOYEE_DB_PASSWORD" "$ATTENDANCE_DB_PASSWORD" "$MEDIA_DB_PASSWORD"; do
+  case "$password" in
+    ''|*[!0-9a-f]*) echo 'STOP: format password tidak sesuai'; exit 1 ;;
+  esac
+  [ "${#password}" -eq 64 ]
+done
+mysql_root() {
+  MYSQL_PWD="$(cat /run/secrets/mysql_root_password)" \
+    mysql -uroot --batch --skip-column-names "$@"
+}
+count=$(mysql_root -e "SELECT COUNT(*) FROM mysql.user WHERE User IN ('attendance_auth','attendance_employee','attendance_attendance','attendance_media');")
+[ "$count" = 0 ] || { echo 'STOP: akun runtime sudah ada; simpan kredensial dan kirim hasil'; exit 1; }
+
+create_user() {
+  printf "CREATE USER '%s'@'%%' IDENTIFIED BY '%s';\n" "$1" "$2"
+}
+grant_tables() {
+  user=$1
+  permissions=$2
+  shift 2
+  for table in "$@"; do
+    printf "GRANT %s ON attendance_prod.%s TO '%s'@'%%';\n" "$permissions" "$table" "$user"
+  done
+}
+if ! {
+  create_user attendance_auth "$AUTH_DB_PASSWORD"
+  create_user attendance_employee "$EMPLOYEE_DB_PASSWORD"
+  create_user attendance_attendance "$ATTENDANCE_DB_PASSWORD"
+  create_user attendance_media "$MEDIA_DB_PASSWORD"
+  grant_tables attendance_auth 'SELECT, INSERT, UPDATE' \
+    auth_accounts auth_sessions auth_provisioning auth_email_changes auth_password_resets
+  grant_tables attendance_auth 'SELECT, INSERT' auth_audit_logs
+  grant_tables attendance_employee 'SELECT, INSERT, UPDATE' \
+    emp_departments emp_positions emp_employees emp_provisioning emp_email_changes emp_lifecycle_changes
+  grant_tables attendance_employee 'SELECT, INSERT' emp_audit_logs emp_employee_history
+  grant_tables attendance_attendance 'SELECT, INSERT, UPDATE' \
+    att_work_policies att_daily_records att_events att_idempotency_requests att_outbox
+  grant_tables attendance_attendance 'SELECT, INSERT, UPDATE, DELETE' att_holidays
+  grant_tables attendance_attendance 'SELECT, INSERT' att_audit_logs
+  grant_tables attendance_media 'SELECT, INSERT, UPDATE' media_objects
+  grant_tables attendance_media 'SELECT, INSERT' media_audit_logs
+} | mysql_root >/dev/null 2>&1; then
+  echo 'FAIL: akun/grants belum lengkap; jangan mengganti file password'
+  exit 1
+fi
+echo 'PASS: empat akun dan grants dibuat'
+
+check_login() {
+  MYSQL_PWD="$2" mysql --protocol=TCP -h127.0.0.1 -u"$1" attendance_prod \
+    --batch -e "SELECT 1 FROM $3 LIMIT 0;" >/dev/null 2>&1
+  echo "PASS: login dan baca tabel milik $1"
+}
+check_login attendance_auth "$AUTH_DB_PASSWORD" auth_accounts
+check_login attendance_employee "$EMPLOYEE_DB_PASSWORD" emp_employees
+check_login attendance_attendance "$ATTENDANCE_DB_PASSWORD" att_daily_records
+check_login attendance_media "$MEDIA_DB_PASSWORD" media_objects
+SH
+```
+
+Kirim PASS/STOP/FAIL dan permission file saja. Akun runtime tidak mendapat DDL/global privilege/grant option; audit append-only (SELECT/INSERT), DELETE hanya att_holidays sesuai fitur. Jika SQL gagal sebagian, akun mungkin sudah dibuat: simpan file dan rekonsiliasi, jangan ulang CREATE/generate password. Uji ini hanya login/SELECT kosong, bukan suite test atau perubahan data karyawan. Setelah hasil diterima, siapkan environment dan Compose lima backend.
+
 ## Status langkah berikutnya
 
 Bootstrap migration/akun runtime, image rilis main/GHCR, Compose backend, domain/TLS dan frontend dikerjakan setelah inventaris tahap 1. Unit rilis dijalankan sekali pada PR; integrasi cepat bila perlu sebelum rilis. Pengiriman otomatis ke VPS belum aktif. T30/T31 belum dicentang dari pemeriksaan infra saja.
