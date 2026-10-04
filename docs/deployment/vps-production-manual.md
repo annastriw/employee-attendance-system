@@ -157,16 +157,15 @@ Jalankan block berikut pada SSH VPS. Fetch tidak mengubah checkout source migrat
   tooling_commit=$(git -C "$source_dir" rev-parse FETCH_HEAD)
   mkdir "$tooling_dir"
   git -C "$source_dir" archive "$tooling_commit" \
-    infra/Dockerfile.migrator infra/prisma-migrator.config.ts infra/migrator |
+    infra/Dockerfile.migrator infra/prisma-migrator.config.ts infra/migrator prisma |
     tar -x -C "$tooling_dir"
   printf '%s\n' "$tooling_commit" > "$tooling_dir/source-commit.txt"
 
   sudo docker build --progress=plain \
     -f "$tooling_dir/infra/Dockerfile.migrator" \
-    -t attendance-migrator:prisma-7.10.0 "$tooling_dir/infra"
+    -t attendance-migrator:prisma-7.10.0 "$tooling_dir"
 
   sudo docker run --rm --network none --memory 512m \
-    --mount "type=bind,src=$source_dir/prisma,dst=/tooling/prisma,readonly" \
     -e DATABASE_URL=mysql://validation:validation@127.0.0.1:1/attendance_validation \
     attendance-migrator:prisma-7.10.0 \
     validate --config /tooling/infra/prisma-migrator.config.ts
@@ -229,17 +228,10 @@ Jalankan block utuh di SSH VPS. Jika command gagal, berhenti: jangan reset, rest
   sudo docker run --rm --memory 512m \
     --network attendance-prod-backend \
     --env-file /opt/attendance/.secrets/migrator.env \
-    --mount "type=bind,src=$release_dir/prisma,dst=/tooling/prisma,readonly" \
-    --entrypoint sh attendance-migrator:prisma-7.10.0 -c '
-      set -eu
-      case "$MIGRATOR_PASSWORD" in
-        ""|*[!0-9a-f]*) echo "STOP: format password tidak sesuai"; exit 1 ;;
-      esac
-      [ "${#MIGRATOR_PASSWORD}" -eq 64 ]
-      export DATABASE_URL="mysql://attendance_migrator:${MIGRATOR_PASSWORD}@attendance-prod-mysql-1:3306/attendance_prod"
-      exec /tooling/node_modules/.bin/prisma migrate deploy \
-        --config /tooling/infra/prisma-migrator.config.ts
-    '
+    --env MIGRATOR_DATABASE_HOST=attendance-prod-mysql-1 \
+    --env MIGRATOR_DATABASE_NAME=attendance_prod \
+    attendance-migrator:prisma-7.10.0 \
+    migrate deploy --config /tooling/infra/prisma-migrator.config.ts
 
   sudo docker exec attendance-prod-mysql-1 sh -c '
     export MYSQL_PWD="$(cat /run/secrets/mysql_root_password)"

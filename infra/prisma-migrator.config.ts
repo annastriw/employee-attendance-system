@@ -1,6 +1,6 @@
 import { defineConfig, env } from "prisma/config";
 
-// The container mounts the selected release's prisma directory read-only.
+// The release migrator image contains the schema and migrations for its commit.
 export default defineConfig({
   schema: "../prisma/schema.prisma",
   migrations: { path: "../prisma/migrations" },
