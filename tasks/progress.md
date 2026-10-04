@@ -1,5 +1,18 @@
 # Progres dan titik lanjut
 
+## T11 selesai - dokumentasi dan perapian (2026-10-05)
+
+- Design system dan UX spec kini mencatat pola rail/drawer HR, navigasi responsif
+  Karyawan, chart/rentang tanggal, profil read-only, tabel kartu mobile, serta D11/D12.
+- `docs/features.md` mencatat fitur UI dan daftar backend yang perlu PR ke `main` lalu
+  deploy: Employee Service + API Gateway `GET /api/v1/employees` (filter optional),
+  Attendance Service + API Gateway `GET /api/v1/monitoring/trend`, Employee Service +
+  API Gateway `GET /api/v1/me/profile`; ketiganya tanpa migration.
+- Verifikasi dokumentasi: `git diff --check`, isi, dan tautan relatif diperiksa; tidak
+  menjalankan test aplikasi untuk perubahan dokumentasi saja.
+- **Lanjut:** acceptance visual T10 tetap menunggu pemeriksaan pengguna di 320/768/
+  1024/1440px, dua tema, dan kontrol zoom. Checkbox acceptance tidak dicentang.
+
 ## T10 teknis selesai - sweep responsif, a11y, dan skala kompak (2026-10-05)
 
 - T10 kode selesai: tabel Monitoring HR menjadi kartu berlabel di bawah 768px tanpa
@@ -9,8 +22,7 @@
   Build/dev server tidak dijalankan karena `resource_status` tidak tersedia (catatan
   RAM bebas terakhir ~2.1 GiB). Zoom lock D11 sebelumnya sudah punya unit test.
 - Acceptance visual T10 masih menunggu pengguna; checklist tetap tidak dicentang.
-- **Lanjut:** dokumentasikan pola sidebar, chart, rentang tanggal, profil, dan daftar
-  endpoint yang menunggu PR+deploy di T11.
+- **Lanjut:** T11 dokumentasi selesai; tunggu acceptance visual manual dari pengguna.
 
 ## T9 teknis selesai - Portal Karyawan responsif (2026-10-05)
 

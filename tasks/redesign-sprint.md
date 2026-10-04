@@ -361,8 +361,12 @@ Fase B:
 - Daftar temuan → perbaiki dalam task ini (bukan task baru), lalu minta pengguna cek.
 - **DoD**: checklist halaman di progress tercentang setelah pengguna oke.
 
-### T11 `[ ]` Dokumentasi & rapikan
-- Status: menunggu pembaruan dokumen dan verifikasi T11.
+### T11 `[x]` Dokumentasi & rapikan
+- **Status 2026-10-05**: `frontend-design-system.md`, `frontend-ui-ux.md`, dan
+  `docs/features.md` diperbarui dan diperiksa. Backend menunggu PR+deploy:
+  Employee Service + Gateway `GET /api/v1/employees` (filter optional), Attendance
+  Service + Gateway `GET /api/v1/monitoring/trend`, Employee Service + Gateway
+  `GET /api/v1/me/profile`; tanpa migration. PR dibuat pengguna.
 - Update `frontend-design-system.md`, `frontend-ui-ux.md` (pola baru: sidebar, chart,
   date range, profil), `docs/features.md`, README bila perlu.
 - Ringkasan perubahan backend untuk PR main (endpoint, migration).
