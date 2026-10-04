@@ -71,7 +71,7 @@ Serial, satu increment ujung ke ujung. Centang hanya setelah pengguna oke manual
 | R01 | Fondasi routing | Pasang React Router di HR, migrasi dari hash, pertahankan slug/filter di URL; tambah halaman 404 route tak dikenal + guard auth (redirect ke login bila sesi hilang) | [x] |
 | R02 | Primitives bersama | Breadcrumb, UnderlineTabs, StatusPill, PageHeader, EmptyState, Skeleton, ConfirmDialog, FormField di `packages/ui` (Atomic) | [ ] |
 | R03 | Patokan: EmployeeDetail HR | Breadcrumb + underline tabs (Detail/Riwayat/Sesi) + list rows + pill status + aksi lifecycle via ConfirmDialog — KUNCI bahasa visual | [x] |
-| R04 | Shell HR | Sidebar + header + breadcrumb + command palette (⌘-K) + shortcuts | [ ] |
+| R04 | Shell HR | Sidebar + header + breadcrumb + command palette (⌘-K) + shortcuts | [x] |
 | R05 | HR list pages | Ringkasan, Karyawan, Absensi, Absensi-dihapus, MasterData (Dept/Jabatan), Hari Libur — pola GitHub list | [ ] |
 | R06 | HR detail pages | AttendanceDetail + MasterData detail — breadcrumb + tabs. ITEM KHUSUS: peta Leaflet (loading/empty/fallback, token tema, z-index) didesain tersendiri, bukan sekadar styling | [ ] |
 | R07 | Attendance portal | Login, Home "Hari ini", Capture, History, ChangePassword — lapang/mobile, motion halus. ITEM KHUSUS: alur kamera full-screen (states: deteksi/gagal/ragu/fallback manual) didesain tersendiri | [ ] |

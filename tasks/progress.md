@@ -1,5 +1,16 @@
 # Progres dan titik lanjut
 
+## R04 — Shell HR: command palette + shortcuts (2026-10-05)
+
+Selesai dan diterima pengguna lewat cek manual. Shell HR dapat command palette (⌘-K/Ctrl-K) + shortcut.
+
+- Baru: `apps/hr-web/src/components/organisms/command-palette.ts` (tipe `Command`, `fuzzyMatch`, `filterCommands` — logika murni) dan `CommandPalette.tsx` (gate `open` + body: overlay modal, input combobox autofocus via rAF, listbox options, navigasi keyboard ↑/↓/Enter/Esc, clamp active saat render, `scrollIntoView` di-guard untuk jsdom) + `CommandPalette.test.tsx` (7 test).
+- `WorkspaceLayout.tsx`: shortcut global Cmd/Ctrl-K toggle; tombol header "Cari…" dengan hint `⌘K`/`Ctrl K`; membangun daftar perintah (7 navigasi via `useNavigate`, 3 tema via `setThemePreference`, Keluar via `logout`); fokus kembali ke trigger saat ditutup.
+- `index.css`: style `cmdk-*` (overlay, panel, input, list, group, option aktif, trigger, kbd) memakai token yang ada; `prefers-reduced-motion` + sembunyikan label trigger di layar sempit.
+- Keputusan: "breadcrumb" shell mengikuti pola `PageHeader` R03 (dipasang per-halaman di R05/R06); tidak menambah breadcrumb shell yang redundan.
+- Verifikasi: hr-web build/typecheck OK, lint bersih, 86/86 unit test lulus (7 baru). `StatusBadge/ConfirmDialog/Notice/PasswordField` masih di hr-web (penyatuan ditunda R05/R07).
+- Lanjut: R05 — HR list pages (Ringkasan, Karyawan, Absensi, Absensi-dihapus, MasterData Dept/Jabatan, Hari Libur) pola GitHub list, memakai PageHeader/breadcrumb + pill + rows padat.
+
 ## R03 — Patokan EmployeeDetail HR (2026-10-05)
 
 Selesai dan diterima pengguna lewat cek manual. EmployeeDetail HR menjadi patokan bahasa visual (GitHub/Primer): breadcrumb + underline tabs + pill status + aksi lifecycle via ConfirmDialog.
