@@ -1,0 +1,75 @@
+name: attendance-backend-prod
+
+x-backend: &backend
+  network_mode: host
+  restart: unless-stopped
+  init: true
+  read_only: true
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,size=64m
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  pids_limit: 128
+  healthcheck:
+    test: [CMD, node, -e, "fetch('http://127.0.0.1:'+process.env.PORT+'/health',{signal:AbortSignal.timeout(5000)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+    interval: 30s
+    timeout: 7s
+    retries: 3
+    start_period: 40s
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+services:
+  api-gateway:
+    <<: *backend
+    image: ghcr.io/annastriw/employee-attendance-system/api-gateway:sha-${BACKEND_RELEASE_SHA:?Set the main release SHA}
+    mem_limit: 192m
+    environment:
+      NODE_OPTIONS: --max-old-space-size=128
+    env_file:
+      - path: .secrets/backend/api-gateway.env
+        format: raw
+    depends_on:
+      auth-service: {condition: service_started}
+      employee-service: {condition: service_started}
+      attendance-service: {condition: service_started}
+      media-service: {condition: service_started}
+  auth-service:
+    <<: *backend
+    image: ghcr.io/annastriw/employee-attendance-system/auth-service:sha-${BACKEND_RELEASE_SHA:?Set the main release SHA}
+    mem_limit: 256m
+    environment:
+      NODE_OPTIONS: --max-old-space-size=128
+    env_file:
+      - path: .secrets/backend/auth-service.env
+        format: raw
+  employee-service:
+    <<: *backend
+    image: ghcr.io/annastriw/employee-attendance-system/employee-service:sha-${BACKEND_RELEASE_SHA:?Set the main release SHA}
+    mem_limit: 256m
+    environment:
+      NODE_OPTIONS: --max-old-space-size=128
+    env_file:
+      - path: .secrets/backend/employee-service.env
+        format: raw
+  attendance-service:
+    <<: *backend
+    image: ghcr.io/annastriw/employee-attendance-system/attendance-service:sha-${BACKEND_RELEASE_SHA:?Set the main release SHA}
+    mem_limit: 384m
+    environment:
+      NODE_OPTIONS: --max-old-space-size=192
+    env_file:
+      - path: .secrets/backend/attendance-service.env
+        format: raw
+  media-service:
+    <<: *backend
+    image: ghcr.io/annastriw/employee-attendance-system/media-service:sha-${BACKEND_RELEASE_SHA:?Set the main release SHA}
+    mem_limit: 384m
+    environment:
+      NODE_OPTIONS: --max-old-space-size=192
+    env_file:
+      - path: .secrets/backend/media-service.env
+        format: raw

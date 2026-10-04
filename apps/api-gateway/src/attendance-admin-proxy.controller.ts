@@ -10,7 +10,7 @@ import {
 import type { Request, Response } from 'express';
 import { AuthProxyService } from './auth-proxy.service';
 const UUID =
-  '[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}';
+  '[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}';
 const DETAIL = new RegExp('^/api/v1/attendance/' + UUID + '$', 'i');
 const RESTORE = new RegExp('^/api/v1/attendance/' + UUID + '/restore$', 'i');
 const PHOTO = new RegExp(

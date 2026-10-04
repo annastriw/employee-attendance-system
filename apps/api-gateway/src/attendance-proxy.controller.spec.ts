@@ -91,6 +91,21 @@ describe('Attendance Gateway boundary', () => {
     );
     expect(forward.mock.calls[1][2]).not.toHaveProperty('Idempotency-Key');
   });
+  it('accepts seeded UUID v5 attendance and event identifiers for detail and photo reads', async () => {
+    const dailyId = 'ee79c983-1129-5776-b94c-768aea5256e4';
+    const eventId = '0aa74f9b-8d6e-5fbd-a875-16f38e959f39';
+    const detailRequest = req(dailyId);
+    await controller.detail(detailRequest, response() as unknown as Response);
+    expect(forward.mock.calls[0][0]).toBe('/api/v1/me/attendance/' + dailyId);
+
+    await controller.photo(
+      req(dailyId + '/events/' + eventId + '/photo'),
+      response() as unknown as Response,
+    );
+    expect(forward.mock.calls[1][0]).toBe(
+      '/api/v1/me/attendance/' + dailyId + '/events/' + eventId + '/photo',
+    );
+  });
   it.each([
     '?employeeId=' + key,
     '?page=1&page=2',

@@ -193,6 +193,408 @@ Bagian ini dilakukan di browser GitHub, bukan SSH VPS:
 
 Tidak perlu perintah VPS pada tahap 3A. Image GHCR baru dibangun setelah merge main; PR sendiri belum deploy/migrate. Proteksi main-production sudah aktif: PR dan CI result wajib, tanpa bypass; detail pada [workflow rilis](../development/ci-cd-workflow.md). Pengguna tetap menjalankan tutorial bertahap; agen tidak membuat atau merge PR pada increment ini.
 
+## Tahap 4A — migration database production
+
+Rilis pertama main 1c27c9062ac04ee4213b19225e8a70e159aca3cc terverifikasi 2026-10-04: PR #1 merged, CI run 37193755926 lulus dan kelima image pada run 37193965079 sukses. Prisma source rilis sama dengan ffe1365 yang divalidasi pengguna. Tahap ini memang mengubah schema attendance_prod; akun runtime dibuat setelah hasil diterima. [Prisma 7 migrate deploy](https://www.prisma.io/docs/orm/v7/prisma-migrate/workflows/development-and-production) menerapkan migration tersimpan tanpa reset/shadow/seed.
+
+Jalankan block utuh di SSH VPS. Jika command gagal, berhenti: jangan reset, restore atau resolve sendiri. Jangan kirim isi backup/secret. Folder source baru tidak ditimpa, backup privat diperiksa sebelum migration.
+
+```sh
+(
+  set -eu
+  set -o pipefail
+  umask 077
+  cd /opt/attendance
+  release_commit=1c27c9062ac04ee4213b19225e8a70e159aca3cc
+  release_dir=/opt/attendance/releases/source-1c27c90
+
+  [ ! -e "$release_dir" ] || {
+    echo 'STOP: folder rilis sudah ada; kirim hasil ini'
+    exit 1
+  }
+  git clone --branch main --single-branch \
+    https://github.com/annastriw/employee-attendance-system.git "$release_dir"
+  git -C "$release_dir" checkout --detach "$release_commit"
+  [ "$(git -C "$release_dir" rev-parse HEAD)" = "$release_commit" ]
+
+  backup_file="/opt/attendance/backups/before-migration-$(date -u +%Y%m%dT%H%M%S%NZ).sql.gz"
+  sudo docker exec attendance-prod-mysql-1 sh -c '
+    export MYSQL_PWD="$(cat /run/secrets/mysql_root_password)"
+    exec mysqldump -uroot --single-transaction --no-tablespaces \
+      --set-gtid-purged=OFF attendance_prod
+  ' | gzip > "$backup_file"
+  gzip -t "$backup_file"
+  echo 'PASS: backup sebelum migration tersimpan'
+
+  sudo docker run --rm --memory 512m \
+    --network attendance-prod-backend \
+    --env-file /opt/attendance/.secrets/migrator.env \
+    --mount "type=bind,src=$release_dir/prisma,dst=/tooling/prisma,readonly" \
+    --entrypoint sh attendance-migrator:prisma-7.10.0 -c '
+      set -eu
+      case "$MIGRATOR_PASSWORD" in
+        ""|*[!0-9a-f]*) echo "STOP: format password tidak sesuai"; exit 1 ;;
+      esac
+      [ "${#MIGRATOR_PASSWORD}" -eq 64 ]
+      export DATABASE_URL="mysql://attendance_migrator:${MIGRATOR_PASSWORD}@attendance-prod-mysql-1:3306/attendance_prod"
+      exec /tooling/node_modules/.bin/prisma migrate deploy \
+        --config /tooling/infra/prisma-migrator.config.ts
+    '
+
+  sudo docker exec attendance-prod-mysql-1 sh -c '
+    export MYSQL_PWD="$(cat /run/secrets/mysql_root_password)"
+    exec mysql -uroot attendance_prod --batch -e "
+      SELECT COUNT(*) AS jumlah_tabel FROM information_schema.tables
+        WHERE table_schema = DATABASE();
+      SELECT migration_name, finished_at IS NOT NULL AS selesai
+        FROM _prisma_migrations ORDER BY started_at;
+    "
+  '
+  echo 'PASS: migration production selesai'
+)
+```
+
+Target: all migrations successfully applied, 10 baris migration masing-masing selesai=1, jumlah tabel lebih dari nol. Kirim output migration/SELECT/PASS saja, tanpa password/isi backup. Belum deploy backend, seed admin atau membuat runtime grants. Akun migrator hanya tooling, tidak dipakai backend. Setelah hasil diterima, lanjut 4B akun runtime tiap service.
+
+## Tahap 4B — akun database runtime
+
+Output pengguna tahap 4A diterima: backup PASS, 10 migration selesai=1, 24 tabel. Berikut membuat empat akun runtime dengan grants sama seperti kepemilikan tabel pada setup lokal, hanya untuk attendance_prod. Gateway tidak memakai database. Jangan menjalankan script setup lokal pada production.
+
+### 1. Buat file password privat
+
+```sh
+cd /opt/attendance
+(
+  set -eu
+  set -o noclobber
+  umask 077
+  {
+    for service in AUTH EMPLOYEE ATTENDANCE MEDIA; do
+      password=$(openssl rand -hex 32)
+      printf '%s_DB_PASSWORD=%s\n' "$service" "$password"
+    done
+  } > .secrets/database-runtime.env
+  echo 'PASS: kredensial runtime tersimpan'
+)
+ls -l .secrets/database-runtime.env
+```
+
+Jika file sudah ada/gagal, berhenti; jangan lanjut block berikut atau overwrite. Target mode 600. Jangan kirim isi file.
+
+### 2. Buat akun/grants dan cek akses
+
+```sh
+sudo docker exec -i --env-file .secrets/database-runtime.env attendance-prod-mysql-1 sh -s <<'SH'
+set -eu
+for password in "$AUTH_DB_PASSWORD" "$EMPLOYEE_DB_PASSWORD" "$ATTENDANCE_DB_PASSWORD" "$MEDIA_DB_PASSWORD"; do
+  case "$password" in
+    ''|*[!0-9a-f]*) echo 'STOP: format password tidak sesuai'; exit 1 ;;
+  esac
+  [ "${#password}" -eq 64 ]
+done
+mysql_root() {
+  MYSQL_PWD="$(cat /run/secrets/mysql_root_password)" \
+    mysql -uroot --batch --skip-column-names "$@"
+}
+count=$(mysql_root -e "SELECT COUNT(*) FROM mysql.user WHERE User IN ('attendance_auth','attendance_employee','attendance_attendance','attendance_media');")
+[ "$count" = 0 ] || { echo 'STOP: akun runtime sudah ada; simpan kredensial dan kirim hasil'; exit 1; }
+
+create_user() {
+  printf "CREATE USER '%s'@'%%' IDENTIFIED BY '%s';\n" "$1" "$2"
+}
+grant_tables() {
+  user=$1
+  permissions=$2
+  shift 2
+  for table in "$@"; do
+    printf "GRANT %s ON attendance_prod.%s TO '%s'@'%%';\n" "$permissions" "$table" "$user"
+  done
+}
+if ! {
+  create_user attendance_auth "$AUTH_DB_PASSWORD"
+  create_user attendance_employee "$EMPLOYEE_DB_PASSWORD"
+  create_user attendance_attendance "$ATTENDANCE_DB_PASSWORD"
+  create_user attendance_media "$MEDIA_DB_PASSWORD"
+  grant_tables attendance_auth 'SELECT, INSERT, UPDATE' \
+    auth_accounts auth_sessions auth_provisioning auth_email_changes auth_password_resets
+  grant_tables attendance_auth 'SELECT, INSERT' auth_audit_logs
+  grant_tables attendance_employee 'SELECT, INSERT, UPDATE' \
+    emp_departments emp_positions emp_employees emp_provisioning emp_email_changes emp_lifecycle_changes
+  grant_tables attendance_employee 'SELECT, INSERT' emp_audit_logs emp_employee_history
+  grant_tables attendance_attendance 'SELECT, INSERT, UPDATE' \
+    att_work_policies att_daily_records att_events att_idempotency_requests att_outbox
+  grant_tables attendance_attendance 'SELECT, INSERT, UPDATE, DELETE' att_holidays
+  grant_tables attendance_attendance 'SELECT, INSERT' att_audit_logs
+  grant_tables attendance_media 'SELECT, INSERT, UPDATE' media_objects
+  grant_tables attendance_media 'SELECT, INSERT' media_audit_logs
+} | mysql_root >/dev/null 2>&1; then
+  echo 'FAIL: akun/grants belum lengkap; jangan mengganti file password'
+  exit 1
+fi
+echo 'PASS: empat akun dan grants dibuat'
+
+check_login() {
+  MYSQL_PWD="$2" mysql --protocol=TCP -h127.0.0.1 -u"$1" attendance_prod \
+    --batch -e "SELECT 1 FROM $3 LIMIT 0;" >/dev/null 2>&1
+  echo "PASS: login dan baca tabel milik $1"
+}
+check_login attendance_auth "$AUTH_DB_PASSWORD" auth_accounts
+check_login attendance_employee "$EMPLOYEE_DB_PASSWORD" emp_employees
+check_login attendance_attendance "$ATTENDANCE_DB_PASSWORD" att_daily_records
+check_login attendance_media "$MEDIA_DB_PASSWORD" media_objects
+SH
+```
+
+Kirim PASS/STOP/FAIL dan permission file saja. Akun runtime tidak mendapat DDL/global privilege/grant option; audit append-only (SELECT/INSERT), DELETE hanya att_holidays sesuai fitur. Jika SQL gagal sebagian, akun mungkin sudah dibuat: simpan file dan rekonsiliasi, jangan ulang CREATE/generate password. Uji ini hanya login/SELECT kosong, bukan suite test atau perubahan data karyawan. Setelah hasil diterima, siapkan environment dan Compose lima backend.
+
+## Tahap 5A — secret aplikasi dan komunikasi internal
+
+Output 4B diterima: empat akun/grants dibuat, masing-masing login/SELECT tabel milik service PASS. Berikut membuat secret aplikasi saja, belum menjalankan backend. AUTH_JWT_SECRET terpisah dari PROVISIONING_CREDENTIAL_KEY dan secret komunikasi service. Attendance INTERNAL_SERVICE_SECRET harus sama dengan Employee/Auth PROVISIONING_SERVICE_SECRET; MEDIA_INTERNAL_SECRET dibagikan Attendance/Media. Key enkripsi tidak boleh diganti sembarangan setelah data provisioning tersimpan.
+
+Jalankan pada SSH VPS:
+
+```sh
+cd /opt/attendance
+(
+  set -eu
+  set -o noclobber
+  umask 077
+  jwt_secret=$(openssl rand -hex 64)
+  provisioning_secret=$(openssl rand -hex 32)
+  credential_key=$(openssl rand -hex 32)
+  media_secret=$(openssl rand -hex 32)
+  printf 'AUTH_JWT_SECRET=%s\nPROVISIONING_SERVICE_SECRET=%s\nPROVISIONING_CREDENTIAL_KEY=%s\nINTERNAL_SERVICE_SECRET=%s\nMEDIA_INTERNAL_SECRET=%s\n' \
+    "$jwt_secret" "$provisioning_secret" "$credential_key" \
+    "$provisioning_secret" "$media_secret" > .secrets/application.env
+  echo 'PASS: secret aplikasi tersimpan tanpa ditampilkan'
+)
+ls -l .secrets/application.env .secrets/database-runtime.env
+find .secrets -maxdepth 1 -type f -printf '%f\n' | sort
+```
+
+Jika file sudah ada/gagal, berhenti dan kirim error; jangan overwrite atau menampilkan isi file. Target mode 600. Daftar nama file diperlukan untuk memastikan file akun storage yang dibuat sebelumnya tersedia sebelum menyusun env per service. Jangan menggunakan kredensial administrator AIStor untuk Media. Kirim PASS/permission/nama file saja. Berikut 5B konfigurasi environment dan Compose backend, memakai lima image rilis yang sudah tersedia.
+
+## Tahap 5B — environment tiap service dan Compose backend
+
+Output 5A diterima: application.env/database-runtime.env mode 600, media-storage.env tersedia. Script prepare-backend-env.py membaca tiga file tersebut, membuat lima file privat dalam .secrets/backend tanpa overwrite, tidak mencetak secret dan tidak membuat admin. Domain mengikuti baseline attendance/hr/attendance-storage. Jika domain berubah, sesuaikan konfigurasi sebelum backend/public access.
+
+Backend memakai network_mode host pada Linux dengan HOST=127.0.0.1: port 3000–3004 terpisah dan hanya loopback. MySQL 127.0.0.1:3307 serta AIStor 127.0.0.1:9000 tetap di Compose infra yang sudah ada. Ini memenuhi guard aplikasi yang mewajibkan TLS untuk koneksi non-loopback tanpa menurunkan validasi TLS. Host networking berbagi namespace jaringan VPS (isolasi jaringan lebih kecil dibanding bridge); filesystem/proses tetap container terpisah. Tidak memakai privileged/Docker socket. [Docker host networking](https://docs.docker.com/engine/network/drivers/host/). Env file format raw menjaga password dengan karakter khusus; membutuhkan Compose >=2.30, VPS dilaporkan v5.5.1. [Docker env_file](https://docs.docker.com/reference/compose-file/services/#env_file).
+
+Jalankan satu block pada SSH VPS. Hanya menyiapkan file dan config --quiet; belum pull/up/restart. Script/config baru diambil dari commit dev yang dicatat, sedangkan lima image tetap rilis main 1c27c90. File persiapan tidak mengubah kode image/source migration. Setelah berhasil, deployment berikut memakai artefak tersebut; tidak perlu merge ulang hanya untuk membuat file VPS ini.
+
+```sh
+(
+  set -eu
+  set -o pipefail
+  set -o noclobber
+  umask 077
+  cd /opt/attendance
+  config_dir=/opt/attendance/releases/backend-config-prepare
+  source_dir=/opt/attendance/releases/source-ffe1365
+  for target in "$config_dir" .secrets/backend compose.backend.yml backend-release.env; do
+    [ ! -e "$target" ] || { echo 'STOP: file/folder persiapan sudah ada; kirim hasil'; exit 1; }
+  done
+  git -C "$source_dir" fetch origin dev
+  config_commit=$(git -C "$source_dir" rev-parse FETCH_HEAD)
+  mkdir "$config_dir"
+  git -C "$source_dir" archive "$config_commit" \
+    infra/compose.backend.yml scripts/deployment/prepare-backend-env.py |
+    tar -x -C "$config_dir"
+  printf '%s\n' "$config_commit" > "$config_dir/source-commit.txt"
+
+  python3 "$config_dir/scripts/deployment/prepare-backend-env.py" --root /opt/attendance
+  cp --update=none "$config_dir/infra/compose.backend.yml" compose.backend.yml
+  cmp --silent "$config_dir/infra/compose.backend.yml" compose.backend.yml
+  printf 'BACKEND_RELEASE_SHA=1c27c9062ac04ee4213b19225e8a70e159aca3cc\n' > backend-release.env
+
+  sudo docker compose --env-file backend-release.env -f compose.backend.yml config --quiet
+  ls -l .secrets/backend/*.env
+  printf 'Config commit: %s\n' "$config_commit"
+  echo 'PASS: environment dan Compose backend siap; belum dijalankan'
+)
+```
+
+Kirim PASS/permission atau error tanpa isi env. Jika sudah ada/terjadi partial preparation, simpan file dan laporkan; jangan overwrite/generate ulang secret. Jangan memakai config tanpa --quiet atau docker inspect penuh karena dapat menampilkan credential. Compose hanya menyentuh project attendance-backend-prod, berbeda dari infra. Batas memori: Gateway 192 MiB, Auth/Employee 256 MiB masing-masing, Attendance/Media 384 MiB masing-masing (total 1472 MiB); Node heap lebih rendah, log dibatasi. Resource aktual dinilai saat container berjalan. Readiness health setiap service memakai /health. Berikut 5C pull/up/check health tanpa unit suite di VPS.
+
+Verifikasi agen: unit generator terfokus, actionlint dan parsing YAML; Docker daemon lokal tidak tersedia sehingga validasi Compose sesungguhnya menunggu config --quiet VPS. Belum menjalankan backend/database/storage integration atau mengubah VPS oleh agen.
+
+## Tahap 5C — pull dan jalankan backend
+
+Output 5B diterima: lima env mode 600, config commit 13f56e0d1c65d8d11a161b142ea3e78ed1bb37de, Compose config PASS. Anonymous GHCR manifest HEAD kelima image rilis main1c27c90 diperiksa HTTP200; tidak perlu login/token untuk pull saat pemeriksaan. Tahap ini menjalankan lima backend, bukan infra/nginx/SSL/frontend; belum berarti aplikasi live publik.
+
+Jalankan satu block pada SSH VPS. Compose backend berbeda project dari infra; tidak memakai down/reset/build. Pull gagal akan menghentikan block sebelum up. Jika up --wait gagal, sebagian container bisa sudah berjalan; laporkan error, jangan down/reset atau mengulang bootstrap.
+
+```sh
+(
+  set -eu
+  cd /opt/attendance
+  sudo docker compose --env-file backend-release.env -f compose.backend.yml pull
+  sudo docker compose --env-file backend-release.env -f compose.backend.yml \
+    up -d --wait --wait-timeout 120
+  sudo docker compose --env-file backend-release.env -f compose.backend.yml ps
+  for port in 3000 3001 3002 3003 3004; do
+    curl --max-time 10 -fsS -o /dev/null \
+      -w "Backend port $port HTTP %{http_code}\n" "http://127.0.0.1:$port/health"
+  done
+  echo 'PASS: lima backend berjalan dan health HTTP 200'
+)
+```
+
+Target lima container healthy dan semua health HTTP200. Health operasional menguji dependency nyata (Auth DB; Media DB/bucket); tidak menjalankan suite unit/integrasi/browser. Setelah block sukses, jalankan:
+
+```sh
+free -h
+sudo docker stats --no-stream
+sudo ss -lntp | grep -E ':(3000|3001|3002|3003|3004|3307|9000|9001)\b'
+```
+
+Target backend/database/storage hanya 127.0.0.1. Host-network container ps tidak menampilkan port mapping; ss menjadi bukti bind. Kirim ps/HTTP/PASS/resource/port atau error. Jangan kirim full docker inspect/config/env, token atau log mentah yang mengandung credential. Agen belum menjalankan VPS; runtime health/resource masih menunggu output pengguna. Berikut domain/Nginx/HTTPS, admin seed, frontend dan backup/acceptance live. Jangan membuat admin otomatis di tahap ini.
+
+## Tahap 6A — cek domain/Nginx/SSL aktual
+
+Output 5C diterima: kelima /health HTTP200. RAM available1.4GiB, swap426MiB; Gateway45.57/Auth124.7/Employee105.8/Attendance102.9/Media160.2MiB, AIStor142.1/MySQL462.2MiB (semua di bawah limit). Ini snapshot idle, bukan bukti kapasitas beban serentak. Output ss belum terlihat; konfirmasi loopback masih diperlukan. Jangan ulang pull/up/test suite.
+
+Nginx sudah aktif pada audit sebelumnya. Tahap6A read-only untuk memilih konfigurasi yang sudah ada, menghindari duplikasi domain/server block. Tidak mengubah DNS/Nginx/firewall/SSL atau renew sertifikat. Jalankan pada SSH VPS:
+
+```sh
+sudo ss -lntp | grep -E ':(3000|3001|3002|3003|3004|3307|9000|9001)\b'
+sudo nginx -t
+sudo ls -l /etc/nginx/sites-enabled
+sudo grep -RnE '^[[:space:]]*(listen|server_name|proxy_pass|ssl_certificate|ssl_certificate_key)[[:space:]]' \
+  /etc/nginx/sites-enabled /etc/nginx/conf.d
+```
+
+Output grep hanya directive domain/port/upstream/path sertifikat, bukan isi konfigurasi penuh, secret atau private key. Jika tidak ada match, laporkan tanpa menambah konfigurasi sendiri.
+
+```sh
+if command -v certbot >/dev/null 2>&1; then
+  sudo certbot certificates
+else
+  echo 'INFO: Certbot belum tersedia'
+fi
+for domain in attendance-api.annastriwidagdo.me attendance-storage.annastriwidagdo.me; do
+  printf '\nDNS %s\n' "$domain"
+  getent ahostsv4 "$domain" || echo 'INFO: DNS domain belum ditemukan'
+done
+```
+
+Kirim output domain/sertifikat/port di atas; jangan kirim private key/token/file env. DNS IP Cloudflare proxy dapat berbeda dari IP VPS sehingga tidak otomatis berarti salah; record di dashboard akan dikonfirmasi pada langkah domain. Setelah inventaris diterima, buat/ubah reverse proxy API→127.0.0.1:3000 dan S3→127.0.0.1:9000 sesuai konfigurasi aktual. Console9001 tidak dibuka publik. Domain frontend tetap Vercel. Backend HTTP200 saja belum membuktikan API/storage HTTPS/public atau frontend live.
+
+## Tahap 6B — DNS Cloudflare API dan storage
+
+Pengguna menyatakan domain absensi belum diatur di Cloudflare. Pilih zone annastriwidagdo.me yang statusnya Active (nameserver sudah sesuai), buka DNS→Records→Add record. [Panduan Cloudflare](https://developers.cloudflare.com/dns/manage-dns-records/how-to/create-dns-records/).
+
+| Type | Name | IPv4 | Proxy status | TTL |
+| --- | --- | --- | --- | --- |
+| A | attendance-api | 43.157.243.37 | DNS only (awan abu-abu) | Auto |
+| A | attendance-storage | 43.157.243.37 | DNS only (awan abu-abu) | Auto |
+
+IP adalah alamat SSH VPS yang diberikan pengguna. Jangan memakai IP private10.11.21.149 atau menyertakan port. Jika nama persis sudah memiliki A/CNAME/AAAA, periksa record itu sebelum menambah duplikat; jangan mengubah record domain lain. Frontend attendance/hr diatur sesuai instruksi Vercel nanti, bukan diarahkan ke VPS.
+
+DNS only dipakai selama setup agar validasi DNS/origin/sertifikat jelas. Request langsung ke VPS; HTTPS belum siap hanya karena record ada. Jangan mengubah SSL zone-wide sekarang, karena domain lain mungkin menggunakannya. Jika API kelak diproxy setelah sertifikat origin valid, gunakan Full (strict) sesuai [Cloudflare SSL](https://developers.cloudflare.com/ssl/origin-configuration/ssl-modes/full-strict/). Storage boleh tetap DNS only dengan HTTPS Nginx dan bucket privat.
+
+Setelah Save, cek satu per satu pada SSH VPS:
+
+```sh
+getent ahostsv4 attendance-api.annastriwidagdo.me || echo 'DNS API belum ditemukan'
+```
+
+```sh
+getent ahostsv4 attendance-storage.annastriwidagdo.me || echo 'DNS storage belum ditemukan'
+```
+
+Target IP43.157.243.37. Jika belum terlihat, tunggu cache DNS tanpa mengubah server. Kirim hasil DNS, serta list sites/grep directive6A yang belum terlihat. Pernyataan situs fe terhapus jam23 belum dibuktikan; expiry sertifikat bukan jadwal penghapusan. Jangan hapus/ubah fe/dev.ihealthedu.site atau mengasumsikan cleanup-nya aman bagi Nginx; audit timer/cron terpisah bila perlu. Agen tidak mengubah DNS atau server pada tahap ini.
+
+## Tahap 6C — reverse proxy HTTP API dan S3
+
+Output pengguna6A/6B lengkap diterima: hanya question-scanner.conf aktif (fe/dev.ihealthedu.site→4310 dengan SSL sertifikat sendiri), kedua DNS absensi43.157.243.37. Tambahkan attendance.conf, jangan mengubah question-scanner/sertifikat/domain lain. HTTP hanya bootstrap health sebelum HTTPS; jangan login/upload/data karyawan melalui HTTP.
+
+Template [attendance-http.conf](../../infra/nginx/attendance-http.conf) mengarahkan API→3000, S3→9000, tidak mempublikasikan Console9001. Host/path/query asli dijaga untuk signature S3; access log storage dimatikan agar URL presigned tidak tercatat sebagai log akses. Request body10MiB sesuai foto aplikasi; aplikasi tetap memvalidasi ukuran/tipe sendiri. [NGINX proxy_pass](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_pass).
+
+Jalankan satu block di SSH VPS. File baru tidak menimpa konfigurasi existing. Reload hanya setelah nginx -t sukses. Jika gagal, stop/kirim error; jangan menghapus konfigurasi lama atau restart server. Jika file baru sudah dibuat sebagian, simpan dan rekonsiliasi sebelum mengulang.
+
+```sh
+(
+  set -eu
+  set -o pipefail
+  umask 077
+  config_dir=/opt/attendance/releases/nginx-http-config
+  source_dir=/opt/attendance/releases/source-ffe1365
+  [ ! -e "$config_dir" ] || { echo 'STOP: folder config sudah ada'; exit 1; }
+  sudo test ! -e /etc/nginx/sites-available/attendance.conf
+  sudo test ! -L /etc/nginx/sites-available/attendance.conf
+  sudo test ! -e /etc/nginx/sites-enabled/attendance.conf
+  sudo test ! -L /etc/nginx/sites-enabled/attendance.conf
+  git -C "$source_dir" fetch origin dev
+  config_commit=$(git -C "$source_dir" rev-parse FETCH_HEAD)
+  mkdir "$config_dir"
+  git -C "$source_dir" archive "$config_commit" infra/nginx/attendance-http.conf |
+    tar -x -C "$config_dir"
+  printf '%s\n' "$config_commit" > "$config_dir/source-commit.txt"
+
+  sudo install -o root -g root -m 644 \
+    "$config_dir/infra/nginx/attendance-http.conf" /etc/nginx/sites-available/attendance.conf
+  sudo ln -s /etc/nginx/sites-available/attendance.conf /etc/nginx/sites-enabled/attendance.conf
+  sudo nginx -t
+  sudo systemctl reload nginx
+
+  curl --max-time 10 -fsS -o /dev/null -w 'API HTTP %{http_code}\n' \
+    http://attendance-api.annastriwidagdo.me/health
+  curl --max-time 10 -fsS -o /dev/null -w 'Storage HTTP %{http_code}\n' \
+    http://attendance-storage.annastriwidagdo.me/minio/health/live
+  echo 'PASS: reverse proxy HTTP siap; berikutnya HTTPS'
+)
+```
+
+Target nginx -t sukses, kedua HTTP200, PASS. Kirim hasil atau error saja. Jangan mengulang template ini setelah Certbot menambahkan SSL karena dapat menghapus SSL yang sudah dibuat. HTTP health dari VPS belum membuktikan akses dari internet; tahap HTTPS diuji eksternal. Template belum diuji nginx binary oleh agen (tidak tersedia lokal); nginx -t VPS menjadi pemeriksaan sebelum reload. Berikut6D Certbot hanya kedua domain absensi, kemudian HTTPS sebelum penggunaan akun/data.
+
+## Tahap 6D — HTTPS diterima
+
+Pengguna menjalankan Certbot Nginx untuk attendance-api/storage dengan cert-name attendance-production dan redirect HTTP. Backup konfigurasi sebelum perubahan disarankan. Output pengguna: API HTTPS200 dan Storage HTTPS200 dengan curl tanpa -k. TLS kedua endpoint valid dari VPS; belum bukti login/frontend atau pengujian eksternal. Jangan menimpa attendance.conf dengan template HTTP lagi. Pemeriksaan jadwal renewal dan backup/restore tetap pending sebelum acceptance live.
+
+## Tahap 7A — akun HR pertama
+
+Gunakan seed aplikasi yang sudah ada di image Auth main, bukan INSERT manual atau akun migrator. AdminSeedService memvalidasi email/password, menulis akun dan audit dalam transaksi, mengharuskan perubahan password pertama, dan mempertahankan akun existing tanpa mengubah password/status. Tidak restart container atau membuka port baru. Seed tidak menjalankan HTTP listener.
+
+Jalankan satu block pada SSH VPS. Masukkan email HR ketika diminta, bukan password. File admin-seed.env hanya untuk bootstrap, tidak ditambahkan ke environment service permanen. Jika file sudah ada, jangan regenerate/overwrite; rekonsiliasi hasil seed dulu. Password hex64 karakter (64 byte) memenuhi batas12–72 byte bcrypt aplikasi.
+
+```sh
+(
+  set -eu
+  set -o noclobber
+  umask 077
+  cd /opt/attendance
+  [ ! -e .secrets/admin-seed.env ] && [ ! -L .secrets/admin-seed.env ] || {
+    echo 'STOP: file seed sudah ada; jangan mengganti password'
+    exit 1
+  }
+  read -r -p 'Email akun HR: ' hr_email
+  case "$hr_email" in
+    ''|*[!a-zA-Z0-9@._+-]*) echo 'STOP: gunakan email biasa tanpa spasi'; exit 1 ;;
+  esac
+  hr_password=$(openssl rand -hex 32)
+  printf 'ADMIN_SEED_EMAIL=%s\nADMIN_SEED_PASSWORD=%s\n' \
+    "$hr_email" "$hr_password" > .secrets/admin-seed.env
+  unset hr_password
+  chmod 600 .secrets/admin-seed.env
+  sudo docker exec --env-file .secrets/admin-seed.env \
+    attendance-backend-prod-auth-service-1 node dist/auth/seed-admin.js
+  echo 'PASS: seed HR selesai; password tersimpan privat'
+)
+```
+
+Target pesan Admin HRD created; initial password change is required. Jika Existing admin retained, password baru di file bukan bukti password akun existing: berhenti dan rekonsiliasi, jangan mencoba reset otomatis. Jika seed gagal, file dipertahankan untuk diagnosis/retry terarah. Kirim pesan seed/PASS atau error saja, jangan isi file. Pengambilan password dilakukan privat saat frontend siap; setelah login dan perubahan password, file bootstrap dapat dihapus sesuai tahap selanjutnya. Berikutnya dua frontend Vercel dari main.
+
+## Tahap 7B — konfigurasi project Attendance di Vercel
+
+Output seed diterima: Admin HRD created; initial password change is required, PASS. Jangan seed ulang. Siapkan Attendance dulu, HR project terpisah berikutnya. Vercel Add New→Project→import annastriw/employee-attendance-system. Project attendance-web, framework Vite, Root Directory apps/attendance-web, Include source files outside Root Directory enabled untuk packages/ui, Build Command pnpm run build, Output dist, Install pnpm install --frozen-lockfile, Node24.x. Build hanya frontend terkait, tidak root build/validate/unit ulang.
+
+Environment Production: VITE_API_BASE_URL=https://attendance-api.annastriwidagdo.me/api/v1, ENABLE_EXPERIMENTAL_COREPACK=1 untuk packageManager pnpm10.28.0 di root repo. URL frontend publik, bukan secret. Tidak memasukkan kredensial DB/S3/JWT/seed ke Vercel.
+
+Sebelum Deploy, konfirmasi source branch main; default repository sebelumnya dev sehingga jangan menganggap import otomatis main. Jika branch tidak dapat dipilih pada form import, kirim tampilan/options yang ada sebelum lanjut agar project production main dapat dikonfigurasi tanpa sengaja deploy dev. Production Branch main dan pencegahan preview dev harus diselesaikan sebelum auto deployment dipakai. Saat ini hanya konfigurasi project, belum klik Deploy atau menambahkan DNS domain. URL vercel.app tidak di allowlist backend; login diuji setelah domain attendance.annastriwidagdo.me terpasang. Berikut build Attendance dari main lalu domain sesuai record yang diberikan Vercel, bukan IP VPS.
+
+Acuan [build settings Vercel](https://vercel.com/docs/builds/configure-a-build), [monorepo outside-root](https://vercel.com/docs/monorepos/monorepo-faq), [Git production branch](https://vercel.com/docs/git). Pengguna melakukan langkah dashboard manual; agen belum membuat project/deploy frontend.
+
 ## Status langkah berikutnya
 
 Bootstrap migration/akun runtime, image rilis main/GHCR, Compose backend, domain/TLS dan frontend dikerjakan setelah inventaris tahap 1. Unit rilis dijalankan sekali pada PR; integrasi cepat bila perlu sebelum rilis. Pengiriman otomatis ke VPS belum aktif. T30/T31 belum dicentang dari pemeriksaan infra saja.

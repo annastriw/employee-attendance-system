@@ -6,8 +6,8 @@ import {
   Res,
   BadRequestException,
 } from '@nestjs/common';
-const UUID_V4 =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 import type { Request, Response } from 'express';
 import { AuthProxyService } from './auth-proxy.service';
 @Controller('api/v1/me/attendance')
@@ -36,10 +36,10 @@ export class AttendanceProxyController {
     const allowed =
       method === 'GET'
         ? list ||
-          (!!detail && UUID_V4.test(detail[1])) ||
-          (!!photo && UUID_V4.test(photo[1]) && UUID_V4.test(photo[2])) ||
+          (!!detail && UUID.test(detail[1])) ||
+          (!!photo && UUID.test(photo[1]) && UUID.test(photo[2])) ||
           requestPath === '/api/v1/me/attendance/today' ||
-          (!!operation && UUID_V4.test(operation[1]))
+          (!!operation && UUID.test(operation[1]))
         : [
             '/api/v1/me/attendance/check-in',
             '/api/v1/me/attendance/check-out',
