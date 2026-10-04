@@ -20,7 +20,7 @@ interface AuthShellProps {
   /**
    * Optional product panel. When given, the shell renders a split layout on
    * wide screens (form left, panel right); the panel is hidden below 1024px.
-   * Omit it for the single-column layout (Attendance Portal).
+   * Omit it for focused auth screens such as password change.
    */
   showcase?: AuthShowcase;
 }

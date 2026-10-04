@@ -11,12 +11,16 @@ const props = () => ({
 });
 
 describe("Employee login page", () => {
-  it("uses the centered Attendance shell and submits validated credentials", async () => {
+  it("uses the split Attendance shell and submits validated credentials", async () => {
     const page = props();
     const user = userEvent.setup();
     render(<LoginPage {...page} />);
     expect(screen.getByRole("main")).toHaveClass("auth-main");
-    expect(screen.getByRole("main")).not.toHaveClass("auth-split");
+    expect(screen.getByRole("main")).toHaveClass("auth-split");
+    expect(screen.getByRole("complementary", { name: "Tentang Attendance Portal" }))
+      .toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Check-in dan riwayat absensi dalam satu portal." }))
+      .toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Masuk" })).toBeVisible();
     await user.type(screen.getByLabelText("Email"), " employee@example.test ");
     await user.type(screen.getByLabelText("Password"), "temporary-password");

@@ -124,7 +124,13 @@ for (const state of [
           await expect(page.getByRole("heading", { level: 1 })).toHaveText(
             title[state],
           );
-          await expect(page.locator(".auth-showcase")).toHaveCount(0);
+          if (state === "login") {
+            const showcase = page.locator(".auth-showcase");
+            if (width >= 1024) await expect(showcase).toBeVisible();
+            else await expect(showcase).toBeHidden();
+          } else {
+            await expect(page.locator(".auth-showcase")).toHaveCount(0);
+          }
           const layout = await page.evaluate(() => {
             const root = getComputedStyle(document.documentElement);
             return {
