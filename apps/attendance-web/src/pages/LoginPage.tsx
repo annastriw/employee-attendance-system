@@ -1,9 +1,35 @@
 import { useState, type SubmitEvent } from "react";
 import { Button, Input, Label, TextField } from "@heroui/react";
-import { Clock } from "@phosphor-icons/react";
-import { AuthShell } from "@attendance/ui";
+import {
+  CalendarCheck,
+  Clock,
+  ClockCounterClockwise,
+  MapPinArea,
+} from "@phosphor-icons/react";
+import { AuthShell, type AuthShowcase } from "@attendance/ui";
 import { Notice } from "../components/molecules/Notice";
 import { PasswordField } from "../components/molecules/PasswordField";
+
+const showcase: AuthShowcase = {
+  title: "Check-in dan riwayat absensi dalam satu portal.",
+  items: [
+    {
+      icon: <CalendarCheck size={18} />,
+      title: "Check-in dan checkout",
+      description: "Catat kehadiran sesuai jadwal kerja harian.",
+    },
+    {
+      icon: <MapPinArea size={18} />,
+      title: "Foto dan lokasi",
+      description: "Lampirkan bukti foto dan lokasi saat presensi.",
+    },
+    {
+      icon: <ClockCounterClockwise size={18} />,
+      title: "Riwayat absensi",
+      description: "Lihat catatan kehadiran yang sudah tersimpan.",
+    },
+  ],
+};
 
 const bytes = (value: string) => new TextEncoder().encode(value).length;
 
@@ -34,7 +60,11 @@ export function LoginPage({ busy, error, message, onSubmit }: Props) {
   }
 
   return (
-    <AuthShell name="Attendance Portal" brandIcon={<Clock size={16} weight="bold" />}>
+    <AuthShell
+      name="Attendance Portal"
+      brandIcon={<Clock size={16} weight="bold" />}
+      showcase={showcase}
+    >
       <h1>Masuk</h1>
       <p className="page-intro">Gunakan akun karyawan Anda.</p>
       {message && <Notice message={message} success />}
