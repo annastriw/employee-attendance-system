@@ -1,5 +1,34 @@
 # Progres dan titik lanjut
 
+## T1 aktif — rewrite cookie proxy lokal (2026-10-05)
+
+- Mulai dari `dev` HEAD `f5719b5`, tree bersih; fetch origin berhasil. Tidak ada
+  dev server listening pada 5173/5174 saat pemeriksaan.
+- File terkait: `apps/{hr-web,attendance-web}/vite.config.ts`,
+  `scripts/dev-proxy-cookies.{mjs,d.mts,test.mjs}`, `package.json`, progress ini.
+  Modul murni bersama memulihkan nama `__Host-auth_refresh_admin/employee` pada
+  Cookie request; response login/logout menghapus prefix hanya dari nama refresh
+  cookie, menghapus Secure/Domain, mempertahankan Path, SameSite dan expiry.
+- Verifikasi: reproduksi awal 4 test gagal; setelah implementasi 6/6 unit lulus
+  (`node --test scripts/dev-proxy-cookies.test.mjs`), lint kedua portal lulus.
+  Unit script ditambahkan ke `test:unit` agar tercakup CI; suite penuh tidak diulang.
+- Build belum dijalankan: `resource_status` tidak tersedia dalam tool sesi;
+  pengganti baca memori Windows (`Get-CimInstance Win32_OperatingSystem`)
+  menunjukkan RAM bebas 1,42–1,47 GiB, di bawah batas aman ~3 GB sprint.
+  Tidak memulai build/dev server. Pengguna mengizinkan commit/push ke dev tanpa
+  build pada 2026-10-05 karena RAM sulit mencapai batas tersebut; build tetap
+  belum terbukti, dapat diverifikasi CI PR main.
+- [ ] Manual pengguna: restart satu portal pada satu waktu, login → refresh 3×
+  tetap masuk; logout → refresh kembali ke login; ulang untuk role satunya.
+  Jika gagal, kirim status/response body `/api/v1/auth/refresh` dan pesan console,
+  tanpa nilai Cookie/token. Pengguna memilih cek production setelah PR main;
+  sudah dijelaskan bahwa T1 hanya proxy Vite lokal sehingga cek production tidak
+  membuktikan rewrite ini. Acceptance localhost tetap belum dikonfirmasi.
+- Perlu PR+deploy: tidak ada perubahan backend (T1 hanya proxy development).
+- Lanjut: **T1** — verifikasi build melalui CI PR main atau lokal saat RAM aman.
+  Setelah pengguna mengonfirmasi DoD refresh/logout localhost, centang T1 di sprint dan
+  lanjut **T2**: minta Network/console error detail absensi HR dan riwayat karyawan.
+
 ## Pivot — overhaul penuh frontend + rewrite sprint (2026-10-05)
 
 Pengguna memperluas scope dari lanjutan R06 menjadi **overhaul penuh dua portal +

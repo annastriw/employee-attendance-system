@@ -1,6 +1,7 @@
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+import { rewriteRequestCookies, rewriteResponseCookie } from "../../scripts/dev-proxy-cookies.mjs";
 
 const VPS_API = "https://attendance-api.annastriwidagdo.me";
 const PROD_ORIGIN = "https://hr.annastriwidagdo.me";
@@ -15,18 +16,17 @@ export default defineConfig({
         secure: true,
         configure(proxy) {
           proxy.on("proxyReq", (proxyReq) => {
+            const cookie = proxyReq.getHeader("cookie");
+            if (typeof cookie === "string") {
+              proxyReq.setHeader("cookie", rewriteRequestCookies(cookie)!);
+            }
             proxyReq.setHeader("origin", PROD_ORIGIN);
             proxyReq.setHeader("referer", PROD_ORIGIN + "/");
           });
           proxy.on("proxyRes", (proxyRes) => {
             const cookies = proxyRes.headers["set-cookie"];
             if (Array.isArray(cookies)) {
-              proxyRes.headers["set-cookie"] = cookies.map((c) =>
-                c
-                  .replace(/__Host-/g, "")
-                  .replace(/;\s*Secure/gi, "")
-                  .replace(/;\s*Domain=[^;]+/gi, ""),
-              );
+              proxyRes.headers["set-cookie"] = cookies.map(rewriteResponseCookie);
             }
           });
         },
