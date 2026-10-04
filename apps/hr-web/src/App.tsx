@@ -1,123 +1,74 @@
-import { useEffect, useState } from "react";
-import { PageTitle } from "./components/atoms/Brand";
-import { Notice } from "./components/molecules/Notice";
 import {
-  LoginForm,
-  ChangePasswordForm,
-} from "./components/organisms/AuthForms";
-import { AuthLayout } from "./components/templates/AuthLayout";
-import { DashboardPage } from "./pages/DashboardPage";
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+} from "react-router-dom";
+import type { ReactNode } from "react";
+import { WorkspaceLayout } from "./components/templates/WorkspaceLayout";
+import { AuthProvider } from "./routes/AuthProvider";
+import { RequireAuth } from "./routes/RequireAuth";
+import { LoginRoute } from "./routes/LoginRoute";
+import { ChangePasswordRoute } from "./routes/ChangePasswordRoute";
+import { NotFoundRoute } from "./routes/NotFoundRoute";
 import {
-  authClient,
-  AuthError,
-  type AdminUser,
-  type AuthClient,
-} from "./lib/auth-client";
-export function App({ client = authClient }: { client?: AuthClient }) {
-  const [user, setUser] = useState<AdminUser | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
-  useEffect(() => {
-    let active = true;
-    client
-      .restore()
-      .then((value) => {
-        if (active) setUser(value);
-      })
-      .catch((reason: unknown) => {
-        if (active)
-          setError(
-            reason instanceof Error
-              ? reason.message
-              : "Sesi tidak dapat dipulihkan.",
-          );
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [client]);
-  async function act(action: () => Promise<void>) {
-    setBusy(true);
-    setError("");
-    setMessage("");
-    try {
-      await action();
-    } catch (reason) {
-      setError(
-        reason instanceof Error
-          ? reason.message
-          : "Terjadi kesalahan. Coba lagi.",
-      );
-      if (reason instanceof AuthError && reason.status === 401 && user)
-        setUser(null);
-    } finally {
-      setBusy(false);
-    }
-  }
-  const logout = () =>
-    act(async () => {
-      await client.logout();
-      setUser(null);
-    });
-  if (loading)
-    return (
-      <AuthLayout>
-        <p role="status" className="loading-session">
-          Memeriksa sesi Anda…
-        </p>
-      </AuthLayout>
-    );
-  if (user && !user.mustChangePassword)
-    return (
-      <DashboardPage user={user} client={client} busy={busy} error={error} onLogout={logout}
-        onSessionExpired={() => { setUser(null); setError("Sesi Anda telah berakhir. Silakan masuk kembali."); }} />
-    );
+  AbsensiRoute,
+  DepartemenRoute,
+  HariLiburRoute,
+  JabatanRoute,
+  KaryawanRoute,
+  RingkasanRoute,
+} from "./routes/ViewRoutes";
+import { CHANGE_PASSWORD_PATH, LOGIN_PATH, viewPath } from "./routes/routes";
+import type { AuthClient } from "./lib/auth-client";
+
+/** The route tree, shared between the real app and tests. */
+function AppRoutes() {
   return (
-    <AuthLayout>
-      {user ? (
-        <>
-          <PageTitle>Buat password baru</PageTitle>
-          <p className="page-intro">
-            Ganti password awal untuk melanjutkan.
-          </p>
-          <p className="signed-in-email">{user.email}</p>
-          <ChangePasswordForm
-            busy={busy}
-            error={error}
-            onLogout={logout}
-            onSubmit={(current, replacement) =>
-              act(async () => {
-                await client.changePassword(current, replacement);
-                setUser(null);
-                setMessage(
-                  "Password berhasil diperbarui. Silakan masuk dengan password baru.",
-                );
-              })
-            }
+    <Routes>
+      <Route path={LOGIN_PATH} element={<LoginRoute />} />
+      <Route path={CHANGE_PASSWORD_PATH} element={<ChangePasswordRoute />} />
+      <Route element={<RequireAuth />}>
+        <Route element={<WorkspaceLayout />}>
+          <Route
+            index
+            element={<Navigate to={viewPath("ringkasan")} replace />}
           />
-        </>
-      ) : (
-        <>
-          <PageTitle>Masuk</PageTitle>
-          <p className="page-intro">Gunakan akun admin HRD Anda.</p>
-          {message && <Notice message={message} success />}
-          <LoginForm
-            busy={busy}
-            error={error}
-            onSubmit={(email, password) =>
-              act(async () => {
-                setUser(await client.login(email, password));
-              })
-            }
+          <Route path={viewPath("ringkasan")} element={<RingkasanRoute />} />
+          <Route path={viewPath("karyawan")} element={<KaryawanRoute />} />
+          <Route path={viewPath("absensi")} element={<AbsensiRoute />} />
+          <Route
+            path={viewPath("absensi-dihapus")}
+            element={<AbsensiRoute deleted />}
           />
-        </>
-      )}
-    </AuthLayout>
+          <Route path={viewPath("departemen")} element={<DepartemenRoute />} />
+          <Route path={viewPath("jabatan")} element={<JabatanRoute />} />
+          <Route path={viewPath("hari-libur")} element={<HariLiburRoute />} />
+        </Route>
+      </Route>
+      <Route path="*" element={<NotFoundRoute />} />
+    </Routes>
   );
 }
+
+/**
+ * Application root: provides the auth session and the router. The optional
+ * `client` lets tests inject a mock auth client, and `router` lets tests drive
+ * routing with an in-memory history and a chosen initial path.
+ */
+export function App({
+  client,
+  router,
+}: {
+  client?: AuthClient;
+  router?: (children: ReactNode) => ReactNode;
+}) {
+  const withRouter =
+    router ??
+    ((children: ReactNode) => <BrowserRouter>{children}</BrowserRouter>);
+  return (
+    <AuthProvider client={client}>{withRouter(<AppRoutes />)}</AuthProvider>
+  );
+}
+
 export default App;

@@ -68,7 +68,7 @@ Serial, satu increment ujung ke ujung. Centang hanya setelah pengguna oke manual
 | ID | Judul | Cakupan | Status |
 | --- | --- | --- | --- |
 | R00 | Fitur tema per portal | Toggle terang/gelap/sistem + persistensi (SELESAI, commit 1822f62) | [x] |
-| R01 | Fondasi routing | Pasang React Router di HR, migrasi dari hash, pertahankan slug/filter di URL; tambah halaman 404 route tak dikenal + guard auth (redirect ke login bila sesi hilang) | [ ] |
+| R01 | Fondasi routing | Pasang React Router di HR, migrasi dari hash, pertahankan slug/filter di URL; tambah halaman 404 route tak dikenal + guard auth (redirect ke login bila sesi hilang) | [x] |
 | R02 | Primitives bersama | Breadcrumb, UnderlineTabs, StatusPill, PageHeader, EmptyState, Skeleton, ConfirmDialog, FormField di `packages/ui` (Atomic) | [ ] |
 | R03 | Patokan: EmployeeDetail HR | Breadcrumb + underline tabs (Detail/Riwayat/Sesi) + list rows + pill status + aksi lifecycle via ConfirmDialog — KUNCI bahasa visual | [ ] |
 | R04 | Shell HR | Sidebar + header + breadcrumb + command palette (⌘-K) + shortcuts | [ ] |

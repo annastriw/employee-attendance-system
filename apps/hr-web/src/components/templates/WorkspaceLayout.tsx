@@ -1,4 +1,5 @@
 import { useRef, useState, type ReactNode } from "react";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { Button } from "@heroui/react";
 import {
   Briefcase,
@@ -12,8 +13,10 @@ import {
 } from "@phosphor-icons/react";
 import { Brand, PageTitle } from "../atoms/Brand";
 import { AccountMenu } from "../molecules/AccountMenu";
+import { Notice } from "../molecules/Notice";
 import { ThemeToggle } from "@attendance/ui";
-import type { View } from "../../lib/use-hash-route";
+import { useAuth } from "../../routes/auth-context";
+import { viewPath, type View } from "../../routes/routes";
 
 // Only destinations that exist in this increment are listed (spec: no dead links).
 const NAV: { view: View; label: string; icon: ReactNode }[] = [
@@ -54,50 +57,55 @@ const NAV: { view: View; label: string; icon: ReactNode }[] = [
   },
 ];
 
-function NavLinks({
-  active,
-  onNavigate,
-}: {
-  active: View;
-  onNavigate?: () => void;
-}) {
+// Page title per destination; shown in the header and used for the content label.
+const TITLES: Record<View, string> = {
+  ringkasan: "Ringkasan",
+  departemen: "Departemen",
+  jabatan: "Jabatan",
+  karyawan: "Karyawan",
+  "hari-libur": "Hari Libur",
+  absensi: "Absensi",
+  "absensi-dihapus": "Absensi dihapus",
+};
+
+function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   return NAV.map((item) => (
-    <a
+    <NavLink
       key={item.view}
-      href={`#${item.view}`}
+      to={viewPath(item.view)}
       className="nav-link"
       onClick={onNavigate}
-      aria-current={item.view === active ? "page" : undefined}
     >
       {item.icon}
       {item.label}
-    </a>
+    </NavLink>
   ));
 }
 
-export function WorkspaceLayout({
-  view,
-  title,
-  email,
-  busy,
-  onLogout,
-  children,
-}: {
-  view: View;
-  title: string;
-  email: string;
-  busy: boolean;
-  onLogout: () => Promise<void>;
-  children: ReactNode;
-}) {
+/**
+ * Persistent workspace shell. Rendered once for every authenticated page via
+ * the router Outlet; the sidebar, header and theme/account controls stay
+ * mounted while only the content changes. The active destination and title
+ * derive from the current path, so deep links and browser back/forward keep
+ * the navigation state correct.
+ */
+export function WorkspaceLayout() {
+  const { user, busy, error, logout } = useAuth();
+  const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuToggle = useRef<HTMLButtonElement>(null);
+
+  const active =
+    NAV.find((item) => location.pathname.startsWith(viewPath(item.view)))
+      ?.view ?? "ringkasan";
+  const title = TITLES[active];
+
   return (
     <div className="dashboard-layout">
       <aside className="dashboard-sidebar">
         <Brand />
         <nav aria-label="Navigasi utama" className="nav-list">
-          <NavLinks active={view} />
+          <NavLinks />
         </nav>
       </aside>
       <main id="konten" className="dashboard-main">
@@ -115,11 +123,15 @@ export function WorkspaceLayout({
             >
               <List size={20} aria-hidden="true" />
             </Button>
-            <PageTitle key={view}>{title}</PageTitle>
+            <PageTitle key={active}>{title}</PageTitle>
           </div>
           <div className="header-actions">
             <ThemeToggle />
-            <AccountMenu email={email} busy={busy} onLogout={onLogout} />
+            <AccountMenu
+              email={user?.email ?? ""}
+              busy={busy}
+              onLogout={logout}
+            />
           </div>
         </header>
         <nav
@@ -134,10 +146,11 @@ export function WorkspaceLayout({
             }
           }}
         >
-          <NavLinks active={view} onNavigate={() => setMenuOpen(false)} />
+          <NavLinks onNavigate={() => setMenuOpen(false)} />
         </nav>
         <section className="dashboard-content" aria-label={title}>
-          {children}
+          {error && <Notice message={error} />}
+          <Outlet />
         </section>
       </main>
     </div>

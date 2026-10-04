@@ -1,5 +1,22 @@
 # Progres dan titik lanjut
 
+## R01 — Fondasi routing HR (2026-10-05)
+
+Selesai dan diterima pengguna lewat cek manual dev server (route lancar). HR portal pindah dari hash routing ke React Router path routing.
+
+- Dependency: `react-router-dom@7.18.4` (pinned) di `apps/hr-web`.
+- Path per view: `/ringkasan` `/karyawan` `/absensi` `/absensi-dihapus` `/departemen` `/jabatan` `/hari-libur`; `/` redirect ke `/ringkasan`; `*` → halaman 404.
+- Filter/slug URL dipertahankan: pages tetap memakai kontrak `{ params: URLSearchParams, onParamsChange }` lewat adapter `useSearchParams` (navigasi `replace`, setara `history.replaceState` lama). Detail-dalam-view (`?employee=`, `?id=`) tak berubah — siap jadi sumber breadcrumb di R03/R05/R06.
+- 404 memakai primitive bersama R02 `EmptyState` (tidak membuat primitive baru).
+- Guard auth `RequireAuth`: redirect ke `/masuk` saat sesi hilang / `restore()` gagal; gate `mustChangePassword` ke `/ganti-password`. Login + ganti password identik perilaku dengan `App.tsx` lama (state diangkat ke `AuthProvider` + `auth-context`).
+- `WorkspaceLayout` kini shell router (NavLink + Outlet; judul/active diturunkan dari path; Notice error bersama di atas Outlet). IA/label nav tidak diubah.
+- Vite SPA fallback default (`appType: spa`, tanpa override) → refresh di sub-path tidak 404. Proxy VPS di `vite.config.ts` tidak disentuh.
+- Dihapus (dead): `src/lib/use-hash-route.ts`, `src/pages/DashboardPage.tsx`.
+- Test: tambah polyfill `window.matchMedia` di `src/test/setup.ts` (jsdom tak punya; `ThemeToggle` bersama memakainya) dan helper `src/test/router.tsx` (`memoryRouter`). `App.test.tsx` memakai `memoryRouter(["/"])`.
+- Verifikasi: `pnpm --filter hr-web build` (tsc+vite) OK, `lint` bersih, 79/79 unit test lulus. attendance-web tidak disentuh. StatusBadge/ConfirmDialog/Notice/PasswordField belum dipindah (ditunda R05/R07).
+- File: `apps/hr-web/package.json`, `pnpm-lock.yaml`, `apps/hr-web/src/App.tsx`, `apps/hr-web/src/App.test.tsx`, `apps/hr-web/src/components/templates/WorkspaceLayout.tsx`, `apps/hr-web/src/routes/*` (routes.ts, auth-context.ts, AuthProvider.tsx, RequireAuth.tsx, LoginRoute.tsx, ChangePasswordRoute.tsx, NotFoundRoute.tsx, ViewRoutes.tsx), `apps/hr-web/src/test/{setup.ts,router.tsx}`.
+- Lanjut: R03 — patokan EmployeeDetail HR (breadcrumb dari path + underline tabs Detail/Riwayat/Sesi + list rows + pill status + aksi lifecycle via ConfirmDialog), mengunci bahasa visual.
+
 ## Handoff — 2026-10-05
 
 Website/live diterima pengguna. Folder docs/temporary diminta dihapus dari checkout lokal serta dev/main GitHub; semua rujukan dipindahkan ke file ini. Dokumentasi analisis kebutuhan, PRD dan siklus SDD lengkap tetap dipertahankan. Sinkronisasi main menggunakan PR dev → main dengan CI, tanpa force push atau perubahan ruleset.
