@@ -418,6 +418,38 @@ Kirim PASS/permission atau error tanpa isi env. Jika sudah ada/terjadi partial p
 
 Verifikasi agen: unit generator terfokus, actionlint dan parsing YAML; Docker daemon lokal tidak tersedia sehingga validasi Compose sesungguhnya menunggu config --quiet VPS. Belum menjalankan backend/database/storage integration atau mengubah VPS oleh agen.
 
+## Tahap 5C — pull dan jalankan backend
+
+Output 5B diterima: lima env mode 600, config commit 13f56e0d1c65d8d11a161b142ea3e78ed1bb37de, Compose config PASS. Anonymous GHCR manifest HEAD kelima image rilis main1c27c90 diperiksa HTTP200; tidak perlu login/token untuk pull saat pemeriksaan. Tahap ini menjalankan lima backend, bukan infra/nginx/SSL/frontend; belum berarti aplikasi live publik.
+
+Jalankan satu block pada SSH VPS. Compose backend berbeda project dari infra; tidak memakai down/reset/build. Pull gagal akan menghentikan block sebelum up. Jika up --wait gagal, sebagian container bisa sudah berjalan; laporkan error, jangan down/reset atau mengulang bootstrap.
+
+```sh
+(
+  set -eu
+  cd /opt/attendance
+  sudo docker compose --env-file backend-release.env -f compose.backend.yml pull
+  sudo docker compose --env-file backend-release.env -f compose.backend.yml \
+    up -d --wait --wait-timeout 120
+  sudo docker compose --env-file backend-release.env -f compose.backend.yml ps
+  for port in 3000 3001 3002 3003 3004; do
+    curl --max-time 10 -fsS -o /dev/null \
+      -w "Backend port $port HTTP %{http_code}\n" "http://127.0.0.1:$port/health"
+  done
+  echo 'PASS: lima backend berjalan dan health HTTP 200'
+)
+```
+
+Target lima container healthy dan semua health HTTP200. Health operasional menguji dependency nyata (Auth DB; Media DB/bucket); tidak menjalankan suite unit/integrasi/browser. Setelah block sukses, jalankan:
+
+```sh
+free -h
+sudo docker stats --no-stream
+sudo ss -lntp | grep -E ':(3000|3001|3002|3003|3004|3307|9000|9001)\b'
+```
+
+Target backend/database/storage hanya 127.0.0.1. Host-network container ps tidak menampilkan port mapping; ss menjadi bukti bind. Kirim ps/HTTP/PASS/resource/port atau error. Jangan kirim full docker inspect/config/env, token atau log mentah yang mengandung credential. Agen belum menjalankan VPS; runtime health/resource masih menunggu output pengguna. Berikut domain/Nginx/HTTPS, admin seed, frontend dan backup/acceptance live. Jangan membuat admin otomatis di tahap ini.
+
 ## Status langkah berikutnya
 
 Bootstrap migration/akun runtime, image rilis main/GHCR, Compose backend, domain/TLS dan frontend dikerjakan setelah inventaris tahap 1. Unit rilis dijalankan sekali pada PR; integrasi cepat bila perlu sebelum rilis. Pengiriman otomatis ke VPS belum aktif. T30/T31 belum dicentang dari pemeriksaan infra saja.

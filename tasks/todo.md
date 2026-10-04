@@ -274,7 +274,7 @@ Penyederhanaan disetujui (2026-10-01): T01–T31 adalah satu backlog utama; UX01
 - [x] Alur fase diverifikasi, batasan dicatat dan ditinjau.
 
 ## T30 — Artefak deploy dan runbook
-- Pelaksanaan pengguna: manual satu tahap per giliran pada [runbook VPS](../docs/deployment/vps-production-manual.md). Rilis main/image/schema/akun runtime siap, 5A secret aplikasi diterima. Berikut 5B generator env per service dan Compose (config --quiet); lalu 5C pull/up/health. Backend belum deploy.
+- Pelaksanaan pengguna: manual satu tahap per giliran pada [runbook VPS](../docs/deployment/vps-production-manual.md). Rilis main/image/schema/akun/env/Compose siap, 5B config diterima. Berikut 5C pull/up --wait/health/resource. Backend belum terverifikasi berjalan/live publik.
 - [ ] Selesai
 - Acceptance: Satu repo GitHub, dua project Vercel terpisah, backend/MySQL/AIStor VPS Ubuntu, Cloudflare, migration/seed, healthcheck, backup/restore dan rollback siap; topologi mengikuti ADR-003.
 - Verification: Review konfigurasi tanpa secret; uji restore backup test.
