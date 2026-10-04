@@ -1,5 +1,9 @@
 # Progres dan titik lanjut
 
+## Increment dokumentasi SDD — 2026-10-05
+
+Arahan pengguna: SDD mulai analisis kebutuhan dan PRD hingga auto-deployment. Ditambahkan analisis/PRD ringkas berdasarkan baseline serta lifecycle yang menghubungkan desain, spesifikasi domain, Kanban, implementasi, verifikasi, PR main, Vercel/GHCR/VPS dan feedback. Dokumentasi ini bertanggal aktual; tidak mengubah aturan bisnis/source atau mengarang bukti acceptance. Verifikasi increment: isi/source acuan, tautan relatif dan diff; tidak menjalankan test aplikasi untuk perubahan dokumentasi saja. Coding/push tetap dev; promosi main kembali lewat PR.
+
 ## Selesai — perapian repository
 
 Keputusan pengguna 2026-10-04–05: README Inggris, SDD/panduan Indonesia, docs/ERD/fitur/local setup, GitHub About, audit secret, hapus duplikasi/artefak tidak penting dan kurasi history dev/main. Kerja serial tanpa subagen. [Plan](../docs/temporary/task/plan.md), [checklist](../docs/temporary/task/checklist.md), [handoff](../docs/temporary/task/handoff.md).

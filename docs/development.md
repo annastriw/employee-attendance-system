@@ -4,6 +4,8 @@ Coding langsung di `dev`; `main` adalah branch live. Kerja serial, satu incremen
 
 ## Siklus kerja
 
+Mulai dari [analisis kebutuhan](requirements/analysis.md) dan [PRD](requirements/prd.md). [Siklus SDD lengkap](sdd/lifecycle.md) menghubungkan kebutuhan, desain/ERD/API/UI, implementasi, testing dan auto-deployment. Langkah berikut merinci increment harian.
+
 ```mermaid
 flowchart LR
     Backlog[Backlog] --> Spec[Spesifikasi dan kontrak]

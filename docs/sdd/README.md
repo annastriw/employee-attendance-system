@@ -1,6 +1,6 @@
 # Spesifikasi per domain
 
-SDD menjelaskan aturan dan kontrak implementasi aktual. Dokumen menyimpan scope, invariant, state, integrasi dan titik verifikasi tanpa menyalin log sesi atau mengarang hasil.
+SDD mencakup [analisis kebutuhan](../requirements/analysis.md), [PRD](../requirements/prd.md), desain, kontrak domain, implementasi, verifikasi hingga auto-deployment. Mulai dari [siklus SDD lengkap](lifecycle.md). Spesifikasi domain menyimpan scope, invariant, state, integrasi dan titik verifikasi tanpa menyalin log sesi atau mengarang hasil.
 
 | Spesifikasi | Isi |
 | --- | --- |

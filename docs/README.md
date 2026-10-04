@@ -4,6 +4,9 @@ Mulai dari [README Inggris](../README.md) untuk ringkasan produk dan akun demo.
 
 | Panduan | Isi |
 | --- | --- |
+| [Analisis kebutuhan](requirements/analysis.md) | Masalah, pengguna, kendala dan batas scope |
+| [PRD](requirements/prd.md) | Tujuan produk, prioritas dan acceptance |
+| [Siklus SDD](sdd/lifecycle.md) | Kebutuhan → desain → implementasi → auto-deployment |
 | [Setup lokal](getting-started.md) | Clone, environment, MySQL/AIStor, seed dan tujuh aplikasi |
 | [Fitur](features.md) | Portal karyawan/HR, aturan dan demo walkthrough |
 | [Arsitektur](architecture.md) | Service, transport, storage, deployment |

@@ -100,6 +100,9 @@ tasks/         roadmap and accepted feature status
 
 ## Documentation
 
+- [Requirements analysis](docs/requirements/analysis.md)
+- [Product requirements](docs/requirements/prd.md)
+- [SDD lifecycle: requirements to automatic deployment](docs/sdd/lifecycle.md)
 - [Local setup](docs/getting-started.md)
 - [Features and demo walkthrough](docs/features.md)
 - [Architecture and service boundaries](docs/architecture.md)

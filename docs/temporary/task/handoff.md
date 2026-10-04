@@ -4,6 +4,8 @@
 
 C01–C10 selesai. Tidak ada increment perapian tersisa. Agent tunggal, tanpa delegasi. Kerja berikut mengikuti dev lokal → PR main → auto deployment.
 
+Tambahan arahan 2026-10-05: [analisis kebutuhan](../../requirements/analysis.md), [PRD](../../requirements/prd.md) dan [siklus SDD](../../sdd/lifecycle.md) melengkapi dokumentasi kebutuhan sampai auto-deployment. Source/aturan bisnis tetap; perubahan dokumentasi dipush ke dev, promosi berikut ke main lewat PR.
+
 ## Kondisi awal
 
 - Lokal dev: `b17fa28`; origin/main setelah fetch: `f581f31aa11d757e36aeab7b06936d40bc6f547f`.
