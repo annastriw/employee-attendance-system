@@ -477,6 +477,16 @@ textarea:focus-visible {
 .page-header__title { font-size: var(--ui-title); line-height: 1.2; font-weight: 600; letter-spacing: -0.02em; }
 .page-header__desc { color: var(--muted); font-size: 0.875rem; line-height: 1.5; max-width: 60ch; }
 .page-header__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.chart-container { width: 100%; min-width: 0; }
+.chart-container .recharts-cartesian-axis-tick-value { fill: var(--muted); font-family: var(--font-sans); font-size: 11px; }
+.chart-container .recharts-cartesian-grid line { stroke: var(--border); }
+.chart-tooltip { min-width: 9rem; padding: .625rem .75rem; border: 1px solid var(--border); border-radius: .625rem; background: var(--surface); color: var(--foreground); box-shadow: var(--overlay-shadow); font-size: .75rem; }
+.chart-tooltip__title { margin: 0 0 .5rem; color: var(--muted); font-weight: 600; }
+.chart-tooltip__row { display: grid; grid-template-columns: .5rem minmax(0,1fr) auto; align-items: center; gap: .5rem; padding: .125rem 0; }
+.chart-tooltip__swatch, .chart-legend__swatch { width: .5rem; height: .5rem; border-radius: 9999px; }
+.chart-tooltip__row strong { font-variant-numeric: tabular-nums; }
+.chart-legend { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; margin: .25rem 0 0; padding: 0; list-style: none; color: var(--muted); font-size: .75rem; }
+.chart-legend li { display: inline-flex; align-items: center; gap: .375rem; }
 
 /* ---------- Skeleton ---------- */
 .skeleton {

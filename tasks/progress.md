@@ -1,5 +1,25 @@
 # Progres dan titik lanjut
 
+## T7 teknis selesai - Ringkasan HR dengan tren dan detail inline (2026-10-05)
+
+- Ringkasan HR kini memakai DateRangeField default 7 hari, grafik tren responsif
+  dan berwarna token tema, donut ringkasan tanggal terpilih, tooltip/legenda Bahasa
+  Indonesia, state skeleton/kosong/error, serta fallback 404 "Grafik tren tersedia
+  setelah rilis backend". Klik baris membuka Drawer detail; desktop panel kanan,
+  mobile sheet bawah, fokus kembali ke baris, dan ada tautan ke bukti absensi/profil.
+- Backend Attendance Service + API Gateway menyediakan
+  `GET /api/v1/monitoring/trend?startDate&endDate`, rentang inklusif maks. 92 hari,
+  data historis per hari dan penanda jadwal/libur. Tidak ada migration.
+- Perlu PR+deploy sebelum endpoint grafik aktif di production: Attendance Service,
+  API Gateway, endpoint di atas, tanpa migration. Frontend aman saat endpoint belum
+  live. PR ke main dibuat pengguna sesuai alur.
+- Verifikasi: HR unit 8/8, lint dan typecheck lulus; Attendance Service unit
+  terfokus 11/11, lint dan typecheck lulus; API Gateway unit 7/7, lint dan typecheck
+  lulus. Build dilewati karena resource_status tidak tersedia; catatan RAM terakhir
+  sekitar 2.1 GiB bebas. UI visual menunggu acceptance manual pengguna.
+- Lanjut: T8 profil read-only dan ganti password tiap role. T7 sudah di-commit/push
+  ke `dev`; acceptance visual tetap belum dicentang.
+
 ## T6 aktif - halaman detail HR dan aksi baris (2026-10-05)
 
 - Detail Absensi memakai PageHeader + breadcrumb Absensi/tanggal/nama, status dan

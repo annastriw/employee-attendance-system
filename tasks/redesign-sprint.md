@@ -288,6 +288,11 @@ Fase B:
 - **DoD**: semua baris list membuka target yang benar; detail punya breadcrumb kembali.
 
 ### T7 `[ ]` Ringkasan HR: chart + detail inline  *(backend)*
+- Status 2026-10-05: implementasi teknis selesai dan di-push pada commit T7; lint,
+  typecheck, dan unit terfokus lulus (HR 8/8, Attendance Service 11/11, Gateway
+  7/7). Checklist UI tetap terbuka sampai acceptance manual. Backend perlu PR+deploy:
+  Attendance Service + API Gateway, `GET /api/v1/monitoring/trend?startDate&endDate`,
+  tanpa migration.
 - **Backend** (attendance-service + api-gateway): `GET /api/v1/monitoring/trend?startDate&endDate`
   → `[{ date, present, late, absent, onLeave? }]` per hari (WIB, maks 92 hari, hari libur
   ditandai). Admin guard sama dengan `monitoring/summary`. Unit service. Push dev,

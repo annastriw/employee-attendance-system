@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Button, Skeleton } from "@heroui/react";
+import { Link } from "react-router-dom";
+import { Button, Drawer, Skeleton, useOverlayState } from "@heroui/react";
 import {
   CaretLeft,
   CaretRight,
@@ -10,8 +10,9 @@ import {
   Warning,
   ArrowClockwise,
   ArrowSquareOut,
+  X,
 } from "@phosphor-icons/react";
-import { Notice, StatusPill, monitoringTone, CalendarField, SearchInput, FilterSelect } from "@attendance/ui";
+import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, Tooltip, XAxis, YAxis, Notice, StatusPill, monitoringTone, CalendarField, SearchInput, FilterSelect, DateRangeField, ChartContainer, ChartLegend, ChartTooltip, type ChartSeriesConfig, dateRangePreset } from "@attendance/ui";
 
 import { loadMasters } from "../lib/employees";
 import type { MasterRecord } from "../lib/master-data";
@@ -27,6 +28,24 @@ import {
 
 type Client = Pick<AuthClient, "api">;
 type Params = Record<string, string | undefined>;
+interface MonitoringTrendPoint {
+  date: string;
+  present: number;
+  late: number;
+  absent: number;
+  scheduleType: "REGULAR_WORKDAY" | "WEEKEND" | "HOLIDAY";
+  holiday: string | null;
+}
+const TREND_SERIES: ChartSeriesConfig = {
+  present: { label: "Hadir", color: "var(--success)" },
+  late: { label: "Terlambat", color: "var(--warning)" },
+  absent: { label: "Belum hadir", color: "var(--muted)" },
+};
+const DONUT_SERIES: ChartSeriesConfig = {
+  present: { label: "Hadir tepat waktu", color: "var(--success)" },
+  late: { label: "Terlambat", color: "var(--warning)" },
+  absent: { label: "Belum hadir", color: "var(--muted)" },
+};
 
 const failure = (e: unknown) =>
   e instanceof Error ? e.message : "Data monitoring belum dapat dimuat. Coba lagi.";
@@ -76,7 +95,6 @@ export function MonitoringPage({
   onParamsChange: (next: Params) => void;
   onSessionExpired: () => void;
 }) {
-  const navigate = useNavigate();
   const handle = useFailure(onSessionExpired);
 
   const todayStr = getTodayWIB();
@@ -98,6 +116,23 @@ export function MonitoringPage({
   const [employeesLoaded, setEmployeesLoaded] = useState("");
   const [error, setError] = useState("");
   const [searchInput, setSearchInput] = useState(searchQuery);
+  const [trendRange, setTrendRange] = useState(() => dateRangePreset("7days"));
+  const [trend, setTrend] = useState<MonitoringTrendPoint[]>([]);
+  const [trendLoaded, setTrendLoaded] = useState("");
+  const [trendError, setTrendError] = useState<{ key: string; status?: number; message: string } | null>(null);
+  const [trendReload, setTrendReload] = useState(0);
+  const [selectedEmployee, setSelectedEmployee] = useState<MonitoringEmployeeItem | null>(null);
+  const rowRefs = useRef(new Map<string, HTMLTableRowElement>());
+  const drawerState = useOverlayState({
+    isOpen: Boolean(selectedEmployee),
+    onOpenChange: open => { if (!open) setSelectedEmployee(null); },
+  });
+  useEffect(() => {
+    if (!selectedEmployee) return;
+    const employeeId = selectedEmployee.employeeId;
+    const rows = rowRefs.current;
+    return () => rows.get(employeeId)?.focus();
+  }, [selectedEmployee]);
 
   const summaryKey = [selectedDate, reload].join("|");
   const loadingSummary = summaryKey !== summaryLoaded;
@@ -111,6 +146,20 @@ export function MonitoringPage({
     reload,
   ].join("|");
   const loadingEmployees = employeesKey !== employeesLoaded;
+  const trendKey = `${trendRange.startDate}|${trendRange.endDate}|${trendReload}`;
+  const loadingTrend = trendLoaded !== trendKey;
+
+  useEffect(() => {
+    let active = true;
+    const query = new URLSearchParams({ startDate: trendRange.startDate, endDate: trendRange.endDate });
+    client.api<{ data: MonitoringTrendPoint[] }>(`monitoring/trend?${query}`)
+      .then(result => { if (active) { setTrend(result.data); setTrendError(null); } })
+      .catch((e: unknown) => {
+        if (active) setTrendError({ key: trendKey, status: e instanceof AuthError ? e.status : undefined, message: handle(e) });
+      })
+      .finally(() => { if (active) setTrendLoaded(trendKey); });
+    return () => { active = false; };
+  }, [client, trendRange, trendKey, handle]);
 
   // Load departments once for dropdown
   useEffect(() => {
@@ -480,6 +529,50 @@ export function MonitoringPage({
         </div>
       </div>
 
+      <section className="monitoring-analytics-grid" aria-label="Analitik kehadiran">
+        <article className="monitoring-chart-card monitoring-trend-card">
+          <header className="monitoring-chart-heading">
+            <div><h2>Tren kehadiran</h2><p>Jumlah karyawan per hari</p></div>
+            <DateRangeField label="Rentang tren" value={trendRange} onChange={value => { if (value) setTrendRange(value); }} />
+          </header>
+          {loadingTrend ? <Skeleton className="monitoring-chart-loading" aria-label="Memuat tren kehadiran" /> : trendError?.key === trendKey ? (
+            <div className="monitoring-chart-message" role="status">
+              <p>{trendError.status === 404 ? "Grafik tren tersedia setelah rilis backend" : trendError.message}</p>
+              {trendError.status !== 404 && <Button size="sm" variant="secondary" onPress={() => setTrendReload(x => x + 1)}>Coba lagi</Button>}
+            </div>
+          ) : trend.length ? <>
+            <ChartContainer label="Grafik tren harian: hadir, terlambat, belum hadir" height={250}>
+              <AreaChart data={trend} margin={{ top: 8, right: 8, bottom: 0, left: -20 }}>
+                <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
+                <XAxis dataKey="date" tickFormatter={(value: string) => new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", timeZone: "Asia/Jakarta" }).format(new Date(`${value}T00:00:00+07:00`))} />
+                <YAxis allowDecimals={false} />
+                <Tooltip content={<ChartTooltip series={TREND_SERIES} />} />
+                <Area type="monotone" dataKey="present" stroke="var(--success)" fill="var(--success)" fillOpacity={0.14} />
+                <Area type="monotone" dataKey="late" stroke="var(--warning)" fill="var(--warning)" fillOpacity={0.12} />
+                <Area type="monotone" dataKey="absent" stroke="var(--muted)" fill="var(--muted)" fillOpacity={0.1} />
+              </AreaChart>
+            </ChartContainer>
+            <ChartLegend series={TREND_SERIES} />
+          </> : <p className="monitoring-chart-message">Belum ada data tren pada rentang ini.</p>}
+        </article>
+        <article className="monitoring-chart-card monitoring-donut-card">
+          <header className="monitoring-chart-heading"><div><h2>Komposisi {monitoringDateFormatted(selectedDate)}</h2><p>Ringkasan untuk tanggal terpilih</p></div></header>
+          {loadingSummary ? <Skeleton className="monitoring-chart-loading" aria-label="Memuat komposisi kehadiran" /> : summary && summary.activeEmployees > 0 ? <div className="monitoring-donut-wrap">
+            <ChartContainer label="Komposisi hadir tepat waktu, terlambat, dan belum hadir hari ini" height={220}>
+              <PieChart><Pie data={[
+                { key: "present", value: Math.max(summary.checkedIn - summary.late, 0) },
+                { key: "late", value: summary.late },
+                { key: "absent", value: summary.missingAttendance },
+              ]} dataKey="value" nameKey="key" innerRadius="66%" outerRadius="88%" paddingAngle={2} stroke="none">
+                {Object.keys(DONUT_SERIES).map(key => <Cell key={key} fill={DONUT_SERIES[key].color} />)}
+              </Pie><Tooltip content={<ChartTooltip series={DONUT_SERIES} />} /></PieChart>
+            </ChartContainer>
+            <div className="monitoring-donut-center"><strong>{summary.activeEmployees}</strong><span>Karyawan</span></div>
+          </div> : <p className="monitoring-chart-message">Belum ada data untuk tanggal ini.</p>}
+          <ChartLegend series={DONUT_SERIES} />
+        </article>
+      </section>
+
       {/* Filter Toolbar */}
       <div className="monitoring-filters-toolbar">
         <SearchInput label="Cari nama atau NIK" value={searchInput} onChange={setSearchInput} onSearch={value => update({ search: value.trim() || undefined, page: undefined })} placeholder="Cari nama atau NIK" />
@@ -548,16 +641,16 @@ export function MonitoringPage({
             </thead>
             <tbody>
               {items.map((item: MonitoringEmployeeItem) => (
-                <tr key={item.employeeId} data-interactive-row="true" tabIndex={0}
+                <tr key={item.employeeId} ref={node => { if (node) rowRefs.current.set(item.employeeId, node); else rowRefs.current.delete(item.employeeId); }} data-interactive-row="true" tabIndex={0}
                   aria-label={`Buka detail ${item.name}`}
                   onClick={event => {
                     if (event.target instanceof Element && event.target.closest("a, button")) return;
-                    navigate(item.recordId ? `/absensi?id=${encodeURIComponent(item.recordId)}` : `/karyawan?employee=${encodeURIComponent(item.employeeId)}`);
+                    setSelectedEmployee(item);
                   }}
                   onKeyDown={event => {
                     if (event.target === event.currentTarget && event.key === "Enter") {
                       event.preventDefault();
-                      navigate(item.recordId ? `/absensi?id=${encodeURIComponent(item.recordId)}` : `/karyawan?employee=${encodeURIComponent(item.employeeId)}`);
+                      setSelectedEmployee(item);
                     }
                   }}>
                   <td>
@@ -639,6 +732,30 @@ export function MonitoringPage({
           </Button>
         </div>
       )}
+
+      <Drawer state={drawerState}>
+        <Drawer.Trigger className="monitoring-detail-trigger" aria-hidden="true">Open employee detail</Drawer.Trigger>
+        <Drawer.Backdrop className="monitoring-detail-backdrop">
+          <Drawer.Content className="monitoring-detail-drawer" placement="right">
+            <Drawer.Dialog aria-label={selectedEmployee ? `Detail ${selectedEmployee.name}` : "Detail karyawan"}>
+              <Drawer.Header className="monitoring-detail-header">
+                <div><h2>{selectedEmployee?.name ?? "Detail karyawan"}</h2><p>{selectedEmployee?.nik}</p></div>
+                <Drawer.CloseTrigger aria-label="Tutup detail"><X size={18} /></Drawer.CloseTrigger>
+              </Drawer.Header>
+              <Drawer.Body className="monitoring-detail-body">
+                <StatusPill tone={monitoringTone(selectedEmployee?.status ?? "MISSING")} label={selectedEmployee ? monitoringStatusLabel(selectedEmployee.status) : ""} />
+                <dl><div><dt>Tanggal</dt><dd>{selectedEmployee ? monitoringDateFormatted(selectedEmployee.attendanceDate) : "—"}</dd></div>
+                  <div><dt>Departemen</dt><dd>{selectedEmployee?.department ?? "—"}</dd></div><div><dt>Jabatan</dt><dd>{selectedEmployee?.position ?? "—"}</dd></div>
+                  <div><dt>Check-in</dt><dd>{monitoringTimeFormatted(selectedEmployee?.checkInTime ?? null)}</dd></div><div><dt>Checkout</dt><dd>{monitoringTimeFormatted(selectedEmployee?.checkOutTime ?? null)}</dd></div>
+                </dl>
+              </Drawer.Body>
+              <Drawer.Footer className="monitoring-detail-footer">
+                {selectedEmployee?.recordId ? <Link to={`/absensi?id=${encodeURIComponent(selectedEmployee.recordId)}`} className="monitoring-detail-link">Buka detail absensi <ArrowSquareOut size={16} /></Link> : <Link to={`/karyawan?employee=${encodeURIComponent(selectedEmployee?.employeeId ?? "")}`} className="monitoring-detail-link is-secondary">Buka profil karyawan</Link>}
+              </Drawer.Footer>
+            </Drawer.Dialog>
+          </Drawer.Content>
+        </Drawer.Backdrop>
+      </Drawer>
     </div>
   );
 }

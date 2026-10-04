@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { DatabaseService } from '../database/database.module';
 import { AttendanceUpstreamClient } from '../checkin/attendance-upstream.client';
 import { WorkPolicyService } from '../policy/work-policy.service';
@@ -18,8 +18,10 @@ import {
 import type {
   MonitoringEmployeesQueryDto,
   MonitoringSummaryQueryDto,
+  MonitoringTrendQueryDto,
 } from './attendance-monitoring.dto';
 import type { Prisma } from '@attendance/database';
+import { monitoringTrendRange } from './monitoring-trend-range';
 
 export interface MonitoringEmployeeItem {
   employeeId: string;
@@ -44,6 +46,15 @@ export interface MonitoringEmployeeItem {
   checkOutTime: string | null;
   recordId: string | null;
   deletedAt: string | null;
+}
+
+export interface MonitoringTrendPoint {
+  date: string;
+  present: number;
+  late: number;
+  absent: number;
+  scheduleType: 'REGULAR_WORKDAY' | 'WEEKEND' | 'HOLIDAY';
+  holiday: string | null;
 }
 
 type DailyWithEvents = Prisma.AttDailyRecordGetPayload<{
@@ -74,6 +85,95 @@ export class AttendanceMonitoringService {
       holidayDate: h.holidayDate.toISOString().slice(0, 10),
       description: h.description,
     }));
+  }
+
+  async getTrend(query: MonitoringTrendQueryDto, requestId: string) {
+    const range = monitoringTrendRange(query.startDate, query.endDate);
+    if (!range) {
+      throw new BadRequestException('Rentang tren harus valid dan maksimal 92 hari.');
+    }
+    const now = this.clock.now();
+    const [roster, policy, holidays, dailyRecords] = await Promise.all([
+      this.upstream.roster(requestId),
+      this.policyService.getActivePolicy(),
+      this.getHolidays(),
+      this.db.client.attDailyRecord.findMany({
+        where: {
+          attendanceDate: {
+            gte: new Date(`${range.startDate}T00:00:00.000Z`),
+            lt: new Date(Date.parse(`${range.endDate}T00:00:00.000Z`) + 86_400_000),
+          },
+        },
+        include: { events: true },
+      }),
+    ]);
+    const recordsByDate = new Map<string, Map<string, DailyWithEvents>>();
+    for (const record of dailyRecords) {
+      const date = record.attendanceDate.toISOString().slice(0, 10);
+      const byEmployee = recordsByDate.get(date) ?? new Map<string, DailyWithEvents>();
+      byEmployee.set(record.employeeId, record);
+      recordsByDate.set(date, byEmployee);
+    }
+
+    const snapshots = roster.map((employee) => ({
+      employee: {
+        id: employee.id,
+        nik: employee.nik,
+        name: employee.name,
+        startDate: employee.startDate,
+        status: employee.status,
+        ready: employee.ready,
+        departmentId: employee.departmentId,
+        departmentName: employee.departmentName,
+        positionId: employee.positionId,
+        positionName: employee.positionName,
+      } satisfies EmployeeProfileSnapshot,
+      historyEntries: (employee.history || []).map((entry) => ({
+        action: entry.action,
+        before: entry.before,
+        after: entry.after,
+        createdAt: new Date(entry.createdAt),
+      } satisfies LifecycleHistoryEntry)),
+    }));
+
+    const data: MonitoringTrendPoint[] = range.dates.map((date) => {
+      const targetDate = TimePolicyEngine.getWibComponents(new Date(`${date}T12:00:00+07:00`));
+      const schedule = TimePolicyEngine.classifySchedule(targetDate, policy, holidays);
+      let present = 0;
+      let late = 0;
+      let absent = 0;
+      const recordByEmployee = recordsByDate.get(date);
+      for (const snapshot of snapshots) {
+        const dailyRecord = recordByEmployee?.get(snapshot.employee.id) ?? null;
+        const evaluation = EligibilityEngine.evaluateDayAttendance({
+          ...snapshot,
+          targetDateStr: date,
+          currentTime: now,
+          dailyRecord,
+          policy,
+          holidays,
+        });
+        if (evaluation.isMissingAttendance) absent++;
+        if (!dailyRecord || dailyRecord.deletedAt) continue;
+        const checkIn = dailyRecord.events.find((event) => event.eventType === 'CHECK_IN');
+        if (!checkIn) continue;
+        present++;
+        if (checkIn.isLate) late++;
+      }
+      return {
+        date,
+        present,
+        late,
+        absent,
+        scheduleType: schedule.scheduleType,
+        holiday: schedule.holiday?.description ?? null,
+      };
+    });
+
+    return {
+      data,
+      meta: { requestId, serverTime: wib(now), startDate: range.startDate, endDate: range.endDate },
+    };
   }
 
   async getSummary(query: MonitoringSummaryQueryDto, requestId: string) {

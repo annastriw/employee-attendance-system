@@ -232,6 +232,48 @@ describe('AttendanceMonitoringService (T25)', () => {
     });
   });
 
+  describe('getTrend', () => {
+    it('counts historical check-ins and absences, and marks non-working dates', async () => {
+      mockDb.client.attHoliday.findMany.mockResolvedValue([
+        { holidayDate: new Date('2026-10-04T00:00:00.000Z'), description: 'Hari Libur Uji' },
+      ]);
+      mockDb.client.attDailyRecord.findMany.mockResolvedValue([
+        {
+          id: 'fri-late', employeeId: 'emp-1', attendanceDate: new Date('2026-10-02T00:00:00.000Z'), deletedAt: null,
+          events: [{ eventType: 'CHECK_IN', isLate: true, isEarlyDeparture: false }],
+        },
+        {
+          id: 'fri-present', employeeId: 'emp-2', attendanceDate: new Date('2026-10-02T00:00:00.000Z'), deletedAt: null,
+          events: [{ eventType: 'CHECK_IN', isLate: false, isEarlyDeparture: false }],
+        },
+        {
+          id: 'mon-present', employeeId: 'emp-1', attendanceDate: new Date('2026-10-05T00:00:00.000Z'), deletedAt: null,
+          events: [{ eventType: 'CHECK_IN', isLate: false, isEarlyDeparture: false }],
+        },
+      ]);
+
+      const result = await service.getTrend({
+        startDate: '2026-10-02', endDate: '2026-10-05',
+      } as any, 'request-trend');
+
+      expect(result.data).toEqual([
+        { date: '2026-10-02', present: 2, late: 1, absent: 2, scheduleType: 'REGULAR_WORKDAY', holiday: null },
+        { date: '2026-10-03', present: 0, late: 0, absent: 0, scheduleType: 'WEEKEND', holiday: null },
+        { date: '2026-10-04', present: 0, late: 0, absent: 0, scheduleType: 'HOLIDAY', holiday: 'Hari Libur Uji' },
+        { date: '2026-10-05', present: 1, late: 0, absent: 3, scheduleType: 'REGULAR_WORKDAY', holiday: null },
+      ]);
+      expect(result.meta).toMatchObject({ requestId: 'request-trend', startDate: '2026-10-02', endDate: '2026-10-05' });
+      expect(mockUpstream.roster).toHaveBeenCalledTimes(1);
+      expect(mockDb.client.attDailyRecord.findMany).toHaveBeenCalledTimes(1);
+    });
+
+    it('rejects ranges longer than 92 days', async () => {
+      await expect(service.getTrend({ startDate: '2026-01-01', endDate: '2026-04-03' } as any, 'request-trend'))
+        .rejects.toThrow('maksimal 92 hari');
+      expect(mockUpstream.roster).not.toHaveBeenCalled();
+    });
+  });
+
   describe('getEmployees', () => {
     it('returns all employees with accurate statuses, snapshots and pagination', async () => {
       const targetDate = '2026-10-05';
