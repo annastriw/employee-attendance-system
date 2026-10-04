@@ -64,7 +64,7 @@ ID layar untuk keterlacakan, bukan ketentuan nama file atau endpoint baru.
 
 | ID | Halaman/alur | Informasi dan tindakan |
 | --- | --- | --- |
-| E01 | Masuk | Form satu kolom terpusat maksimal 368 px, tanpa panel samping maupun kartu; Attendance Portal, Masuk, email, password, toggle password, tombol Masuk. Bantuan akses mengarahkan ke HR jika diperlukan; tidak membuat reset mandiri/email otomatis. |
+| E01 | Masuk | Layout split seperti H01 pada lebar >= 1024 px: form maksimal 368 px di kiri dan panel kanan berisi kemampuan nyata Attendance Portal; di bawah 1024 px satu kolom tanpa panel. Memuat Attendance Portal, Masuk, email, password, toggle password, tombol Masuk, dan bantuan akses ke HR; tidak membuat reset mandiri/email otomatis. |
 | E02 | Password awal | Password sementara/current, password baru, konfirmasi; aturan dekat input. Setelah berhasil jelaskan login ulang sesuai kontrak sesi. |
 | E03 | Hari ini | Tanggal WIB, jadwal 08.00–17.00 pada hari kerja, status, waktu check-in/checkout dan tindakan berikutnya. Link detail/riwayat tidak mendominasi. |
 | E04 | Capture | Satu flow check-in/checkout dengan judul sesuai tindakan. Izin kamera/lokasi, panduan wajah, kedipan auto capture, manual fallback sesuai validitas wajah. |
