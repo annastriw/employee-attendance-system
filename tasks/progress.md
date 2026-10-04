@@ -2,7 +2,15 @@
 
 Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mulai/selesai task, sebelum sesi berganti atau kapasitas sesi habis. Status completion tetap di [todo](todo.md); dependency di [plan](plan.md); prosedur pada [alur implementasi](../docs/development/implementation-workflow.md).
 
-## Titik lanjut aktif — manual T25/T26 diterima, T30 tutorial
+## Titik lanjut aktif — VPS tahap 1 diterima, menunggu tahap 2A (2026-10-04)
+
+- Output VPS pengguna: MySQL 8.4.11 healthy, AIStor running, loopback 3307/9000/9001, network attendance-prod-backend. RAM available 2 GiB, disk available 46 GB, swap terpakai 540 MiB. attendance_prod nol tabel.
+- Nginx saat ini aktif pada 80/443; konfigurasi/domain aktual perlu diperiksa sebelum perubahan. Port backend 3000–3004 tidak tampil pada hasil listener.
+- Runbook ditambah tahap 2A: membuat file kredensial privat tanpa overwrite, akun attendance_migrator dengan grant hanya attendance_prod, lalu login/SHOW GRANTS. Pengguna menjalankan manual; akun belum diklaim dibuat.
+- Menunggu output tahap 2A; migration (2B), akun runtime/backend/image rilis main dilanjutkan setelah hasil diperiksa. Tidak menggunakan script setup dev yang mengubah beberapa schema untuk production.
+- Verifikasi increment dokumentasi: Bash -n untuk snippet tutorial, review SQL/grant/quoting, 51 tautan lokal dan diff lulus. Tidak ada perubahan VPS oleh agen, deployment, rilis main atau suite aplikasi baru.
+
+## Riwayat — manual T25/T26 diterima, T30 tutorial
 
 - Pengguna menyatakan: monitoring dan detail absensi sudah oke (2026-10-03). Acceptance manual T25/T26 dicatat/diterima; tidak mengarang perangkat/browser, tidak menjalankan ulang test dan tidak menerima recovery/live dari scope ini.
 - T30 dilanjutkan manual oleh pengguna, satu tahap per giliran. Runbook docs/deployment/vps-production-manual.md tahap 1 hanya inventaris Compose/resource/port/network dan jumlah tabel attendance_prod, tanpa membuka secret atau mengubah VPS.
@@ -62,7 +70,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T30 — tutorial manual VPS tahap 1 | Sesi ini (serial) | docs/deployment/vps-production-manual.md, docs index, todo/progress | Manual T25/T26 diterima pengguna | Tidak mengubah VPS/proses/port | Menunggu output inventaris infra/schema sebelum tahap berikut |
+| T30 — tutorial manual VPS tahap 2A | Sesi ini (serial) | runbook VPS, progress/todo | Tahap 1: MySQL/AIStor/network tersedia, DB nol tabel | Tidak mengubah VPS/proses/port | Menunggu output pembuatan/login migrator sebelum migration |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 

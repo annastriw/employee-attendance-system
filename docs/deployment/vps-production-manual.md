@@ -40,6 +40,70 @@ Ini hanya membaca nama database/jumlah tabel; tidak menampilkan password atau is
 
 Kirim output status Compose, resource/port/network dan jumlah tabel. Tahap berikut ditentukan dari hasil tersebut. Tidak menjalankan unit/integrasi/browser suite pada audit read-only ini.
 
+## Tahap 2A — akun migrator production
+
+Tahap 1 diterima dari output pengguna 2026-10-04: MySQL healthy, AIStor running, network attendance-prod-backend, RAM available 2 GiB, disk available 46 GB, attendance_prod nol tabel. Nginx kini aktif pada 80/443; jangan menganggap konfigurasi lama masih disabled.
+
+Bagian ini membuat akun yang khusus menerapkan migration pada attendance_prod, bukan akun backend. Tidak menjalankan migration/reset/restart. Setelah hasil akun diterima, lanjut 2B migration dari source rilis yang ditetapkan, kemudian akun runtime terbatas.
+
+### 1. Simpan password acak tanpa menampilkannya
+
+Jalankan pada SSH VPS. Jika file sudah ada, block berhenti; jangan overwrite atau lanjut block berikutnya, kirim error tanpa isi file.
+
+```sh
+cd /opt/attendance
+(
+  set -eu
+  set -o noclobber
+  umask 077
+  migrator_password=$(openssl rand -hex 32)
+  printf 'MIGRATOR_PASSWORD=%s\n' "$migrator_password" > .secrets/migrator.env
+  echo 'PASS: file kredensial migrator dibuat'
+)
+ls -l .secrets/migrator.env
+```
+
+Target permission -rw------- (600). Jangan cat/print/salin isi file ke chat.
+
+### 2. Buat akun dan uji login
+
+```sh
+sudo docker exec -i --env-file .secrets/migrator.env attendance-prod-mysql-1 sh -s <<'SH'
+set -eu
+case "$MIGRATOR_PASSWORD" in
+  ''|*[!0-9a-f]*) echo 'STOP: format password tidak sesuai'; exit 1 ;;
+esac
+[ "${#MIGRATOR_PASSWORD}" -eq 64 ] || { echo 'STOP: panjang password tidak sesuai'; exit 1; }
+
+mysql_root() {
+  MYSQL_PWD="$(cat /run/secrets/mysql_root_password)" \
+    mysql -uroot --batch --skip-column-names "$@"
+}
+
+count=$(mysql_root -e "SELECT COUNT(*) FROM mysql.user WHERE User='attendance_migrator';")
+[ "$count" = 0 ] || { echo 'STOP: akun migrator sudah ada; jangan mengganti password'; exit 1; }
+
+if ! mysql_root >/dev/null 2>&1 <<SQL
+CREATE USER 'attendance_migrator'@'%' IDENTIFIED BY '$MIGRATOR_PASSWORD';
+GRANT ALL PRIVILEGES ON \`attendance\_prod\`.* TO 'attendance_migrator'@'%';
+SQL
+then
+  echo 'FAIL: akun/grant belum lengkap; simpan file kredensial dan laporkan hasil'
+  exit 1
+fi
+echo 'PASS: akun migrator dibuat'
+
+MYSQL_PWD="$MIGRATOR_PASSWORD" mysql --protocol=TCP -h127.0.0.1 \
+  -uattendance_migrator attendance_prod --batch \
+  -e 'SELECT DATABASE(), CURRENT_USER(); SHOW GRANTS FOR CURRENT_USER;'
+echo 'PASS: login migrator berhasil'
+SH
+```
+
+Grant dibatasi attendance_prod; underscore di-escape agar bukan wildcard database, sesuai [MySQL GRANT](https://dev.mysql.com/doc/refman/8.4/en/grant.html). Tidak memberi grant option/global privilege. Jika gagal setelah CREATE USER, jangan membuat ulang secret atau mengganti password; kirim pesan FAIL/STOP untuk rekonsiliasi sebelum langkah berikut.
+
+Kirim output PASS/STOP/FAIL, ls permission dan SELECT/SHOW GRANTS. Jangan kirim nilai password. Tahap ini belum diklaim selesai sebelum output pengguna diterima.
+
 ## Status langkah berikutnya
 
 Bootstrap migration/akun runtime, image rilis main/GHCR, Compose backend, domain/TLS dan frontend dikerjakan setelah inventaris tahap 1. Unit rilis dijalankan sekali pada PR; integrasi cepat bila perlu sebelum rilis. Pengiriman otomatis ke VPS belum aktif. T30/T31 belum dicentang dari pemeriksaan infra saja.
