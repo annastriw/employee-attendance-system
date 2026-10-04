@@ -39,7 +39,9 @@ Temuan backend: `auth/me` sudah diproksikan; `monitoring/summary` ada; **belum a
 Perlu PR+deploy: (belum ada perubahan backend).
 
 Revisi 2026-10-05 (lanjutan): D4 → profil read-only + ganti password (tanpa edit data
-diri, baseline tetap); D11 → layar fixed `100dvh` + cegah zoom mobile/tablet.
+diri, baseline tetap); D11 → layar fixed `100dvh` + **zoom diblokir di semua layar**
+(termasuk shortcut/wheel zoom desktop, kecuali kanvas peta); D12 → skala kompak
+proporsional (kontrol 32 px desktop / 36–40 px mobile, baris tabel 36–40 px, teks 13–14 px).
 T1 root cause terkonfirmasi dari source + bukti Network pengguna (refresh 401 di 5173/5174):
 proxy melucuti prefix `__Host-` dari Set-Cookie, padahal Auth production membaca
 `__Host-auth_refresh_<role>`; perbaikan = proxy menambahkan kembali prefix pada header

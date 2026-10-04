@@ -42,7 +42,8 @@
 | D8 | "Tanpa iterasi" | Tiap task diserahkan utuh (build/lint/test hijau). Penyesuaian rasa dari pengguna = finishing normal, bukan task gagal. |
 | D9 | Testing | Manual oleh pengguna. Agen: typecheck/build + lint + unit untuk logika murni berubah (bagian 5). Tanpa Playwright/E2E/screenshot. |
 | D10 | Edit profil | Tidak ada (lihat D4). Data profil tetap dikelola HR sesuai baseline — tidak perlu ubah baseline. |
-| D11 | Layar fixed, tanpa zoom | App shell fixed (`100dvh`, header/sidebar/bottom-nav tetap, konten scroll di dalam area), responsif semua layar; **cegah pinch/double-tap zoom** di mobile/tablet dan auto-zoom input iOS. Detail & batas di bagian 4 "Layar fixed". |
+| D11 | Layar fixed, tanpa zoom — SEMUA layar | App shell fixed (`100dvh`, header/sidebar/bottom-nav tetap, konten scroll di dalam area), responsif desktop/tablet/mobile. **Zoom diblokir di semua ukuran layar**: pinch/double-tap (mobile/tablet), auto-zoom input iOS, dan shortcut zoom desktop (Ctrl/⌘ `+` `-` `=` `0`, Ctrl/⌘+wheel, trackpad pinch). Detail di bagian 4 "Layar fixed". |
+| D12 | Proporsional & kompak | Tombol, input, tabel, kartu, ikon, judul **tidak besar** — skala kompak ala GitHub/Linear. Token ukuran di bagian 4 "Skala kompak" wajib dipakai semua halaman kedua portal. |
 
 ## 3. Halaman Profil (D4/D10)
 
@@ -70,9 +71,9 @@ src/
 - Satu komponen satu tanggung jawab; jangan bikin abstraksi generik tanpa reuse nyata.
 
 ### Sistem visual (dipakai semua task)
-- **Ukuran kontrol seragam**: semua Button/Input/Select/DateRange/SearchField
-  `size="md"` (tinggi 36px) di HR dan Karyawan; aksi utama halaman di kanan
-  `PageHeader`; aksi destruktif selalu lewat `ConfirmDialog`; urutan tombol dialog
+- **Ukuran kontrol seragam** (lihat "Skala kompak"): semua Button/Input/Select/
+  DateRange/SearchField memakai ukuran yang sama di HR dan Karyawan; aksi utama halaman
+  di kanan `PageHeader`; aksi destruktif selalu lewat `ConfirmDialog`; urutan tombol dialog
   `Batal` (kiri, secondary) → aksi (kanan, primary/danger).
 - **Spacing**: grid 4px; gap section 24px, gap field 16px; container halaman
   `max-width: none` (isi penuh lebar area konten — tidak ada space kosong kiri/kanan),
@@ -82,21 +83,52 @@ src/
   tidak boleh punya hover seperti tombol.
 - **States** tiap data view: Skeleton berbentuk, EmptyState dengan aksi, error Notice + "Muat ulang".
 
-### Layar fixed & tanpa zoom (D11)
+### Skala kompak (D12) — proporsional, jangan besar
+Definisikan sebagai CSS variable di `packages/ui/src/theme.css` dan pakai di semua komponen
+(jangan angka ad-hoc per halaman). Override ukuran default HeroUI lewat `size="sm"` atau
+class bersama bila default terlalu besar.
+
+| Elemen | Desktop/tablet (≥ 768 px) | Mobile (< 768 px) |
+| --- | --- | --- |
+| Teks dasar / tabel | 13–14 px, line-height 1.45 | 14 px |
+| Judul halaman (`PageHeader`) | 18–20 px semibold | 17–18 px |
+| Judul section | 14–15 px semibold | 15 px |
+| Tombol, input, select, date range, search | tinggi **32 px**, padding x 10–12 px, font 13 px | tinggi **36–40 px** (target sentuh), font 14 px |
+| Tombol ikon | 28–32 px, ikon 16 px | 36 px, ikon 18 px |
+| Baris tabel / list row | **36–40 px**, padding sel 8 × 12 px | kartu list padding 12 px |
+| Pill/badge status | tinggi 20 px, font 12 px | sama |
+| Kartu metrik Ringkasan | padding 12–16 px, angka 20–24 px | padding 12 px, angka 20 px |
+| Ikon nav sidebar | 16–18 px, item 32 px | item drawer 40 px |
+| Radius | 6 px kontrol, 8 px kartu/dialog | sama |
+| Dialog | lebar maks 440 px (form) / 560 px (detail) | full-width sheet bawah |
+
+Aturan: satu aksi primer per area; tombol lebarnya mengikuti isi (jangan full-width di
+desktop, kecuali form login/mobile); ikon + label pendek; tabel padat tanpa border tebal.
+
+### Layar fixed & tanpa zoom (D11) — semua ukuran layar
 - `index.html` kedua portal: `<meta name="viewport" content="width=device-width,
-  initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">`.
+  initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">`
+  (maximum-scale=1 juga mencegah auto-zoom iOS saat fokus input).
 - CSS global (`packages/ui/src/theme.css`): `html,body,#root{height:100dvh;overflow:hidden}`,
-  `overscroll-behavior:none`, `touch-action:manipulation` (matikan double-tap zoom),
-  `-webkit-text-size-adjust:100%`; area konten utama `overflow-y:auto` (satu scroller
-  per layar); safe-area inset untuk bottom-nav/notch.
-- Semua input/select/textarea `font-size ≥ 16px` di < 768 px (iOS tidak auto-zoom saat fokus).
-- Gesture pinch iOS Safari: tambahkan listener `gesturestart` → `preventDefault` di
-  `packages/ui/src/theme/viewport.ts`, dipanggil dari `main.tsx` kedua portal.
-- **Batas teknis (jujur)**: zoom browser desktop (Ctrl +/−, menu browser) dan opsi
-  aksesibilitas OS tidak dapat diblokir secara andal. Keputusan yang dipakai lihat
-  bagian 9 (pertanyaan terbuka); tanpa jawaban, default = layout tetap rapi saat
-  zoom desktop (tidak diblokir), mobile/tablet dikunci seperti di atas.
-- Peta Leaflet tetap boleh pinch-zoom di dalam kanvas peta (gesture milik peta).
+  `overscroll-behavior:none`, `touch-action:pan-x pan-y` (matikan pinch & double-tap zoom),
+  `-webkit-text-size-adjust:100%`, `text-size-adjust:100%`; area konten utama
+  `overflow-y:auto` (satu scroller per layar); safe-area inset untuk bottom-nav/notch.
+- `packages/ui/src/theme/viewport.ts` — `lockViewportZoom()` dipanggil sekali dari
+  `main.tsx` kedua portal, mendaftarkan (passive:false) dan mengembalikan fungsi cleanup:
+  - `keydown`: Ctrl/⌘ + `+` `=` `-` `_` `0` (dan numpad add/subtract/0) → `preventDefault`.
+  - `wheel` dengan `ctrlKey` (Ctrl+scroll & trackpad pinch di Chrome/Edge) → `preventDefault`.
+  - `gesturestart`/`gesturechange`/`gestureend` (Safari iOS & macOS) → `preventDefault`.
+  - `touchmove` dengan `touches.length > 1` → `preventDefault`, **kecuali** target di
+    dalam elemen `[data-allow-zoom]` (dipakai peta Leaflet).
+  - `dblclick` tidak di-preventDefault (dipakai seleksi teks); double-tap mobile sudah
+    ditangani `touch-action`.
+- Unit test `viewport.test.ts`: keydown Ctrl+`+`/`0` dan wheel ctrlKey ter-cancel; key
+  biasa & wheel tanpa ctrl tidak; target `[data-allow-zoom]` dikecualikan.
+- Batas yang tetap ada (diterima pengguna): menu zoom bawaan browser desktop dan
+  pengaturan aksesibilitas OS tidak bisa diblokir oleh halaman. Layout tetap fixed &
+  responsif bila itu terjadi.
+- Peta Leaflet: container diberi `data-allow-zoom`, zoom peta via kontrol +/− & pinch di
+  dalam kanvas peta saja.
 
 ### Git
 - Commit per task: `feat(hr-web): …`, `feat(attendance-web): …`, `feat(ui): …`,
@@ -188,9 +220,10 @@ Fase B:
   `SearchInput` (HeroUI `SearchField` + hook `useDebouncedValue` 300 ms),
   `DataList` row clickable (pola bagian 4), `SidebarShell` (rail+drawer D3) bisa
   menunggu T5 bila lebih rapi.
-- **Layar fixed & tanpa zoom (D11)**: terapkan viewport meta, CSS app-shell `100dvh`
-  satu scroller, `touch-action`, font input ≥16px mobile, dan `viewport.ts` (gesturestart)
-  sesuai bagian 4 di kedua portal.
+- **Layar fixed & tanpa zoom (D11)** + **skala kompak (D12)**: terapkan viewport meta,
+  CSS app-shell `100dvh` satu scroller, `touch-action`, `lockViewportZoom()` (+ unit),
+  dan token ukuran kompak di `theme.css`; komponen bersama memakai token itu. Halaman
+  lama otomatis ikut lewat token; sisanya dirapikan di T4–T10.
 - **Bersihkan**: `apps/attendance-web/src/spikes/` (+ entry Vite bila ada),
   `pages/WelcomePage.tsx`, css per-halaman pindah ke `styles/`. Pastikan tidak ada
   import yatim (grep) sebelum hapus.
@@ -286,6 +319,9 @@ Fase B:
   overflow horizontal, tidak ada space kosong, tabel → list kartu di < 768 px.
 - Kontras AA, focus ring, keyboard, `prefers-reduced-motion`, toast konsisten (HeroUI Toast)
   untuk hasil aksi.
+- Audit proporsi (D12): tidak ada tombol/input/tabel/kartu yang melebihi skala kompak;
+  ganti ukuran ad-hoc dengan token. Audit zoom (D11): pinch, double-tap, Ctrl +/−/0,
+  Ctrl+scroll tidak mengubah skala di kedua portal; peta tetap bisa zoom di kanvasnya.
 - Daftar temuan → perbaiki dalam task ini (bukan task baru), lalu minta pengguna cek.
 - **DoD**: checklist halaman di progress tercentang setelah pengguna oke.
 
@@ -303,14 +339,11 @@ departemen: T4 · grafik Ringkasan: T7 · jangan mudah logout: T1 · rentang wak
 detail absensi HR rusak: T2 · full layar tanpa space kosong: T5/T9/T10 · sidebar
 hideable: T5 · Atomic/struktur rapi: T3 + konvensi · tata letak tombol: konvensi/T4 ·
 naluriah klik: T6 · profil (lihat) + ganti password tiap role: T8 · riwayat karyawan rusak: T2 ·
-layar fixed tanpa zoom: T3/T10 · saran unit test cepat: bagian 5.
+layar fixed tanpa zoom: T3/T10 · ukuran proporsional/kompak: T3/T4/T10 · saran unit test cepat: bagian 5.
 
-## 9. Pertanyaan terbuka (agen: pakai default bila belum dijawab)
+## 9. Pertanyaan terbuka
 
-- **Q1 Zoom desktop** (Ctrl +/−): tidak bisa diblokir andal di browser. Default:
-  **tidak diblokir**, layout dijamin tetap rapi/responsif saat zoom. Opsi lain:
-  tangkap Ctrl/⌘ + `+`/`-`/`0`/wheel lalu `preventDefault` (hanya mencegah shortcut,
-  menu browser tetap bisa zoom; menurunkan aksesibilitas).
+- Tidak ada. (Q1 zoom desktop dijawab pengguna 2026-10-05: blokir zoom di semua layar — D11.)
 
 ## 8. Ketentuan pindah agen
 
