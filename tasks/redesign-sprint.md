@@ -68,13 +68,13 @@ Serial, satu increment ujung ke ujung. Centang hanya setelah pengguna oke manual
 | ID | Judul | Cakupan | Status |
 | --- | --- | --- | --- |
 | R00 | Fitur tema per portal | Toggle terang/gelap/sistem + persistensi (SELESAI, commit 1822f62) | [x] |
-| R01 | Fondasi routing | Pasang React Router di HR, migrasi dari hash, pertahankan slug/filter di URL | [ ] |
-| R02 | Primitives bersama | Breadcrumb, UnderlineTabs, StatusPill, PageHeader, EmptyState, Skeleton di `packages/ui` (Atomic) | [ ] |
-| R03 | Patokan: EmployeeDetail HR | Breadcrumb + underline tabs (Detail/Riwayat/Sesi) + list rows + pill status — KUNCI bahasa visual | [ ] |
+| R01 | Fondasi routing | Pasang React Router di HR, migrasi dari hash, pertahankan slug/filter di URL; tambah halaman 404 route tak dikenal + guard auth (redirect ke login bila sesi hilang) | [ ] |
+| R02 | Primitives bersama | Breadcrumb, UnderlineTabs, StatusPill, PageHeader, EmptyState, Skeleton, ConfirmDialog, FormField di `packages/ui` (Atomic) | [ ] |
+| R03 | Patokan: EmployeeDetail HR | Breadcrumb + underline tabs (Detail/Riwayat/Sesi) + list rows + pill status + aksi lifecycle via ConfirmDialog — KUNCI bahasa visual | [ ] |
 | R04 | Shell HR | Sidebar + header + breadcrumb + command palette (⌘-K) + shortcuts | [ ] |
 | R05 | HR list pages | Ringkasan, Karyawan, Absensi, Absensi-dihapus, MasterData (Dept/Jabatan), Hari Libur — pola GitHub list | [ ] |
-| R06 | HR detail pages | AttendanceDetail (+peta), MasterData detail — breadcrumb + tabs | [ ] |
-| R07 | Attendance portal | Login, Home "Hari ini", Capture, History, ChangePassword — lapang/mobile, motion halus | [ ] |
+| R06 | HR detail pages | AttendanceDetail + MasterData detail — breadcrumb + tabs. ITEM KHUSUS: peta Leaflet (loading/empty/fallback, token tema, z-index) didesain tersendiri, bukan sekadar styling | [ ] |
+| R07 | Attendance portal | Login, Home "Hari ini", Capture, History, ChangePassword — lapang/mobile, motion halus. ITEM KHUSUS: alur kamera full-screen (states: deteksi/gagal/ragu/fallback manual) didesain tersendiri | [ ] |
 | R08 | Motion & polish | Transisi, skeleton, toast, empty/error di kedua portal; audit `prefers-reduced-motion` | [ ] |
 | R09 | Responsif + a11y sweep | 320/768/1024/1440 terang+gelap; kontras & keyboard; pengguna verifikasi manual | [ ] |
 | R10 | Rapikan commit & docs | Squash/retata commit saat website clear; update design-system/ui-ux + progress | [ ] |
