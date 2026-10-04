@@ -347,6 +347,33 @@ SH
 
 Kirim PASS/STOP/FAIL dan permission file saja. Akun runtime tidak mendapat DDL/global privilege/grant option; audit append-only (SELECT/INSERT), DELETE hanya att_holidays sesuai fitur. Jika SQL gagal sebagian, akun mungkin sudah dibuat: simpan file dan rekonsiliasi, jangan ulang CREATE/generate password. Uji ini hanya login/SELECT kosong, bukan suite test atau perubahan data karyawan. Setelah hasil diterima, siapkan environment dan Compose lima backend.
 
+## Tahap 5A — secret aplikasi dan komunikasi internal
+
+Output 4B diterima: empat akun/grants dibuat, masing-masing login/SELECT tabel milik service PASS. Berikut membuat secret aplikasi saja, belum menjalankan backend. AUTH_JWT_SECRET terpisah dari PROVISIONING_CREDENTIAL_KEY dan secret komunikasi service. Attendance INTERNAL_SERVICE_SECRET harus sama dengan Employee/Auth PROVISIONING_SERVICE_SECRET; MEDIA_INTERNAL_SECRET dibagikan Attendance/Media. Key enkripsi tidak boleh diganti sembarangan setelah data provisioning tersimpan.
+
+Jalankan pada SSH VPS:
+
+```sh
+cd /opt/attendance
+(
+  set -eu
+  set -o noclobber
+  umask 077
+  jwt_secret=$(openssl rand -hex 64)
+  provisioning_secret=$(openssl rand -hex 32)
+  credential_key=$(openssl rand -hex 32)
+  media_secret=$(openssl rand -hex 32)
+  printf 'AUTH_JWT_SECRET=%s\nPROVISIONING_SERVICE_SECRET=%s\nPROVISIONING_CREDENTIAL_KEY=%s\nINTERNAL_SERVICE_SECRET=%s\nMEDIA_INTERNAL_SECRET=%s\n' \
+    "$jwt_secret" "$provisioning_secret" "$credential_key" \
+    "$provisioning_secret" "$media_secret" > .secrets/application.env
+  echo 'PASS: secret aplikasi tersimpan tanpa ditampilkan'
+)
+ls -l .secrets/application.env .secrets/database-runtime.env
+find .secrets -maxdepth 1 -type f -printf '%f\n' | sort
+```
+
+Jika file sudah ada/gagal, berhenti dan kirim error; jangan overwrite atau menampilkan isi file. Target mode 600. Daftar nama file diperlukan untuk memastikan file akun storage yang dibuat sebelumnya tersedia sebelum menyusun env per service. Jangan menggunakan kredensial administrator AIStor untuk Media. Kirim PASS/permission/nama file saja. Berikut 5B konfigurasi environment dan Compose backend, memakai lima image rilis yang sudah tersedia.
+
 ## Status langkah berikutnya
 
 Bootstrap migration/akun runtime, image rilis main/GHCR, Compose backend, domain/TLS dan frontend dikerjakan setelah inventaris tahap 1. Unit rilis dijalankan sekali pada PR; integrasi cepat bila perlu sebelum rilis. Pengiriman otomatis ke VPS belum aktif. T30/T31 belum dicentang dari pemeriksaan infra saja.

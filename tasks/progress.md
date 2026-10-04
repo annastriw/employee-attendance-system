@@ -2,7 +2,7 @@
 
 Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mulai/selesai task, sebelum sesi berganti atau kapasitas sesi habis. Status completion tetap di [todo](todo.md); dependency di [plan](plan.md); prosedur pada [alur implementasi](../docs/development/implementation-workflow.md).
 
-## Titik lanjut aktif — migration VPS 4A diterima, akun runtime 4B (2026-10-04)
+## Titik lanjut aktif — akun runtime 4B diterima, secret aplikasi 5A (2026-10-04)
 
 - Output VPS pengguna: MySQL 8.4.11 healthy, AIStor running, loopback 3307/9000/9001, network attendance-prod-backend. RAM available 2 GiB, disk available 46 GB, swap terpakai 540 MiB. attendance_prod nol tabel.
 - Nginx saat ini aktif pada 80/443; konfigurasi/domain aktual perlu diperiksa sebelum perubahan. Port backend 3000–3004 tidak tampil pada hasil listener.
@@ -17,6 +17,8 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 - Increment aktif dokumentasi tahap 4A: clone source main pinned, backup privat attendance_prod, migrate deploy memakai image tooling dan akun migrator, SELECT hasil 10 migration. Menunggu pengguna; belum mengklaim schema diterapkan. Tidak menjalankan DB/VPS command oleh agen atau mengulang suite aplikasi. Berikut 4B runtime grants.
 - Output 4A diterima: backup tersimpan, all migrations successfully applied, 24 tabel, semua 10 migration selesai=1. Schema production berhasil menurut output pengguna.
 - Increment aktif dokumentasi 4B: file empat password privat/no overwrite, akun attendance_auth/employee/attendance/media, grants tabel sesuai scripts/database/setup-local.mjs, uji login/SELECT kosong. Tidak ada akun Gateway/DDL/global grants. Menunggu output pengguna; partial failure harus direkonsiliasi tanpa regenerate secret. Agen tidak mengakses VPS. Berikut environment/Compose backend.
+- Output pengguna 4B diterima: empat akun/grants dibuat, empat login/SELECT tabel milik service PASS. Backend belum dijalankan.
+- Increment aktif dokumentasi 5A: application.env privat/no overwrite, JWT 64 random bytes, provisioning/media/credential key masing-masing 32 bytes, INTERNAL_SERVICE_SECRET sama dengan provisioning secret. Meminta hanya permission/nama file untuk memastikan kredensial Media storage tersedia; tidak meminta nilai secret. Selanjutnya env/Compose, tanpa rebuild image atau memakai akun root runtime.
 - Atas permintaan pengguna, ruleset GitHub main-production (24451981) diaktifkan: hanya refs/heads/main, PR wajib, CI result app GitHub Actions 15368 wajib, blok deletion/force push, bypass kosong, approval 0, merge commit, strict up-to-date false. Payload infra/github/main-ruleset.json. Main/dev effective rules diperiksa melalui API; dev tidak dibatasi. Tidak mengubah default branch/rilis/VPS.
 - Verifikasi: Prisma validate config baru lulus lokal dengan URL dummy; Docker daemon lokal tidak tersedia sehingga build image belum diuji agen. Tidak ada unit bisnis baru karena hanya konfigurasi/tooling; tidak menjalankan suite aplikasi.
 - Verifikasi increment dokumentasi: Bash -n untuk snippet tutorial, review SQL/grant/quoting, 51 tautan lokal dan diff lulus. Tidak ada perubahan VPS oleh agen, deployment, rilis main atau suite aplikasi baru.
