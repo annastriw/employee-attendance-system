@@ -56,6 +56,8 @@ jobs:
         run: pnpm run build
       - name: Run isolated unit tests (no browser, database or storage suite)
         run: pnpm run test:unit
+      - name: Check VPS deployment script syntax
+        run: bash -n scripts/deployment/attendance-deploy.sh
       - name: Unit test deployment environment preparation
         run: python3 -m unittest discover -s scripts/deployment -p 'test_*.py'
 
