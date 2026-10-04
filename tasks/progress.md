@@ -18,7 +18,7 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 - File target: `apps/api-gateway/src/release-metadata.ts` + unit, `apps/api-gateway/src/auth-proxy.controller.ts` + unit, `infra/Dockerfile.backend`, `.github/workflows/backend-images.yml`, runbook auto-deploy dan checkpoint ini.
 - Kebijakan: image production menerima `RELEASE_SHA` dari build Actions; health mempertahankan `status/service/auth` lalu menambah SHA penuh. Lokal/fallback menampilkan `local`. Tidak ada migration/database/frontend.
 - RED/GREEN: test baru awalnya gagal karena helper dan field release belum tersedia; sesudah implementasi dua suite unit, 3/3 test lulus. ESLint package API Gateway dan build API Gateway lulus. Belum dilakukan UI/manual test karena tidak ada frontend.
-- Berikut: periksa diff dan pastikan detector mengklasifikasikan rilis sebagai backend berubah tanpa migration; commit/push ke `dev`. Deployment baru sesudah PR `main` dan instruksi rilis pengguna; perubahan ini akan membangun lima image dan tidak menjalankan migration.
+- Klasifikasi perubahan terhadap aturan `scripts/deployment/detect-release-changes.py`: backend berubah (`apps/api-gateway/**`, `infra/Dockerfile.backend`), migration tidak berubah. Skrip tidak dapat dijalankan lokal karena runtime Python Windows tidak tersedia; workflow Ubuntu akan menjalankannya saat rilis. Commit `2bac3b4 feat: expose backend release SHA in health` selesai; berikutnya push ke `dev`, lalu PR `dev → main`. Deployment hanya terjadi setelah rilis ke `main`; perubahan ini membangun lima image dan tidak menjalankan migration.
 
 ## Arsip checkpoint — seed HR lulus, konfigurasi Vercel Attendance 7B (2026-10-04)
 
