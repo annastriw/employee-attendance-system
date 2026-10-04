@@ -1,6 +1,20 @@
 # Progres dan titik lanjut
 
-## T4 aktif — kontrol dan filter seragam (2026-10-05)
+## T5 aktif - shell HR responsif (2026-10-05)
+
+- Task aktif: T5, shell HR pada semua halaman. `SidebarShell` kini shared di
+  `packages/ui`: rail desktop bisa ciut/perluas (state disimpan), grup navigasi,
+  header sticky, dan Drawer HeroUI untuk tablet/mobile. Footer drawer memuat tema
+  dan akun; navigasi menutup drawer. Shortcut `[` tidak mengambil alih input,
+  textarea, select atau contenteditable; Ctrl/Cmd-K tetap tersedia.
+- Verifikasi: test shell/auth 6/6, lint HR lulus, typecheck HR lulus. Build tidak
+  dijalankan; resource_status tidak tersedia dan catatan terakhir RAM bebas ~2.1
+  GiB (<3 GiB). Manual UI belum diperiksa pengguna.
+- T5 mengubah shell responsive, tidak mengubah backend/endpoint/database. PR+deploy
+  frontend dibutuhkan setelah acceptance.
+- Lanjut: T6 halaman detail HR setelah commit/push T5 ke dev.
+
+## T4 diimplementasikan — kontrol dan filter seragam (2026-10-05)
 
 - Task aktif: T4, seri satu per satu. Scope: shared CalendarField/FilterSelect,
   default/preset/date query utilities, semua filter Absensi/Ringkasan/Hari Libur/
@@ -23,7 +37,7 @@
 - Build tidak dijalankan: RAM bebas ~2.1 GiB (<3 GiB). UI acceptance tetap manual
   pengguna setelah merge/deploy, termasuk date picker/preset, pencarian, filter
   master, desktop/tablet/mobile serta tema terang/gelap.
-- Lanjut: audit diff, commit/push task T4 ke dev; lalu T5 shell HR.
+- Lanjut: `e34e06d` sudah commit/push ke dev; visual acceptance pengguna masih tertunda. T5 shell HR aktif.
 
 ## T3 implementasi selesai — fondasi UI bersama (2026-10-05)
 

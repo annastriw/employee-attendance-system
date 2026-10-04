@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { App } from "./App";
 import { memoryRouter } from "./test/router";
@@ -73,6 +73,17 @@ describe("HR portal authentication journey", () => {
     render(<App client={api} router={memoryRouter(["/"])} />);
     await screen.findByRole("heading", { name: "Ringkasan" });
     expect(await screen.findByText("Karyawan Aktif")).toBeInTheDocument();
+    const collapse = screen.getByRole("button", { name: "Ciutkan sidebar" });
+    await user.click(collapse);
+    expect(screen.getByRole("button", { name: "Perluas sidebar" })).toHaveAttribute("aria-expanded", "false");
+    expect(localStorage.getItem("hr-sidebar-collapsed")).toBe("true");
+    fireEvent.keyDown(window, { key: "[" });
+    expect(screen.getByRole("button", { name: "Ciutkan sidebar" })).toHaveAttribute("aria-expanded", "true");
+    await user.click(screen.getByRole("button", { name: "Menu navigasi" }));
+    const drawer = await screen.findByRole("dialog", { name: "Navigasi" });
+    await user.click(within(drawer).getByRole("link", { name: "Karyawan" }));
+    await screen.findByRole("heading", { name: "Karyawan" });
+    expect(drawer).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Menu akun" }));
     await user.click(await screen.findByRole("menuitem", { name: "Keluar" }));
     await screen.findByRole("heading", { name: "Masuk" });

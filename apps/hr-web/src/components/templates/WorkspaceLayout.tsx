@@ -18,11 +18,12 @@ import {
 } from "@phosphor-icons/react";
 import { Brand, PageTitle } from "../atoms/Brand";
 import { AccountMenu } from "../molecules/AccountMenu";
-import { Notice, ThemeToggle, setThemePreference } from "@attendance/ui";
+import { Notice, SidebarShell, ThemeToggle, setThemePreference } from "@attendance/ui";
 
 import { useAuth } from "../../routes/auth-context";
 import { viewPath, type View } from "../../routes/routes";
 import { CommandPalette, type Command } from "../organisms/CommandPalette";
+import { isTextEditingTarget, readSidebarCollapsed, writeSidebarCollapsed } from "../../lib/workspace-preferences";
 
 // Only destinations that exist in this increment are listed (spec: no dead links).
 const NAV: { view: View; label: string; icon: ReactNode; keywords?: string }[] = [
@@ -81,18 +82,24 @@ const TITLES: Record<View, string> = {
   "absensi-dihapus": "Absensi dihapus",
 };
 
+const NAV_GROUPS: { label: string; views: View[] }[] = [
+  { label: "Utama", views: ["ringkasan"] },
+  { label: "Kehadiran", views: ["absensi", "absensi-dihapus"] },
+  { label: "Tim", views: ["karyawan"] },
+  { label: "Master data", views: ["departemen", "jabatan", "hari-libur"] },
+];
+
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
-  return NAV.map((item) => (
-    <NavLink
-      key={item.view}
-      to={viewPath(item.view)}
-      className="nav-link"
-      onClick={onNavigate}
-    >
-      {item.icon}
-      {item.label}
-    </NavLink>
-  ));
+  return NAV_GROUPS.map(group => <div className="nav-group" key={group.label}>
+    <p className="nav-group-label">{group.label}</p>
+    <div className="nav-group-links">{group.views.map(view => {
+      const item = NAV.find(candidate => candidate.view === view)!;
+      return <NavLink key={item.view} to={viewPath(item.view)} className="nav-link"
+        aria-label={item.label} title={item.label} onClick={onNavigate}>
+        {item.icon}<span>{item.label}</span>
+      </NavLink>;
+    })}</div>
+  </div>);
 }
 
 const isMac =
@@ -112,6 +119,9 @@ export function WorkspaceLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpenedAtPath, setMenuOpenedAtPath] = useState(location.pathname);
+  const drawerOpen = menuOpen && menuOpenedAtPath === location.pathname;
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => readSidebarCollapsed(window.localStorage));
   const [paletteOpen, setPaletteOpen] = useState(false);
   const menuToggle = useRef<HTMLButtonElement>(null);
   const paletteTrigger = useRef<HTMLButtonElement>(null);
@@ -121,12 +131,19 @@ export function WorkspaceLayout() {
       ?.view ?? "ringkasan";
   const title = TITLES[active];
 
+  useEffect(() => { writeSidebarCollapsed(window.localStorage, sidebarCollapsed); }, [sidebarCollapsed]);
+
   // Global Cmd/Ctrl-K toggles the palette from anywhere in the shell.
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
         setPaletteOpen((open) => !open);
+        return;
+      }
+      if (event.key === "[" && !isTextEditingTarget(event.target)) {
+        event.preventDefault();
+        setSidebarCollapsed((collapsed) => !collapsed);
       }
     };
     window.addEventListener("keydown", onKey);
@@ -182,13 +199,15 @@ export function WorkspaceLayout() {
   }, [navigate, logout]);
 
   return (
-    <div className="dashboard-layout">
-      <aside className="dashboard-sidebar">
-        <Brand />
-        <nav aria-label="Navigasi utama" className="nav-list">
-          <NavLinks />
-        </nav>
-      </aside>
+    <div className="dashboard-layout" data-sidebar-collapsed={sidebarCollapsed}>
+      <SidebarShell brand={<Brand />} navigation={<NavLinks onNavigate={() => setMenuOpen(false)} />}
+        footer={<><ThemeToggle /><AccountMenu email={user?.email ?? ""} busy={busy} onLogout={logout} /></>}
+        collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(value => !value)}
+        open={drawerOpen} onOpenChange={(open) => {
+          setMenuOpenedAtPath(location.pathname);
+          setMenuOpen(open);
+          if (!open) requestAnimationFrame(() => menuToggle.current?.focus());
+        }} />
       <main id="konten" className="dashboard-main">
         <header className="dashboard-header">
           <div className="header-title">
@@ -198,9 +217,9 @@ export function WorkspaceLayout() {
               isIconOnly
               className="mobile-menu-toggle"
               aria-label="Menu navigasi"
-              aria-expanded={menuOpen}
-              aria-controls="mobile-navigation"
-              onPress={() => setMenuOpen(!menuOpen)}
+              aria-expanded={drawerOpen}
+              aria-controls="hr-navigation-drawer"
+              onPress={() => { setMenuOpenedAtPath(location.pathname); setMenuOpen(!drawerOpen); }}
             >
               <List size={20} aria-hidden="true" />
             </Button>
@@ -218,28 +237,8 @@ export function WorkspaceLayout() {
               <span className="cmdk-trigger-label">Cari…</span>
               <kbd className="cmdk-trigger-kbd">{shortcutHint}</kbd>
             </button>
-            <ThemeToggle />
-            <AccountMenu
-              email={user?.email ?? ""}
-              busy={busy}
-              onLogout={logout}
-            />
           </div>
         </header>
-        <nav
-          id="mobile-navigation"
-          className="mobile-navigation nav-list"
-          aria-label="Navigasi mobile"
-          hidden={!menuOpen}
-          onKeyDown={(event) => {
-            if (event.key === "Escape") {
-              setMenuOpen(false);
-              menuToggle.current?.focus();
-            }
-          }}
-        >
-          <NavLinks onNavigate={() => setMenuOpen(false)} />
-        </nav>
         <section className="dashboard-content" aria-label={title}>
           {error && <Notice message={error} />}
           <Outlet />

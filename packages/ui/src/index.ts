@@ -36,3 +36,4 @@ export { DataList, DataListRow } from "./organisms/DataList";
 export { CalendarField } from "./molecules/CalendarField";
 export { FilterSelect } from "./molecules/FilterSelect";
 export { listDateRange, rangeQuery } from "./lib/filter-query";
+export { SidebarShell } from "./templates/SidebarShell";
