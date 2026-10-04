@@ -2,14 +2,14 @@
 
 Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mulai/selesai task, sebelum sesi berganti atau kapasitas sesi habis. Status completion tetap di [todo](todo.md); dependency di [plan](plan.md); prosedur pada [alur implementasi](../docs/development/implementation-workflow.md).
 
-## Increment aktif — menyamakan login Attendance dengan HR (2026-10-04)
+## Increment selesai — menyamakan login Attendance dengan HR (2026-10-04)
 
 - Pengguna meminta layout login karyawan dibuat split-screen seperti HR: form di sisi kiri, panel kemampuan Attendance di kanan pada desktop, satu kolom pada layar kecil.
-- `dev` lokal diselaraskan dengan `origin/main` memakai fast-forward ke `f94ea85` sebelum implementasi. Branch lokal kini membawa lima commit yang belum ada di `origin/dev`; perubahan aktif belum di-commit/push. Folder untracked `.agents/`, `.claude/`, `.kiro/`, `.windsurf/`, dan `skills-lock.json` adalah milik pengguna dan dibiarkan.
+- `dev` lokal diselaraskan dengan `origin/main` memakai fast-forward ke `f94ea85` sebelum implementasi. Commit fitur `f79cf94` sudah dipush ke `origin/dev`; folder untracked `.agents/`, `.claude/`, `.kiro/`, `.windsurf/`, dan `skills-lock.json` adalah milik pengguna dan dibiarkan.
 - Source diubah: `apps/attendance-web/src/pages/LoginPage.tsx`, test login dan assertion fixture desain lama; komentar shared `AuthShell`; spec E01, design system, todo dan checkpoint ini.
-- Unit `LoginPage.test.tsx`: 3/3 lulus; ESLint pada dua file login dan build Attendance Portal lulus. Pemeriksaan manual desktop/mobile/keyboard belum dilakukan pengguna; checkbox acceptance tetap terbuka.
-- VPS auto-deploy setup diselesaikan manual oleh pengguna: GitHub variable `VPS_AUTO_DEPLOY_ENABLED=true` dilaporkan sudah disimpan, verifier lulus untuk SHA aktif, dan preflight file/service/resource lulus. Belum ada rilis production otomatis pasca-aktivasi; perubahan frontend ini hanya akan memicu Vercel setelah masuk `main`.
-- Berikut: commit dan push perubahan login ke `dev`, lalu pengguna memeriksa login lokal secara manual. PR `dev → main` hanya setelah pengguna menyatakan tampilan/alur diterima; frontend akan deploy ke Vercel dan tidak memicu VPS.
+- Unit `LoginPage.test.tsx`: 3/3 lulus; ESLint pada dua file login dan build Attendance Portal lulus. Pengguna menyatakan login live sudah oke pada 2026-10-04; acceptance manual untuk perubahan E01 ini diterima.
+- VPS auto-deploy setup diselesaikan manual oleh pengguna: GitHub variable `VPS_AUTO_DEPLOY_ENABLED=true` dilaporkan sudah disimpan, verifier lulus untuk SHA aktif, dan preflight file/service/resource lulus. Rilis backend otomatis pasca-aktivasi belum dibuktikan; frontend login sudah diterima pengguna di live melalui alur Vercel.
+- Commit `f79cf94 feat: align employee login with HR split layout` sudah dipush ke `dev`; pengguna telah menerima tampilan live. Perubahan frontend ini tidak memicu VPS. Belum ada increment coding berikut yang dipilih.
 
 ## Arsip checkpoint — seed HR lulus, konfigurasi Vercel Attendance 7B (2026-10-04)
 
