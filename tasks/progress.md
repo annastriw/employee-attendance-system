@@ -1,5 +1,27 @@
 # Progres dan titik lanjut
 
+## Perbaikan CI PR #9 — setup tema pada test Karyawan (2026-10-05)
+
+- Log [CI 37233159248](https://github.com/annastriw/employee-attendance-system/actions/runs/37233159248)
+  dibaca langsung melalui GitHub CLI. Lint, typecheck database dan build seluruh
+  aplikasi lulus pada commit T1 `98f5c12`; unit rewrite cookie 6/6 juga lulus CI.
+  Build T1 kini terbukti di CI, tanpa build lokal pada RAM CRITICAL.
+- CI gagal pada 18 test di `attendance-web`: `window.matchMedia is not a function`
+  dari shared theme hook. Setup jsdom Karyawan belum menyediakan stub API ini,
+  sedangkan setup HR sudah memilikinya.
+- File berubah: `apps/attendance-web/src/test/setup.ts`, progress ini.
+  Menambahkan stub matchMedia dengan metode listener, mengikuti setup HR;
+  tidak mengubah kode aplikasi/theme atau perilaku production.
+- Verifikasi terfokus lokal: `HistoryPage.test.tsx` + `LoginPage.test.tsx`
+  10/10 lulus; `App.test.tsx` 8/8 lulus. Semua 18 test yang gagal CI kini lulus;
+  lint attendance-web dan pemeriksaan diff lulus.
+  Build ulang lokal tidak dijalankan (RAM bebas ~0,93 GiB); tidak ada dev server
+  yang dimulai. CI PR memverifikasi ulang setelah push perbaikan.
+- Perlu PR+deploy: tidak ada perubahan backend.
+- Lanjut: pantau CI baru PR #9 setelah push ke dev. T1 acceptance refresh/logout
+  localhost tetap belum dikonfirmasi; T2 menunggu bukti Network/console pengguna
+  untuk detail HR dan riwayat Karyawan. T1–T11 belum dianggap selesai penuh.
+
 ## T1 aktif — rewrite cookie proxy lokal (2026-10-05)
 
 - Mulai dari `dev` HEAD `f5719b5`, tree bersih; fetch origin berhasil. Tidak ada
