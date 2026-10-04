@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import { EmployeeDetailPage } from './EmployeeDetailPage';
 import { AuthError } from '../lib/auth-client';
@@ -69,12 +70,14 @@ function setup(override?: (path: string, init?: Init) => Promise<unknown>) {
   const onBack = vi.fn(),
     onSessionExpired = vi.fn();
   render(
-    <EmployeeDetailPage
-      client={{ api: api as never }}
-      employeeId={id}
-      onBack={onBack}
-      onSessionExpired={onSessionExpired}
-    />,
+    <MemoryRouter>
+      <EmployeeDetailPage
+        client={{ api: api as never }}
+        employeeId={id}
+        onBack={onBack}
+        onSessionExpired={onSessionExpired}
+      />
+    </MemoryRouter>,
   );
   return { api, onBack, onSessionExpired, user: userEvent.setup() };
 }
@@ -319,9 +322,10 @@ describe('H08 Employee lifecycle actions and history', () => {
   });
 
   it('displays history timeline loaded from GET /employees/:id/history', async () => {
-    setup();
+    const { user } = setup();
 
-    const historySection = await screen.findByRole('region', {
+    await user.click(await screen.findByRole('tab', { name: /Riwayat/ }));
+    const historySection = await screen.findByRole('tabpanel', {
       name: 'Riwayat perubahan karyawan',
     });
     expect(historySection).toBeVisible();
@@ -391,7 +395,8 @@ describe('H08 Employee lifecycle actions and history', () => {
     expect(screen.getByText(/Password berhasil di-reset/)).toBeVisible();
 
     // History section renders password reset event
-    const historySection = screen.getByRole('region', { name: 'Riwayat perubahan karyawan' });
+    await user.click(screen.getByRole('tab', { name: /Riwayat/ }));
+    const historySection = await screen.findByRole('tabpanel', { name: 'Riwayat perubahan karyawan' });
     expect(within(historySection).getByText('Password di-reset')).toBeVisible();
     expect(within(historySection).getByText('Sesi dicabut dan password sementara baru dibuat.')).toBeVisible();
   });

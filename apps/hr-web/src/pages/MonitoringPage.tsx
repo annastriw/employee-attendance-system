@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { Button, Input, Skeleton } from "@heroui/react";
 import {
   CaretLeft,
@@ -12,6 +13,8 @@ import {
   ArrowSquareOut,
 } from "@phosphor-icons/react";
 import { Notice } from "../components/molecules/Notice";
+import { StatusPill } from "../components/molecules/StatusPill";
+import { monitoringTone } from "../components/molecules/status-pill";
 import { AuthError, type AuthClient } from "../lib/auth-client";
 import {
   monitoringDateFormatted,
@@ -290,17 +293,16 @@ export function MonitoringPage({
             {monitoringDateFormatted(selectedDate)}
           </span>
           {summary && (
-            <span
-              className={`status-badge ${
-                summary.isWorkday ? "status-active" : "status-inactive"
-              }`}
-            >
-              {summary.scheduleType === "REGULAR_WORKDAY"
-                ? "Hari Kerja Reguler"
-                : summary.scheduleType === "HOLIDAY"
-                  ? "Hari Libur Nasional"
-                  : "Akhir Pekan"}
-            </span>
+            <StatusPill
+              tone={summary.isWorkday ? "active" : "inactive"}
+              label={
+                summary.scheduleType === "REGULAR_WORKDAY"
+                  ? "Hari Kerja Reguler"
+                  : summary.scheduleType === "HOLIDAY"
+                    ? "Hari Libur Nasional"
+                    : "Akhir Pekan"
+              }
+            />
           )}
         </div>
       </div>
@@ -651,30 +653,21 @@ export function MonitoringPage({
                     </div>
                   </td>
                   <td>
-                    <span
-                      className={`status-badge ${
-                        item.status === "COMPLETED"
-                          ? "status-active"
-                          : item.status === "CHECKED_IN"
-                            ? "status-active"
-                            : item.status === "MISSING" || item.status === "DELETED"
-                              ? "status-archived"
-                              : "status-inactive"
-                      }`}
-                    >
-                      {monitoringStatusLabel(item.status)}
-                    </span>
+                    <StatusPill
+                      tone={monitoringTone(item.status)}
+                      label={monitoringStatusLabel(item.status)}
+                    />
                   </td>
                   <td>
                     {item.recordId ? (
-                      <a
-                        href={`#absensi?id=${item.recordId}`}
+                      <Link
+                        to={`/absensi?id=${item.recordId}`}
                         className="btn-action-link"
                         aria-label={`Lihat detail absensi ${item.name}`}
                       >
                         <ArrowSquareOut size={16} />
                         Lihat
-                      </a>
+                      </Link>
                     ) : (
                       <span className="text-muted">—</span>
                     )}

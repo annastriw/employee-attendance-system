@@ -20,6 +20,6 @@ Kerja serial satu fitur ujung ke ujung, SDD + Kanban. Unit logika berubah wajib;
 
 ## Pekerjaan aktif
 
-Pengguna pada 2026-10-04–05 mengalihkan fokus ke perapian repo/docs/history. Gunakan [plan sementara](../docs/temporary/task/plan.md), [checklist](../docs/temporary/task/checklist.md) dan [handoff](../docs/temporary/task/handoff.md). Tidak menambah fitur/task operasional sebelum perapian selesai.
+Perapian repo/docs/history pada 2026-10-04–05 selesai. Pengguna meminta folder temporary dihapus; hasil dan handoff disimpan pada [progress](progress.md). Pekerjaan berikut dibahas sesuai prioritas pengguna, bukan otomatis menambah fitur/task operasional.
 
 Restore drill, backup terjadwal, uji beban/kapasitas dan hardening tambahan ditunda pengguna dalam scope demo. Penundaan bukan klaim pekerjaan lulus. Source/tests/migrations tetap disimpan; hasil lama tidak dijalankan ulang tanpa perubahan/risiko baru.

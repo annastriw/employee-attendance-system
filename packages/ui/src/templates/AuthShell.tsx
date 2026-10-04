@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { PortalBrand } from "../atoms/PortalBrand";
+import { ThemeToggle } from "../molecules/ThemeToggle";
 
 export interface ShowcaseItem {
   icon: ReactNode;
@@ -33,10 +34,21 @@ export function AuthShell({ name, children, brandIcon, showcase }: AuthShellProp
     </div>
   );
 
-  if (!showcase) return <main className="auth-main">{content}</main>;
+  if (!showcase)
+    return (
+      <main className="auth-main">
+        <div className="auth-theme-corner">
+          <ThemeToggle />
+        </div>
+        {content}
+      </main>
+    );
 
   return (
     <main className="auth-main auth-split">
+      <div className="auth-theme-corner">
+        <ThemeToggle />
+      </div>
       <div className="auth-form-column">{content}</div>
       <aside className="auth-showcase" aria-label={`Tentang ${name}`}>
         <h2 className="showcase-title">{showcase.title}</h2>

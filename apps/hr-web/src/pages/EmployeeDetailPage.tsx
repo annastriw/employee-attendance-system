@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState, type SubmitEvent } from 'react';
 import { Button, Input, Label, TextField } from '@heroui/react';
-import { ArrowLeft } from '@phosphor-icons/react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Clock } from '@phosphor-icons/react';
+import { PageHeader, UnderlineTabs } from '@attendance/ui';
 import { AuthError, type AuthClient } from '../lib/auth-client';
 import {
   loadActiveMasters,
@@ -21,6 +23,8 @@ import { StatusBadge } from '../components/molecules/StatusBadge';
 
 const failure = (reason: unknown) =>
   reason instanceof Error ? reason.message : 'Terjadi kesalahan. Coba lagi.';
+
+type DetailTab = 'detail' | 'riwayat' | 'sesi';
 
 function formatAction(action: string): string {
   switch (action) {
@@ -94,11 +98,13 @@ export function EmployeeDetailPage({
   onSessionExpired: () => void;
 }) {
   const [detail, setDetail] = useState<EmployeeDetail | null>(null);
+  const navigate = useNavigate();
   const [masters, setMasters] = useState<{
     departments: MasterRecord[];
     positions: MasterRecord[];
   } | null>(null);
   const [reload, setReload] = useState(0);
+  const [tab, setTab] = useState<DetailTab>('detail');
   const [loadError, setLoadError] = useState('');
   const [profileError, setProfileError] = useState('');
   const [emailError, setEmailError] = useState('');
@@ -449,16 +455,76 @@ export function EmployeeDetailPage({
     }
   }
 
+  // Lifecycle action buttons shown in the page header, driven by current status.
+  const actionsDisabled = busy || Boolean(detail?.hasPendingOperation);
+  const lifecycleActions = detail && (
+    <>
+      {detail.status === 'ACTIVE' && (
+        <>
+          <Button variant="secondary" isDisabled={actionsDisabled} onPress={() => setConfirmReset(true)}>
+            Reset password
+          </Button>
+          <Button variant="secondary" isDisabled={actionsDisabled} onPress={() => setConfirmLifecycle('INACTIVE')}>
+            Nonaktifkan
+          </Button>
+          <Button variant="danger" isDisabled={actionsDisabled} onPress={() => setConfirmLifecycle('ARCHIVED')}>
+            Arsipkan
+          </Button>
+        </>
+      )}
+      {detail.status === 'INACTIVE' && (
+        <>
+          <Button variant="secondary" isDisabled={actionsDisabled} onPress={() => setConfirmReset(true)}>
+            Reset password
+          </Button>
+          <Button variant="primary" isDisabled={actionsDisabled} onPress={() => setConfirmLifecycle('ACTIVE')}>
+            Aktifkan
+          </Button>
+          <Button variant="danger" isDisabled={actionsDisabled} onPress={() => setConfirmLifecycle('ARCHIVED')}>
+            Arsipkan
+          </Button>
+        </>
+      )}
+      {detail.status === 'ARCHIVED' && (
+        <Button variant="secondary" isDisabled={actionsDisabled} onPress={() => setConfirmLifecycle('INACTIVE')}>
+          Restore karyawan
+        </Button>
+      )}
+    </>
+  );
+
+  const historyCount = historyTotal || history.length;
+
   return (
     <div className="employee-detail">
-      <div className="employee-detail-header">
-        <Button variant="tertiary" isDisabled={busy} onPress={onBack}>
-          <ArrowLeft size={16} aria-hidden="true" />
-          Kembali
-        </Button>
-        <h2>Profil karyawan</h2>
-        <a className="attendance-history-link" href={"#absensi?employeeId=" + employeeId}>Lihat absensi</a>
-      </div>
+      <PageHeader
+        breadcrumb={[{ label: 'Karyawan', href: '/karyawan' }, { label: detail?.name ?? 'Memuat…' }]}
+        onNavigate={() => onBack()}
+        title={
+          <span className="employee-detail-title">
+            <span>{detail?.name ?? 'Profil karyawan'}</span>
+            {detail && <StatusBadge status={detail.status} />}
+          </span>
+        }
+        description={detail ? `NIK ${detail.nik}` : undefined}
+        actions={
+          <div className="employee-detail-actions">
+            <Button variant="tertiary" isDisabled={busy} onPress={onBack}>
+              <ArrowLeft size={16} aria-hidden="true" />
+              Kembali
+            </Button>
+            <Button
+              variant="tertiary"
+              isDisabled={busy}
+              onPress={() => navigate(`/absensi?employeeId=${employeeId}`)}
+            >
+              <Clock size={16} aria-hidden="true" />
+              Lihat absensi
+            </Button>
+            {lifecycleActions}
+          </div>
+        }
+      />
 
       {loadError ? (
         <div className="load-error">
@@ -471,80 +537,8 @@ export function EmployeeDetailPage({
         <p role="status">Memuat profil karyawan…</p>
       ) : (
         <>
-          <div className="employee-status-card">
-            <div className="employee-status-identity">
-              <span className="cell-strong">{detail.name}</span>
-              {detail.status === 'ARCHIVED' ? (
-                <span className="status-badge status-inactive">Arsip</span>
-              ) : (
-                <StatusBadge status={detail.status} />
-              )}
-            </div>
-            <div className="employee-status-actions">
-              {detail.status === 'ACTIVE' && (
-                <>
-                  <Button
-                    variant="secondary"
-                    isDisabled={busy || detail.hasPendingOperation}
-                    onPress={() => setConfirmReset(true)}
-                  >
-                    Reset password
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    isDisabled={busy || detail.hasPendingOperation}
-                    onPress={() => setConfirmLifecycle('INACTIVE')}
-                  >
-                    Nonaktifkan
-                  </Button>
-                  <Button
-                    variant="danger"
-                    isDisabled={busy || detail.hasPendingOperation}
-                    onPress={() => setConfirmLifecycle('ARCHIVED')}
-                  >
-                    Arsipkan
-                  </Button>
-                </>
-              )}
-              {detail.status === 'INACTIVE' && (
-                <>
-                  <Button
-                    variant="secondary"
-                    isDisabled={busy || detail.hasPendingOperation}
-                    onPress={() => setConfirmReset(true)}
-                  >
-                    Reset password
-                  </Button>
-                  <Button
-                    variant="primary"
-                    isDisabled={busy || detail.hasPendingOperation}
-                    onPress={() => setConfirmLifecycle('ACTIVE')}
-                  >
-                    Aktifkan
-                  </Button>
-                  <Button
-                    variant="danger"
-                    isDisabled={busy || detail.hasPendingOperation}
-                    onPress={() => setConfirmLifecycle('ARCHIVED')}
-                  >
-                    Arsipkan
-                  </Button>
-                </>
-              )}
-              {detail.status === 'ARCHIVED' && (
-                <Button
-                  variant="secondary"
-                  isDisabled={busy || detail.hasPendingOperation}
-                  onPress={() => setConfirmLifecycle('INACTIVE')}
-                >
-                  Restore karyawan
-                </Button>
-              )}
-            </div>
-          </div>
-
           {notice && <Notice message={notice} success />}
-          {lifecycleError && !confirmLifecycle && <Notice message={lifecycleError} />}
+          {lifecycleError && !confirmLifecycle && !confirmReset && <Notice message={lifecycleError} />}
 
           {pendingLifecycleId && (
             <div className="provisioning-result" role="status">
@@ -552,11 +546,7 @@ export function EmployeeDetailPage({
                 Sedang menyelesaikan perubahan status ke{' '}
                 {detail.lifecycleChange?.targetStatus}.
               </p>
-              <Button
-                variant="secondary"
-                isDisabled={busy}
-                onPress={() => void retryLifecycle()}
-              >
+              <Button variant="secondary" isDisabled={busy} onPress={() => void retryLifecycle()}>
                 Lanjutkan perubahan status
               </Button>
             </div>
@@ -566,148 +556,186 @@ export function EmployeeDetailPage({
             <Notice message="Operasi sebelumnya sedang diproses. Selesaikan atau pulihkan terlebih dahulu." />
           )}
 
-          {detail.status === 'ARCHIVED' ? (
-            <p className="dialog-text">Karyawan arsip tidak dapat diedit.</p>
-          ) : (
-            <>
-              <EmployeeForm
-                key={JSON.stringify([
-                  detail.nik,
-                  detail.name,
-                  detail.phone,
-                  detail.departmentId,
-                  detail.positionId,
-                  detail.startDate,
-                ])}
-                editing
-                initial={{ ...detail, phone: detail.phone ?? '', status: detail.status }}
-                departments={masters.departments}
-                positions={masters.positions}
-                busy={busy || Boolean(detail.hasPendingOperation)}
-                error={profileError}
-                onSubmit={(input) => void saveProfile(input)}
-                onCancel={onBack}
-              />
-              {profileError && (
-                <Button
-                  variant="secondary"
-                  onPress={() => {
-                    setProfileError('');
-                    setReload((value) => value + 1);
-                  }}
-                >
-                  Muat ulang profil
-                </Button>
-              )}
-              <form
-                className="form-section"
-                onSubmit={prepareEmail}
-                noValidate
-                aria-label="Ubah email karyawan"
-              >
-                <h2>Akun</h2>
-                <p className="dialog-text">
-                  Email saat ini: <strong>{detail.email}</strong>
-                </p>
-                {emailError && !confirmEmail && <Notice message={emailError} />}
-                {pendingEmailId ? (
-                  <div className="provisioning-result">
-                    <p role="status">
-                      Sedang menyelesaikan perubahan ke {detail.emailChange?.email}.
-                    </p>
+          <UnderlineTabs
+            items={[
+              { id: 'detail', label: 'Detail' },
+              { id: 'riwayat', label: 'Riwayat', count: historyCount },
+              { id: 'sesi', label: 'Sesi' },
+            ]}
+            active={tab}
+            onSelect={(id) => setTab(id as DetailTab)}
+          />
+
+          {tab === 'detail' && (
+            <div className="detail-panel" role="tabpanel" aria-label="Detail karyawan">
+              {detail.status === 'ARCHIVED' ? (
+                <p className="dialog-text">Karyawan arsip tidak dapat diedit.</p>
+              ) : (
+                <>
+                  <EmployeeForm
+                    key={JSON.stringify([
+                      detail.nik,
+                      detail.name,
+                      detail.phone,
+                      detail.departmentId,
+                      detail.positionId,
+                      detail.startDate,
+                    ])}
+                    editing
+                    initial={{ ...detail, phone: detail.phone ?? '', status: detail.status }}
+                    departments={masters.departments}
+                    positions={masters.positions}
+                    busy={busy || Boolean(detail.hasPendingOperation)}
+                    error={profileError}
+                    onSubmit={(input) => void saveProfile(input)}
+                    onCancel={onBack}
+                  />
+                  {profileError && (
                     <Button
                       variant="secondary"
-                      isDisabled={busy}
-                      onPress={() => void retryEmail()}
-                    >
-                      Lanjutkan perubahan email
-                    </Button>
-                  </div>
-                ) : (
-                  <>
-                    <TextField
-                      className="form-field"
-                      value={newEmail}
-                      onChange={(value) => {
-                        setNewEmail(value);
-                        setEmailError('');
+                      onPress={() => {
+                        setProfileError('');
+                        setReload((value) => value + 1);
                       }}
-                      isRequired
-                      isDisabled={busy || Boolean(detail.hasPendingOperation)}
-                      validationBehavior="aria"
                     >
-                      <Label>Email baru</Label>
-                      <Input type="email" autoComplete="off" maxLength={254} />
-                    </TextField>
+                      Muat ulang profil
+                    </Button>
+                  )}
+                  <form
+                    className="form-section"
+                    onSubmit={prepareEmail}
+                    noValidate
+                    aria-label="Ubah email karyawan"
+                  >
+                    <h2>Akun</h2>
                     <p className="dialog-text">
-                      Sesi karyawan dicabut setelah email diubah. Karyawan masuk kembali
-                      dengan email baru dan password yang sama.
+                      Email saat ini: <strong>{detail.email}</strong>
                     </p>
-                    <div className="form-actions">
-                      <Button
-                        variant="primary"
-                        type="submit"
-                        isDisabled={busy || Boolean(detail.hasPendingOperation)}
-                      >
-                        Ubah email
-                      </Button>
-                    </div>
-                  </>
-                )}
-              </form>
-            </>
+                    {emailError && !confirmEmail && <Notice message={emailError} />}
+                    {pendingEmailId ? (
+                      <div className="provisioning-result">
+                        <p role="status">
+                          Sedang menyelesaikan perubahan ke {detail.emailChange?.email}.
+                        </p>
+                        <Button variant="secondary" isDisabled={busy} onPress={() => void retryEmail()}>
+                          Lanjutkan perubahan email
+                        </Button>
+                      </div>
+                    ) : (
+                      <>
+                        <TextField
+                          className="form-field"
+                          value={newEmail}
+                          onChange={(value) => {
+                            setNewEmail(value);
+                            setEmailError('');
+                          }}
+                          isRequired
+                          isDisabled={busy || Boolean(detail.hasPendingOperation)}
+                          validationBehavior="aria"
+                        >
+                          <Label>Email baru</Label>
+                          <Input type="email" autoComplete="off" maxLength={254} />
+                        </TextField>
+                        <p className="dialog-text">
+                          Sesi karyawan dicabut setelah email diubah. Karyawan masuk kembali
+                          dengan email baru dan password yang sama.
+                        </p>
+                        <div className="form-actions">
+                          <Button
+                            variant="primary"
+                            type="submit"
+                            isDisabled={busy || Boolean(detail.hasPendingOperation)}
+                          >
+                            Ubah email
+                          </Button>
+                        </div>
+                      </>
+                    )}
+                  </form>
+                </>
+              )}
+            </div>
           )}
 
-          <section
-            className="form-section employee-history"
-            aria-label="Riwayat perubahan karyawan"
-          >
-            <h2>Riwayat perubahan</h2>
-            {history.length === 0 ? (
-              <p className="dialog-text">Belum ada riwayat perubahan.</p>
-            ) : (
-              <ul className="history-list" aria-label="Daftar riwayat">
-                {history.map((item) => (
-                  <li key={item.id} className="history-item">
-                    <div className="history-item-header">
-                      <span className="cell-strong">{formatAction(item.action)}</span>
-                      <span className="history-date">
-                        {new Date(item.createdAt).toLocaleString('id-ID', {
-                          dateStyle: 'medium',
-                          timeStyle: 'short',
-                          timeZone: 'Asia/Jakarta',
-                        })}
-                      </span>
-                    </div>
-                    {formatHistoryDetails(item)}
-                  </li>
-                ))}
-              </ul>
-            )}
-            {historyTotal > historyPageSize && (
-              <div className="history-pagination">
-                <Button
-                  variant="secondary"
-                  isDisabled={historyPage <= 1 || busy}
-                  onPress={() => setHistoryPage((p) => p - 1)}
-                >
-                  Sebelumnya
-                </Button>
-                <span>
-                  Halaman {historyPage} dari {Math.ceil(historyTotal / historyPageSize)}
-                </span>
-                <Button
-                  variant="secondary"
-                  isDisabled={
-                    historyPage * historyPageSize >= historyTotal || busy
-                  }
-                  onPress={() => setHistoryPage((p) => p + 1)}
-                >
-                  Berikutnya
-                </Button>
-              </div>
-            )}
-          </section>
+          {tab === 'riwayat' && (
+            <section
+              className="form-section employee-history"
+              role="tabpanel"
+              aria-label="Riwayat perubahan karyawan"
+            >
+              <h2>Riwayat perubahan</h2>
+              {history.length === 0 ? (
+                <p className="dialog-text">Belum ada riwayat perubahan.</p>
+              ) : (
+                <ul className="history-list" aria-label="Daftar riwayat">
+                  {history.map((item) => (
+                    <li key={item.id} className="history-item">
+                      <div className="history-item-header">
+                        <span className="cell-strong">{formatAction(item.action)}</span>
+                        <span className="history-date">
+                          {new Date(item.createdAt).toLocaleString('id-ID', {
+                            dateStyle: 'medium',
+                            timeStyle: 'short',
+                            timeZone: 'Asia/Jakarta',
+                          })}
+                        </span>
+                      </div>
+                      {formatHistoryDetails(item)}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {historyTotal > historyPageSize && (
+                <div className="history-pagination">
+                  <Button
+                    variant="secondary"
+                    isDisabled={historyPage <= 1 || busy}
+                    onPress={() => setHistoryPage((p) => p - 1)}
+                  >
+                    Sebelumnya
+                  </Button>
+                  <span>
+                    Halaman {historyPage} dari {Math.ceil(historyTotal / historyPageSize)}
+                  </span>
+                  <Button
+                    variant="secondary"
+                    isDisabled={historyPage * historyPageSize >= historyTotal || busy}
+                    onPress={() => setHistoryPage((p) => p + 1)}
+                  >
+                    Berikutnya
+                  </Button>
+                </div>
+              )}
+            </section>
+          )}
+
+          {tab === 'sesi' && (
+            <section
+              className="form-section employee-sessions"
+              role="tabpanel"
+              aria-label="Sesi dan akun karyawan"
+            >
+              <h2>Sesi dan akun</h2>
+              <p className="dialog-text">
+                Email masuk saat ini: <strong>{detail.email}</strong>
+              </p>
+              <p className="dialog-text">
+                Reset password dan perubahan email mencabut seluruh sesi aktif karyawan
+                seketika. Setelah dicabut, karyawan harus masuk kembali.
+              </p>
+              {detail.status === 'ARCHIVED' ? (
+                <p className="dialog-text">
+                  Karyawan arsip tidak dapat masuk; tidak ada sesi aktif.
+                </p>
+              ) : (
+                <p className="dialog-text">
+                  Gunakan <strong>Reset password</strong> di bagian atas halaman untuk
+                  mencabut sesi dan membuat password sementara baru.
+                </p>
+              )}
+            </section>
+          )}
         </>
       )}
 

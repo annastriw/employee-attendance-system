@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { App } from "./App";
+import { memoryRouter } from "./test/router";
 import type { AuthClient, AdminUser } from "./lib/auth-client";
 const admin: AdminUser = {
   id: "test-admin",
@@ -24,7 +25,7 @@ describe("HR portal authentication journey", () => {
   it("requires password change, validates confirmation and returns to login after success", async () => {
     const api = client();
     const user = userEvent.setup();
-    render(<App client={api} />);
+    render(<App client={api} router={memoryRouter(["/"])} />);
     await screen.findByRole("heading", { name: "Masuk" });
     await user.type(screen.getByLabelText("Email"), admin.email);
     await user.type(screen.getByLabelText("Password"), "Initial-Test-123456");
@@ -69,7 +70,7 @@ describe("HR portal authentication journey", () => {
       mustChangePassword: false,
     });
     const user = userEvent.setup();
-    render(<App client={api} />);
+    render(<App client={api} router={memoryRouter(["/"])} />);
     await screen.findByRole("heading", { name: "Ringkasan" });
     expect(await screen.findByText("Karyawan Aktif")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Menu akun" }));
@@ -83,7 +84,7 @@ describe("HR portal authentication journey", () => {
       new Error("Email atau password salah."),
     );
     const user = userEvent.setup();
-    render(<App client={api} />);
+    render(<App client={api} router={memoryRouter(["/"])} />);
     await screen.findByRole("heading", { name: "Masuk" });
     await user.type(screen.getByLabelText("Email"), admin.email);
     await user.type(screen.getByLabelText("Password"), "Incorrect-Test-123456");
@@ -97,7 +98,7 @@ describe("HR portal authentication journey", () => {
     const api = client();
     vi.mocked(api.restore).mockResolvedValue(admin);
     const user = userEvent.setup();
-    render(<App client={api} />);
+    render(<App client={api} router={memoryRouter(["/"])} />);
     await screen.findByRole("heading", { name: "Buat password baru" });
     await user.type(
       screen.getByLabelText("Password saat ini"),

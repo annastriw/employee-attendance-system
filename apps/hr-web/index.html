@@ -6,18 +6,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light dark" />
     <script>
-      // Follow the OS colour scheme before first paint; HeroUI reads .dark / data-theme.
+      // Resolve theme before first paint: stored preference wins, else OS.
+      // HeroUI reads .dark / data-theme. Keep in sync with @attendance/ui theme controller.
       (function () {
         var media = window.matchMedia("(prefers-color-scheme: dark)");
+        function resolve() {
+          var pref = null;
+          try { pref = localStorage.getItem("theme"); } catch (e) {}
+          if (pref !== "light" && pref !== "dark") pref = "system";
+          return pref === "system" ? (media.matches ? "dark" : "light") : pref;
+        }
         function apply() {
-          var theme = media.matches ? "dark" : "light";
+          var theme = resolve();
           var root = document.documentElement;
           root.classList.remove("light", "dark");
           root.classList.add(theme);
           root.dataset.theme = theme;
         }
         apply();
-        media.addEventListener("change", apply);
+        // Only follow the OS while the user is on "system".
+        media.addEventListener("change", function () {
+          var pref = null;
+          try { pref = localStorage.getItem("theme"); } catch (e) {}
+          if (pref !== "light" && pref !== "dark") apply();
+        });
       })();
     </script>
     <title>HR Portal</title>

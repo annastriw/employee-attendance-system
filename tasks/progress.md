@@ -1,8 +1,156 @@
 # Progres dan titik lanjut
 
-## Aktif — perapian repository
+## T1 aktif — rewrite cookie proxy lokal (2026-10-05)
 
-Keputusan pengguna 2026-10-04–05: README Inggris, SDD/panduan Indonesia, docs/ERD/fitur/local setup, GitHub About, audit secret, hapus duplikasi/artefak tidak penting dan kurasi history dev/main. Kerja serial tanpa subagen. [Plan](../docs/temporary/task/plan.md), [checklist](../docs/temporary/task/checklist.md), [handoff](../docs/temporary/task/handoff.md).
+- Mulai dari `dev` HEAD `f5719b5`, tree bersih; fetch origin berhasil. Tidak ada
+  dev server listening pada 5173/5174 saat pemeriksaan.
+- File terkait: `apps/{hr-web,attendance-web}/vite.config.ts`,
+  `scripts/dev-proxy-cookies.{mjs,d.mts,test.mjs}`, `package.json`, progress ini.
+  Modul murni bersama memulihkan nama `__Host-auth_refresh_admin/employee` pada
+  Cookie request; response login/logout menghapus prefix hanya dari nama refresh
+  cookie, menghapus Secure/Domain, mempertahankan Path, SameSite dan expiry.
+- Verifikasi: reproduksi awal 4 test gagal; setelah implementasi 6/6 unit lulus
+  (`node --test scripts/dev-proxy-cookies.test.mjs`), lint kedua portal lulus.
+  Unit script ditambahkan ke `test:unit` agar tercakup CI; suite penuh tidak diulang.
+- Build belum dijalankan: `resource_status` tidak tersedia dalam tool sesi;
+  pengganti baca memori Windows (`Get-CimInstance Win32_OperatingSystem`)
+  menunjukkan RAM bebas 1,42–1,47 GiB, di bawah batas aman ~3 GB sprint.
+  Tidak memulai build/dev server. Pengguna mengizinkan commit/push ke dev tanpa
+  build pada 2026-10-05 karena RAM sulit mencapai batas tersebut; build tetap
+  belum terbukti, dapat diverifikasi CI PR main.
+- [ ] Manual pengguna: restart satu portal pada satu waktu, login → refresh 3×
+  tetap masuk; logout → refresh kembali ke login; ulang untuk role satunya.
+  Jika gagal, kirim status/response body `/api/v1/auth/refresh` dan pesan console,
+  tanpa nilai Cookie/token. Pengguna memilih cek production setelah PR main;
+  sudah dijelaskan bahwa T1 hanya proxy Vite lokal sehingga cek production tidak
+  membuktikan rewrite ini. Acceptance localhost tetap belum dikonfirmasi.
+- Perlu PR+deploy: tidak ada perubahan backend (T1 hanya proxy development).
+- Lanjut: **T1** — verifikasi build melalui CI PR main atau lokal saat RAM aman.
+  Setelah pengguna mengonfirmasi DoD refresh/logout localhost, centang T1 di sprint dan
+  lanjut **T2**: minta Network/console error detail absensi HR dan riwayat karyawan.
+
+## Pivot — overhaul penuh frontend + rewrite sprint (2026-10-05)
+
+Pengguna memperluas scope dari lanjutan R06 menjadi **overhaul penuh dua portal +
+perbaikan bug fungsional + boleh ubah backend**, metode **task tanpa iterasi** (tiap
+task DONE lalu lanjut), testing manual oleh pengguna, push semua ke `dev` (PR `main`
+oleh pengguna). `tasks/redesign-sprint.md` ditulis ulang: fase A (R00–R05 selesai)
+dilipat; fase B (X1–X10) baru.
+
+Audit codebase (baca-saja, memori CRITICAL — tanpa build/dev server):
+- **Dua bug "tidak berfungsi" belum di-root-cause-kan secara runtime** (butuh dev
+  server + memori lega). Hipotesis dari source:
+  - *Logout saat refresh*: `restore()` → `/auth/refresh` bergantung cookie
+    `__Host-auth_refresh_*` (Secure, path `/`). Lewat proxy localhost HTTP, cookie
+    harus di-rewrite (`__Host-`/`Secure`/`Domain` dilucuti) **pada response refresh**.
+    Perlu verifikasi apakah rewrite berlaku untuk endpoint refresh / SameSite menolak.
+  - *HR detail absensi*: `AttendancePage` me-render `AttendanceDetailPage` saat
+    `?id=` ada (bukan route terpisah) — perlu reproduksi apakah link/param hilang
+    di bawah path routing R01, atau validasi data melempar.
+  - *Karyawan riwayat*: `HistoryPage` ada & terwire via hash route `#riwayat`;
+    attendance-web MASIH hash routing. Perlu reproduksi error aktual (validasi
+    `attendance-history.ts` ketat — bisa melempar `invalid()` bila bentuk data beda).
+- Struktur aktual: hr-web sudah React Router + Atomic Design sebagian; attendance-web
+  masih hash routing + ada `spikes/` dan `WelcomePage` (dead code kandidat hapus).
+- HeroUI v3.2.6: punya `DatePicker/DateRangePicker/SearchField/Drawer/Select` —
+  cukup untuk date-range, search-saat-ketik, sidebar hideable, dropdown departemen.
+  **Tidak punya chart** → keputusan chart (Recharts vs SVG/Meter) ditandai di X7.
+
+Revisi gabungan (2026-10-05, setelah tanya-jawab): keputusan D1–D10 dikunci di
+`tasks/redesign-sprint.md` (chart shadcn/Recharts, sidebar rail+drawer, profil
+lihat+edit dengan batas field default, date range preset, search debounce 300 ms,
+backend → push dev + kabari pengguna). Backlog X-series diganti **T1–T11** dengan
+file, langkah, dan DoD per task agar bisa dilanjutkan agen lain (kiro CLI).
+Temuan backend: `auth/me` sudah diproksikan; `monitoring/summary` ada; **belum ada**
+`monitoring/trend` (T7) dan `me/profile` (T8). Tailwind v4 ada di kedua portal;
+`recharts` belum terpasang.
+
+Perlu PR+deploy: (belum ada perubahan backend).
+
+Revisi 2026-10-05 (lanjutan): D4 → profil read-only + ganti password (tanpa edit data
+diri, baseline tetap); D11 → layar fixed `100dvh` + **zoom diblokir di semua layar**
+(termasuk shortcut/wheel zoom desktop, kecuali kanvas peta); D12 → skala kompak
+proporsional (kontrol 32 px desktop / 36–40 px mobile, baris tabel 36–40 px, teks 13–14 px).
+T1 root cause terkonfirmasi dari source + bukti Network pengguna (refresh 401 di 5173/5174):
+proxy melucuti prefix `__Host-` dari Set-Cookie, padahal Auth production membaca
+`__Host-auth_refresh_<role>`; perbaikan = proxy menambahkan kembali prefix pada header
+`Cookie` request.
+
+Lanjut: **T1** — implementasi rewrite Cookie request di kedua `vite.config.ts` (modul
+bersama + unit), lalu minta pengguna restart dev server dan cek refresh 3×.
+
+## R05 — HR list pages: pill konsisten + fix link routing (2026-10-05)
+
+Selesai dan diterima pengguna lewat cek manual. Halaman list HR disamakan ke pola GitHub list dengan pill status konsisten dan link yang benar di bawah path routing.
+
+- Baru: `apps/hr-web/src/components/molecules/StatusPill.tsx` (komponen pill dot+label) + `status-pill.ts` (tipe `PillTone`, `PILL_TONE_CLASS`, mapping `monitoringTone`/`attendanceTone` — logika murni, dipisah agar fast-refresh/lint bersih).
+- Ringkasan (`MonitoringPage`): fix link mati `#absensi?id=` → router `Link` ke `/absensi?id=` (regresi R01); pill status baris + badge tipe jadwal pakai `StatusPill`. Test diperbarui: href `/absensi?id=rec-1` + bungkus `MemoryRouter`.
+- Absensi (`AttendancePage`): kolom status pakai `StatusPill` (tone via `attendanceTone`), menggantikan span inline.
+- Hari Libur (`HolidaysPage`): pill Lampau/Hari Ini/Mendatang pakai `StatusPill`.
+- Karyawan (`EmployeesPage`) & MasterData Dept/Jabatan (`MasterDataPage`): sudah memakai HeroUI `Table` + `StatusBadge` konsisten; tidak diubah.
+- Verifikasi: hr-web build/typecheck OK, lint bersih, 86/86 unit test lulus. `StatusBadge` (ACTIVE/INACTIVE/ARCHIVED) tetap dipakai untuk entitas master/karyawan; `StatusPill` untuk status attendance/jadwal/holiday. Penyatuan StatusBadge/ConfirmDialog/Notice/PasswordField ke `packages/ui` masih ditunda (R07).
+- Lanjut: R06 — HR detail pages (AttendanceDetail + MasterData detail): breadcrumb + tabs; item khusus peta Leaflet (loading/empty/fallback, token tema, z-index) didesain tersendiri.
+
+## R04 — Shell HR: command palette + shortcuts (2026-10-05)
+
+Selesai dan diterima pengguna lewat cek manual. Shell HR dapat command palette (⌘-K/Ctrl-K) + shortcut.
+
+- Baru: `apps/hr-web/src/components/organisms/command-palette.ts` (tipe `Command`, `fuzzyMatch`, `filterCommands` — logika murni) dan `CommandPalette.tsx` (gate `open` + body: overlay modal, input combobox autofocus via rAF, listbox options, navigasi keyboard ↑/↓/Enter/Esc, clamp active saat render, `scrollIntoView` di-guard untuk jsdom) + `CommandPalette.test.tsx` (7 test).
+- `WorkspaceLayout.tsx`: shortcut global Cmd/Ctrl-K toggle; tombol header "Cari…" dengan hint `⌘K`/`Ctrl K`; membangun daftar perintah (7 navigasi via `useNavigate`, 3 tema via `setThemePreference`, Keluar via `logout`); fokus kembali ke trigger saat ditutup.
+- `index.css`: style `cmdk-*` (overlay, panel, input, list, group, option aktif, trigger, kbd) memakai token yang ada; `prefers-reduced-motion` + sembunyikan label trigger di layar sempit.
+- Keputusan: "breadcrumb" shell mengikuti pola `PageHeader` R03 (dipasang per-halaman di R05/R06); tidak menambah breadcrumb shell yang redundan.
+- Verifikasi: hr-web build/typecheck OK, lint bersih, 86/86 unit test lulus (7 baru). `StatusBadge/ConfirmDialog/Notice/PasswordField` masih di hr-web (penyatuan ditunda R05/R07).
+- Lanjut: R05 — HR list pages (Ringkasan, Karyawan, Absensi, Absensi-dihapus, MasterData Dept/Jabatan, Hari Libur) pola GitHub list, memakai PageHeader/breadcrumb + pill + rows padat.
+
+## R03 — Patokan EmployeeDetail HR (2026-10-05)
+
+Selesai dan diterima pengguna lewat cek manual. EmployeeDetail HR menjadi patokan bahasa visual (GitHub/Primer): breadcrumb + underline tabs + pill status + aksi lifecycle via ConfirmDialog.
+
+- Primitives R02 dipakai ulang: `PageHeader` + `Breadcrumb` (`Karyawan / <Nama>`), `UnderlineTabs` (Detail/Riwayat/Sesi). `Breadcrumb`/`PageHeader` diberi opsi `onNavigate(href)` agar crumb bernavigasi dalam SPA (bukan reload); backward compatible (href-only tetap jalan).
+- Header: judul = nama + pill status; aksi = Kembali, Lihat absensi (navigate `/absensi?employeeId=`), dan tombol lifecycle (Reset/Nonaktifkan/Aktifkan/Arsipkan/Restore) via `ConfirmDialog`.
+- `StatusBadge` hr-web diperluas ke ACTIVE/INACTIVE/ARCHIVED (pill `.status-archived`), menggantikan hack inline "Arsip".
+- Tabs: Detail = `EmployeeForm` (aria 'Edit profil karyawan') + bagian Akun/email; Riwayat = timeline (kini `role=tabpanel`, aria 'Riwayat perubahan karyawan') + badge jumlah; Sesi = penjelasan sesi/akun yang merujuk aksi Reset di header. Default tab = Detail.
+- Logika, copy ConfirmDialog, label tombol, notice, alur API, idempotency, dan polling pending TIDAK berubah. Banner pending (lifecycle/email) tetap di luar tab agar selalu terlihat.
+- Dihapus: link hash lama `#absensi?employeeId=` + CSS orphan `.attendance-history-link`. Halaman kini memakai `useNavigate` (butuh Router) — test membungkus render dengan `MemoryRouter`.
+- Test: `displays history timeline` dan reset-password kini membuka tab Riwayat lalu query `tabpanel`; assertion perilaku lain tetap. Verifikasi: hr-web build/typecheck OK, lint bersih, 79/79 unit test lulus.
+- File: `packages/ui/src/molecules/Breadcrumb.tsx`, `packages/ui/src/organisms/PageHeader.tsx`, `apps/hr-web/src/components/molecules/StatusBadge.tsx`, `apps/hr-web/src/pages/EmployeeDetailPage.tsx`, `apps/hr-web/src/pages/EmployeeDetailPage.test.tsx`, `apps/hr-web/src/index.css`.
+- Catatan: `ConfirmDialog`/`StatusBadge`/`Notice`/`PasswordField` masih di hr-web (penyatuan ke `packages/ui` ditunda R05/R07).
+- Lanjut: R04 — Shell HR (sidebar + header + breadcrumb + command palette ⌘-K + shortcuts).
+
+## R01 — Fondasi routing HR (2026-10-05)
+
+Selesai dan diterima pengguna lewat cek manual dev server (route lancar). HR portal pindah dari hash routing ke React Router path routing.
+
+- Dependency: `react-router-dom@7.18.4` (pinned) di `apps/hr-web`.
+- Path per view: `/ringkasan` `/karyawan` `/absensi` `/absensi-dihapus` `/departemen` `/jabatan` `/hari-libur`; `/` redirect ke `/ringkasan`; `*` → halaman 404.
+- Filter/slug URL dipertahankan: pages tetap memakai kontrak `{ params: URLSearchParams, onParamsChange }` lewat adapter `useSearchParams` (navigasi `replace`, setara `history.replaceState` lama). Detail-dalam-view (`?employee=`, `?id=`) tak berubah — siap jadi sumber breadcrumb di R03/R05/R06.
+- 404 memakai primitive bersama R02 `EmptyState` (tidak membuat primitive baru).
+- Guard auth `RequireAuth`: redirect ke `/masuk` saat sesi hilang / `restore()` gagal; gate `mustChangePassword` ke `/ganti-password`. Login + ganti password identik perilaku dengan `App.tsx` lama (state diangkat ke `AuthProvider` + `auth-context`).
+- `WorkspaceLayout` kini shell router (NavLink + Outlet; judul/active diturunkan dari path; Notice error bersama di atas Outlet). IA/label nav tidak diubah.
+- Vite SPA fallback default (`appType: spa`, tanpa override) → refresh di sub-path tidak 404. Proxy VPS di `vite.config.ts` tidak disentuh.
+- Dihapus (dead): `src/lib/use-hash-route.ts`, `src/pages/DashboardPage.tsx`.
+- Test: tambah polyfill `window.matchMedia` di `src/test/setup.ts` (jsdom tak punya; `ThemeToggle` bersama memakainya) dan helper `src/test/router.tsx` (`memoryRouter`). `App.test.tsx` memakai `memoryRouter(["/"])`.
+- Verifikasi: `pnpm --filter hr-web build` (tsc+vite) OK, `lint` bersih, 79/79 unit test lulus. attendance-web tidak disentuh. StatusBadge/ConfirmDialog/Notice/PasswordField belum dipindah (ditunda R05/R07).
+- File: `apps/hr-web/package.json`, `pnpm-lock.yaml`, `apps/hr-web/src/App.tsx`, `apps/hr-web/src/App.test.tsx`, `apps/hr-web/src/components/templates/WorkspaceLayout.tsx`, `apps/hr-web/src/routes/*` (routes.ts, auth-context.ts, AuthProvider.tsx, RequireAuth.tsx, LoginRoute.tsx, ChangePasswordRoute.tsx, NotFoundRoute.tsx, ViewRoutes.tsx), `apps/hr-web/src/test/{setup.ts,router.tsx}`.
+- Lanjut: R03 — patokan EmployeeDetail HR (breadcrumb dari path + underline tabs Detail/Riwayat/Sesi + list rows + pill status + aksi lifecycle via ConfirmDialog), mengunci bahasa visual.
+
+## Handoff — 2026-10-05
+
+Website/live diterima pengguna. Folder docs/temporary diminta dihapus dari checkout lokal serta dev/main GitHub; semua rujukan dipindahkan ke file ini. Dokumentasi analisis kebutuhan, PRD dan siklus SDD lengkap tetap dipertahankan. Sinkronisasi main menggunakan PR dev → main dengan CI, tanpa force push atau perubahan ruleset.
+
+Tidak ada fitur baru yang sedang dikerjakan dan tidak ada service/proses baru yang dijalankan sesi dokumentasi ini. Agen berikut membaca AGENTS.md, status/diff/ref Git aktual, baseline dan file ini; bekerja serial tanpa subagen. Backup/mapping history ada di `.local/repository-cleanup/`, ignored dan privat; jangan dihapus atau dipush. Jangan menggabungkan checkout berhistory lama kembali; simpan pekerjaan lalu clone ulang jika perlu.
+
+Calon pembahasan berikut (belum merupakan instruksi implementasi): verifikasi panduan setup dari clone bersih; keputusan lisensi repository sebelum menambah LICENSE; audit konsistensi docs/konfigurasi dan file yang benar-benar tidak digunakan. Jangan mengulang rewrite history atau menambah suite testing/deployment berat. Restore drill/load test/hardening tetap ditunda pengguna.
+
+Saat PR penghapusan temporary, CI menemukan tiga ekspektasi MonitoringPage yang bergantung tanggal runner: fixture 2026-10-05 menjadi hari ini, sehingga filter sengaja menghilangkan parameter date. Unit diperbaiki dengan clock Date tetap untuk tanggal historis dan satu kasus hari ini WIB; kode aplikasi tetap. Verifikasi lokal: 10 file/79 unit HR lulus dan lint file monitoring lulus. Command unit file terfokus di panduan diperbaiki agar filter diteruskan langsung ke Vitest. PR #8 memuat penghapusan temporary, dokumentasi SDD sebelumnya dan perbaikan test ini.
+
+## Increment dokumentasi SDD — 2026-10-05
+
+Arahan pengguna: SDD mulai analisis kebutuhan dan PRD hingga auto-deployment. Ditambahkan analisis/PRD ringkas berdasarkan baseline serta lifecycle yang menghubungkan desain, spesifikasi domain, Kanban, implementasi, verifikasi, PR main, Vercel/GHCR/VPS dan feedback. Dokumentasi ini bertanggal aktual; tidak mengubah aturan bisnis/source atau mengarang bukti acceptance. Verifikasi increment: isi/source acuan, tautan relatif dan diff; tidak menjalankan test aplikasi untuk perubahan dokumentasi saja. Coding/push tetap dev; promosi main kembali lewat PR.
+
+## Selesai — perapian repository
+
+Keputusan pengguna 2026-10-04–05: README Inggris, SDD/panduan Indonesia, docs/ERD/fitur/local setup, GitHub About, audit secret, hapus duplikasi/artefak tidak penting dan kurasi history dev/main. Kerja serial tanpa subagen; catatan sementara sudah digabung ke file ini dan folder temporary dihapus sesuai arahan berikutnya.
 
 ## Bukti live terakhir
 
@@ -21,8 +169,10 @@ Backup Git lengkap dan metadata tanggal disimpan di .local/repository-cleanup, i
 
 Source bisnis, tests, migration, scripts operasional dan asset model runtime dipertahankan. Dokumen lama digabung, tujuh scaffold README dan enam asset React/Vite tanpa referensi dihapus. Semua untracked tooling pengguna tetap tidak disentuh. Tidak menjalankan/stop service lokal/VPS pada tahap dokumentasi.
 
+Perapian selesai. Main lama 145 commit dikurasi menjadi 26 milestone bertanggal sumber asli, lalu satu commit penutupan aktual. Pada penutupan kurasi, dev/main lokal dan remote sama; GitHub About dan default main sesuai, ruleset main-production asli aktif kembali. Workflow kurasi sukses dan melewati build/deploy VPS karena business source/migration tidak berubah. Relative links, kedua build frontend dan tujuh unit detector lulus. Audit sesudah kurasi mencakup 898 blob tanpa match/path sensitif tracked; lihat batas audit. Handoff di file ini memuat bukti dan cara melanjutkan tanpa force push.
+
 ## Batas dan izin
 
 Satu kali rewrite history + force-with-lease dev/main diizinkan pengguna, dengan tanggal sumber dan backup pemulihan. Aturan berikutnya tetap dev→PR→main tanpa force push. Nilai public demo hanya boleh di README/panduan, bukan alasan menaruh secret infra di Git.
 
-Restore drill/load test/hardening tambahan ditunda pengguna. Jangan mengklaim lulus atau mengaktifkan task itu dari catatan lama. Lanjut berdasarkan checklist dan diff aktual, bukan transkrip sesi yang usang.
+Restore drill/load test/hardening tambahan ditunda pengguna. Jangan mengklaim lulus atau mengaktifkan task itu dari catatan lama. Lanjut berdasarkan status/diff aktual, bukan transkrip sesi yang usang.
