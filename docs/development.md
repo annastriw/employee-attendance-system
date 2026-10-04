@@ -38,7 +38,7 @@ Kanban di proyek ini berupa task/checklist repository, bukan klaim adanya board 
 
 ```sh
 pnpm --filter attendance-service test --runInBand
-pnpm --filter hr-web test -- src/pages/MonitoringPage.test.tsx
+pnpm --filter hr-web exec vitest run src/pages/MonitoringPage.test.tsx
 ```
 
 Pilih file/package yang benar-benar berubah. Integrasi cepat contoh bila query departemen berubah:
