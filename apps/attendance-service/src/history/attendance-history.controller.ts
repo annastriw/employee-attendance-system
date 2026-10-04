@@ -30,15 +30,15 @@ export class AttendanceHistoryController {
     return this.service.list(query, req.actor!, req.requestId);
   }
   @Get(':id') detail(
-    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Req() req: AttendanceRequest,
   ) {
     this.noQuery(req);
     return this.service.detail(id, req.actor!, req.requestId);
   }
   @Get(':id/events/:eventId/photo') photo(
-    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-    @Param('eventId', new ParseUUIDPipe({ version: '4' })) eventId: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('eventId', new ParseUUIDPipe()) eventId: string,
     @Req() req: AttendanceRequest,
   ) {
     this.noQuery(req);
