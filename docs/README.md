@@ -21,4 +21,4 @@ Mulai dari [README Inggris](../README.md) untuk ringkasan produk dan akun demo.
 
 Keputusan: [AIStor](architecture/adr-001-object-storage.md), [tooling/HTTP/outbox](architecture/adr-002-project-tooling.md), [monorepo/deployment](architecture/adr-003-repository-and-deployment.md). Operasional: [auto-deploy](deployment/vps-auto-deploy.md), [runbook VPS](deployment/vps-production-manual.md). Testing: [workflow](testing/workflow.md), [audit dependency historis](testing/dependency-audit.md).
 
-[Roadmap](../tasks/plan.md) dan [status](../tasks/todo.md) menyimpan keterlacakan produk. [Plan perapian](temporary/task/plan.md), [checklist](temporary/task/checklist.md), [handoff](temporary/task/handoff.md) dipakai untuk pekerjaan serial lintas sesi.
+[Roadmap](../tasks/plan.md) dan [status](../tasks/todo.md) menyimpan keterlacakan produk. [Progress dan handoff](../tasks/progress.md) menjadi satu titik lanjut pekerjaan serial lintas sesi.

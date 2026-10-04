@@ -67,4 +67,4 @@ Perapian history satu kali disetujui pemilik pada 2026-10-04; backup dan mapping
 
 ## Handoff serial
 
-[Tasks](../tasks/plan.md) menyimpan roadmap produk. Plan cleanup aktif dan handoff ada di [docs/temporary/task](temporary/task/plan.md). Catat satu task aktif, source terkait, verifikasi aktual, branch/commit, proses yang benar-benar berjalan dan langkah berikut. Agen berikut membaca status/diff aktual dan bekerja serial tanpa subagen. Jangan commit berkas tooling/private pengguna hanya agar status terlihat kosong.
+[Tasks](../tasks/plan.md) menyimpan roadmap produk. Handoff ada di [tasks/progress.md](../tasks/progress.md). Catat satu task aktif, source terkait, verifikasi aktual, branch/commit, proses yang benar-benar berjalan dan langkah berikut. Agen berikut membaca status/diff aktual dan bekerja serial tanpa subagen. Jangan membuat ulang folder temporary atau commit berkas tooling/private pengguna hanya agar status terlihat kosong.
