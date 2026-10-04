@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MonitoringPage } from "./MonitoringPage";
 import type {
   MonitoringEmployeesResult,
@@ -8,6 +8,16 @@ import type {
 } from "../lib/monitoring";
 
 describe("MonitoringPage (Layar H02 Monitoring & Rekap)", () => {
+  beforeEach(() => {
+    // Keep the fixture historical regardless of the runner's real calendar.
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-10-06T05:00:00Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   const mockSummary: MonitoringSummary = {
     date: "2026-10-05",
     isWorkday: true,
@@ -184,6 +194,19 @@ describe("MonitoringPage (Layar H02 Monitoring & Rekap)", () => {
         date: "2026-10-05",
         status: "LATE",
       }),
+    );
+  });
+
+  it("keeps today's date implicit when filtering status", async () => {
+    vi.setSystemTime(new Date("2026-10-04T18:00:00Z")); // Oct 5 in Jakarta.
+    const { onParamsChange, user } = setup();
+
+    await user.click(
+      await screen.findByRole("button", { name: "Total Terlambat" }),
+    );
+
+    expect(onParamsChange).toHaveBeenCalledWith(
+      expect.objectContaining({ date: undefined, status: "LATE" }),
     );
   });
 

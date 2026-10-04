@@ -33,7 +33,7 @@ Restore backup, backup terjadwal, uji beban/kapasitas dan hardening tambahan dit
 
 ## Increment berikut
 
-[Perapian repo](../docs/temporary/task/checklist.md), dikerjakan serial. Feature/backend/frontend baru tidak ditambahkan hanya untuk mengulang uji auto-deploy yang sudah lulus.
+[Perapian repo dan handoff](progress.md), dikerjakan serial dan sudah selesai. Feature/backend/frontend baru tidak ditambahkan hanya untuk mengulang uji auto-deploy yang sudah lulus.
 
 ## Sumber acceptance dan verifikasi
 

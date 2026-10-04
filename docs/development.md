@@ -4,6 +4,8 @@ Coding langsung di `dev`; `main` adalah branch live. Kerja serial, satu incremen
 
 ## Siklus kerja
 
+Mulai dari [analisis kebutuhan](requirements/analysis.md) dan [PRD](requirements/prd.md). [Siklus SDD lengkap](sdd/lifecycle.md) menghubungkan kebutuhan, desain/ERD/API/UI, implementasi, testing dan auto-deployment. Langkah berikut merinci increment harian.
+
 ```mermaid
 flowchart LR
     Backlog[Backlog] --> Spec[Spesifikasi dan kontrak]
@@ -36,7 +38,7 @@ Kanban di proyek ini berupa task/checklist repository, bukan klaim adanya board 
 
 ```sh
 pnpm --filter attendance-service test --runInBand
-pnpm --filter hr-web test -- src/pages/MonitoringPage.test.tsx
+pnpm --filter hr-web exec vitest run src/pages/MonitoringPage.test.tsx
 ```
 
 Pilih file/package yang benar-benar berubah. Integrasi cepat contoh bila query departemen berubah:
@@ -65,4 +67,4 @@ Perapian history satu kali disetujui pemilik pada 2026-10-04; backup dan mapping
 
 ## Handoff serial
 
-[Tasks](../tasks/plan.md) menyimpan roadmap produk. Plan cleanup aktif dan handoff ada di [docs/temporary/task](temporary/task/plan.md). Catat satu task aktif, source terkait, verifikasi aktual, branch/commit, proses yang benar-benar berjalan dan langkah berikut. Agen berikut membaca status/diff aktual dan bekerja serial tanpa subagen. Jangan commit berkas tooling/private pengguna hanya agar status terlihat kosong.
+[Tasks](../tasks/plan.md) menyimpan roadmap produk. Handoff ada di [tasks/progress.md](../tasks/progress.md). Catat satu task aktif, source terkait, verifikasi aktual, branch/commit, proses yang benar-benar berjalan dan langkah berikut. Agen berikut membaca status/diff aktual dan bekerja serial tanpa subagen. Jangan membuat ulang folder temporary atau commit berkas tooling/private pengguna hanya agar status terlihat kosong.

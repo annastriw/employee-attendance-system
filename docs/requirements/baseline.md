@@ -1,5 +1,7 @@
 # Spesifikasi disetujui — versi 1
 
+Konteks kebutuhan: [analisis](analysis.md), [PRD](prd.md). Keterlacakan hingga rilis: [siklus SDD](../sdd/lifecycle.md). Dokumen ringkasan tersebut tidak mengganti aturan rinci baseline ini.
+
 Dokumen ini merekam keputusan pengguna dalam sesi perencanaan. Dokumen rancangan terperinci berikutnya harus menjaga aturan ini. Status: kebutuhan, rancangan database, peta endpoint API dan arah UI/UX telah disetujui; rencana serta kemajuan implementasi mengikuti tasks/plan.md dan tasks/todo.md.
 
 ## Produk dan platform

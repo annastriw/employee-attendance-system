@@ -1,8 +1,22 @@
 # Progres dan titik lanjut
 
+## Handoff — 2026-10-05
+
+Website/live diterima pengguna. Folder docs/temporary diminta dihapus dari checkout lokal serta dev/main GitHub; semua rujukan dipindahkan ke file ini. Dokumentasi analisis kebutuhan, PRD dan siklus SDD lengkap tetap dipertahankan. Sinkronisasi main menggunakan PR dev → main dengan CI, tanpa force push atau perubahan ruleset.
+
+Tidak ada fitur baru yang sedang dikerjakan dan tidak ada service/proses baru yang dijalankan sesi dokumentasi ini. Agen berikut membaca AGENTS.md, status/diff/ref Git aktual, baseline dan file ini; bekerja serial tanpa subagen. Backup/mapping history ada di `.local/repository-cleanup/`, ignored dan privat; jangan dihapus atau dipush. Jangan menggabungkan checkout berhistory lama kembali; simpan pekerjaan lalu clone ulang jika perlu.
+
+Calon pembahasan berikut (belum merupakan instruksi implementasi): verifikasi panduan setup dari clone bersih; keputusan lisensi repository sebelum menambah LICENSE; audit konsistensi docs/konfigurasi dan file yang benar-benar tidak digunakan. Jangan mengulang rewrite history atau menambah suite testing/deployment berat. Restore drill/load test/hardening tetap ditunda pengguna.
+
+Saat PR penghapusan temporary, CI menemukan tiga ekspektasi MonitoringPage yang bergantung tanggal runner: fixture 2026-10-05 menjadi hari ini, sehingga filter sengaja menghilangkan parameter date. Unit diperbaiki dengan clock Date tetap untuk tanggal historis dan satu kasus hari ini WIB; kode aplikasi tetap. Verifikasi lokal: 10 file/79 unit HR lulus dan lint file monitoring lulus. Command unit file terfokus di panduan diperbaiki agar filter diteruskan langsung ke Vitest. PR #8 memuat penghapusan temporary, dokumentasi SDD sebelumnya dan perbaikan test ini.
+
+## Increment dokumentasi SDD — 2026-10-05
+
+Arahan pengguna: SDD mulai analisis kebutuhan dan PRD hingga auto-deployment. Ditambahkan analisis/PRD ringkas berdasarkan baseline serta lifecycle yang menghubungkan desain, spesifikasi domain, Kanban, implementasi, verifikasi, PR main, Vercel/GHCR/VPS dan feedback. Dokumentasi ini bertanggal aktual; tidak mengubah aturan bisnis/source atau mengarang bukti acceptance. Verifikasi increment: isi/source acuan, tautan relatif dan diff; tidak menjalankan test aplikasi untuk perubahan dokumentasi saja. Coding/push tetap dev; promosi main kembali lewat PR.
+
 ## Selesai — perapian repository
 
-Keputusan pengguna 2026-10-04–05: README Inggris, SDD/panduan Indonesia, docs/ERD/fitur/local setup, GitHub About, audit secret, hapus duplikasi/artefak tidak penting dan kurasi history dev/main. Kerja serial tanpa subagen. [Plan](../docs/temporary/task/plan.md), [checklist](../docs/temporary/task/checklist.md), [handoff](../docs/temporary/task/handoff.md).
+Keputusan pengguna 2026-10-04–05: README Inggris, SDD/panduan Indonesia, docs/ERD/fitur/local setup, GitHub About, audit secret, hapus duplikasi/artefak tidak penting dan kurasi history dev/main. Kerja serial tanpa subagen; catatan sementara sudah digabung ke file ini dan folder temporary dihapus sesuai arahan berikutnya.
 
 ## Bukti live terakhir
 
@@ -21,10 +35,10 @@ Backup Git lengkap dan metadata tanggal disimpan di .local/repository-cleanup, i
 
 Source bisnis, tests, migration, scripts operasional dan asset model runtime dipertahankan. Dokumen lama digabung, tujuh scaffold README dan enam asset React/Vite tanpa referensi dihapus. Semua untracked tooling pengguna tetap tidak disentuh. Tidak menjalankan/stop service lokal/VPS pada tahap dokumentasi.
 
-C01–C10 selesai. Main lama 145 commit dikurasi menjadi 26 milestone bertanggal sumber asli, lalu satu commit penutupan aktual. Dev/main lokal dan remote sama; GitHub About dan default main sesuai, ruleset main-production asli aktif kembali. Workflow kurasi sukses dan melewati build/deploy VPS karena business source/migration tidak berubah. Relative links, kedua build frontend dan tujuh unit detector lulus. Audit sesudah kurasi mencakup 898 blob tanpa match/path sensitif tracked; lihat batas audit. Handoff memuat bukti dan cara melanjutkan tanpa force push.
+Perapian selesai. Main lama 145 commit dikurasi menjadi 26 milestone bertanggal sumber asli, lalu satu commit penutupan aktual. Pada penutupan kurasi, dev/main lokal dan remote sama; GitHub About dan default main sesuai, ruleset main-production asli aktif kembali. Workflow kurasi sukses dan melewati build/deploy VPS karena business source/migration tidak berubah. Relative links, kedua build frontend dan tujuh unit detector lulus. Audit sesudah kurasi mencakup 898 blob tanpa match/path sensitif tracked; lihat batas audit. Handoff di file ini memuat bukti dan cara melanjutkan tanpa force push.
 
 ## Batas dan izin
 
 Satu kali rewrite history + force-with-lease dev/main diizinkan pengguna, dengan tanggal sumber dan backup pemulihan. Aturan berikutnya tetap dev→PR→main tanpa force push. Nilai public demo hanya boleh di README/panduan, bukan alasan menaruh secret infra di Git.
 
-Restore drill/load test/hardening tambahan ditunda pengguna. Jangan mengklaim lulus atau mengaktifkan task itu dari catatan lama. Lanjut berdasarkan checklist dan diff aktual, bukan transkrip sesi yang usang.
+Restore drill/load test/hardening tambahan ditunda pengguna. Jangan mengklaim lulus atau mengaktifkan task itu dari catatan lama. Lanjut berdasarkan status/diff aktual, bukan transkrip sesi yang usang.
