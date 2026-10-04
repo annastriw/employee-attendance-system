@@ -1,0 +1,14 @@
+FROM node:24.15.0-bookworm-slim
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends openssl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /tooling
+COPY migrator/package.json migrator/package-lock.json ./
+RUN npm ci --no-audit --no-fund && npm cache clean --force
+COPY prisma-migrator.config.ts ./infra/prisma-migrator.config.ts
+
+USER node
+ENTRYPOINT ["/tooling/node_modules/.bin/prisma"]
+CMD ["--help"]

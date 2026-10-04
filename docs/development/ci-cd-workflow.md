@@ -18,9 +18,11 @@ Build diperlukan untuk menghasilkan aplikasi/image; lint/typecheck adalah pemeri
 
 ## Status saat ini dan titik lanjut VPS
 
-CI PR dan workflow publish GHCR sudah dikonfigurasi. Publish terbaru belum dieksekusi; backend image build sebelumnya pernah lulus di Actions. Pengiriman otomatis ke VPS, Compose backend, akses pull GHCR, domain/TLS, dua Vercel dan rollback masih T30. Jangan menganggap merge main otomatis memperbarui VPS sebelum langkah itu tersambung.
+CI PR dan workflow publish GHCR sudah berjalan: PR #1 merged, lima image rilis main 1c27c90 sukses dipublikasikan (run 37193965079, 2026-10-04). Pengiriman otomatis ke VPS, Compose backend, akses pull GHCR, domain/TLS, dua Vercel dan rollback masih T30. Jangan menganggap merge main otomatis memperbarui VPS sebelum langkah itu tersambung.
 
-Main saat ini hanya dasar dokumentasi awal 39d7795 untuk PR rilis pertama; kode terbaru ada di dev. Jangan push development langsung ke main. Main perlu proteksi PR dan required check CI result sebelum rilis; konfigurasi YAML sendiri tidak mencegah bypass GitHub.
+Rilis aplikasi pertama sudah di main melalui PR #1. Coding tetap di dev, rilis berikutnya melalui PR dev ke main. Jangan push development langsung ke main.
+
+Proteksi [main-production](https://github.com/annastriw/employee-attendance-system/settings/rules/24451981) aktif sejak 2026-10-04. Target eksplisit main, bukan default branch (default repository masih dev). Wajib PR dan CI result dari GitHub Actions; penghapusan dan force push diblokir, bypass kosong. Approval reviewer 0 karena workflow pengembang tunggal; tidak memerlukan code owner/signature/coverage/browser/deployment gate tambahan. Merge commit dipakai agar riwayat dua branch panjang tetap tersambung. Strict up-to-date dinonaktifkan untuk menghindari pengulangan CI tanpa kebutuhan; hanya satu rilis pada satu waktu, pastikan CI untuk head PR terbaru lulus sebelum merge. Dev tetap menerima push langsung. Payload yang dipasang tersimpan di [main-ruleset.json](../../infra/github/main-ruleset.json); perubahan JSON tidak otomatis memperbarui aturan GitHub.
 
 VPS terakhir disiapkan pengguna sampai MySQL production dan AIStor/bucket/akun Media terverifikasi. Setup berikut dilanjutkan dari [progress](../../tasks/progress.md), tanpa reset/bootstrap ulang. Status migration/backend/live setelah reset belum dibuktikan.
 

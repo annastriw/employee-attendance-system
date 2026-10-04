@@ -36,6 +36,8 @@ Thumbs.db
 minio.license
 .licenses/
 .data/
+.secrets/
+__pycache__/
 
 /generated/prisma
 /packages/database/src/generated/
