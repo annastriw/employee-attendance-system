@@ -2,7 +2,7 @@
 
 Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mulai/selesai task, sebelum sesi berganti atau kapasitas sesi habis. Status completion tetap di [todo](todo.md); dependency di [plan](plan.md); prosedur pada [alur implementasi](../docs/development/implementation-workflow.md).
 
-## Titik lanjut aktif — environment/Compose 5B diterima, backend start 5C (2026-10-04)
+## Titik lanjut aktif — backend health 5C diterima, audit domain/Nginx 6A (2026-10-04)
 
 - Output VPS pengguna: MySQL 8.4.11 healthy, AIStor running, loopback 3307/9000/9001, network attendance-prod-backend. RAM available 2 GiB, disk available 46 GB, swap terpakai 540 MiB. attendance_prod nol tabel.
 - Nginx saat ini aktif pada 80/443; konfigurasi/domain aktual perlu diperiksa sebelum perubahan. Port backend 3000–3004 tidak tampil pada hasil listener.
@@ -23,6 +23,8 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 - Increment aktif 5B: scripts/deployment/prepare-backend-env.py + unit, infra/compose.backend.yml, CI menambah unit Python fokus. Env per-service privat/no overwrite, image tetap main1c27c90; Linux host network/bind loopback sesuai guard aplikasi dan infra existing, total batas backend1472MiB. ADR-003/runbook diperbarui. Menunggu config --quiet VPS, belum pull/up/backend live. Tidak mengubah service runtime maupun infra/VPS oleh agen.
 - Output 5B diterima: lima file environment mode600, config commit13f56e0d1c65d8d11a161b142ea3e78ed1bb37de, config --quiet PASS. Env/Compose siap, belum backend running.
 - Increment aktif dokumentasi5C: pull image, up --wait timeout120, lima /health HTTP200, ps/free/stats/ss. GHCR anonymous HEAD manifest kelima image main1c27c90 HTTP200; tidak perlu token saat diperiksa. GH API package listing403 karena scope read:packages tidak tersedia; manifest anonim membuktikan akses pull sehingga bukan penghalang. Agen tidak menjalankan VPS, menunggu health/resource pengguna. Berikut domain/TLS/seed/frontend.
+- Output 5C diterima: kelima backend/health HTTP200; RAM available1.4GiB/swap426MiB. Gateway45.57/Auth124.7/Employee105.8/Attendance102.9/Media160.2MiB, AIStor142.1/MySQL462.2MiB, semua di bawah limit. Output ss tidak terlihat; loopback belum dikonfirmasi dari sesi ini. Tidak mengklaim kapasitas beban dari snapshot idle atau frontend/public live.
+- Increment aktif dokumentasi6A: ss, nginx -t/list sites/grep selected directives, certbot certificates dan DNS getent, read-only. Menunggu konfigurasi/domain aktual sebelum perubahan proxy/TLS, tidak membuka Console publik. Agen tidak mengubah VPS/DNS atau mengulang suite aplikasi. Berikut6B proxy API/S3 sesuai hasil.
 - Atas permintaan pengguna, ruleset GitHub main-production (24451981) diaktifkan: hanya refs/heads/main, PR wajib, CI result app GitHub Actions 15368 wajib, blok deletion/force push, bypass kosong, approval 0, merge commit, strict up-to-date false. Payload infra/github/main-ruleset.json. Main/dev effective rules diperiksa melalui API; dev tidak dibatasi. Tidak mengubah default branch/rilis/VPS.
 - Verifikasi: Prisma validate config baru lulus lokal dengan URL dummy; Docker daemon lokal tidak tersedia sehingga build image belum diuji agen. Tidak ada unit bisnis baru karena hanya konfigurasi/tooling; tidak menjalankan suite aplikasi.
 - Verifikasi increment dokumentasi: Bash -n untuk snippet tutorial, review SQL/grant/quoting, 51 tautan lokal dan diff lulus. Tidak ada perubahan VPS oleh agen, deployment, rilis main atau suite aplikasi baru.

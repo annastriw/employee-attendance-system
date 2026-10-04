@@ -450,6 +450,36 @@ sudo ss -lntp | grep -E ':(3000|3001|3002|3003|3004|3307|9000|9001)\b'
 
 Target backend/database/storage hanya 127.0.0.1. Host-network container ps tidak menampilkan port mapping; ss menjadi bukti bind. Kirim ps/HTTP/PASS/resource/port atau error. Jangan kirim full docker inspect/config/env, token atau log mentah yang mengandung credential. Agen belum menjalankan VPS; runtime health/resource masih menunggu output pengguna. Berikut domain/Nginx/HTTPS, admin seed, frontend dan backup/acceptance live. Jangan membuat admin otomatis di tahap ini.
 
+## Tahap 6A — cek domain/Nginx/SSL aktual
+
+Output 5C diterima: kelima /health HTTP200. RAM available1.4GiB, swap426MiB; Gateway45.57/Auth124.7/Employee105.8/Attendance102.9/Media160.2MiB, AIStor142.1/MySQL462.2MiB (semua di bawah limit). Ini snapshot idle, bukan bukti kapasitas beban serentak. Output ss belum terlihat; konfirmasi loopback masih diperlukan. Jangan ulang pull/up/test suite.
+
+Nginx sudah aktif pada audit sebelumnya. Tahap6A read-only untuk memilih konfigurasi yang sudah ada, menghindari duplikasi domain/server block. Tidak mengubah DNS/Nginx/firewall/SSL atau renew sertifikat. Jalankan pada SSH VPS:
+
+```sh
+sudo ss -lntp | grep -E ':(3000|3001|3002|3003|3004|3307|9000|9001)\b'
+sudo nginx -t
+sudo ls -l /etc/nginx/sites-enabled
+sudo grep -RnE '^[[:space:]]*(listen|server_name|proxy_pass|ssl_certificate|ssl_certificate_key)[[:space:]]' \
+  /etc/nginx/sites-enabled /etc/nginx/conf.d
+```
+
+Output grep hanya directive domain/port/upstream/path sertifikat, bukan isi konfigurasi penuh, secret atau private key. Jika tidak ada match, laporkan tanpa menambah konfigurasi sendiri.
+
+```sh
+if command -v certbot >/dev/null 2>&1; then
+  sudo certbot certificates
+else
+  echo 'INFO: Certbot belum tersedia'
+fi
+for domain in attendance-api.annastriwidagdo.me attendance-storage.annastriwidagdo.me; do
+  printf '\nDNS %s\n' "$domain"
+  getent ahostsv4 "$domain" || echo 'INFO: DNS domain belum ditemukan'
+done
+```
+
+Kirim output domain/sertifikat/port di atas; jangan kirim private key/token/file env. DNS IP Cloudflare proxy dapat berbeda dari IP VPS sehingga tidak otomatis berarti salah; record di dashboard akan dikonfirmasi pada langkah domain. Setelah inventaris diterima, buat/ubah reverse proxy API→127.0.0.1:3000 dan S3→127.0.0.1:9000 sesuai konfigurasi aktual. Console9001 tidak dibuka publik. Domain frontend tetap Vercel. Backend HTTP200 saja belum membuktikan API/storage HTTPS/public atau frontend live.
+
 ## Status langkah berikutnya
 
 Bootstrap migration/akun runtime, image rilis main/GHCR, Compose backend, domain/TLS dan frontend dikerjakan setelah inventaris tahap 1. Unit rilis dijalankan sekali pada PR; integrasi cepat bila perlu sebelum rilis. Pengiriman otomatis ke VPS belum aktif. T30/T31 belum dicentang dari pemeriksaan infra saja.
