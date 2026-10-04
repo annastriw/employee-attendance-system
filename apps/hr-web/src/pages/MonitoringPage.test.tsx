@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MonitoringPage } from "./MonitoringPage";
 import type {
@@ -139,12 +140,14 @@ describe("MonitoringPage (Layar H02 Monitoring & Rekap)", () => {
     const onSessionExpired = vi.fn();
     const user = userEvent.setup();
     const rendered = render(
-      <MonitoringPage
-        client={{ api: api as never }}
-        params={new URLSearchParams(params)}
-        onParamsChange={onParamsChange}
-        onSessionExpired={onSessionExpired}
-      />,
+      <MemoryRouter>
+        <MonitoringPage
+          client={{ api: api as never }}
+          params={new URLSearchParams(params)}
+          onParamsChange={onParamsChange}
+          onSessionExpired={onSessionExpired}
+        />
+      </MemoryRouter>,
     );
     return { api, onParamsChange, onSessionExpired, user, rendered };
   }
@@ -174,7 +177,7 @@ describe("MonitoringPage (Layar H02 Monitoring & Rekap)", () => {
     // Check action link for existing record
     const viewLinks = screen.getAllByRole("link", { name: /Lihat/i });
     expect(viewLinks.length).toBe(3); // emp-1, emp-2, emp-4
-    expect(viewLinks[0]).toHaveAttribute("href", "#absensi?id=rec-1");
+    expect(viewLinks[0]).toHaveAttribute("href", "/absensi?id=rec-1");
   });
 
   it("clicking metric card triggers status filtering", async () => {

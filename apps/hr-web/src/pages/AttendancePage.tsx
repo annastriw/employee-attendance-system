@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Skeleton, Table } from "@heroui/react";
 import { CaretLeft, CaretRight, Clock } from "@phosphor-icons/react";
 import { Notice } from "../components/molecules/Notice";
+import { StatusPill } from "../components/molecules/StatusPill";
+import { attendanceTone } from "../components/molecules/status-pill";
 import { AttendanceFilters } from "../components/organisms/AttendanceFilters";
 import { AttendanceDetailPage } from "./AttendanceDetailPage";
 import { AuthError, type AuthClient } from "../lib/auth-client";
@@ -206,9 +208,10 @@ export function AttendancePage({
                         )}
                       </Table.Cell>
                       <Table.Cell>
-                        <span className="status-badge status-inactive">
-                          {attendanceStatus(row)}
-                        </span>
+                        <StatusPill
+                          tone={attendanceTone(deleted)}
+                          label={attendanceStatus(row)}
+                        />
                       </Table.Cell>
                     </Table.Row>
                   ))}

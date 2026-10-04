@@ -14,6 +14,7 @@ import {
   Trash,
 } from '@phosphor-icons/react';
 import { Notice } from '../components/molecules/Notice';
+import { StatusPill } from '../components/molecules/StatusPill';
 import { ConfirmDialog } from '../components/organisms/ConfirmDialog';
 import { HolidayFormDialog } from '../components/organisms/HolidayFormDialog';
 import { AuthError, type AuthClient } from '../lib/auth-client';
@@ -293,20 +294,11 @@ export function HolidaysPage({
                           <Table.Cell>{record.description}</Table.Cell>
                           <Table.Cell>
                             {isPast ? (
-                              <span className="status-badge status-inactive">
-                                <span className="status-dot" aria-hidden="true" />
-                                Lampau
-                              </span>
+                              <StatusPill tone="inactive" label="Lampau" />
                             ) : isToday ? (
-                              <span className="status-badge status-active">
-                                <span className="status-dot" aria-hidden="true" />
-                                Hari Ini
-                              </span>
+                              <StatusPill tone="active" label="Hari Ini" />
                             ) : (
-                              <span className="status-badge">
-                                <span className="status-dot" aria-hidden="true" />
-                                Mendatang
-                              </span>
+                              <StatusPill tone="archived" label="Mendatang" />
                             )}
                           </Table.Cell>
                           <Table.Cell className="col-actions">

@@ -1,5 +1,17 @@
 # Progres dan titik lanjut
 
+## R05 — HR list pages: pill konsisten + fix link routing (2026-10-05)
+
+Selesai dan diterima pengguna lewat cek manual. Halaman list HR disamakan ke pola GitHub list dengan pill status konsisten dan link yang benar di bawah path routing.
+
+- Baru: `apps/hr-web/src/components/molecules/StatusPill.tsx` (komponen pill dot+label) + `status-pill.ts` (tipe `PillTone`, `PILL_TONE_CLASS`, mapping `monitoringTone`/`attendanceTone` — logika murni, dipisah agar fast-refresh/lint bersih).
+- Ringkasan (`MonitoringPage`): fix link mati `#absensi?id=` → router `Link` ke `/absensi?id=` (regresi R01); pill status baris + badge tipe jadwal pakai `StatusPill`. Test diperbarui: href `/absensi?id=rec-1` + bungkus `MemoryRouter`.
+- Absensi (`AttendancePage`): kolom status pakai `StatusPill` (tone via `attendanceTone`), menggantikan span inline.
+- Hari Libur (`HolidaysPage`): pill Lampau/Hari Ini/Mendatang pakai `StatusPill`.
+- Karyawan (`EmployeesPage`) & MasterData Dept/Jabatan (`MasterDataPage`): sudah memakai HeroUI `Table` + `StatusBadge` konsisten; tidak diubah.
+- Verifikasi: hr-web build/typecheck OK, lint bersih, 86/86 unit test lulus. `StatusBadge` (ACTIVE/INACTIVE/ARCHIVED) tetap dipakai untuk entitas master/karyawan; `StatusPill` untuk status attendance/jadwal/holiday. Penyatuan StatusBadge/ConfirmDialog/Notice/PasswordField ke `packages/ui` masih ditunda (R07).
+- Lanjut: R06 — HR detail pages (AttendanceDetail + MasterData detail): breadcrumb + tabs; item khusus peta Leaflet (loading/empty/fallback, token tema, z-index) didesain tersendiri.
+
 ## R04 — Shell HR: command palette + shortcuts (2026-10-05)
 
 Selesai dan diterima pengguna lewat cek manual. Shell HR dapat command palette (⌘-K/Ctrl-K) + shortcut.
