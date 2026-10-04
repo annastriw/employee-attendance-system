@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { App } from "./App";
 import {
@@ -135,7 +135,7 @@ describe("Employee portal authentication journey", () => {
     const signedOut = client();
     const first = render(<App client={signedOut} />);
     await screen.findByRole("heading", { name: "Masuk" });
-    expect(window.location.hash).toBe("#masuk");
+    await waitFor(() => expect(window.location.hash).toBe("#masuk"));
     first.unmount();
 
     const signedIn = client();
@@ -145,7 +145,7 @@ describe("Employee portal authentication journey", () => {
     });
     render(<App client={signedIn} />);
     await screen.findByRole("heading", { name: "Hari ini" });
-    expect(window.location.hash).toBe("#beranda");
+    await waitFor(() => expect(window.location.hash).toBe("#beranda"));
   });
 
   it("returns to login when an authenticated action gets 401", async () => {

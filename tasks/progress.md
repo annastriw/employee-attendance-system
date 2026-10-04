@@ -2,7 +2,7 @@
 
 Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mulai/selesai task, sebelum sesi berganti atau kapasitas sesi habis. Status completion tetap di [todo](todo.md); dependency di [plan](plan.md); prosedur pada [alur implementasi](../docs/development/implementation-workflow.md).
 
-## Titik lanjut aktif — tooling VPS 2C diterima, PR rilis 3A (2026-10-04)
+## Titik lanjut aktif — PR #1, perbaikan unit navigasi sesi (2026-10-04)
 
 - Output VPS pengguna: MySQL 8.4.11 healthy, AIStor running, loopback 3307/9000/9001, network attendance-prod-backend. RAM available 2 GiB, disk available 46 GB, swap terpakai 540 MiB. attendance_prod nol tabel.
 - Nginx saat ini aktif pada 80/443; konfigurasi/domain aktual perlu diperiksa sebelum perubahan. Port backend 3000–3004 tidak tampil pada hasil listener.
@@ -11,6 +11,8 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 - Output tahap 2B diterima: source pinned ffe136562717f4944051e51061f56bec015ff42c tersedia dengan 10 migration. Belum migration/deployment. Cocokkan migration dengan rilis main sebelum menerapkannya; jangan memakai script setup dev production.
 - Pengguna menyatakan tahap 2C lancar semua; build tooling/validasi schema diterima berdasarkan laporan pengguna. Image hanya tooling Prisma, config tanpa shadow/local env, source migration dimount read-only. Default help; tidak otomatis migrate. Belum migration/database/backend live.
 - Tahap 3A PR manual dev ke main, tunggu CI result, kirim URL/hasil sebelum merge. Main remote diperiksa masih 39d7795, daftar PR terbuka dev ke main kosong. Agen tidak membuat/merge PR atau menjalankan deployment.
+- Pengguna membuat PR #1 Release: deployment production pertama. Run 37193226711 (6a3bea2) sukses, tetapi run terbaru 37193497682 (9409c24) gagal pada App.test.tsx: heading beranda muncul sebelum effect menulis hash. Branch policy/lint/build lulus; Quality/CI result gagal karena satu assertion unit. Jangan menganggap run sebelumnya mengizinkan merge head terbaru.
+- Increment aktif apps/attendance-web/src/App.test.tsx: menunggu hash pada kedua transisi restore-session dengan waitFor, tanpa sleep tetap atau perubahan aplikasi. Verifikasi file fokus: 8 unit lulus, ESLint file lulus; versi sebelum fix juga lulus lokal sehingga kegagalan timing terbukti dari log CI. Tidak menjalankan browser/integrasi. Setelah push, tunggu CI PR terbaru sebelum tutorial merge; agen tidak merge.
 - Atas permintaan pengguna, ruleset GitHub main-production (24451981) diaktifkan: hanya refs/heads/main, PR wajib, CI result app GitHub Actions 15368 wajib, blok deletion/force push, bypass kosong, approval 0, merge commit, strict up-to-date false. Payload infra/github/main-ruleset.json. Main/dev effective rules diperiksa melalui API; dev tidak dibatasi. Tidak mengubah default branch/rilis/VPS.
 - Verifikasi: Prisma validate config baru lulus lokal dengan URL dummy; Docker daemon lokal tidak tersedia sehingga build image belum diuji agen. Tidak ada unit bisnis baru karena hanya konfigurasi/tooling; tidak menjalankan suite aplikasi.
 - Verifikasi increment dokumentasi: Bash -n untuk snippet tutorial, review SQL/grant/quoting, 51 tautan lokal dan diff lulus. Tidak ada perubahan VPS oleh agen, deployment, rilis main atau suite aplikasi baru.
