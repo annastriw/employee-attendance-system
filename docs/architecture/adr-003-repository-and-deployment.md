@@ -13,6 +13,7 @@ Status: disetujui pengguna.
 - MinIO AIStor Free tetap berjalan di VPS melalui Docker Compose sesuai ADR-001, dengan bucket privat dan volume persisten.
 - DNS memakai Cloudflare. Domain API attendance-api.annastriwidagdo.me mengarah ke pintu masuk HTTPS backend; attendance-storage.annastriwidagdo.me mengikuti rancangan storage privat dan akses foto terotorisasi.
 - JWT secret, kredensial MySQL/storage, dan lisensi AIStor hanya berada pada environment backend/VPS yang sesuai. Variabel VITE_ hanya memuat konfigurasi publik seperti alamat API.
+- Implementasi VPS tunggal 2026-10-04: lima backend Docker memakai network_mode host dan bind 127.0.0.1:3000–3004, mengakses MySQL/storage via port loopback Compose infra. Ini menjaga guard HTTPS/TLS non-loopback tanpa mengubah kode service; jaringan host dibagi, filesystem/proses tetap container terpisah. Tidak memakai privileged atau mount Docker socket. Nginx host menjadi akses publik. Compose backend terpisah dari infra, image main pinned, env privat per service. Detail [runbook VPS](../deployment/vps-production-manual.md).
 
 ## Alasan
 Satu repository memudahkan perubahan kontrak frontend/backend dan package bersama ditinjau dalam satu perubahan. Pemisahan project Vercel membuat kedua portal memiliki deployment dan environment sendiri. Batas service ditentukan oleh proses, API dan kepemilikan data; tidak membutuhkan repository berbeda.

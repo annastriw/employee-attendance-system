@@ -374,6 +374,50 @@ find .secrets -maxdepth 1 -type f -printf '%f\n' | sort
 
 Jika file sudah ada/gagal, berhenti dan kirim error; jangan overwrite atau menampilkan isi file. Target mode 600. Daftar nama file diperlukan untuk memastikan file akun storage yang dibuat sebelumnya tersedia sebelum menyusun env per service. Jangan menggunakan kredensial administrator AIStor untuk Media. Kirim PASS/permission/nama file saja. Berikut 5B konfigurasi environment dan Compose backend, memakai lima image rilis yang sudah tersedia.
 
+## Tahap 5B — environment tiap service dan Compose backend
+
+Output 5A diterima: application.env/database-runtime.env mode 600, media-storage.env tersedia. Script prepare-backend-env.py membaca tiga file tersebut, membuat lima file privat dalam .secrets/backend tanpa overwrite, tidak mencetak secret dan tidak membuat admin. Domain mengikuti baseline attendance/hr/attendance-storage. Jika domain berubah, sesuaikan konfigurasi sebelum backend/public access.
+
+Backend memakai network_mode host pada Linux dengan HOST=127.0.0.1: port 3000–3004 terpisah dan hanya loopback. MySQL 127.0.0.1:3307 serta AIStor 127.0.0.1:9000 tetap di Compose infra yang sudah ada. Ini memenuhi guard aplikasi yang mewajibkan TLS untuk koneksi non-loopback tanpa menurunkan validasi TLS. Host networking berbagi namespace jaringan VPS (isolasi jaringan lebih kecil dibanding bridge); filesystem/proses tetap container terpisah. Tidak memakai privileged/Docker socket. [Docker host networking](https://docs.docker.com/engine/network/drivers/host/). Env file format raw menjaga password dengan karakter khusus; membutuhkan Compose >=2.30, VPS dilaporkan v5.5.1. [Docker env_file](https://docs.docker.com/reference/compose-file/services/#env_file).
+
+Jalankan satu block pada SSH VPS. Hanya menyiapkan file dan config --quiet; belum pull/up/restart. Script/config baru diambil dari commit dev yang dicatat, sedangkan lima image tetap rilis main 1c27c90. File persiapan tidak mengubah kode image/source migration. Setelah berhasil, deployment berikut memakai artefak tersebut; tidak perlu merge ulang hanya untuk membuat file VPS ini.
+
+```sh
+(
+  set -eu
+  set -o pipefail
+  set -o noclobber
+  umask 077
+  cd /opt/attendance
+  config_dir=/opt/attendance/releases/backend-config-prepare
+  source_dir=/opt/attendance/releases/source-ffe1365
+  for target in "$config_dir" .secrets/backend compose.backend.yml backend-release.env; do
+    [ ! -e "$target" ] || { echo 'STOP: file/folder persiapan sudah ada; kirim hasil'; exit 1; }
+  done
+  git -C "$source_dir" fetch origin dev
+  config_commit=$(git -C "$source_dir" rev-parse FETCH_HEAD)
+  mkdir "$config_dir"
+  git -C "$source_dir" archive "$config_commit" \
+    infra/compose.backend.yml scripts/deployment/prepare-backend-env.py |
+    tar -x -C "$config_dir"
+  printf '%s\n' "$config_commit" > "$config_dir/source-commit.txt"
+
+  python3 "$config_dir/scripts/deployment/prepare-backend-env.py" --root /opt/attendance
+  cp --update=none "$config_dir/infra/compose.backend.yml" compose.backend.yml
+  cmp --silent "$config_dir/infra/compose.backend.yml" compose.backend.yml
+  printf 'BACKEND_RELEASE_SHA=1c27c9062ac04ee4213b19225e8a70e159aca3cc\n' > backend-release.env
+
+  sudo docker compose --env-file backend-release.env -f compose.backend.yml config --quiet
+  ls -l .secrets/backend/*.env
+  printf 'Config commit: %s\n' "$config_commit"
+  echo 'PASS: environment dan Compose backend siap; belum dijalankan'
+)
+```
+
+Kirim PASS/permission atau error tanpa isi env. Jika sudah ada/terjadi partial preparation, simpan file dan laporkan; jangan overwrite/generate ulang secret. Jangan memakai config tanpa --quiet atau docker inspect penuh karena dapat menampilkan credential. Compose hanya menyentuh project attendance-backend-prod, berbeda dari infra. Batas memori: Gateway 192 MiB, Auth/Employee 256 MiB masing-masing, Attendance/Media 384 MiB masing-masing (total 1472 MiB); Node heap lebih rendah, log dibatasi. Resource aktual dinilai saat container berjalan. Readiness health setiap service memakai /health. Berikut 5C pull/up/check health tanpa unit suite di VPS.
+
+Verifikasi agen: unit generator terfokus, actionlint dan parsing YAML; Docker daemon lokal tidak tersedia sehingga validasi Compose sesungguhnya menunggu config --quiet VPS. Belum menjalankan backend/database/storage integration atau mengubah VPS oleh agen.
+
 ## Status langkah berikutnya
 
 Bootstrap migration/akun runtime, image rilis main/GHCR, Compose backend, domain/TLS dan frontend dikerjakan setelah inventaris tahap 1. Unit rilis dijalankan sekali pada PR; integrasi cepat bila perlu sebelum rilis. Pengiriman otomatis ke VPS belum aktif. T30/T31 belum dicentang dari pemeriksaan infra saja.
