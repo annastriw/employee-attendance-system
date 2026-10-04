@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { AuthProxyService } from './auth-proxy.service';
+import { releaseVersion } from './release-metadata';
 
 @Controller()
 export class AuthProxyController {
@@ -71,6 +72,11 @@ export class AuthProxyController {
       throw new ServiceUnavailableException(
         'Layanan autentikasi sementara tidak tersedia.',
       );
-    return { status: 'ok', service: 'api-gateway', auth: 'ready' };
+    return {
+      status: 'ok',
+      service: 'api-gateway',
+      auth: 'ready',
+      release: releaseVersion(),
+    };
   }
 }
