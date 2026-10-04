@@ -1,5 +1,30 @@
 # Progres dan titik lanjut
 
+## Bug aktif — refresh path HR 404 Vercel (2026-10-05)
+
+- Pengguna melaporkan refresh `https://hr.annastriwidagdo.me/absensi`
+  menghasilkan Vercel NOT_FOUND; Karyawan aman. Reproduksi read-only HTTP:
+  root HR `/` = 200, `/absensi` = 404.
+- Akar masalah: HR sudah memakai BrowserRouter tetapi tidak memiliki fallback
+  SPA pada Vercel; server mencari resource `/absensi` sebelum React dimuat.
+  Karyawan masih hash routing, fragmen tidak dikirim ke server.
+- File terkait: `apps/hr-web/vercel.json`, `docs/deployment.md`, progress ini.
+  Tambahkan rewrite `/(.*)` → `/index.html` mengikuti panduan resmi Vercel Vite,
+  pada root project HR (`apps/hr-web`). React route guard tetap menangani auth.
+- Verifikasi: parse JSON konfigurasi, review pola rewrite terhadap dokumentasi
+  resmi, tautan lokal dokumentasi dan diff. Tidak ada logika aplikasi berubah;
+  tidak menambah unit yang hanya mencerminkan config. Build/lint aplikasi sudah
+  lulus CI 37233478898 untuk source sebelumnya; tidak diulang lokal pada RAM
+  CRITICAL. Config routing baru baru terbukti runtime sesudah deploy Vercel.
+- [ ] Pengguna: setelah PR main + deploy frontend HR, buka langsung `/absensi`,
+  refresh 3×, coba `/ringkasan` dan `/absensi?id=<id-valid>`; periksa halaman,
+  query dan aset termuat, tanpa error NOT_FOUND Vercel.
+- Perlu PR+deploy: frontend HR saja; tidak ada service/endpoint/migration backend.
+  Tidak menjalankan dev server 5173/5174.
+- Lanjut: push fix ke dev, pengguna PR ke main; verifikasi refresh path HR live.
+  T1 acceptance localhost tetap tertunda; lanjut diagnosis T2 dari bukti runtime
+  detail absensi HR/riwayat Karyawan setelah penghalang routing ini teratasi.
+
 ## Perbaikan CI PR #9 — setup tema pada test Karyawan (2026-10-05)
 
 - Log [CI 37233159248](https://github.com/annastriw/employee-attendance-system/actions/runs/37233159248)
