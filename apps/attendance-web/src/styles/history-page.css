@@ -90,7 +90,7 @@
   font-weight: 500;
 }
 .history-event-time {
-  font-size: 1.75rem;
+  font-size: var(--ui-metric-font);
   font-variant-numeric: tabular-nums;
   font-weight: 500;
   letter-spacing: -0.03em;

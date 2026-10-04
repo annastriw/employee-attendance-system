@@ -268,7 +268,7 @@
 .attendance-events { display: flex; gap: .75rem; flex-wrap: wrap; }
 .attendance-event { flex: 1 1 12rem; min-width: 0; padding: 1rem; border: 1px solid var(--border); border-radius: .5rem; }
 .attendance-event h3 { font-size: .8125rem; color: var(--muted); }
-.attendance-event-time { font-size: 1.75rem; font-weight: 500; font-variant-numeric: tabular-nums; margin-top: .375rem; }
+.attendance-event-time { font-size: var(--ui-metric-font); font-weight: 500; font-variant-numeric: tabular-nums; margin-top: .375rem; }
 .attendance-event-time span { font-size: .75rem; color: var(--muted); }
 .attendance-reason { font-size: .8125rem; overflow-wrap: anywhere; white-space: pre-wrap; }
 .attendance-deletion { display: grid; gap: .375rem; padding-top: 1rem; border-top: 1px solid var(--border); }
@@ -297,7 +297,7 @@
 .monitoring-chart-heading p { margin-top: .2rem; color: var(--muted); font-size: .75rem; }
 .monitoring-donut-wrap { position: relative; }
 .monitoring-donut-total { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; pointer-events: none; }
-.monitoring-donut-total strong { font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+.monitoring-donut-total strong { font-size: var(--ui-metric-font); font-variant-numeric: tabular-nums; }
 .monitoring-donut-total span { color: var(--muted); font-size: .6875rem; }
 .monitoring-chart-state { min-height: 12rem; display: grid; place-content: center; justify-items: center; gap: .5rem; padding: 1rem; text-align: center; color: var(--muted); font-size: .8125rem; }
 .monitoring-chart-message { min-height: 12rem; display: grid; place-content: center; justify-items: center; gap: .5rem; padding: 1rem; text-align: center; color: var(--muted); font-size: .8125rem; }
@@ -342,7 +342,7 @@
 .metric-icon-info { color: var(--accent); }
 .metric-icon-danger { color: var(--danger); }
 .metric-title { font-size: 0.8125rem; font-weight: 500; color: var(--muted); }
-.metric-value { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--foreground); }
+.metric-value { font-size: var(--ui-metric-font); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--foreground); }
 .skeleton-metric { width: 3rem; height: 1.75rem; border-radius: 0.25rem; }
 .metric-desc { font-size: 0.75rem; color: var(--muted); }
 
@@ -385,8 +385,8 @@
   background: var(--surface-secondary);
 }
 .portal-table td {
-  padding: 0.75rem 1rem;
-  font-size: 0.8125rem;
+  padding: var(--ui-cell-y) var(--ui-cell-x);
+  font-size: var(--ui-text);
   border-bottom: 1px solid var(--border);
   vertical-align: top;
 }
@@ -519,6 +519,72 @@
   width: 100%;
   position: relative;
   z-index: 0;
+}
+
+@media (max-width: 767px) {
+  .table-responsive {
+    overflow: visible;
+    border: 0;
+    background: transparent;
+  }
+  .portal-table,
+  .portal-table tbody {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+  .portal-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .portal-table tbody {
+    display: grid;
+    gap: 0.5rem;
+  }
+  .portal-table tbody tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.375rem;
+    min-width: 0;
+    height: auto;
+    padding: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--ui-card-radius);
+    background: var(--surface);
+  }
+  .portal-table tbody td {
+    display: grid;
+    align-content: start;
+    gap: 0.25rem;
+    min-width: 0;
+    padding: 0.375rem;
+    border: 0;
+    overflow-wrap: anywhere;
+  }
+  .portal-table tbody td::before {
+    content: attr(data-label);
+    color: var(--muted);
+    font-size: 0.6875rem;
+    line-height: 1.3;
+  }
+  .portal-table tbody td:nth-child(1),
+  .portal-table tbody td:nth-child(2) {
+    grid-column: 1 / -1;
+  }
+  .portal-table tbody td:nth-child(1) {
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .portal-table tbody td:last-child {
+    align-content: center;
+  }
 }
 .table-responsive tbody tr[data-interactive-row="true"] { cursor: pointer; }
 .table-responsive tbody tr[data-interactive-row="true"]:hover { background: var(--surface-secondary); }

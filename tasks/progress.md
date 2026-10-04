@@ -1,5 +1,17 @@
 # Progres dan titik lanjut
 
+## T10 teknis selesai - sweep responsif, a11y, dan skala kompak (2026-10-05)
+
+- T10 kode selesai: tabel Monitoring HR menjadi kartu berlabel di bawah 768px tanpa
+  scroll horizontal; sel tabel dan metrik memakai token D12; baris membuka detail
+  dengan Enter/Space. Riwayat karyawan memakai ukuran waktu metrik bersama.
+- Lint + typecheck HR dan Karyawan lulus; unit `MonitoringPage.test.tsx` lulus 9/9.
+  Build/dev server tidak dijalankan karena `resource_status` tidak tersedia (catatan
+  RAM bebas terakhir ~2.1 GiB). Zoom lock D11 sebelumnya sudah punya unit test.
+- Acceptance visual T10 masih menunggu pengguna; checklist tetap tidak dicentang.
+- **Lanjut:** dokumentasikan pola sidebar, chart, rentang tanggal, profil, dan daftar
+  endpoint yang menunggu PR+deploy di T11.
+
 ## T9 teknis selesai - Portal Karyawan responsif (2026-10-05)
 
 - Migrasi hash ke React Router DOM 7.18.4; rute `/masuk`, `/ganti-password`, `/`,

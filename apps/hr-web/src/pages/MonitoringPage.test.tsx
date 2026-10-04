@@ -201,6 +201,15 @@ describe("MonitoringPage (Layar H02 Monitoring & Rekap)", () => {
     expect(screen.getByRole("link", { name: "Buka profil karyawan" })).toHaveAttribute("href", "/karyawan?employee=emp-3");
   });
 
+  it("opens an employee row with the keyboard on desktop and mobile layouts", async () => {
+    const { user } = setup();
+    await screen.findByText("Karyawan Aktif");
+    const row = screen.getByRole("row", { name: "Buka detail Aditya Pratama" });
+    row.focus();
+    await user.keyboard(" ");
+    expect(await screen.findByRole("dialog", { name: "Detail Aditya Pratama" })).toBeInTheDocument();
+  });
+
   it("shows the pending-release fallback when the trend endpoint is unavailable", async () => {
     const api = vi.fn(async (url: string) => {
       if (url.startsWith("departments")) return mockDepartments;

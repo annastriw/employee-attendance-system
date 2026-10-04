@@ -648,20 +648,23 @@ export function MonitoringPage({
                     setSelectedEmployee(item);
                   }}
                   onKeyDown={event => {
-                    if (event.target === event.currentTarget && event.key === "Enter") {
+                    if (
+                      event.target === event.currentTarget &&
+                      (event.key === "Enter" || event.key === " ")
+                    ) {
                       event.preventDefault();
                       setSelectedEmployee(item);
                     }
                   }}>
-                  <td>
+                  <td data-label="Karyawan">
                     <div className="table-cell-title">{item.name}</div>
                     <div className="table-cell-subtitle">{item.nik}</div>
                   </td>
-                  <td>
+                  <td data-label="Departemen & Jabatan">
                     <div>{item.department}</div>
                     <div className="table-cell-subtitle">{item.position}</div>
                   </td>
-                  <td>
+                  <td data-label="Check-in">
                     <div className="time-badge-wrap">
                       <span>{monitoringTimeFormatted(item.checkInTime)}</span>
                       {item.isLate && (
@@ -669,7 +672,7 @@ export function MonitoringPage({
                       )}
                     </div>
                   </td>
-                  <td>
+                  <td data-label="Checkout">
                     <div className="time-badge-wrap">
                       <span>{monitoringTimeFormatted(item.checkOutTime)}</span>
                       {item.isEarlyDeparture && (
@@ -677,13 +680,13 @@ export function MonitoringPage({
                       )}
                     </div>
                   </td>
-                  <td>
+                  <td data-label="Status Kehadiran">
                     <StatusPill
                       tone={monitoringTone(item.status)}
                       label={monitoringStatusLabel(item.status)}
                     />
                   </td>
-                  <td>
+                  <td data-label="Aksi">
                     {item.recordId ? (
                       <Link
                         to={`/absensi?id=${item.recordId}`}

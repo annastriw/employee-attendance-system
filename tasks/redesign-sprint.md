@@ -346,6 +346,11 @@ Fase B:
   password); unit test lama diperbarui untuk router.
 
 ### T10 `[ ]` Sweep responsif + a11y + polish
+- **Status 2026-10-05**: tabel monitoring HR beralih ke kartu berlabel pada viewport
+  <768px, sel tabel/angka metrik mengikuti token D12, waktu detail riwayat memakai
+  token metrik, dan baris monitoring mendukung Enter/Space. Lint + typecheck kedua
+  portal dan unit MonitoringPage 9/9 lulus. Acceptance manual di 320/768/1024/1440,
+  tema terang/gelap, dan zoom masih menunggu pengguna; checkbox tetap terbuka.
 - Cek 320 / 768 / 1024 / 1440 px, terang & gelap, tiap halaman kedua portal: tidak ada
   overflow horizontal, tidak ada space kosong, tabel → list kartu di < 768 px.
 - Kontras AA, focus ring, keyboard, `prefers-reduced-motion`, toast konsisten (HeroUI Toast)
@@ -357,6 +362,7 @@ Fase B:
 - **DoD**: checklist halaman di progress tercentang setelah pengguna oke.
 
 ### T11 `[ ]` Dokumentasi & rapikan
+- Status: menunggu pembaruan dokumen dan verifikasi T11.
 - Update `frontend-design-system.md`, `frontend-ui-ux.md` (pola baru: sidebar, chart,
   date range, profil), `docs/features.md`, README bila perlu.
 - Ringkasan perubahan backend untuk PR main (endpoint, migration).
