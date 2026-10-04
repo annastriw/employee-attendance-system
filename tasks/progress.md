@@ -27,9 +27,20 @@ Audit codebase (baca-saja, memori CRITICAL — tanpa build/dev server):
   cukup untuk date-range, search-saat-ketik, sidebar hideable, dropdown departemen.
   **Tidak punya chart** → keputusan chart (Recharts vs SVG/Meter) ditandai di X7.
 
-Lanjut: **X1 — perbaikan bug kritis** (butuh dev server saat memori lega untuk
-reproduksi; mulai dari root-cause cookie refresh). Belum ada kode diubah di sesi ini
-selain dokumen sprint + progress.
+Revisi gabungan (2026-10-05, setelah tanya-jawab): keputusan D1–D10 dikunci di
+`tasks/redesign-sprint.md` (chart shadcn/Recharts, sidebar rail+drawer, profil
+lihat+edit dengan batas field default, date range preset, search debounce 300 ms,
+backend → push dev + kabari pengguna). Backlog X-series diganti **T1–T11** dengan
+file, langkah, dan DoD per task agar bisa dilanjutkan agen lain (kiro CLI).
+Temuan backend: `auth/me` sudah diproksikan; `monitoring/summary` ada; **belum ada**
+`monitoring/trend` (T7) dan `me/profile` (T8). Tailwind v4 ada di kedua portal;
+`recharts` belum terpasang.
+
+Perlu PR+deploy: (belum ada perubahan backend).
+
+Lanjut: **T1 — sesi hilang saat refresh**. Langkah pertama: minta pengguna kirim
+Network `auth/refresh` (status, header Cookie request, Set-Cookie saat login) dan
+daftar cookie `localhost`.
 
 ## R05 — HR list pages: pill konsisten + fix link routing (2026-10-05)
 
