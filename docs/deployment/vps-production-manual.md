@@ -104,6 +104,37 @@ Grant dibatasi attendance_prod; underscore di-escape agar bukan wildcard databas
 
 Kirim output PASS/STOP/FAIL, ls permission dan SELECT/SHOW GRANTS. Jangan kirim nilai password. Tahap ini belum diklaim selesai sebelum output pengguna diterima.
 
+## Tahap 2B — siapkan source migration
+
+Pengguna menyatakan tahap 2A lancar semua pada 2026-10-04. Akun/login migrator diterima berdasarkan laporan pengguna; password tidak dicatat. Berikut hanya mengambil source, belum menjalankan migration atau backend. Main masih dasar dokumentasi rilis pertama; source dev dipin untuk persiapan, bukan deployment dev. Sebelum migration dijalankan, cocokkan migration dengan source rilis main yang disetujui.
+
+Jalankan satu block pada SSH VPS. Folder tujuan baru; jika sudah ada, berhenti tanpa menghapus/menimpanya.
+
+```sh
+(
+  set -eu
+  source_dir=/opt/attendance/releases/source-ffe1365
+  source_commit=ffe136562717f4944051e51061f56bec015ff42c
+
+  [ ! -e "$source_dir" ] || {
+    echo 'STOP: folder source sudah ada; kirim hasil ini'
+    exit 1
+  }
+
+  git clone --branch dev --single-branch \
+    https://github.com/annastriw/employee-attendance-system.git "$source_dir"
+  git -C "$source_dir" checkout --detach "$source_commit"
+  [ "$(git -C "$source_dir" rev-parse HEAD)" = "$source_commit" ]
+  cd "$source_dir"
+  git status --short --branch
+  git log -1 --oneline
+  find prisma/migrations -maxdepth 2 -type f -name migration.sql | sort
+  echo 'PASS: source migration tersedia; database belum diubah'
+)
+```
+
+Kirim output block ini. Jangan install dependency, build semua service, menjalankan db:setup/db push/migrate reset atau menyalin secret ke source. Berikutnya siapkan tooling migrate deploy sesuai source rilis; konfigurasi lokal memerlukan shadow database dan tidak dipakai langsung untuk production.
+
 ## Status langkah berikutnya
 
 Bootstrap migration/akun runtime, image rilis main/GHCR, Compose backend, domain/TLS dan frontend dikerjakan setelah inventaris tahap 1. Unit rilis dijalankan sekali pada PR; integrasi cepat bila perlu sebelum rilis. Pengiriman otomatis ke VPS belum aktif. T30/T31 belum dicentang dari pemeriksaan infra saja.
