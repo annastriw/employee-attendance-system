@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState, type SubmitEvent } from "react";
-import { Button, Input, Label, Skeleton } from "@heroui/react";
+import { useEffect, useRef, useState } from "react";
+import { Button, Skeleton } from "@heroui/react";
 import { ArrowLeft, CaretLeft, CaretRight, Clock } from "@phosphor-icons/react";
-import { AuthShell, Notice } from "@attendance/ui";
+import { AuthShell, Notice, DateRangeField, listDateRange, rangeQuery } from "@attendance/ui";
 
 import { HistoryEvidence } from "../components/organisms/HistoryEvidence";
 import { AuthError, type AuthClient } from "../lib/auth-client";
@@ -29,13 +29,13 @@ export default function HistoryPage({
   onHome: () => void;
   onSessionExpired: () => void;
 }) {
+  const range = listDateRange(params);
   const id = params.get("id"),
-    startDate = params.get("startDate") ?? "",
-    endDate = params.get("endDate") ?? "",
+    startDate = range?.startDate ?? "",
+    endDate = range?.endDate ?? "",
     page = params.get("page") ?? "1";
   const [data, setData] = useState<HistoryResult | HistoryRecord | null>(null);
   const [error, setError] = useState(""),
-    [filterError, setFilterError] = useState(""),
     [loaded, setLoaded] = useState(""),
     [reload, setReload] = useState(0);
   const key = [id, startDate, endDate, page, reload].join("|");
@@ -74,30 +74,12 @@ export default function HistoryPage({
   }, [client, id, startDate, endDate, page, key, reload, onSessionExpired]);
   function update(next: HistoryParams) {
     onParamsChange({
+      period: params.get("period") ?? undefined,
       startDate: startDate || undefined,
       endDate: endDate || undefined,
       page: page === "1" ? undefined : page,
       id: undefined,
       ...next,
-    });
-  }
-  function filter(event: SubmitEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const fields = new FormData(event.currentTarget);
-    const start = String(fields.get("startDate") ?? ""),
-      end = String(fields.get("endDate") ?? "");
-    if (start && end && start > end) {
-      setFilterError(
-        "Tanggal awal harus sebelum atau sama dengan tanggal akhir.",
-      );
-      return;
-    }
-    setFilterError("");
-    update({
-      startDate: start || undefined,
-      endDate: end || undefined,
-      page: undefined,
-      id: undefined,
     });
   }
   const detail = id && data && !("data" in data) ? data : null;
@@ -121,46 +103,11 @@ export default function HistoryPage({
           {id ? "Detail absensi" : "Riwayat"}
         </h1>
         {!id && (
-          <form
-            key={startDate + "|" + endDate}
-            className="history-filter"
-            onSubmit={filter}
-          >
-            <div>
-              <Label htmlFor="history-from">Dari tanggal</Label>
-              <Input
-                id="history-from"
-                name="startDate"
-                type="date"
-                defaultValue={startDate}
-              />
-            </div>
-            <div>
-              <Label htmlFor="history-until">Sampai tanggal</Label>
-              <Input
-                id="history-until"
-                name="endDate"
-                type="date"
-                defaultValue={endDate}
-              />
-            </div>
-            <Button type="submit" variant="secondary">
-              Terapkan
-            </Button>
-            {(startDate || endDate || page !== "1") && (
-              <Button
-                variant="ghost"
-                onPress={() => {
-                  setFilterError("");
-                  onParamsChange({});
-                }}
-              >
-                Bersihkan filter
-              </Button>
-            )}
-          </form>
+          <div className="history-filter">
+            <DateRangeField value={range} onChange={value => update(rangeQuery(value))} />
+            <Button variant="ghost" onPress={() => update(rangeQuery(null))}>Semua tanggal</Button>
+          </div>
         )}
-        {filterError && <Notice message={filterError} />}
         {loading ? (
           <div
             aria-busy="true"

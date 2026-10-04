@@ -5,12 +5,14 @@ export interface EmployeeRecord extends Omit<EmployeeInput, 'departmentId' | 'po
 export interface EmployeePage { items: EmployeeRecord[]; total: number; page: number; pageSize: number }
 export interface ProvisioningOperation { id: string; employeeId: string; status: 'PENDING' | 'COMPLETED' | 'FAILED'; errorCode: string | null; email: string; canCorrectEmail?: boolean }
 export interface TemporaryCredential { email: string; temporaryPassword: string }
-export async function loadActiveMasters(client: Pick<AuthClient, 'api'>, resource: 'departments' | 'positions'): Promise<MasterRecord[]> {
+export async function loadMasters(client: Pick<AuthClient, 'api'>, resource: 'departments' | 'positions', activeOnly = false): Promise<MasterRecord[]> {
   const records: MasterRecord[] = []; let page = 1;
   while (true) {
-    const result = await client.api<MasterRecordPage>(resource + '?status=ACTIVE&pageSize=100&page=' + page);
-    records.push(...result.items.filter(row => row.status === 'ACTIVE'));
-    if (page * result.pageSize >= result.total) return records;
+    const result = await client.api<MasterRecordPage>(resource + '?' + (activeOnly ? 'status=ACTIVE&' : '') + 'pageSize=100&page=' + page);
+    if (!Array.isArray(result.items) || !Number.isInteger(result.total) || !Number.isInteger(result.pageSize) || result.pageSize < 1)
+      throw new Error('Daftar pilihan master tidak valid. Coba lagi.');
+    records.push(...result.items.filter(row => !activeOnly || row.status === 'ACTIVE'));
+    if (page * result.pageSize >= result.total) return records.sort((a, b) => a.name.localeCompare(b.name, 'id'));
     if (!result.items.length || page >= 1000) throw new Error('Pilihan master belum selesai dimuat. Coba lagi.');
     page++;
   }
@@ -28,3 +30,4 @@ export interface EmployeeDetail extends Omit<EmployeeInput, 'status' | 'phone'> 
   lifecycleChange: LifecycleOperation | null;
   hasPendingOperation?: boolean;
 }
+export const loadActiveMasters = (client: Pick<AuthClient, 'api'>, resource: 'departments' | 'positions') => loadMasters(client, resource, true);

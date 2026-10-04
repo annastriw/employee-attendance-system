@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Button,
-  SearchField,
   Skeleton,
   Table,
 } from '@heroui/react';
@@ -13,7 +12,7 @@ import {
   Plus,
   Trash,
 } from '@phosphor-icons/react';
-import { Notice, StatusPill, ConfirmDialog } from "@attendance/ui";
+import { Notice, StatusPill, ConfirmDialog, SearchInput, DateRangeField, listDateRange, rangeQuery } from "@attendance/ui";
 
 import { HolidayFormDialog } from '../components/organisms/HolidayFormDialog';
 import { AuthError, type AuthClient } from '../lib/auth-client';
@@ -71,12 +70,14 @@ export function HolidaysPage({
   const year = yearParam ? Number(yearParam) : undefined;
   const monthParam = params.get('month');
   const month = monthParam ? Number(monthParam) : undefined;
+  const range = year || month ? null : listDateRange(params);
+  const startDate = range?.startDate, endDate = range?.endDate;
   const page = Math.max(1, Number(params.get('page')) || 1);
 
   const [data, setData] = useState<HolidayPage | null>(null);
   const [loadError, setLoadError] = useState('');
   const [reload, setReload] = useState(0);
-  const key = `${search}|${year ?? ''}|${month ?? ''}|${page}|${reload}`;
+  const key = `${search}|${year ?? ''}|${month ?? ''}|${startDate ?? ''}|${endDate ?? ''}|${page}|${reload}`;
   const [loadedKey, setLoadedKey] = useState('');
   const loading = loadedKey !== key;
 
@@ -88,16 +89,17 @@ export function HolidaysPage({
   const [actionError, setActionError] = useState('');
 
   const setFilters = useCallback(
-    (next: { search?: string; year?: number; month?: number; page?: number }) => {
-      const merged = { search, year, month, page, ...next };
+    (next: { search?: string; year?: number; month?: number; page?: number; startDate?: string; endDate?: string; period?: string }) => {
+      const merged = { search, year, month, startDate, endDate, period: params.get("period") ?? undefined, page, ...next };
       onParamsChange({
         search: merged.search || undefined,
+        startDate: merged.startDate, endDate: merged.endDate, period: merged.period,
         year: merged.year ? String(merged.year) : undefined,
         month: merged.month ? String(merged.month) : undefined,
         page: merged.page > 1 ? String(merged.page) : undefined,
       });
     },
-    [month, onParamsChange, page, search, year],
+    [month, onParamsChange, page, search, year, startDate, endDate, params],
   );
 
   const handle = useCallback(
@@ -114,7 +116,7 @@ export function HolidaysPage({
       .list({
         search: search || undefined,
         year,
-        month,
+        month, startDate, endDate,
         page,
         pageSize: PAGE_SIZE,
       })
@@ -133,16 +135,7 @@ export function HolidaysPage({
     return () => {
       active = false;
     };
-  }, [api, handle, key, month, page, search, year]);
-
-  const debounce = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  function onSearchInput(value: string) {
-    setQuery(value);
-    clearTimeout(debounce.current);
-    debounce.current = setTimeout(() => {
-      setFilters({ search: value.trim(), page: 1 });
-    }, 250);
-  }
+  }, [api, handle, key, month, page, search, year, startDate, endDate]);
 
   function refresh() {
     setReload((r) => r + 1);
@@ -170,20 +163,12 @@ export function HolidaysPage({
   const lastPage = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const from = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
   const to = Math.min(total, page * PAGE_SIZE);
-  const filtered = Boolean(search || year || month);
+  const filtered = Boolean(search || year || month || startDate || endDate);
 
   return (
     <div className="holidays-page">
       <div className="list-toolbar">
-        <SearchField
-          className="list-search"
-          value={query}
-          onChange={onSearchInput}
-          aria-label="Cari keterangan hari libur"
-        >
-          <SearchField.Input placeholder="Cari keterangan hari libur…" />
-          <SearchField.ClearButton />
-        </SearchField>
+        <SearchInput label="Cari keterangan hari libur" value={query} onChange={setQuery} onSearch={value => setFilters({ search: value.trim(), page: 1 })} placeholder="Cari keterangan hari libur" />
 
         <Button
           variant="primary"
@@ -198,6 +183,10 @@ export function HolidaysPage({
         </Button>
       </div>
 
+      <DateRangeField value={range} onChange={value => {
+        onParamsChange({ search: search || undefined, ...rangeQuery(value) });
+      }} />
+      <Button size="sm" variant="ghost" onPress={() => onParamsChange({ search: search || undefined, period: "ALL" })}>Semua tanggal</Button>
       {success && <Notice message={success} success />}
       {actionError && !form && !toDelete && <Notice message={actionError} />}
       {loadError && (

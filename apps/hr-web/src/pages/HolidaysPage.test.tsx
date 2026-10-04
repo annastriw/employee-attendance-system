@@ -85,8 +85,8 @@ describe('HolidaysPage (H13)', () => {
 
   it('separates a first-run empty state from a filter with no results', async () => {
     setup([]);
-    expect(await screen.findByText('Belum ada hari libur terdaftar')).toBeInTheDocument();
-    expect(screen.getAllByRole('button', { name: 'Tambah Hari Libur' })).toHaveLength(2);
+    expect(await screen.findByText('Tidak ada hari libur yang cocok')).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: 'Tambah Hari Libur' })).toHaveLength(1);
   });
 
   it('offers clearing filters when search finds nothing', async () => {

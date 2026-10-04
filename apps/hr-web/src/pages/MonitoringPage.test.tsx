@@ -116,7 +116,7 @@ describe("MonitoringPage (Layar H02 Monitoring & Rekap)", () => {
     },
   };
 
-  const mockDepartments = {
+  const mockDepartments = { total: 2, page: 1, pageSize: 100,
     items: [
       { id: "dept-1", name: "Teknologi Informasi" },
       { id: "dept-2", name: "Sumber Daya Manusia" },
@@ -245,7 +245,8 @@ describe("MonitoringPage (Layar H02 Monitoring & Rekap)", () => {
     });
 
     const deptSelect = screen.getByLabelText("Filter Departemen");
-    await user.selectOptions(deptSelect, "dept-1");
+    await user.click(deptSelect);
+    await user.click(await screen.findByRole("menuitemradio", { name: "Teknologi Informasi" }));
 
     expect(onParamsChange).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -255,7 +256,7 @@ describe("MonitoringPage (Layar H02 Monitoring & Rekap)", () => {
     );
   });
 
-  it("submits search form for employee name or NIK", async () => {
+  it("debounces search for employee name or NIK", async () => {
     const { onParamsChange, user } = setup();
 
     await waitFor(() => {
@@ -265,14 +266,11 @@ describe("MonitoringPage (Layar H02 Monitoring & Rekap)", () => {
     const searchInput = screen.getByLabelText("Cari nama atau NIK");
     await user.type(searchInput, "Aditya");
 
-    const searchBtn = screen.getByRole("button", { name: "Cari" });
-    await user.click(searchBtn);
-
-    expect(onParamsChange).toHaveBeenCalledWith(
+    await waitFor(() => expect(onParamsChange).toHaveBeenCalledWith(
       expect.objectContaining({
         date: "2026-10-05",
         search: "Aditya",
       }),
-    );
+    ));
   });
 });

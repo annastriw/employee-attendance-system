@@ -8,7 +8,7 @@ import {
   Modal,
   TextField,
 } from '@heroui/react';
-import { Notice } from "@attendance/ui";
+import { Notice, CalendarField } from "@attendance/ui";
 import type { HolidayRecord } from '../../lib/holidays';
 
 type Errors = { holidayDate?: string; description?: string };
@@ -85,26 +85,10 @@ export function HolidayFormDialog({
               </Modal.Heading>
             </Modal.Header>
             <Modal.Body className="dialog-body">
-              <TextField
-                className="form-field"
-                value={holidayDate}
-                onChange={(value) => {
-                  setHolidayDate(value);
-                  setErrors({ ...errors, holidayDate: undefined });
-                }}
-                isRequired
-                isDisabled={busy}
-                isInvalid={Boolean(shown.holidayDate)}
-                validationBehavior="aria"
-              >
-                <Label>Tanggal Libur</Label>
-                <Input type="date" min={todayWIB} autoFocus={!record} />
-                {shown.holidayDate ? (
-                  <FieldError>{shown.holidayDate}</FieldError>
-                ) : (
-                  <Description>Pilih tanggal hari ini atau mendatang (WIB).</Description>
-                )}
-              </TextField>
+              <CalendarField label="Tanggal Libur" value={holidayDate}
+                onChange={value => { setHolidayDate(value); setErrors({ ...errors, holidayDate: undefined }); }}
+                disabled={busy} required min={todayWIB} error={shown.holidayDate}
+                hint="Pilih tanggal hari ini atau mendatang (WIB)." />
 
               <TextField
                 className="form-field"

@@ -16,7 +16,10 @@ export class CreateEmployeeDto {
   @ValidateBy({ name: 'calendarDate', validator: { validate: value => { try { return validCalendarDate(value); } catch { return false; } }, defaultMessage: () => 'Tanggal mulai bekerja harus tanggal kalender yang valid.' } }) startDate!: string;
   @IsIn(['ACTIVE', 'INACTIVE']) status: 'ACTIVE' | 'INACTIVE' = 'ACTIVE';
 }
-export class ListEmployeesQuery extends ListPositionsQuery {}
+export class ListEmployeesQuery extends ListPositionsQuery {
+  @IsOptional() @IsUUID() departmentId?: string;
+  @IsOptional() @IsUUID() positionId?: string;
+}
 export class CredentialRequestDto { @IsOptional() @IsIn([true, false]) recover?: boolean; }
 
 export class RetryEmployeeDto {

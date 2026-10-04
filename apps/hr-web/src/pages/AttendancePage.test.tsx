@@ -55,6 +55,7 @@ function setup(
   const api = vi.fn(
     async (path: string, init?: { method?: string; body?: unknown }) => {
       if (override) return override(path, init);
+      if (path.startsWith("employees?")) return { items: [], total: 0, page: 1, pageSize: 20 };
       return path.includes("?")
         ? { data: [record], meta: { total: 21, page: 1, pageSize: 20 } }
         : { data: record };

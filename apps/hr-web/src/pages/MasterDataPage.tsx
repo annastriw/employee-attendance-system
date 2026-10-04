@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Button, SearchField, Skeleton, Table, ToggleButton, ToggleButtonGroup } from "@heroui/react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Button, Skeleton, Table, ToggleButton, ToggleButtonGroup } from "@heroui/react";
 import { Buildings, CaretLeft, CaretRight, PencilSimple, Plus, Power } from "@phosphor-icons/react";
-import { Notice, StatusBadge, ConfirmDialog } from "@attendance/ui";
+import { Notice, StatusBadge, ConfirmDialog, SearchInput } from "@attendance/ui";
 
 import { MasterFormDialog } from "../components/organisms/MasterFormDialog";
 import { AuthError, type AuthClient } from "../lib/auth-client";
@@ -61,15 +61,6 @@ export function MasterDataPage({ client, params, onParamsChange, onSessionExpire
   }, [api, handle, key, page, search, status]);
   const refresh = () => setReload((value) => value + 1);
 
-  // Debounce typing; a new search always starts from the first page.
-  const typing = useRef<number | undefined>(undefined);
-  useEffect(() => {
-    if (query.trim() === search) return;
-    window.clearTimeout(typing.current);
-    typing.current = window.setTimeout(() => setFilters({ search: query.trim(), page: 1 }), 300);
-    return () => window.clearTimeout(typing.current);
-  }, [query, search, setFilters]);
-
   async function run(action: () => Promise<MasterRecord>, done: (record: MasterRecord) => string) {
     setBusy(true);
     setActionError("");
@@ -103,13 +94,7 @@ export function MasterDataPage({ client, params, onParamsChange, onSessionExpire
   return (
     <div className="list-page">
       <div className="list-toolbar" role="search">
-        <SearchField className="list-search" value={query} onChange={setQuery} aria-label={`Cari ${label}`}>
-          <SearchField.Group>
-            <SearchField.SearchIcon />
-            <SearchField.Input placeholder="Cari nama atau kode" />
-            <SearchField.ClearButton />
-          </SearchField.Group>
-        </SearchField>
+        <SearchInput label={`Cari ${label}`} value={query} onChange={setQuery} onSearch={value => setFilters({ search: value.trim(), page: 1 })} placeholder="Cari nama atau kode" />
         <ToggleButtonGroup aria-label="Filter status" selectionMode="single" disallowEmptySelection
           selectedKeys={[status]} size="sm" className="status-filter"
           onSelectionChange={(keys) => { const [key] = [...keys]; if (key) setFilters({ status: key as Filter, page: 1 }); }}>

@@ -1,27 +1,40 @@
 # Progres dan titik lanjut
 
+## T4 aktif — kontrol dan filter seragam (2026-10-05)
+
+- Task aktif: T4, seri satu per satu. Scope: shared CalendarField/FilterSelect,
+  default/preset/date query utilities, semua filter Absensi/Ringkasan/Hari Libur/
+  Karyawan HR dan Riwayat Karyawan; Employee Service list filter; test dan docs.
+- Semua tanggal native diganti DateRangeField/CalendarField HeroUI; pencarian
+  memakai SearchInput debounce 300 ms tanpa tombol Cari/Terapkan. Rentang list
+  30 hari default WIB, dapat pilih preset, rentang khusus, atau Semua tanggal.
+  Query tanggal/page/detail tetap terjaga saat navigasi.
+- Filter master memuat semua page (pageSize 100), urut nama Indonesia dan memberi
+  label Nonaktif. Form penugasan tetap hanya menawarkan master ACTIVE sesuai
+  aturan bisnis. Pilihan Semua menjadi default. Daftar karyawan mendapat filter
+  departemen/jabatan di Employee Service; API list memakai predicates yang sama
+  untuk hasil dan total.
+- Perubahan backend: Employee Service `GET /api/v1/employees` menerima optional
+  `departmentId`/`positionId`; tidak ada migration. Push dev lalu pengguna PR+
+  deploy sebelum filter backend aktif production.
+- Verifikasi: unit logika baru 12/12, Riwayat Karyawan 7/7, Employee Service
+  filter murni 2/2; HR fokus 61/61 lintas 8 file. Lint HR/Employee Service dan
+  typecheck kedua portal lulus. Build kedua portal menunggu CI.
+- Build tidak dijalankan: RAM bebas ~2.1 GiB (<3 GiB). UI acceptance tetap manual
+  pengguna setelah merge/deploy, termasuk date picker/preset, pencarian, filter
+  master, desktop/tablet/mobile serta tema terang/gelap.
+- Lanjut: audit diff, commit/push task T4 ke dev; lalu T5 shell HR.
+
 ## T3 implementasi selesai — fondasi UI bersama (2026-10-05)
 
-- Task aktif: T3, serial tanpa subagen. Scope file: `packages/ui/src` + package
-  manifest/lockfile, import komponen kedua portal, CSS `src/styles`, viewport
-  `index.html`/`main.tsx`, unit HR untuk logika bersama, arsip spike Karyawan.
 - Notice, PasswordField, ConfirmDialog, StatusBadge/Pill dipindahkan ke UI bersama;
-  FormField, DateRangeField, SearchInput, DataList ditambahkan. SidebarShell T5.
-- D11/D12: zoom lock + token kompak + shell fixed diterapkan; test
-  tanggal WIB/debounce/viewport 12/12 lulus setelah 11 test awal gagal.
-- Verifikasi: unit terdampak HR 90/90 (termasuk 12 test logika bersama),
-  Karyawan 40/40; lint kedua portal dan packages/ui lulus, typecheck kedua portal
-  lulus, diff tanpa whitespace error. Fixture capture lama tetap diuji di test/legacy.
-- Build/dev server tidak dimulai (RAM <3 GiB); build menunggu CI PR sesuai
-  keputusan pengguna. Port 5173/5174 tidak dibuka oleh agen.
-- Manual setelah deploy: cek login, daftar/detail dan modal desktop/mobile;
-  konten scroll dalam layar, ukuran kompak, Ctrl/Cmd +/-/0 dan pinch halaman
-  diblokir, pinch peta tetap berfungsi. Acceptance UI belum dicentang.
-- Acceptance T2 Karyawan tetap tertunda; "oke lanjut" adalah arahan melanjutkan,
-  bukan klaim riwayat/detail/foto production sudah diterima.
-- Perlu PR+deploy: fondasi frontend kedua portal; tidak ada backend/migration.
-- Lanjut: T4 kontrol/filter seragam; build T3 melalui CI PR dan manual UI pengguna
-  tetap tertunda. Commit/push ke dev; tidak ada perubahan main.
+  FormField, DateRangeField, SearchInput, dan DataList ditambahkan.
+- D11/D12 diterapkan lintas kedua portal. Lint/typecheck kedua portal lulus; unit
+  HR 90/90, Karyawan 40/40. Fixture capture lama tetap dijalankan di test/legacy.
+- Build dan dev server tidak dijalankan karena RAM bebas <3 GiB. UI manual desktop,
+  tablet, mobile dan zoom peta masih menunggu pengguna setelah rilis.
+- Perlu PR+deploy: frontend dua portal; tidak ada backend/migration.
+- Lanjut: T4 kontrol/filter. Commit/push `c4b8e66`.
 
 ## T2 aktif — validator riwayat Karyawan menolak UUID demo v5 (2026-10-05)
 

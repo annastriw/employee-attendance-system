@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Skeleton, Table } from "@heroui/react";
 import { CaretLeft, CaretRight, Clock } from "@phosphor-icons/react";
-import { Notice, StatusPill, attendanceTone } from "@attendance/ui";
+import { Notice, StatusPill, attendanceTone, listDateRange } from "@attendance/ui";
 
 import { AttendanceFilters } from "../components/organisms/AttendanceFilters";
 import { AttendanceDetailPage } from "./AttendanceDetailPage";
@@ -41,8 +41,9 @@ export function AttendancePage({
 }) {
   const handle = useFailure(onSessionExpired);
   const id = params.get("id");
-  const startDate = params.get("startDate") ?? "",
-    endDate = params.get("endDate") ?? "",
+  const range = listDateRange(params);
+  const startDate = range?.startDate ?? "",
+    endDate = range?.endDate ?? "",
     employeeId = params.get("employeeId") ?? "";
   const page = Math.max(1, Math.min(1000000, Number(params.get("page")) || 1));
   const [data, setData] = useState<AttendancePageResult | null>(null);
@@ -56,6 +57,7 @@ export function AttendancePage({
       startDate: startDate || undefined,
       endDate: endDate || undefined,
       employeeId: employeeId || undefined,
+      period: params.get("period") ?? undefined,
       page: page > 1 ? String(page) : undefined,
       id: undefined,
       ...next,

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Button, Input, Skeleton } from "@heroui/react";
+import { Button, Skeleton } from "@heroui/react";
 import {
   CaretLeft,
   CaretRight,
@@ -9,11 +9,12 @@ import {
   Users,
   Warning,
   ArrowClockwise,
-  CalendarBlank,
   ArrowSquareOut,
 } from "@phosphor-icons/react";
-import { Notice, StatusPill, monitoringTone } from "@attendance/ui";
+import { Notice, StatusPill, monitoringTone, CalendarField, SearchInput, FilterSelect } from "@attendance/ui";
 
+import { loadMasters } from "../lib/employees";
+import type { MasterRecord } from "../lib/master-data";
 import { AuthError, type AuthClient } from "../lib/auth-client";
 import {
   monitoringDateFormatted,
@@ -88,7 +89,7 @@ export function MonitoringPage({
   const [employeesData, setEmployeesData] =
     useState<MonitoringEmployeesResult | null>(null);
   const [departments, setDepartments] = useState<
-    { id: string; name: string }[]
+    MasterRecord[]
   >([]);
 
   const [reload, setReload] = useState(0);
@@ -113,18 +114,13 @@ export function MonitoringPage({
   // Load departments once for dropdown
   useEffect(() => {
     let active = true;
-    client
-      .api<{ items: { id: string; name: string }[] }>(
-        "departments?status=ALL&pageSize=100",
-      )
-      .then((res) => {
-        if (active) setDepartments(res.items);
-      })
-      .catch(() => {});
+    loadMasters(client, "departments")
+      .then((records) => { if (active) setDepartments(records); })
+      .catch((e: unknown) => { if (active) setError(handle(e)); });
     return () => {
       active = false;
     };
-  }, [client]);
+  }, [client, handle]);
 
   const update = useCallback(
     (next: Params) => {
@@ -216,11 +212,6 @@ export function MonitoringPage({
     }
   };
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    update({ search: searchInput.trim() || undefined, page: undefined });
-  };
-
   const handleClearFilters = () => {
     setSearchInput("");
     onParamsChange({
@@ -253,21 +244,7 @@ export function MonitoringPage({
           >
             <CaretLeft size={18} />
           </Button>
-          <div className="monitoring-date-field">
-            <CalendarBlank size={18} className="monitoring-date-icon" />
-            <input
-              id="monitoring-date"
-              type="date"
-              aria-label="Pilih tanggal monitoring"
-              className="monitoring-date-input"
-              value={selectedDate}
-              onChange={(e) => {
-                if (e.target.value) {
-                  update({ date: e.target.value, page: undefined });
-                }
-              }}
-            />
-          </div>
+          <CalendarField label="Pilih tanggal monitoring" value={selectedDate} onChange={value => { if (value) update({ date: value, page: undefined }); }} />
           <Button
             variant="ghost"
             isIconOnly
@@ -504,72 +481,16 @@ export function MonitoringPage({
 
       {/* Filter Toolbar */}
       <div className="monitoring-filters-toolbar">
-        <form
-          className="monitoring-search-form"
-          onSubmit={handleSearchSubmit}
-        >
-          <Input
-            id="monitoring-search-input"
-            aria-label="Cari nama atau NIK"
-            placeholder="Cari nama atau NIK..."
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-          />
-          <Button type="submit" variant="secondary">
-            Cari
-          </Button>
-        </form>
+        <SearchInput label="Cari nama atau NIK" value={searchInput} onChange={setSearchInput} onSearch={value => update({ search: value.trim() || undefined, page: undefined })} placeholder="Cari nama atau NIK" />
 
         <div className="monitoring-selectors">
-          <div className="monitoring-select-wrap">
-            <label htmlFor="dept-filter" className="field-label">
-              Departemen
-            </label>
-            <select
-              id="dept-filter"
-              aria-label="Filter Departemen"
-              className="monitoring-dropdown"
-              value={selectedDept}
-              onChange={(e) =>
-                update({ departmentId: e.target.value || undefined, page: undefined })
-              }
-            >
-              <option value="">Semua Departemen</option>
-              {departments.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <FilterSelect label="Filter Departemen" value={selectedDept}
+            onChange={value => update({ departmentId: value || undefined, page: undefined })}
+            options={[{ id: "", name: "Semua departemen" }, ...departments.map(d => ({ id: d.id, name: d.name + (d.status === "INACTIVE" ? " (Nonaktif)" : "") }))]} />
 
-          <div className="monitoring-select-wrap">
-            <label htmlFor="status-filter" className="field-label">
-              Status Kehadiran
-            </label>
-            <select
-              id="status-filter"
-              aria-label="Filter Status Kehadiran"
-              className="monitoring-dropdown"
-              value={selectedStatus}
-              onChange={(e) =>
-                update({
-                  status: e.target.value !== "ALL" ? e.target.value : undefined,
-                  page: undefined,
-                })
-              }
-            >
-              <option value="ALL">Semua Status</option>
-              <option value="CHECKED_IN">Hadir</option>
-              <option value="LATE">Terlambat</option>
-              <option value="EARLY_DEPARTURE">Pulang Lebih Awal</option>
-              <option value="PENDING_CHECKOUT">Belum Checkout</option>
-              <option value="COMPLETED">Selesai</option>
-              <option value="MISSING">Tidak Ada Absensi</option>
-              <option value="PENDING_CHECK_IN">Belum Check-in</option>
-              <option value="DELETED">Dihapus HRD</option>
-            </select>
-          </div>
+          <FilterSelect label="Filter Status Kehadiran" value={selectedStatus}
+            onChange={value => update({ status: value === "ALL" ? undefined : value, page: undefined })}
+            options={[{ id: "ALL", name: "Semua Status" }, { id: "CHECKED_IN", name: "Hadir" }, { id: "LATE", name: "Terlambat" }, { id: "EARLY_DEPARTURE", name: "Pulang Lebih Awal" }, { id: "PENDING_CHECKOUT", name: "Belum Checkout" }, { id: "COMPLETED", name: "Selesai" }, { id: "MISSING", name: "Tidak Ada Absensi" }, { id: "PENDING_CHECK_IN", name: "Belum Check-in" }, { id: "DELETED", name: "Dihapus HRD" }]} />
 
           {isFiltered && (
             <Button

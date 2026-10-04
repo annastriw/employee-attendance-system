@@ -59,13 +59,13 @@ html, body, #root {
   font-size: var(--ui-control-font);
   border-radius: var(--ui-control-radius);
 }
-:root :is(.input, .input-group, .select__trigger, .search-field__group, .date-field__group) {
+:root :is(.input, .input-group, .select__trigger, .search-field__group, .date-field__group, .date-input-group) {
   min-height: var(--ui-control-height);
   height: var(--ui-control-height);
   font-size: var(--ui-control-font);
   border-radius: var(--ui-control-radius);
 }
-:root :is(.input-group__input, .search-field__input, .date-field__input) { font-size: var(--ui-control-font); }
+:root :is(.input-group__input, .search-field__input, .date-field__input, .date-input-group__input) { font-size: var(--ui-control-font); }
 :root :is(.password-toggle, .account-trigger, .mobile-menu-toggle, .button--icon-only) {
   min-width: var(--ui-icon-button);
   width: var(--ui-icon-button);
@@ -127,3 +127,10 @@ html, body, #root {
   :root .modal__container { justify-content: flex-end; align-items: center; width: 100%; padding: 0 0 env(safe-area-inset-bottom); }
   :root .data-list-row { padding: var(--ui-card-padding); }
 }
+
+:root .date-picker__trigger, :root .date-range-picker__trigger { width: var(--ui-icon-button); height: var(--ui-control-height); padding: 0; }
+.attendance-filters, .list-toolbar, .monitoring-filters-toolbar { align-items: end; gap: var(--ui-field-gap); }
+.attendance-filters { display: flex; flex-wrap: wrap; }
+.shared-search { flex: 1; min-width: min(220px, 100%); }
+.date-input-group { max-width: 100%; }
+@media (max-width: 767px) { .date-range-field, .attendance-employee-filter, .shared-search { width: 100%; } }

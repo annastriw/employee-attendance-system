@@ -243,6 +243,12 @@ Fase B:
   unit: `useDebouncedValue`, util range tanggal/preset.
 
 ### T4 `[ ]` Sistem kontrol & filter seragam (semua halaman)
+- Status 2026-10-05: implementasi teknis selesai; HR 61/61 test fokus, Riwayat
+  Karyawan 7/7, helper filter Employee Service 2/2; lint kedua portal/Employee
+  Service dan typecheck kedua portal/Employee Service lulus. Build menunggu CI;
+  acceptance visual manual menunggu pengguna, jadi checkbox tetap terbuka.
+- Backend: Employee Service `GET /api/v1/employees` menerima filter optional
+  `departmentId`/`positionId`; tanpa migration. Perlu PR+deploy sebelum production.
 - Ganti semua `<Input type="date">` → `DateRangeField` (HR: Absensi, Absensi-dihapus,
   Ringkasan bila relevan, Hari Libur filter; Karyawan: Riwayat). Query param tetap
   `startDate`/`endDate` (backend sudah menerima).
