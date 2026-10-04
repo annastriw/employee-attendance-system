@@ -1,0 +1,11 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+minimumReleaseAge: 1440
+
+overrides:
+  rolldown: "1.2.11"
+  '@prisma/adapter-mariadb>mariadb': '3.5.3'
+  '@prisma/config>deepmerge-ts': '8.0.0'
+  'prisma>mysql2': '3.23.1'

@@ -1,0 +1,20 @@
+{
+  "name": "@attendance/database",
+  "version": "0.1.0",
+  "private": true,
+  "files": ["dist"],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@prisma/client": "7.10.0",
+    "@prisma/adapter-mariadb": "7.10.0"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2",
+    "@types/node": "^24.0.0"
+  }
+}

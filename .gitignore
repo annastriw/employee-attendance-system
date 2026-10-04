@@ -17,6 +17,7 @@ coverage/
 playwright-report/
 test-results/
 *.log
+*.tsbuildinfo
 
 # Private data and local backups
 backups/
@@ -35,3 +36,6 @@ Thumbs.db
 minio.license
 .licenses/
 .data/
+
+/generated/prisma
+/packages/database/src/generated/

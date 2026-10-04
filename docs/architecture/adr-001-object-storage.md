@@ -10,7 +10,7 @@ Foto check-in dan checkout membutuhkan bucket privat, API S3, akses sementara, d
 - Lokal Windows menggunakan Docker Desktop dengan backend WSL 2. Instalasi belum dilakukan.
 - Gunakan image resmi quay.io/minio/aistor/minio dengan release tag/digest yang diverifikasi dan dikunci saat implementasi; tidak menggunakan latest sebagai pin deployment.
 - Port lokal yang direncanakan: API S3 9000 dan Console 9001. Bind ke localhost; akses dari perangkat lain membutuhkan konfigurasi development terpisah.
-- Gunakan volume persisten; volume production/development/testing dipisahkan.
+- Gunakan volume persisten; volume production dan lingkungan uji rilis dipisahkan dari development. Pada lokal dengan resource terbatas (T19, 2026-10-02), dev/test sementara memakai satu instance/volume dengan bucket dan akun berbeda. Test dikunci ke loopback/bucket test dan hanya membersihkan fixture sendiri; volume uji rilis terpisah tetap gate sebelum production.
 - License Free aktif diperlukan. Pengguna memperoleh lisensi melalui penyedia; simpan sebagai berkas lokal, mount ke container, jangan masukkan GitHub.
 - Bucket foto privat; Media Service menggunakan kredensial aplikasi dengan akses minimum. Root credential tidak dipakai untuk operasi aplikasi.
 - Signed URL dibuat saat diminta setelah pemeriksaan hak akses, tidak disimpan di database.

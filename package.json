@@ -1,0 +1,35 @@
+{
+  "name": "employee-attendance-platform",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=24.15.0 <25"
+  },
+  "scripts": {
+    "build": "pnpm -r --if-present run build",
+    "test": "pnpm run test:unit",
+    "test:unit": "node --test scripts/ci/check-branch-policy.test.mjs && pnpm -r --if-present run test",
+    "lint": "pnpm -r --if-present run lint",
+    "attendance:setup": "node scripts/attendance/setup-local.mjs",
+    "storage:setup": "node scripts/storage/setup-local.mjs",
+    "db:setup": "node scripts/database/setup-local.mjs",
+    "db:validate": "prisma validate",
+    "db:grants": "node scripts/database/setup-local.mjs --grants",
+    "db:migrate": "prisma migrate deploy",
+    "db:generate": "prisma generate && pnpm --filter @attendance/database build",
+    "db:verify": "tsx scripts/database/verify.ts",
+    "db:migrate:test": "prisma migrate deploy --config prisma.test.config.ts",
+    "db:typecheck": "pnpm --dir apps/auth-service exec tsc --ignoreConfig --noEmit --strict --skipLibCheck --esModuleInterop --target ES2023 --module NodeNext --moduleResolution NodeNext ../../scripts/database/verify.ts",
+    "provisioning:setup": "node scripts/database/setup-provisioning-local.mjs",
+    "ci:setup": "node scripts/ci/setup-ci-environment.mjs",
+    "ci:grants": "node scripts/ci/setup-ci-environment.mjs --grants",
+    "validate": "pnpm run lint && pnpm run db:validate && pnpm run db:typecheck && pnpm run build && pnpm run test:unit"
+  },
+  "devDependencies": {
+    "dotenv": "^18.0.4",
+    "prisma": "7.10.0",
+    "tsx": "^4.23.15",
+    "@attendance/database": "workspace:*"
+  }
+}

@@ -1,0 +1,489 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../packages/database/src/generated"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum AuthRole {
+  ADMIN_HRD
+  EMPLOYEE
+}
+
+enum AuthAccountStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+model AuthAccount {
+  id                 String              @id @default(uuid()) @db.Char(36)
+  email              String              @unique @db.VarChar(254)
+  employeeId         String?             @unique @map("employee_id") @db.Char(36)
+  passwordHash       String              @map("password_hash") @db.VarChar(60)
+  role               AuthRole
+  status             AuthAccountStatus   @default(INACTIVE)
+  mustChangePassword Boolean             @default(true) @map("must_change_password")
+  passwordChangedAt  DateTime?           @map("password_changed_at") @db.DateTime(3)
+  archivedAt         DateTime?           @map("archived_at") @db.DateTime(3)
+  createdAt          DateTime            @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt          DateTime            @updatedAt @map("updated_at") @db.DateTime(3)
+  sessions           AuthSession[]
+  provisioning       AuthProvisioning?
+  emailChanges       AuthEmailChange[]
+  passwordResets     AuthPasswordReset[]
+
+  @@index([role, status])
+  @@map("auth_accounts")
+}
+
+model AuthSession {
+  id               String      @id @default(uuid()) @db.Char(36)
+  accountId        String      @map("account_id") @db.Char(36)
+  refreshTokenHash String      @unique @map("refresh_token_hash") @db.Char(64)
+  expiresAt        DateTime    @map("expires_at") @db.DateTime(3)
+  revokedAt        DateTime?   @map("revoked_at") @db.DateTime(3)
+  createdAt        DateTime    @default(now()) @map("created_at") @db.DateTime(3)
+  account          AuthAccount @relation(fields: [accountId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([accountId, revokedAt])
+  @@index([expiresAt])
+  @@map("auth_sessions")
+}
+
+model AuthAuditLog {
+  id              String   @id @default(uuid()) @db.Char(36)
+  actorAccountId  String?  @map("actor_account_id") @db.Char(36)
+  targetAccountId String?  @map("target_account_id") @db.Char(36)
+  action          String   @db.VarChar(80)
+  reason          String?  @db.VarChar(500)
+  requestId       String?  @map("request_id") @db.Char(36)
+  createdAt       DateTime @default(now()) @map("created_at") @db.DateTime(3)
+
+  @@index([targetAccountId, createdAt])
+  @@index([actorAccountId, createdAt])
+  @@map("auth_audit_logs")
+}
+
+enum EmpMasterStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model EmpDepartment {
+  id        String          @id @default(uuid()) @db.Char(36)
+  name      String          @db.VarChar(120)
+  code      String          @unique @db.VarChar(40)
+  status    EmpMasterStatus @default(ACTIVE)
+  createdAt DateTime        @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt DateTime        @updatedAt @map("updated_at") @db.DateTime(3)
+
+  employees EmpEmployee[]
+
+  @@unique([name])
+  @@index([status, name])
+  @@map("emp_departments")
+}
+
+model EmpPosition {
+  id        String          @id @default(uuid()) @db.Char(36)
+  name      String          @db.VarChar(120)
+  code      String          @unique @db.VarChar(40)
+  status    EmpMasterStatus @default(ACTIVE)
+  createdAt DateTime        @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt DateTime        @updatedAt @map("updated_at") @db.DateTime(3)
+
+  employees EmpEmployee[]
+
+  @@unique([name])
+  @@index([status, name])
+  @@map("emp_positions")
+}
+
+model EmpAuditLog {
+  id             String   @id @default(uuid()) @db.Char(36)
+  actorAccountId String?  @map("actor_account_id") @db.Char(36)
+  entityType     String   @map("entity_type") @db.VarChar(40)
+  entityId       String?  @map("entity_id") @db.Char(36)
+  action         String   @db.VarChar(80)
+  reason         String?  @db.VarChar(500)
+  requestId      String?  @map("request_id") @db.Char(36)
+  createdAt      DateTime @default(now()) @map("created_at") @db.DateTime(3)
+
+  @@index([entityType, entityId, createdAt])
+  @@index([actorAccountId, createdAt])
+  @@map("emp_audit_logs")
+}
+
+enum EmpEmployeeStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum EmpProvisioningStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum EmpProvisioningPhase {
+  PREPARE
+  PUBLISH
+  FINALIZE
+}
+
+model EmpEmployee {
+  id               String               @id @default(uuid()) @db.Char(36)
+  nik              String               @unique @db.VarChar(40)
+  name             String               @db.VarChar(120)
+  phone            String?              @db.VarChar(30)
+  departmentId     String               @map("department_id") @db.Char(36)
+  positionId       String               @map("position_id") @db.Char(36)
+  startDate        DateTime             @map("start_date") @db.Date
+  status           EmpEmployeeStatus    @default(INACTIVE)
+  accountEmail     String?              @map("account_email") @db.VarChar(254)
+  ready            Boolean              @default(false)
+  archivedAt       DateTime?            @map("archived_at") @db.DateTime(3)
+  createdAt        DateTime             @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt        DateTime             @updatedAt @map("updated_at") @db.DateTime(3)
+  department       EmpDepartment        @relation(fields: [departmentId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  position         EmpPosition          @relation(fields: [positionId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  provisioning     EmpProvisioning?
+  emailChanges     EmpEmailChange[]
+  lifecycleChanges EmpLifecycleChange[]
+  history          EmpEmployeeHistory[]
+
+  @@index([status, name])
+  @@map("emp_employees")
+}
+
+// Durable operation doubles as the transactional outbox for this one workflow.
+model EmpProvisioning {
+  id             String                @id @db.Char(36)
+  employeeId     String                @unique @map("employee_id") @db.Char(36)
+  actorAccountId String                @map("actor_account_id") @db.Char(36)
+  requestId      String?               @map("request_id") @db.Char(36)
+  payloadHash    String                @map("payload_hash") @db.Char(64)
+  email          String                @db.VarChar(254)
+  desiredStatus  EmpEmployeeStatus     @map("desired_status")
+  status         EmpProvisioningStatus @default(PENDING)
+  phase          EmpProvisioningPhase  @default(PREPARE)
+  authAccountId  String?               @map("auth_account_id") @db.Char(36)
+  attempts       Int                   @default(0)
+  nextAttemptAt  DateTime              @default(now()) @map("next_attempt_at") @db.DateTime(3)
+  leaseUntil     DateTime?             @map("lease_until") @db.DateTime(3)
+  leaseToken     String?               @map("lease_token") @db.Char(36)
+  errorCode      String?               @map("error_code") @db.VarChar(40)
+  createdAt      DateTime              @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt      DateTime              @updatedAt @map("updated_at") @db.DateTime(3)
+  employee       EmpEmployee           @relation(fields: [employeeId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([status, nextAttemptAt, leaseUntil])
+  @@index([actorAccountId, createdAt])
+  @@map("emp_provisioning")
+}
+
+model AuthProvisioning {
+  id                  String      @id @db.Char(36)
+  accountId           String      @unique @map("account_id") @db.Char(36)
+  actorAccountId      String      @map("actor_account_id") @db.Char(36)
+  payloadHash         String      @map("payload_hash") @db.Char(64)
+  finalized           Boolean     @default(false)
+  credentialEnvelope  String?     @map("credential_envelope") @db.VarChar(512)
+  credentialClaimedAt DateTime?   @map("credential_claimed_at") @db.DateTime(3)
+  createdAt           DateTime    @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt           DateTime    @updatedAt @map("updated_at") @db.DateTime(3)
+  account             AuthAccount @relation(fields: [accountId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@map("auth_provisioning")
+}
+
+model EmpEmployeeHistory {
+  id             String      @id @default(uuid()) @db.Char(36)
+  employeeId     String      @map("employee_id") @db.Char(36)
+  actorAccountId String      @map("actor_account_id") @db.Char(36)
+  action         String      @db.VarChar(80)
+  before         Json
+  after          Json
+  requestId      String?     @map("request_id") @db.Char(36)
+  createdAt      DateTime    @default(now()) @map("created_at") @db.DateTime(3)
+  employee       EmpEmployee @relation(fields: [employeeId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([employeeId, createdAt])
+  @@map("emp_employee_history")
+}
+
+model EmpEmailChange {
+  id             String                @id @db.Char(36)
+  employeeId     String                @map("employee_id") @db.Char(36)
+  actorAccountId String                @map("actor_account_id") @db.Char(36)
+  expectedEmail  String                @map("expected_email") @db.VarChar(254)
+  email          String                @db.VarChar(254)
+  payloadHash    String                @map("payload_hash") @db.Char(64)
+  status         EmpProvisioningStatus @default(PENDING)
+  attempts       Int                   @default(0)
+  nextAttemptAt  DateTime              @default(now()) @map("next_attempt_at") @db.DateTime(3)
+  leaseUntil     DateTime?             @map("lease_until") @db.DateTime(3)
+  leaseToken     String?               @map("lease_token") @db.Char(36)
+  errorCode      String?               @map("error_code") @db.VarChar(40)
+  requestId      String?               @map("request_id") @db.Char(36)
+  createdAt      DateTime              @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt      DateTime              @updatedAt @map("updated_at") @db.DateTime(3)
+  employee       EmpEmployee           @relation(fields: [employeeId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([status, nextAttemptAt, leaseUntil])
+  @@index([employeeId, createdAt])
+  @@map("emp_email_changes")
+}
+
+model EmpLifecycleChange {
+  id             String                @id @db.Char(36)
+  employeeId     String                @map("employee_id") @db.Char(36)
+  actorAccountId String                @map("actor_account_id") @db.Char(36)
+  expectedStatus EmpEmployeeStatus     @map("expected_status")
+  targetStatus   EmpEmployeeStatus     @map("target_status")
+  payloadHash    String                @map("payload_hash") @db.Char(64)
+  status         EmpProvisioningStatus @default(PENDING)
+  attempts       Int                   @default(0)
+  nextAttemptAt  DateTime              @default(now()) @map("next_attempt_at") @db.DateTime(3)
+  leaseUntil     DateTime?             @map("lease_until") @db.DateTime(3)
+  leaseToken     String?               @map("lease_token") @db.Char(36)
+  errorCode      String?               @map("error_code") @db.VarChar(40)
+  requestId      String?               @map("request_id") @db.Char(36)
+  createdAt      DateTime              @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt      DateTime              @updatedAt @map("updated_at") @db.DateTime(3)
+  employee       EmpEmployee           @relation(fields: [employeeId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([status, nextAttemptAt, leaseUntil])
+  @@index([employeeId, createdAt])
+  @@map("emp_lifecycle_changes")
+}
+
+model AuthEmailChange {
+  id             String      @id @db.Char(36)
+  accountId      String      @map("account_id") @db.Char(36)
+  actorAccountId String      @map("actor_account_id") @db.Char(36)
+  payloadHash    String      @map("payload_hash") @db.Char(64)
+  email          String      @db.VarChar(254)
+  createdAt      DateTime    @default(now()) @map("created_at") @db.DateTime(3)
+  account        AuthAccount @relation(fields: [accountId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([accountId, createdAt])
+  @@map("auth_email_changes")
+}
+
+model AuthPasswordReset {
+  id             String      @id @db.Char(36)
+  accountId      String      @map("account_id") @db.Char(36)
+  actorAccountId String      @map("actor_account_id") @db.Char(36)
+  payloadHash    String      @map("payload_hash") @db.Char(64)
+  claimedAt      DateTime    @default(now()) @map("claimed_at") @db.DateTime(3)
+  createdAt      DateTime    @default(now()) @map("created_at") @db.DateTime(3)
+  account        AuthAccount @relation(fields: [accountId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([accountId, createdAt])
+  @@map("auth_password_resets")
+}
+
+enum AttEventType {
+  CHECK_IN
+  CHECK_OUT
+}
+
+enum AttRequestState {
+  PENDING
+  SUCCEEDED
+  REJECTED
+  RETRYABLE
+}
+
+enum AttOutboxState {
+  PENDING
+  PROCESSING
+  DELIVERED
+}
+
+enum AttCaptureMethod {
+  AUTO
+  MANUAL
+}
+
+model AttWorkPolicy {
+  id           String   @id @default(uuid()) @db.Char(36)
+  name         String   @db.VarChar(80)
+  workDays     String   @default("1,2,3,4,5") @map("work_days") @db.VarChar(20)
+  checkInTime  String   @default("08:00:00") @map("check_in_time") @db.VarChar(8)
+  checkOutTime String   @default("17:00:00") @map("check_out_time") @db.VarChar(8)
+  cutoffTime   String   @default("23:59:59") @map("cutoff_time") @db.VarChar(8)
+  timezone     String   @default("Asia/Jakarta") @db.VarChar(40)
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.DateTime(3)
+
+  @@index([isActive])
+  @@map("att_work_policies")
+}
+
+model AttHoliday {
+  id          String   @id @default(uuid()) @db.Char(36)
+  holidayDate DateTime @unique @map("holiday_date") @db.Date
+  description String   @db.VarChar(200)
+  createdAt   DateTime @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.DateTime(3)
+
+  @@index([holidayDate])
+  @@map("att_holidays")
+}
+
+model AttDailyRecord {
+  id                     String     @id @default(uuid()) @db.Char(36)
+  employeeId             String     @map("employee_id") @db.Char(36)
+  attendanceDate         DateTime   @map("attendance_date") @db.Date
+  departmentIdSnapshot   String     @map("department_id_snapshot") @db.Char(36)
+  departmentNameSnapshot String     @map("department_name_snapshot") @db.VarChar(120)
+  positionIdSnapshot     String     @map("position_id_snapshot") @db.Char(36)
+  positionNameSnapshot   String     @map("position_name_snapshot") @db.VarChar(120)
+  deletedAt              DateTime?  @map("deleted_at") @db.DateTime(3)
+  deleteReason           String?    @map("delete_reason") @db.VarChar(500)
+  deletedByAccountId     String?    @map("deleted_by_account_id") @db.Char(36)
+  createdAt              DateTime   @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt              DateTime   @updatedAt @map("updated_at") @db.DateTime(3)
+  events                 AttEvent[]
+
+  @@unique([employeeId, attendanceDate])
+  @@index([attendanceDate, deletedAt])
+  @@index([employeeId, attendanceDate, deletedAt])
+  @@map("att_daily_records")
+}
+
+model AttEvent {
+  id                 String           @id @default(uuid()) @db.Char(36)
+  dailyRecordId      String           @map("daily_record_id") @db.Char(36)
+  eventType          AttEventType     @map("event_type")
+  eventTime          DateTime         @map("event_time") @db.DateTime(3)
+  clientCapturedAt   DateTime         @map("client_captured_at") @db.DateTime(3)
+  isOutsideSchedule  Boolean          @default(false) @map("is_outside_schedule")
+  isLate             Boolean          @default(false) @map("is_late")
+  isEarlyDeparture   Boolean          @default(false) @map("is_early_departure")
+  reason             String?          @db.VarChar(500)
+  photoObjectId      String           @unique @map("photo_object_id") @db.Char(36)
+  captureMethod      AttCaptureMethod @map("capture_method")
+  latitude           Decimal          @db.Decimal(10, 7)
+  longitude          Decimal          @db.Decimal(10, 7)
+  accuracyMeters     Decimal          @map("accuracy_meters") @db.Decimal(8, 2)
+  locationCapturedAt DateTime         @map("location_captured_at") @db.DateTime(3)
+  policySnapshot     Json             @map("policy_snapshot")
+  createdAt          DateTime         @default(now()) @map("created_at") @db.DateTime(3)
+  dailyRecord        AttDailyRecord   @relation(fields: [dailyRecordId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([dailyRecordId, eventType])
+  @@index([eventType, eventTime])
+  @@map("att_events")
+}
+
+model AttIdempotencyRequest {
+  id             String          @id @db.Char(36)
+  employeeId     String          @map("employee_id") @db.Char(36)
+  payloadHash    String          @map("payload_hash") @db.Char(64)
+  state          AttRequestState @default(SUCCEEDED)
+  claimToken     String?         @map("claim_token") @db.Char(36)
+  leaseUntil     DateTime?       @map("lease_until") @db.DateTime(3)
+  responseStatus Int             @default(0) @map("response_status")
+  responseBody   Json?           @map("response_body")
+  createdAt      DateTime        @default(now()) @map("created_at") @db.DateTime(3)
+
+  @@index([employeeId, createdAt])
+  @@map("att_idempotency_requests")
+}
+
+model AttAuditLog {
+  id             String   @id @default(uuid()) @db.Char(36)
+  actorAccountId String?  @map("actor_account_id") @db.Char(36)
+  action         String   @db.VarChar(80)
+  entityType     String   @map("entity_type") @db.VarChar(40)
+  entityId       String?  @map("entity_id") @db.Char(36)
+  reason         String?  @db.VarChar(500)
+  details        Json?
+  requestId      String?  @map("request_id") @db.Char(36)
+  createdAt      DateTime @default(now()) @map("created_at") @db.DateTime(3)
+
+  @@index([actorAccountId, createdAt])
+  @@index([entityType, entityId, createdAt])
+  @@map("att_audit_logs")
+}
+
+enum MediaPurpose {
+  CHECK_IN
+  CHECK_OUT
+}
+
+enum MediaStatus {
+  PENDING
+  READY
+  FAILED
+}
+
+model MediaObject {
+  id              String       @id @default(uuid()) @db.Char(36)
+  ownerEmployeeId String       @map("owner_employee_id") @db.Char(36)
+  ownerAccountId  String       @map("owner_account_id") @db.Char(36)
+  purpose         MediaPurpose
+  status          MediaStatus  @default(PENDING)
+  idempotencyKey  String       @map("idempotency_key") @db.Char(36)
+  requestHash     String       @map("request_hash") @db.Char(64)
+  checksumSha256  String       @map("checksum_sha256") @db.Char(64)
+  bucket          String       @db.VarChar(63)
+  objectKey       String       @map("object_key") @db.VarChar(256)
+  byteSize        Int          @map("byte_size") @db.UnsignedInt
+  width           Int          @db.UnsignedInt
+  height          Int          @db.UnsignedInt
+  claimToken      String?      @map("claim_token") @db.Char(36)
+  leaseUntil      DateTime?    @map("lease_until") @db.DateTime(3)
+  boundEventId    String?      @unique @map("bound_event_id") @db.Char(36)
+  boundAt         DateTime?    @map("bound_at") @db.DateTime(3)
+  readyAt         DateTime?    @map("ready_at") @db.DateTime(3)
+  createdAt       DateTime     @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt       DateTime     @updatedAt @map("updated_at") @db.DateTime(3)
+
+  @@unique([ownerEmployeeId, idempotencyKey])
+  @@unique([bucket, objectKey])
+  @@index([status, leaseUntil])
+  @@map("media_objects")
+}
+
+model MediaAuditLog {
+  id             String   @id @default(uuid()) @db.Char(36)
+  actorAccountId String?  @map("actor_account_id") @db.Char(36)
+  action         String   @db.VarChar(80)
+  entityId       String   @map("entity_id") @db.Char(36)
+  requestId      String   @map("request_id") @db.Char(36)
+  createdAt      DateTime @default(now()) @map("created_at") @db.DateTime(3)
+
+  @@index([entityId, createdAt])
+  @@map("media_audit_logs")
+}
+
+model AttOutbox {
+  id              String         @id @default(uuid()) @db.Char(36)
+  eventId         String         @unique @map("event_id") @db.Char(36)
+  photoObjectId   String         @map("photo_object_id") @db.Char(36)
+  ownerEmployeeId String         @map("owner_employee_id") @db.Char(36)
+  purpose         MediaPurpose
+  actorAccountId  String         @map("actor_account_id") @db.Char(36)
+  requestId       String         @map("request_id") @db.Char(36)
+  state           AttOutboxState @default(PENDING)
+  attempts        Int            @default(0) @db.UnsignedInt
+  nextAttemptAt   DateTime       @default(now()) @map("next_attempt_at") @db.DateTime(3)
+  claimToken      String?        @map("claim_token") @db.Char(36)
+  leaseUntil      DateTime?      @map("lease_until") @db.DateTime(3)
+  deliveredAt     DateTime?      @map("delivered_at") @db.DateTime(3)
+  createdAt       DateTime       @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt       DateTime       @updatedAt @map("updated_at") @db.DateTime(3)
+
+  @@index([state, nextAttemptAt, leaseUntil])
+  @@map("att_outbox")
+}

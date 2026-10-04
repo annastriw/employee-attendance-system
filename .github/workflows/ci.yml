@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  branch-policy:
+    name: Release must come from dev
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.15.0'
+      - name: Check release source
+        env:
+          CI_EVENT_NAME: ${{ github.event_name }}
+          CI_BASE_REF: ${{ github.base_ref }}
+          CI_HEAD_REF: ${{ github.head_ref }}
+          CI_HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+        run: node scripts/ci/check-branch-policy.mjs
+
+  quality:
+    name: Quality (lint, build, unit tests)
+    runs-on: ubuntu-latest
+    needs: branch-policy
+    env:
+      DATABASE_URL: mysql://ci:ci@127.0.0.1:3307/attendance_dev
+      SHADOW_DATABASE_URL: mysql://ci:ci@127.0.0.1:3307/attendance_shadow
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.15.0'
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm run lint
+      - name: Validate and generate Prisma client
+        run: pnpm run db:validate && pnpm run db:generate
+      - name: Typecheck database scripts
+        run: pnpm run db:typecheck
+      - name: Build packages and applications
+        run: pnpm run build
+      - name: Run isolated unit tests (no browser, database or storage suite)
+        run: pnpm run test:unit
+
+  ci-result:
+    name: CI result
+    if: always()
+    runs-on: ubuntu-latest
+    needs: [branch-policy, quality]
+    steps:
+      - name: Require release checks to pass
+        env:
+          POLICY: ${{ needs.branch-policy.result }}
+          QUALITY: ${{ needs.quality.result }}
+        run: |
+          for result in "$POLICY" "$QUALITY"; do
+            if [ "$result" != success ]; then
+              echo '::error::A required release check failed, was cancelled, or was skipped.'
+              exit 1
+            fi
+          done
+          echo 'CI passed. This workflow does not deploy production.'

@@ -1,0 +1,46 @@
+# syntax=docker/dockerfile:1.7
+FROM node:24.15.0-bookworm-slim AS build
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="${PNPM_HOME}:${PATH}"
+WORKDIR /workspace
+
+RUN corepack enable && corepack prepare pnpm@10.28.0 --activate
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/api-gateway/package.json apps/api-gateway/package.json
+COPY apps/auth-service/package.json apps/auth-service/package.json
+COPY apps/employee-service/package.json apps/employee-service/package.json
+COPY apps/attendance-service/package.json apps/attendance-service/package.json
+COPY apps/media-service/package.json apps/media-service/package.json
+COPY apps/attendance-web/package.json apps/attendance-web/package.json
+COPY apps/hr-web/package.json apps/hr-web/package.json
+COPY packages/database/package.json packages/database/package.json
+COPY packages/ui/package.json packages/ui/package.json
+
+RUN pnpm install --frozen-lockfile
+
+COPY . .
+
+ARG SERVICE
+RUN case "$SERVICE" in \
+      api-gateway|auth-service|employee-service|attendance-service|media-service) ;; \
+      *) echo "Unsupported backend service" >&2; exit 1 ;; \
+    esac
+
+RUN DATABASE_URL=mysql://ci:ci@127.0.0.1:3307/attendance_build \
+    SHADOW_DATABASE_URL=mysql://ci:ci@127.0.0.1:3307/attendance_shadow \
+    pnpm run db:generate \
+    && pnpm --filter "$SERVICE" run build \
+    && pnpm --filter "$SERVICE" deploy --prod --legacy /runtime \
+    && mkdir -p /runtime/dist \
+    && cp -a "apps/$SERVICE/dist/." /runtime/dist/
+
+FROM node:24.15.0-bookworm-slim AS runtime
+ENV NODE_ENV=production
+ENV HOST=0.0.0.0
+WORKDIR /app
+
+COPY --from=build --chown=node:node /runtime/ ./
+USER node
+ENTRYPOINT ["node", "dist/main.js"]
