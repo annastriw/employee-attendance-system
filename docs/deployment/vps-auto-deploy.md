@@ -5,7 +5,7 @@ Setelah setup satu kali ini selesai, alur rilisnya: PR `dev → main` lulus CI d
 ## Pengamanan dan batas perubahan
 
 - Workflow hanya berjalan pada push ke `main`, menunggu seluruh image SHA rilis berhasil dibuat, lalu memakai GitHub Environment `production`.
-- Kunci SSH deploy dipaksa ke satu command dengan SHA commit dan flag migration. Kunci tidak mendapat shell interaktif atau akses Docker; sudo hanya mengizinkan satu script root-owned.
+- Kunci SSH deploy dipaksa ke satu command dengan SHA commit dan flag migration. Kunci tidak mendapat shell interaktif atau akses Docker; sudo hanya mengizinkan satu script root-owned. Script memverifikasi melalui GitHub API bahwa SHA rilis adalah ancestor branch `main`; bila verifikasi gagal atau GitHub tidak bisa dihubungi, deployment berhenti.
 - Deploy mengunci proses agar dua rilis tidak berjalan bersamaan, backup database sebelum migration, menjalankan `prisma migrate deploy` hanya jika folder migration berubah, memperbarui Compose ke SHA persis, lalu menunggu lima health endpoint.
 - Jika health aplikasi gagal, script mengembalikan versi image aplikasi sebelumnya. Perubahan skema/data tidak di-rollback otomatis. Migration production harus kompatibel ke belakang (expand/contract); backup dipertahankan untuk pemulihan manual.
 - Tidak ada suite test yang dijalankan ulang di VPS. Log workflow menyimpan SHA dan hasil health.
@@ -38,6 +38,7 @@ git clone --branch main --single-branch https://github.com/annastriw/employee-at
 cd /opt/attendance/releases/auto-deploy-setup
 sudo install -o root -g root -m 0755 scripts/deployment/attendance-deploy.sh /usr/local/sbin/attendance-deploy
 sudo install -o root -g root -m 0755 infra/vps/attendance-deploy-ssh.py /usr/local/sbin/attendance-deploy-ssh
+sudo install -o root -g root -m 0755 infra/vps/attendance-release-verifier.py /usr/local/sbin/attendance-release-verifier
 ```
 
 Buat akun khusus dan direktori kunci:
@@ -58,8 +59,10 @@ case "$DEPLOY_PUBLIC_KEY" in ssh-ed25519\ *) ;; *) echo 'STOP: expected an ssh-e
 printf 'restrict,command="/usr/local/sbin/attendance-deploy-ssh" %s\n' "$DEPLOY_PUBLIC_KEY" | sudo tee /var/lib/attendance-deploy/.ssh/authorized_keys >/dev/null
 unset DEPLOY_PUBLIC_KEY
 sudo chown root:root /var/lib/attendance-deploy/.ssh/authorized_keys
-sudo chmod 0600 /var/lib/attendance-deploy/.ssh/authorized_keys
+sudo chmod 0644 /var/lib/attendance-deploy/.ssh/authorized_keys
 ```
+
+`authorized_keys` berisi public key dan forced-command options saja. Mode `0644` membuatnya dapat dibaca saat `sshd` memeriksa key, tetapi tetap tidak dapat ditulis oleh akun deploy; private key tetap rahasia di komputer lokal/GitHub Environment.
 
 Tambahkan aturan sudo terbatas dan validasi sintaksnya:
 
@@ -69,6 +72,7 @@ sudo chmod 0440 /etc/sudoers.d/attendance-deploy
 sudo visudo -cf /etc/sudoers.d/attendance-deploy
 sudo bash -n /usr/local/sbin/attendance-deploy
 sudo python3 -m py_compile /usr/local/sbin/attendance-deploy-ssh
+sudo python3 -m py_compile /usr/local/sbin/attendance-release-verifier
 ```
 
 Ambil host key VPS secara terverifikasi dari sesi SSH yang sudah dipercaya, bukan dengan menerima fingerprint tanpa pemeriksaan. Di sesi VPS:
@@ -88,7 +92,17 @@ Di GitHub repository → **Settings → Environments**, buat environment `produc
 - `VPS_DEPLOY_PRIVATE_KEY`: seluruh isi private key lokal tanpa `.pub`.
 - `VPS_DEPLOY_KNOWN_HOSTS`: baris host key yang fingerprint-nya telah dicocokkan.
 
-Sebelum keluar dari sesi ubuntu, ambil SHA yang sedang aktif: `sed -n 's/^BACKEND_RELEASE_SHA=//p' /opt/attendance/backend-release.env`. Dari komputer lokal, uji restricted key dengan `ssh -i "$env:USERPROFILE\.ssh\attendance-github-deploy" -o IdentitiesOnly=yes attendance-deploy@43.157.243.37 "deploy SHA_AKTIF false"`; ganti placeholder dengan nilai SHA tadi. Jawaban harus menyebut release sudah aktif. Setelah itu, di **Settings → Secrets and variables → Actions → Variables**, tambahkan `VPS_AUTO_DEPLOY_ENABLED` dengan nilai `true`. Sebelum diaktifkan, pastikan environment secrets lengkap, migrator password file `.secrets/migrator.env` ada di VPS, lima backend sehat, dan Compose rilis aktif menunjuk SHA yang benar.
+Jangan aktifkan gate sampai perubahan verifier ini merged ke `main` dan file root-owned `/usr/local/sbin/attendance-deploy` serta `/usr/local/sbin/attendance-release-verifier` sudah diperbarui dari source `main` pada VPS. Untuk update setup satu kali setelah merge:
+
+```bash
+git -C /opt/attendance/releases/auto-deploy-setup pull --ff-only origin main
+sudo install -o root -g root -m 0755 /opt/attendance/releases/auto-deploy-setup/scripts/deployment/attendance-deploy.sh /usr/local/sbin/attendance-deploy
+sudo install -o root -g root -m 0755 /opt/attendance/releases/auto-deploy-setup/infra/vps/attendance-release-verifier.py /usr/local/sbin/attendance-release-verifier
+sudo bash -n /usr/local/sbin/attendance-deploy
+sudo python3 -m py_compile /usr/local/sbin/attendance-release-verifier
+```
+
+Setelah itu pastikan environment secrets lengkap, migrator password file `.secrets/migrator.env` ada di VPS, lima backend sehat, dan Compose rilis aktif menunjuk SHA yang benar. Gate tetap berupa repository variable `VPS_AUTO_DEPLOY_ENABLED=true` di **Settings → Secrets and variables → Actions → Variables**; menambahkan environment secrets saja tidak memicu deploy.
 
 ## Alur harian
 
