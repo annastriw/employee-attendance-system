@@ -12,6 +12,7 @@ readonly DB_CONTAINER=attendance-prod-mysql-1
 readonly DB_NETWORK=attendance-prod-backend
 readonly DB_NAME=attendance_prod
 readonly LOCK_FILE=/run/lock/attendance-deploy.lock
+readonly RELEASE_VERIFIER=/usr/local/sbin/attendance-release-verifier
 readonly HEALTH_PORTS=(3000 3001 3002 3003 3004)
 
 fail() {
@@ -24,6 +25,8 @@ release_sha=$1
 migrations_changed=$2
 [[ "$release_sha" =~ ^[0-9a-f]{40}$ ]] || fail 'invalid release SHA'
 [[ "$migrations_changed" == true || "$migrations_changed" == false ]] || fail 'invalid migration flag'
+[[ -x "$RELEASE_VERIFIER" ]] || fail 'main release verifier is missing'
+"$RELEASE_VERIFIER" "$release_sha" || fail 'requested release is not verified on main'
 [[ -f "$BACKEND_COMPOSE" && -f "$INFRA_COMPOSE" && -f "$RELEASE_FILE" && -d "$BACKUP_DIR" ]] || fail 'production files or backup directory are missing'
 [[ -s "$ROOT/.secrets/migrator.env" ]] || fail 'migrator credential file is missing'
 [[ "$(docker inspect --format '{{.State.Health.Status}}' "$DB_CONTAINER" 2>/dev/null)" == healthy ]] || fail 'production database is not healthy'
