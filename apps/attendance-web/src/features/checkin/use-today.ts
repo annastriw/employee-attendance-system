@@ -3,6 +3,8 @@ import { AuthError, type AuthClient } from "../../lib/auth-client";
 import { getToday, type Today } from "../../lib/attendance-client";
 export function useToday(client: AuthClient, onSessionExpired: () => void) {
   const [data, setData] = useState<Today | null>(null);
+  const [serverTime, setServerTime] = useState<string | null>(null);
+  const [serverTimeReceivedAt, setServerTimeReceivedAt] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [version, setVersion] = useState(0);
@@ -13,6 +15,8 @@ export function useToday(client: AuthClient, onSessionExpired: () => void) {
       .then((value) => {
         if (!c.signal.aborted) {
           setData(value.data);
+          setServerTime(value.meta.serverTime);
+          setServerTimeReceivedAt(Date.now());
           setError("");
         }
       })
@@ -34,5 +38,5 @@ export function useToday(client: AuthClient, onSessionExpired: () => void) {
       });
     return () => c.abort();
   }, [client, version, onSessionExpired]);
-  return { data, loading, error, reload };
+  return { data, loading, error, reload, serverTime, serverTimeReceivedAt };
 }

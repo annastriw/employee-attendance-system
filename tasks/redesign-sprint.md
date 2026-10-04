@@ -327,6 +327,9 @@ Fase B:
   login ulang; unit backend service + validator form password.
 
 ### T9 `[ ]` Portal Karyawan overhaul (eks-R07)
+- Status 2026-10-05: rute React Router dan shell responsif sudah diimplementasikan;
+  lint/typecheck lulus dan unit fokus 29/29 lulus. Build menunggu resource; manual
+  visual pengguna belum diterima. Backend tidak berubah.
 - Migrasi `use-hash-route.ts` → `react-router-dom@7.18.4` (pinned, sama dengan HR):
   `/masuk`, `/ganti-password`, `/` (Hari ini), `/absen/masuk`, `/absen/pulang`,
   `/riwayat`, `/riwayat/:id`, `/profil`, 404, guard auth. Hapus `use-hash-route.ts`.

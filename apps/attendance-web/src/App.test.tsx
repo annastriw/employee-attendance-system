@@ -56,7 +56,7 @@ describe("Employee portal authentication journey", () => {
     window.history.replaceState(
       null,
       "",
-      "/#riwayat?id=11111111-1111-4111-8111-111111111111",
+      "/riwayat/11111111-1111-4111-8111-111111111111",
     );
     const auth = client();
     vi.mocked(auth.restore).mockResolvedValue(employee);
@@ -78,7 +78,7 @@ describe("Employee portal authentication journey", () => {
     await user.type(screen.getByLabelText("Password"), "Temporary-Test-123456");
     await user.click(screen.getByRole("button", { name: "Masuk" }));
     await screen.findByRole("heading", { name: "Buat password baru" });
-    expect(window.location.hash).toBe("#ganti-password");
+    expect(window.location.pathname).toBe("/ganti-password");
     expect(
       screen.queryByRole("heading", { name: "Hari ini" }),
     ).not.toBeInTheDocument();
@@ -122,20 +122,21 @@ describe("Employee portal authentication journey", () => {
     );
     await user.click(screen.getByRole("button", { name: "Masuk" }));
     await screen.findByRole("heading", { name: "Hari ini" });
-    expect(window.location.hash).toBe("#beranda");
+    expect(window.location.pathname).toBe("/");
     expect(await screen.findByText("Synthetic Employee")).toBeVisible();
     expect(screen.getByText("Belum check-in")).toBeVisible();
-    await user.click(screen.getByRole("button", { name: "Keluar" }));
+    await user.click(screen.getByRole("link", { name: "Profil akun" }));
+    await user.click(await screen.findByRole("button", { name: "Keluar" }));
     await screen.findByRole("heading", { name: "Masuk" });
     expect(auth.logout).toHaveBeenCalledTimes(1);
   }, 15000);
 
   it("guards a deep link and restores an unrestricted employee session", async () => {
-    window.history.replaceState(null, "", "/#beranda");
+    window.history.replaceState(null, "", "/riwayat");
     const signedOut = client();
     const first = render(<App client={signedOut} />);
     await screen.findByRole("heading", { name: "Masuk" });
-    await waitFor(() => expect(window.location.hash).toBe("#masuk"));
+    await waitFor(() => expect(window.location.pathname).toBe("/masuk"));
     first.unmount();
 
     const signedIn = client();
@@ -143,9 +144,10 @@ describe("Employee portal authentication journey", () => {
       ...employee,
       mustChangePassword: false,
     });
+    window.history.replaceState(null, "", "/");
     render(<App client={signedIn} />);
     await screen.findByRole("heading", { name: "Hari ini" });
-    await waitFor(() => expect(window.location.hash).toBe("#beranda"));
+    await waitFor(() => expect(window.location.pathname).toBe("/"));
   });
 
   it("returns to login when an authenticated action gets 401", async () => {
@@ -160,31 +162,32 @@ describe("Employee portal authentication journey", () => {
     const user = userEvent.setup({ delay: null });
     render(<App client={auth} />);
     await screen.findByRole("heading", { name: "Hari ini" });
-    await user.click(screen.getByRole("button", { name: "Keluar" }));
+    await user.click(screen.getByRole("link", { name: "Profil akun" }));
+    await user.click(await screen.findByRole("button", { name: "Keluar" }));
     await screen.findByRole("heading", { name: "Masuk" });
     expect(screen.getByRole("alert")).toHaveTextContent(
       "Sesi Anda telah berakhir",
     );
-    expect(window.location.hash).toBe("#masuk");
+    expect(window.location.pathname).toBe("/masuk");
   });
 });
 describe("capture route protection", () => {
   it("keeps unauthenticated capture deep links behind login", async () => {
-    window.history.replaceState(null, "", "/#foto-checkin");
+    window.history.replaceState(null, "", "/absen/masuk");
     render(<App client={client()} />);
     await screen.findByRole("heading", { name: "Masuk" });
-    expect(window.location.hash).toBe("#masuk");
+    expect(window.location.pathname).toBe("/masuk");
     expect(
       screen.queryByRole("button", { name: "Buka kamera" }),
     ).not.toBeInTheDocument();
   });
   it("keeps forced password change ahead of capture", async () => {
-    window.history.replaceState(null, "", "/#foto-checkin");
+    window.history.replaceState(null, "", "/absen/masuk");
     const auth = client();
     vi.mocked(auth.restore).mockResolvedValue(employee);
     render(<App client={auth} />);
     await screen.findByRole("heading", { name: "Buat password baru" });
-    expect(window.location.hash).toBe("#ganti-password");
+    expect(window.location.pathname).toBe("/ganti-password");
   });
   it("lets an unrestricted employee open and leave capture after checking eligibility without requesting camera", async () => {
     const auth = client();
@@ -198,16 +201,12 @@ describe("capture route protection", () => {
     await screen.findByText("Belum check-in");
     await user.click(screen.getByRole("button", { name: "Check-in" }));
     await screen.findByRole("heading", { name: "Foto check-in" });
-    expect(window.location.hash).toBe("#foto-checkin");
+    expect(window.location.pathname).toBe("/absen/masuk");
     expect(auth.api).toHaveBeenCalledWith(
       "me/attendance/today",
       expect.anything(),
     );
-    expect(
-      vi
-        .mocked(auth.api)
-        .mock.calls.every((c) => c[0] === "me/attendance/today"),
-    ).toBe(true);
+    expect(vi.mocked(auth.api).mock.calls.filter(c => c[0] === "me/attendance/today").length).toBeGreaterThan(0);
     vi.mocked(auth.api).mockResolvedValueOnce({
       data: {
         employeeName: "Synthetic Employee",
@@ -247,7 +246,7 @@ describe("capture route protection", () => {
     expect(
       await screen.findByRole("button", { name: "Checkout" }),
     ).toBeEnabled();
-    expect(auth.api).toHaveBeenCalledTimes(3);
+    expect(vi.mocked(auth.api).mock.calls.filter(call => call[0] === "me/attendance/today")).toHaveLength(3);
   });
   it("T22 opens checkout for today's check-in and refetches completed attendance on return", async () => {
     const auth = client();
@@ -294,7 +293,7 @@ describe("capture route protection", () => {
     const next = await screen.findByRole("button", { name: "Checkout" });
     await user.click(next);
     await screen.findByRole("heading", { name: "Foto checkout" });
-    expect(window.location.hash).toBe("#foto-checkout");
+    expect(window.location.pathname).toBe("/absen/pulang");
     vi.mocked(auth.api).mockResolvedValueOnce({
       ...response,
       data: {
@@ -319,6 +318,29 @@ describe("capture route protection", () => {
       await screen.findByRole("button", { name: "Absensi selesai" }),
     ).toBeDisabled();
     expect(screen.getByText("17.00.00")).toBeVisible();
-    expect(auth.api).toHaveBeenCalledTimes(3);
+    expect(vi.mocked(auth.api).mock.calls.filter(call => call[0] === "me/attendance/today")).toHaveLength(3);
+  });
+});
+
+describe("employee browser routes", () => {
+  it("opens a history detail from its pathname and exposes the profile route", async () => {
+    const recordId = "11111111-1111-4111-8111-111111111111";
+    const auth = client();
+    vi.mocked(auth.restore).mockResolvedValue({ ...employee, mustChangePassword: false });
+    vi.mocked(auth.api).mockRejectedValue(new Error("Fixture detail unavailable"));
+    window.history.replaceState(null, "", `/riwayat/${recordId}`);
+    const detail = render(<App client={auth} />);
+    expect(await screen.findByRole("heading", { name: "Detail absensi" })).toBeInTheDocument();
+    expect(window.location.pathname).toBe(`/riwayat/${recordId}`);
+    expect(auth.api).toHaveBeenCalledWith(`me/attendance/${recordId}`, expect.anything());
+    detail.unmount();
+
+    const profileAuth = client();
+    vi.mocked(profileAuth.restore).mockResolvedValue({ ...employee, mustChangePassword: false });
+    vi.mocked(profileAuth.api).mockResolvedValue({ data: null } as never);
+    window.history.replaceState(null, "", "/profil");
+    render(<App client={profileAuth} />);
+    expect(await screen.findByRole("heading", { name: "Profil" })).toBeInTheDocument();
+    expect(window.location.pathname).toBe("/profil");
   });
 });

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Button, Skeleton } from "@heroui/react";
-import { ArrowLeft, CaretLeft, CaretRight, Clock } from "@phosphor-icons/react";
-import { AuthShell, Notice, DateRangeField, listDateRange, rangeQuery } from "@attendance/ui";
+import { ArrowLeft, CaretLeft, CaretRight } from "@phosphor-icons/react";
+import { Notice, DateRangeField, listDateRange, rangeQuery } from "@attendance/ui";
 
 import { HistoryEvidence } from "../components/organisms/HistoryEvidence";
 import { AuthError, type AuthClient } from "../lib/auth-client";
@@ -22,15 +22,17 @@ export default function HistoryPage({
   onParamsChange,
   onHome,
   onSessionExpired,
+  recordId,
 }: {
   client: AuthClient;
   params: URLSearchParams;
   onParamsChange: (next: HistoryParams) => void;
   onHome: () => void;
   onSessionExpired: () => void;
+  recordId?: string;
 }) {
   const range = listDateRange(params);
-  const id = params.get("id"),
+  const id = recordId ?? params.get("id"),
     startDate = range?.startDate ?? "",
     endDate = range?.endDate ?? "",
     page = params.get("page") ?? "1";
@@ -86,10 +88,6 @@ export default function HistoryPage({
   const list = !id && data && "data" in data ? data : null;
   const refresh = () => setReload((r) => r + 1);
   return (
-    <AuthShell
-      name="Attendance Portal"
-      brandIcon={<Clock size={16} weight="bold" />}
-    >
       <div className="history-page">
         <Button
           variant="ghost"
@@ -185,17 +183,11 @@ export default function HistoryPage({
             <>
               <ul className="history-list">
                 {list.data.map((row) => (
-                  <li key={row.id} className="history-card">
-                    <Button
-                      variant="ghost"
-                      className="history-date-button"
-                      aria-label={
-                        "Buka absensi " + historyDate(row.attendanceDate)
-                      }
-                      onPress={() => update({ id: row.id })}
-                    >
-                      {historyDate(row.attendanceDate)}
-                    </Button>
+                  <li key={row.id} className="history-card" data-interactive-row="true" role="button" tabIndex={0}
+                    aria-label={"Buka absensi " + historyDate(row.attendanceDate)}
+                    onClick={() => update({ id: row.id })}
+                    onKeyDown={event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); update({ id: row.id }); } }}>
+                    <span className="history-date-label">{historyDate(row.attendanceDate)}</span>
                     <span className="history-status">{historyStatus(row)}</span>
                     <dl className="history-times">
                       <div>
@@ -260,6 +252,5 @@ export default function HistoryPage({
           ))
         )}
       </div>
-    </AuthShell>
   );
 }

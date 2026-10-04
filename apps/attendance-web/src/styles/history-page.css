@@ -2,7 +2,7 @@
   display: grid;
   gap: 1rem;
   min-width: 0;
-  margin-top: 1.5rem;
+  margin-top: 0;
 }
 .history-page .button {
   min-height: var(--ui-control-height);
@@ -47,6 +47,10 @@
   gap: 0.5rem;
   min-width: 0;
 }
+.history-card[data-interactive-row="true"] { cursor: pointer; outline: none; transition: background-color 120ms ease, border-color 120ms ease; }
+.history-card[data-interactive-row="true"]:hover, .history-card[data-interactive-row="true"]:focus-visible { border-color: var(--focus); background: var(--surface-secondary); }
+.history-card[data-interactive-row="true"]:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.history-date-label { justify-self: start; font-size: .875rem; font-weight: 600; }
 .history-page .history-date-button {
   padding: 0;
   justify-self: start;
@@ -144,3 +148,4 @@
   display: grid;
   gap: 0.5rem;
 }
+@media (prefers-reduced-motion: reduce) { .history-card[data-interactive-row="true"] { transition: none; } }

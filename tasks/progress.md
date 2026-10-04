@@ -1,5 +1,25 @@
 # Progres dan titik lanjut
 
+## T9 teknis selesai - Portal Karyawan responsif (2026-10-05)
+
+- Migrasi hash ke React Router DOM 7.18.4; rute `/masuk`, `/ganti-password`, `/`,
+  `/absen/masuk`, `/absen/pulang`, `/riwayat`, `/riwayat/:id`, `/profil`, dan
+  halaman 404 ber-guard. Filter riwayat tetap di query URL, detail membuka pathname
+  dan tombol browser Back/list mempertahankan filter.
+- Shell baru: topbar brand/theme/avatar dan nav desktop/tablet, bottom nav mobile,
+  area konten fixed dengan scroller tunggal, lebar konten terkendali tanpa ruang
+  kosong. Beranda menggunakan dua kolom pada desktop cukup lebar, status/jadwal/
+  tombol utama, jam server WIB, dan aktivitas tujuh hari; pada mobile panel tersusun
+  satu kolom. Detail riwayat tetap memuat foto/lokasi; kartu riwayat seluruhnya
+  clickable dengan fokus keyboard. Profil dan ganti password tetap dari shell.
+- Verifikasi: 29 unit di App, HistoryPage, LoginPage, dan CapturePanel lulus; lint
+  dan TypeScript attendance-web lulus. Build tidak dijalankan (resource_status tidak
+  tersedia; catatan RAM bebas terakhir sekitar 2.1 GiB). Tidak ada perubahan backend.
+- UI desktop/tablet/mobile, tema terang/gelap, kamera, dan acceptance manual menunggu
+  pemeriksaan pengguna. PR+deploy hanya frontend setelah acceptance.
+- Lanjut: T10 sweep responsif/a11y/polish untuk kedua portal. T9 akan di-commit/push
+  ke `dev`; checklist acceptance visual tetap belum dicentang.
+
 ## T8 teknis selesai - Profil dan keamanan dua role (2026-10-05)
 
 - Endpoint diri `GET /api/v1/me/profile` memverifikasi sesi lewat Auth Service,
