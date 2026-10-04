@@ -91,11 +91,18 @@ Dokumen ini digunakan semua agen/alat pada repo lokal yang sama. Update saat mul
 - Host memory sering CRITICAL (1-2 GB). Jalankan suite berat satu per satu; Playwright 1 worker terbukti stabil.
 - Pemeriksaan handoff 2026-10-02: container Docker MySQL 127.0.0.1:3307 dan AIStor 127.0.0.1:9000-9001 aktif. Port proyek: MySQL 3307, Gateway 3000, Auth 3001, Employee 3002, Attendance 3003, Media 3004, Attendance Web 5173, HR Web 5174.
 
+## Titik lanjut seed demo production — 2026-10-04
+
+- Pengguna mengotorisasi pengisian data sintetis di database `attendance_prod` untuk technical test yang tidak dipakai secara operasional. Akun/demo memakai Test Company; lima akun `DEMO001`–`DEMO005` aktif, provisioning selesai, dan password awal telah diganti berdasarkan output VPS pengguna.
+- Hari libur historis Agustus 2026 tercatat 17 dan 25 Agustus, diverifikasi pengguna. Tidak ada libur nasional September. Tidak ada kebijakan kerja aktif di DB; service memakai kebijakan default Senin–Jumat 08.00–17.00 WIB.
+- Increment aktif: `scripts/seed/demo-attendance.mjs` untuk mengimpor 195 rekap harian, 390 event, 390 ilustrasi avatar synthetic ke DB dan AIStor, dengan alasan dan audit `SIMULASI DEMO`. File test fokus `scripts/seed/demo-attendance.test.mjs`; panduan `scripts/seed/README.md`. Periksa `git diff`/status, jalankan unit test fokus, lalu commit/push dev hanya jika aman. Jangan stage `.agents/`, `.claude/`, `.kiro/`, `.windsurf/`, `skills-lock.json`, atau secrets.
+- Importer default dry-run dan membatasi write ke explicit `DEMO_SEED_TARGET=attendance_prod` plus `--apply-live`; preflight memeriksa akun, libur, bucket dan periode kosong. Belum diuji dengan DB/storage karena VPS dioperasikan pengguna secara manual. Jangan mengklaim seed history telah dijalankan; berikan tahap VPS setelah artifact dipush dan dry-run userside siap.
+
 ## Satu pekerjaan aktif
 
 | Task/subtask | Pemilik/sesi | Scope file | Dependensi | Proses/port | Status |
 | --- | --- | --- | --- | --- | --- |
-| T30 — tutorial manual VPS tahap 2A | Sesi ini (serial) | runbook VPS, progress/todo | Tahap 1: MySQL/AIStor/network tersedia, DB nol tabel | Tidak mengubah VPS/proses/port | Menunggu output pembuatan/login migrator sebelum migration |
+| Importer seed attendance demo Test Company (2026-08/09) | Sesi ini (serial) | scripts/seed/demo-attendance.mjs, test, README, package.json | Hari libur masuk; lima akun aktif dan password berubah; backup verified | Tidak ada port/proses baru; belum menyentuh VPS | Generator fokus lulus; audit diff sebelum commit/push dev, VPS dry-run belum dilakukan |
 
 Isi satu baris saat mulai increment. Hanya satu agen aktif dan satu task/increment berjalan. Sebelum pindah, catat diff, proses/port dan langkah berikut; agen penerus memeriksa Git/source terlebih dahulu.
 

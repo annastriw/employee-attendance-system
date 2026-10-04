@@ -9,7 +9,7 @@
   "scripts": {
     "build": "pnpm -r --if-present run build",
     "test": "pnpm run test:unit",
-    "test:unit": "node --test scripts/ci/check-branch-policy.test.mjs && pnpm -r --if-present run test",
+    "test:unit": "node --test scripts/ci/check-branch-policy.test.mjs scripts/seed/demo-attendance.test.mjs && pnpm -r --if-present run test",
     "lint": "pnpm -r --if-present run lint",
     "attendance:setup": "node scripts/attendance/setup-local.mjs",
     "storage:setup": "node scripts/storage/setup-local.mjs",
