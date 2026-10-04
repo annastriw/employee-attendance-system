@@ -32,6 +32,13 @@ private/
 Thumbs.db
 .DS_Store
 
+# Local agent tooling (kept on the owner's machine)
+.agents/
+.claude/
+.kiro/
+.windsurf/
+skills-lock.json
+
 # AIStor license and persistent local storage
 minio.license
 .licenses/

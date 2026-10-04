@@ -13,4 +13,4 @@ Jelaskan scope fitur/logika/UI yang berubah dan kaitan FE/BE/DB bila ada.
 
 Checkbox manual tidak dicentang hanya karena test otomatis/build lulus. Tidak ada Playwright atau suite integrasi penuh rutin.
 
-Coding/commit/push langsung dev; production hanya main. Auto-deploy VPS belum aktif sampai T30 siap. [Testing](../docs/testing/workflow.md) dan [rilis singkat](../docs/development/ci-cd-workflow.md).
+Coding/commit/push langsung dev; production hanya main. Auto-deploy VPS aktif untuk perubahan backend yang relevan; frontend mengikuti Vercel main. [Testing](../docs/testing/workflow.md) dan [rilis singkat](../docs/development/ci-cd-workflow.md).

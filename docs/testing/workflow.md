@@ -18,7 +18,7 @@ pnpm --filter attendance-service test --runInBand
 pnpm --filter hr-web test
 ```
 
-Contoh integrasi cepat **jika perubahan departemen memerlukannya**, setelah prasyarat database/akun fixture pada [runbook HR](../deployment/hr-local.md) siap:
+Contoh integrasi cepat **jika perubahan departemen memerlukannya**, setelah prasyarat database/akun fixture pada [runbook HR](../getting-started.md) siap:
 
 ```sh
 pnpm --filter employee-service test:e2e --runInBand --runTestsByPath test/departments.e2e-spec.ts

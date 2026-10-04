@@ -36,7 +36,7 @@ FULL_SHA = re.compile(r"[0-9a-f]{40}\Z")
 def detect_changes(paths: list[str]) -> tuple[bool, bool]:
     backend_changed = any(
         path in BACKEND_FILES or path.startswith(BACKEND_PREFIXES)
-        for path in paths
+        for path in paths if not path.lower().endswith(".md")
     )
     migrations_changed = any(
         path.startswith("prisma/migrations/") and path.endswith(".sql")

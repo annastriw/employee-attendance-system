@@ -1,19 +1,21 @@
-# Panduan dokumentasi
+# Dokumentasi proyek
 
-## Acuan aktif
+Mulai dari [README Inggris](../README.md) untuk ringkasan produk dan akun demo.
 
-- [Baseline](requirements/baseline.md): kebutuhan produk dan keputusan pengguna.
-- [Development](development/implementation-workflow.md): satu increment di dev.
-- [Testing](testing/workflow.md): unit wajib, integrasi cepat bila perlu, UI/UX manual menunggu pengguna oke.
-- [Rilis](development/ci-cd-workflow.md): PR dev → main, CI ringkas, image cached/paralel dan status deployment.
-- [VPS manual tahap per tahap](deployment/vps-production-manual.md): lanjut T30 dari infra yang sudah tersedia.
-- [Plan](../tasks/plan.md), [todo](../tasks/todo.md), [progress](../tasks/progress.md): urutan, penerimaan dan titik lanjut VPS.
-- [UI/UX](sdd/frontend-ui-ux.md), [design system](sdd/frontend-design-system.md): arah desain kedua portal.
+| Panduan | Isi |
+| --- | --- |
+| [Setup lokal](getting-started.md) | Clone, environment, MySQL/AIStor, seed dan tujuh aplikasi |
+| [Fitur](features.md) | Portal karyawan/HR, aturan dan demo walkthrough |
+| [Arsitektur](architecture.md) | Service, transport, storage, deployment |
+| [Database/ERD](database.md) | Tabel, relasi fisik/logis, constraint, grants |
+| [API](api.md) | Metode/path aktual, auth dan contoh request |
+| [Development](development.md) | SDD, Kanban, unit/integrasi cepat, Git |
+| [Milestone](development/history.md) | Kurasi history dengan tanggal sumber asli |
+| [Deployment](deployment.md) | PR main, Vercel, GHCR dan VPS |
+| [Keamanan](security.md) | Secret, akun demo dan batas audit |
+| [SDD](sdd/README.md) | Kontrak domain ringkas |
+| [Baseline](requirements/baseline.md) | Scope produk yang disetujui |
 
-## Struktur dan cara memakai dokumen
+Keputusan: [AIStor](architecture/adr-001-object-storage.md), [tooling/HTTP/outbox](architecture/adr-002-project-tooling.md), [monorepo/deployment](architecture/adr-003-repository-and-deployment.md). Operasional: [auto-deploy](deployment/vps-auto-deploy.md), [runbook VPS](deployment/vps-production-manual.md). Testing: [workflow](testing/workflow.md), [audit dependency historis](testing/dependency-audit.md).
 
-`sdd/` berisi kontrak/acceptance tiap modul; `architecture/` mencatat keputusan teknologi; `deployment/` berisi resep lokal/operasional; `testing/` mengatur pemeriksaan. Baca dokumen yang terkait perubahan saja. Tidak perlu menambah spec/runbook baru untuk setiap perubahan kecil.
-
-Frekuensi testing pada semua modul mengikuti panduan testing aktif. Perintah Playwright/integrasi dan catatan hasil lama tetap disimpan untuk kebutuhan khusus; keberadaannya tidak berarti wajib dijalankan setiap fitur/deploy. Jangan menghapus riwayat pengujian atau mengubah bukti manual menjadi hasil otomatis.
-
-Status teknis, penerimaan manual pengguna dan status live dibedakan. Checkbox UI/alur hanya dicentang sesudah konfirmasi pengguna untuk scope terkait. Deploy/live tidak diklaim dari build image saja. Status terbaru dibaca dari Git serta progress; snapshot lama bukan instruksi kerja baru.
+[Roadmap](../tasks/plan.md) dan [status](../tasks/todo.md) menyimpan keterlacakan produk. [Plan perapian](temporary/task/plan.md), [checklist](temporary/task/checklist.md), [handoff](temporary/task/handoff.md) dipakai untuk pekerjaan serial lintas sesi.

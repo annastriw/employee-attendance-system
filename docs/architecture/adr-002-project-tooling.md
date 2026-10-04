@@ -1,35 +1,15 @@
-# ADR-002: Tooling monorepo, database dan komunikasi service
-Tanggal: 2026-10-01 (Asia/Jakarta).
-Status: disetujui pengguna.
+# ADR-002 — Monorepo, MySQL dan HTTP/outbox
+
+Keputusan awal: 2026-10-01. Status: diterapkan; ringkasan diperbarui 2026-10-04.
 
 ## Keputusan
-- Package manager: pnpm workspace untuk apps/* dan packages/*, dengan satu lockfile repository.
-- Versi Node.js dan pnpm dipilih berdasarkan kompatibilitas dependency, lalu dikunci saat bootstrap.
-- ORM: Prisma untuk MySQL, dengan schema dan migration yang ditinjau di Git.
-- Karena satu database memuat tabel beberapa service, satu pengelola schema/migration terpusat menangani struktur keseluruhan.
-- Runtime service tetap menggunakan akun DB dan repository akses miliknya; tidak membaca atau menulis tabel service lain.
-- Kredensial migration dipisahkan dari akun runtime dan hanya dipakai pada pekerjaan migration.
-- Prisma client/database code tidak boleh masuk frontend. Package contracts tidak mengimpor client ORM.
-- HTTP internal digunakan untuk request langsung dan pengiriman event; service bisnis tidak diekspos ke internet.
-- Transactional outbox menyimpan perubahan domain dan event dalam transaksi MySQL yang sama.
-- Worker mengirim event melalui HTTP dengan retry terkontrol, timeout, pencatatan hasil, serta deduplikasi ID event pada penerima.
-- Tidak ada RabbitMQ pada tahap awal. Outbox bukan message broker.
-- Retry tidak menjamin exactly-once; penerima wajib idempotent, dan ordering per entity ditetapkan saat kontrak event.
-- Autentikasi request internal ditetapkan sebelum endpoint internal digunakan.
-- Tidak menambahkan Turborepo/Nx pada tahap awal; kebutuhan orchestration tambahan dievaluasi dari kebutuhan nyata.
 
-## Alasan
-pnpm mengelola aplikasi dan package bersama secara eksplisit.
-Prisma menyediakan client bertipe dan migration yang dapat diperiksa.
-HTTP dan outbox memenuhi komunikasi awal tanpa menambah broker pada satu VPS.
+pnpm workspace dengan satu lockfile, Node 24.x, TypeScript, React/Vite dan NestJS. Prisma mengelola satu schema/migration MySQL terpusat; generated client dibungkus packages/database dan tidak masuk frontend.
 
-## Batas implementasi
-Persetujuan ini menetapkan pilihan tooling, belum memasang dependency atau menjalankan migration.
-Selesaikan kompatibilitas versi, struktur schema/migration, hak akses runtime, retry/ordering/deduplikasi dan kontrak internal sebelum implementasi terkait.
-Aturan bisnis, testing, HeroUI dan deployment mengikuti baseline.md.
+Runtime mempunyai akun DB per service dengan grants tabel miliknya. Antarservice memakai HTTP internal dengan autentikasi, timeout dan idempotensi. Durable operation menangani provisioning/lifecycle; transactional outbox Attendance menyimpan event dan pekerjaan binding foto dalam transaksi sama.
 
-## Sumber
-- https://pnpm.io/workspaces
-- https://www.prisma.io/docs/orm/migrations/how-migrations-work
-- https://docs.nestjs.com/microservices/basics
-- https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html
+## Alasan dan konsekuensi
+
+HTTP/outbox memenuhi kebutuhan tanpa broker tambahan pada satu VPS. Receiver harus idempotent karena retry bukan exactly-once. Schema terpusat memerlukan koordinasi migration, tetapi kepemilikan runtime tetap dibatasi. Tidak menambahkan RabbitMQ/Nx/Turborepo tanpa kebutuhan nyata.
+
+[Arsitektur](../architecture.md), [database](../database.md), [recovery](../sdd/recovery.md). Versi exact mengikuti package.json/lockfile, bukan daftar dependency yang disalin ke banyak dokumen.

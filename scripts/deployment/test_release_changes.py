@@ -34,6 +34,12 @@ class DetectReleaseChangesTests(unittest.TestCase):
     def test_documentation_only_changes_do_not_deploy_backend(self):
         self.assertEqual(MODULE.detect_changes(["docs/deployment/vps-auto-deploy.md"]), (False, False))
 
+    def test_service_readme_cleanup_does_not_deploy_backend(self):
+        self.assertEqual(
+            MODULE.detect_changes(["apps/api-gateway/README.md", "apps/auth-service/README.md"]),
+            (False, False),
+        )
+
     def test_initial_push_falls_back_to_building_backend_and_migrator(self):
         self.assertIsNone(MODULE.changed_paths("0" * 40, "a" * 40))
 

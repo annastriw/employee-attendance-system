@@ -96,6 +96,11 @@ jobs:
           BEFORE_SHA: ${{ github.event.before }}
           RELEASE_SHA: ${{ github.sha }}
         run: |
+          # A rewritten history can leave the previous release outside fetched refs.
+          if [[ "$BEFORE_SHA" =~ ^[0-9a-f]{40}$ && "$BEFORE_SHA" != "0000000000000000000000000000000000000000" ]]; then
+            git cat-file -e "$BEFORE_SHA^{commit}" 2>/dev/null || \
+              git fetch --no-tags origin "$BEFORE_SHA"
+          fi
           python3 scripts/deployment/detect-release-changes.py \
             "$BEFORE_SHA" "$RELEASE_SHA" >> "$GITHUB_OUTPUT"
 

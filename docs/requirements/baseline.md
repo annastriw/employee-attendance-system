@@ -14,8 +14,8 @@ Dokumen ini merekam keputusan pengguna dalam sesi perencanaan. Dokumen rancangan
 - Satu repository GitHub berbentuk monorepo: apps/{attendance-web,hr-web,api-gateway,auth-service,employee-service,attendance-service,media-service}, packages/{contracts,ui,config}, docs/{requirements,sdd,architecture,api,testing,deployment}, infra/.
 - Topologi repository/deployment disetujui: satu repo, dua project Vercel, backend/MySQL/storage di VPS. Detail: [ADR-003](../architecture/adr-003-repository-and-deployment.md).
 - Keputusan terbaru 2026-10-03: hanya dev dan main. Coding serta uji lokal di dev, commit/push langsung dev, lalu PR dev ke main untuk rilis. Satu production main untuk 5 karyawan + 1 HR, tanpa deployment dev/preview. [Workflow CI/CD](../development/ci-cd-workflow.md).
-- Repository public tetap [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system). Increment terverifikasi di-commit/push ke dev; main hanya melalui PR rilis. Artefak CD VPS kini tersedia, tetapi deploy masih nonaktif sampai setup akses terbatas satu kali dan GitHub Environment selesai: [panduan VPS otomatis](../deployment/vps-auto-deploy.md).
-- VPS dikhususkan untuk absensi; pengguna menyatakan UKG telah dipindahkan dan boleh dihapus. Reset/reinstall VPS belum diverifikasi. Target kapasitas awal 2 vCPU/RAM sekitar 3,6 GiB harus diuji untuk 5 check-in bersamaan, termasuk resource, keamanan, monitoring dan pemulihan sebelum production.
+- Repository public tetap [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system). Increment terverifikasi di-commit/push ke dev; main hanya melalui PR rilis. CD VPS sudah aktif dan dibuktikan dengan health SHA rilis pada 2026-10-04: [panduan VPS otomatis](../deployment/vps-auto-deploy.md).
+- VPS dikhususkan untuk absensi; pengguna menyatakan UKG telah dipindahkan dan boleh dihapus. VPS sudah dipersiapkan ulang menurut output pengguna. Resource awal 2 vCPU/RAM sekitar 3,6 GiB; load test, restore drill dan hardening tambahan ditunda pengguna dalam scope demo. Health idle bukan bukti kapasitas beban.
 - GitHub: kode, spesifikasi, migration, konfigurasi aman, .env.example. Lokal: .env, kredensial, backup, data/foto pribadi.
 - SDD, context engineering, Kanban, implementasi bertahap, skills relevan, clean code dan maintainability.
 - Testing terbaru 2026-10-03 mengikuti [satu panduan testing](../testing/workflow.md): unit wajib untuk kode/logika terdampak; integrasi cepat hanya bila sambungan MySQL/AIStor/auth/antarservice membutuhkan bukti nyata; UI/UX/alur manual oleh pengguna. Centang acceptance hanya setelah pengguna menyatakan oke untuk scope terkait. CI PR main: unit sekali + lint/build/typecheck; integrasi perlu dikerjakan terfokus sebelum rilis, bukan suite penuh tiap deploy. Tidak ada Playwright/visual otomatis rutin. Bukti lama dipertahankan; aturan ini menggantikan frekuensi berat sebelumnya.
@@ -59,7 +59,7 @@ Dokumen ini merekam keputusan pengguna dalam sesi perencanaan. Dokumen rancangan
 - Karyawan semua riwayat sendiri, filter tanggal/pagination. Catatan terhapus berlabel dihapus HRD, waktu+alasan terlihat, foto disembunyikan, bukan rekap aktif.
 - HRD riwayat karyawan arsip. Tidak bisa edit waktu/foto atau absen atas nama karyawan.
 - Soft delete absensi seluruh hari, konfirmasi nama/tanggal, alasan wajib, audit actor+waktu+alasan. Menu absensi dihapus dan restore.
-- Restore menolak konflik aktif tanggal yang sama. Penghapusan tidak membuka absen ulang. Kontrak versi, transaksi dan pemulihan mengikuti [lifecycle absensi T23](../sdd/attendance-lifecycle.md).
+- Restore menolak konflik aktif tanggal yang sama. Penghapusan tidak membuka absen ulang. Kontrak versi, transaksi dan pemulihan mengikuti [lifecycle absensi T23](../sdd/attendance.md).
 - Tanpa hard delete di UI. Retensi permanen belum ditentukan.
 
 ## Rancangan database yang disetujui
@@ -69,7 +69,7 @@ Dokumen ini merekam keputusan pengguna dalam sesi perencanaan. Dokumen rancangan
 - Employee: emp_employees, emp_departments, emp_positions, emp_employee_history, emp_audit_logs.
 - Attendance: att_work_policies, att_holidays, att_daily_records, att_events, att_idempotency_requests, att_audit_logs, att_outbox.
 - Media: media_objects, media_audit_logs; status PENDING/READY/FAILED, bucket/key unik, checksum, pemilik/purpose.
-- UNIQUE(employee_id,attendance_date) tetap untuk soft delete; UNIQUE(daily_record_id,event_type) dan UNIQUE(photo_object_id) pada event. Binding foto/event unik, intent ber-state dan outbox durable mengikuti [kontrak check-in T21](../sdd/attendance-checkin.md).
+- UNIQUE(employee_id,attendance_date) tetap untuk soft delete; UNIQUE(daily_record_id,event_type) dan UNIQUE(photo_object_id) pada event. Binding foto/event unik, intent ber-state dan outbox durable mengikuti [kontrak check-in T21](../sdd/attendance.md).
 - Event snapshot jadwal/hari libur, foto, koordinat, akurasi, waktu lokasi, metode capture, is_late/is_early_departure dan reason.
 - Profil departemen/jabatan snapshot di catatan harian; riwayat karyawan untuk eligibility historis.
 - Missing attendance dihitung, bukan baris palsu. Absensi terhapus bukan missing.
@@ -77,18 +77,14 @@ Dokumen ini merekam keputusan pengguna dalam sesi perencanaan. Dokumen rancangan
 - Audit append-only tanpa password/hash/token/signed URL.
 
 ## Peta kontrak API yang disetujui
-Base /api/v1; Swagger /docs; UUID; waktu response ISO8601 +07:00; pagination/filter; requestId.
-- POST /auth/{employee,admin}/login; POST /auth/refresh, /auth/logout, /auth/change-password; GET /auth/me.
-- GET/POST /employees; GET/PATCH/DELETE /employees/:id; POST activate/deactivate/restore/reset-password di /employees/:id/.
-- GET/POST /departments dan /positions; GET/PATCH /:id; POST /:id/activate dan /:id/deactivate.
-- GET/POST /holidays; PATCH/DELETE /holidays/:id.
-- GET /me/attendance/today, /me/attendance, /me/attendance/:id; POST /me/attendance/check-in dan check-out.
-- POST /media/attendance-photos multipart; GET /attendance/:id/events/:eventId/photo-url.
-- GET /monitoring/summary dan /monitoring/employees; GET /attendance dan /attendance/:id; DELETE /attendance/:id dengan alasan; POST /attendance/:id/restore.
-- Payload attendance: photoObjectId, clientCapturedAt berzona (bukan waktu resmi), captureMethod, location{latitude,longitude,accuracyMeters,capturedAt}, reason.
-- Checkout menambahkan dailyRecordId dari catatan hari ini sebagai target tetap; harus milik sesi dan masih tanggal WIB yang sama. Detail [checkout T22](../sdd/attendance-checkout.md).
-- employeeId berasal dari sesi. Idempotency-Key wajib; jika ambang waktu terlewati dan alasan belum ada, service meminta alasan sebelum menerima.
-- Response sukses data+meta; error error{code,message,details}+meta. HTTP 400/401/403/404/409/422/503 sesuai kontrak.
+Base /api/v1; Swagger service /docs; UUID; waktu presensi ISO8601 +07:00; pagination/filter; requestId. Metode/path implementasi aktual ada di [API](../api.md); daftar rancangan lama berikut diringkas menjadi kontrak aktual.
+- Auth login role terpisah, refresh/me/change-password/logout.
+- Master departemen/jabatan list/create/detail/update dan activate/deactivate.
+- Employee list/create/detail/edit/history, email/lifecycle/reset-password serta status/retry/klaim operasi durable.
+- Calendar list/create/detail/update/delete untuk tanggal yang boleh diubah.
+- Presensi sendiri today/history/detail/check-in/check-out/request status dan photo; HR monitoring/list/detail/photo/soft delete/restore.
+- Body presensi: ID foto READY, captureMethod, timestamp bukti berzona, location dan reason jika wajib. employeeId dari sesi; checkout menambah dailyRecordId sendiri.
+- Idempotency-Key wajib pada mutasi yang memakai intent. Format response/error sesuai controller/domain aktual, tidak satu envelope generik untuk seluruh API.
 
 ## Tooling yang disetujui
 - pnpm workspace; Prisma dengan satu pengelola schema/migration untuk satu database; HTTP internal + transactional outbox dan worker retry/idempotent. Tanpa RabbitMQ pada tahap awal. Detail: docs/architecture/adr-002-project-tooling.md.
@@ -102,7 +98,11 @@ Base /api/v1; Swagger /docs; UUID; waktu response ISO8601 +07:00; pagination/fil
 
 ## Tema visual frontend
 - Penegasan pengguna 2026-10-02: T09c disetujui dan wajib pada seluruh halaman Attendance/HR yang tersedia maupun yang dibangun selanjutnya (E01–E09/H01–H14), beserta seluruh state dan dialog. Tema monokrom T09b telah digantikan.
-- Kedua portal dan seluruh halaman berikutnya memakai tema produk modern ala Linear (revisi 2026-10-01): netral zinc, satu aksen emerald, font Geist, ikon Phosphor, mode terang dan gelap mengikuti sistem, tetap mudah dipahami. Login Attendance satu form terpusat satu kolom; login HR split-screen (form + panel kemampuan produk) pada layar lebar; keduanya tanpa slogan jualan atau statistik palsu. HR sidebar ramping dan menu akun. HeroUI dan custom component Atomic Design mengikuti [kontrak desain](../sdd/frontend-design-system.md); token serta shell bersama disimpan di packages/ui.
+- Kedua portal dan seluruh halaman berikutnya memakai tema produk modern ala Linear (revisi 2026-10-01): netral zinc, satu aksen emerald, font Geist, ikon Phosphor, mode terang dan gelap mengikuti sistem, tetap mudah dipahami. Login Attendance dan HR split-screen (form + panel kemampuan produk) pada layar lebar; keduanya tanpa slogan jualan atau statistik palsu. HR sidebar ramping dan menu akun. HeroUI dan custom component Atomic Design mengikuti [kontrak desain](../sdd/frontend-design-system.md); token serta shell bersama disimpan di packages/ui.
 
 - Konsep seluruh halaman: ruang kerja yang tenang dan terstruktur; karyawan berfokus tindakan berikutnya, HR berfokus pencarian/pemeriksaan catatan. Susunan layar, capture, states, daftar/detail, lifecycle dan acceptance mengikuti [spesifikasi UI/UX](../sdd/frontend-ui-ux.md).
 - Seluruh proyek berlanjut sesuai plan dalam repo lokal yang sama, termasuk saat agen/alat berganti karena kapasitas sesi. Seluruh lapisan dikerjakan serial sesuai dependensi, dengan dua agen bergantian dan satu agen aktif pada satu waktu. Saat sesi mendekati batas, checkpoint dan prompt trigger disiapkan untuk melanjutkan progres. Acuan: [alur implementasi](../development/implementation-workflow.md).
+
+## Keputusan demo dan dokumentasi terbaru
+
+Pengguna mengizinkan akun HR/karyawan dan password demo dipublikasikan di README, dengan profil/historical attendance fiktif. Secret DB/storage/JWT/SSH/lisensi tetap privat. Perapian 2026-10-04–05 mengonsolidasikan SDD/dokumentasi dan history secara serial. Tanggal commit milestone sumber dipertahankan, perubahan dokumentasi baru memakai tanggal aktual. Backup mapping privat sebelum rewrite. Pengecualian force-with-lease hanya sekali untuk perapian; flow harian tetap dev→PR→main.

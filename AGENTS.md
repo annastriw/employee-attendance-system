@@ -11,12 +11,13 @@
 - Keputusan terbaru 2026-10-03: hanya branch dev dan main. Coding, commit dan push langsung ke dev; uji lokal lalu PR dev repository ini ke main saat siap rilis. Main untuk production, tanpa deployment dev/preview. Ikuti [workflow CI/CD](docs/development/ci-cd-workflow.md).
 - Gunakan pesan commit jelas dengan prefix feat, fix, docs, test, refactor, atau chore.
 - Periksa diff dan berkas yang akan di-stage sebelum commit. Stage hanya berkas terkait pekerjaan.
-- Jangan commit .env, kredensial, token, private key, backup, data/foto karyawan, dependency terinstal, atau hasil build.
+- Jangan commit .env, kredensial infra, token, private key, backup, data/foto karyawan, dependency terinstal, atau hasil build. Akun demo/password README yang sengaja dipublikasikan pengguna merupakan pengecualian khusus, bukan credential infra.
 - Jalankan pemeriksaan sesuai perubahan. Untuk dokumentasi, periksa isi dan tautan; jangan mengklaim test aplikasi sudah berjalan bila belum tersedia.
 - Jangan force push atau menghapus perubahan pengguna.
+- Pengecualian sekali, disetujui pengguna 2026-10-04: perapian history dev/main dengan tanggal author/committer milestone asli dan backup pemulihan; gunakan force-with-lease. Setelah perapian selesai, aturan normal tanpa force push berlaku kembali. Akun demo publik di README diizinkan; DB/storage/JWT/SSH/lisensi tetap privat. Plan aktif: docs/temporary/task/plan.md, checklist dan handoff pada folder yang sama.
 - Jika remote, autentikasi, atau Git belum tersedia, laporkan penghalangnya secara akurat. Jangan mengklaim commit/push berhasil.
 - Persetujuan commit/push perubahan terverifikasi ke dev tetap berlaku; tidak perlu izin ulang. Merge/rilis main mengikuti instruksi rilis pengguna.
-- Repository public tetap [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system), origin https://github.com/annastriw/employee-attendance-system.git. Push perubahan development ke dev. Main hanya melalui PR rilis; CD belum aktif sampai artefak/akses T30 siap.
+- Repository public tetap [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system), origin https://github.com/annastriw/employee-attendance-system.git. Push perubahan development ke dev. Main melalui PR rilis pada workflow harian; CD VPS sudah aktif dan health SHA rilis terbukti. Pengecualian rewrite sekali mengikuti plan cleanup.
 - Promosi ke main mengikuti tahap rilis, verifikasi, dan instruksi pengguna.
 
 ## Cara kerja
