@@ -1,5 +1,32 @@
 # Progres dan titik lanjut
 
+## T2 aktif — validator riwayat Karyawan menolak UUID demo v5 (2026-10-05)
+
+- [x] Pengguna mengonfirmasi detail HR dari Absensi dan Ringkasan sudah berfungsi.
+  Tidak mengasumsikan Back/filter diterima dari laporan detail saja.
+- Bukti runtime pengguna: `GET /api/v1/me/attendance?page=1&pageSize=20` = 200,
+  payload memiliki UUID v5 untuk record/checkIn/checkOut, metadata WIB valid.
+  Frontend `attendance-history.ts` sebelumnya menerima UUID v4 saja sehingga
+  melempar AuthError 503 lokal meskipun request HTTP berhasil.
+- Backend controller history sudah memakai ParseUUIDPipe tanpa batas v4;
+  tidak membutuhkan perubahan service/endpoint/migration.
+- File terkait: `apps/attendance-web/src/lib/attendance-history.ts` dan `.test.ts`,
+  sprint dan progress ini. Validator hanya diperluas untuk UUID v4/v5, sesuai
+  ID normal dan seed demo. Tetap menolak format/variant invalid, bukti lokasi
+  invalid dan detail milik ID berbeda; validasi metadata/tanggal/foto tetap.
+- Verifikasi: 2 unit regresi list/detail v5 gagal sebelum fix. Setelah fix,
+  unit util 8/8 + HistoryPage 7/7 lulus (15 total); lint attendance-web lulus.
+  Build lokal tidak dijalankan karena RAM bebas ~1,63 GiB, mengikuti keputusan
+  pengguna push dev lalu build CI PR main. Tidak memulai dev server 5173/5174.
+- [ ] Pengguna setelah PR/deploy: Riwayat Karyawan menampilkan daftar, pagination
+  dan filter; klik detail, lihat foto, kembali ke daftar dengan filter tetap.
+  Jika list berhasil tetapi detail gagal, kirim URL/status/Response endpoint
+  `me/attendance/<id>` dan pesan Console; jangan kirim Cookie/token.
+- Perlu PR+deploy: frontend Attendance saja; tidak ada perubahan backend.
+- Lanjut: push T2 fix ke dev, pengguna PR main dan cek riwayat/detail/foto.
+  Setelah acceptance T2, centang sprint lalu **T3** fondasi bersama + D11/D12.
+  T1 logout→refresh masih menunggu konfirmasi; proxy localhost hanya terbukti unit.
+
 ## Acceptance refresh production — kedua role aman (2026-10-05)
 
 - Pengguna menyatakan: "sudah aman semua ketika refresh, semua role" setelah

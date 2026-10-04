@@ -200,6 +200,11 @@ Fase B:
   Pengguna cek manual (restart dev server — `vite.config.ts` tidak hot-reload).
 
 ### T2 `[ ]` Bug: HR "lihat detail absensi" & Karyawan "riwayat" tidak berfungsi
+- **Status 2026-10-05**: pengguna mengonfirmasi detail HR dari Absensi dan Ringkasan
+  berfungsi. Response list Karyawan 200 memakai UUID v5 (seed demo), ditolak
+  validator frontend yang hanya menerima v4. Validator diperbaiki menerima v4/v5;
+  unit regresi list/detail + test HistoryPage lulus. Acceptance riwayat/detail/foto
+  Karyawan dan Back/filter HR tetap menunggu cek pengguna setelah rilis.
 - **File HR**: `pages/AttendancePage.tsx` (detail via `?id=`),
   `pages/AttendanceDetailPage.tsx`, `pages/MonitoringPage.tsx` (link `/absensi?id=`),
   `routes/routes.ts` (`useRouteParams`).
