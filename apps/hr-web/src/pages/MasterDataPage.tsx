@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button, SearchField, Skeleton, Table, ToggleButton, ToggleButtonGroup } from "@heroui/react";
 import { Buildings, CaretLeft, CaretRight, PencilSimple, Plus, Power } from "@phosphor-icons/react";
-import { Notice } from "../components/molecules/Notice";
-import { StatusBadge } from "../components/molecules/StatusBadge";
-import { ConfirmDialog } from "../components/organisms/ConfirmDialog";
+import { Notice, StatusBadge, ConfirmDialog } from "@attendance/ui";
+
 import { MasterFormDialog } from "../components/organisms/MasterFormDialog";
 import { AuthError, type AuthClient } from "../lib/auth-client";
 import { masterDataApi, PAGE_SIZE, type MasterRecord, type MasterRecordPage, type MasterStatus } from "../lib/master-data";

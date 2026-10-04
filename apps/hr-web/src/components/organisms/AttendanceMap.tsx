@@ -124,6 +124,7 @@ export function AttendanceMap({
         ref={containerRef}
         className="attendance-map-container"
         data-testid="attendance-map"
+        data-allow-zoom
         role="region"
         aria-label={`Peta ${label}: koordinat ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`}
       >

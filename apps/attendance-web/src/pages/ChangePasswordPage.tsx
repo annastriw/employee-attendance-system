@@ -1,9 +1,8 @@
 import { useState, type SubmitEvent } from "react";
 import { Button } from "@heroui/react";
 import { Clock } from "@phosphor-icons/react";
-import { AuthShell } from "@attendance/ui";
-import { Notice } from "../components/molecules/Notice";
-import { PasswordField } from "../components/molecules/PasswordField";
+import { AuthShell, Notice, PasswordField } from "@attendance/ui";
+
 import type { EmployeeUser } from "../lib/auth-client";
 
 const bytes = (value: string) => new TextEncoder().encode(value).length;

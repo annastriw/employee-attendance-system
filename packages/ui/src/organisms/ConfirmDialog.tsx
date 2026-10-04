@@ -43,10 +43,11 @@ export function ConfirmDialog({
             {error && <Notice message={error} />}
           </Modal.Body>
           <Modal.Footer className="dialog-footer">
-            <Button variant="tertiary" isDisabled={busy} onPress={onClose}>
+            <Button size="sm" variant="secondary" isDisabled={busy} onPress={onClose}>
               Batal
             </Button>
             <Button
+              size="sm"
               variant="primary"
               isDisabled={busy || confirmDisabled}
               onPress={onConfirm}

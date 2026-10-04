@@ -1,7 +1,7 @@
 import { useState, type SubmitEvent } from "react";
 import { Button, Input, Label, TextField } from "@heroui/react";
-import { PasswordField } from "../molecules/PasswordField";
-import { Notice } from "../molecules/Notice";
+import { PasswordField, Notice } from "@attendance/ui";
+
 const bytes = (value: string) => new TextEncoder().encode(value).length;
 interface LoginProps {
   busy: boolean;

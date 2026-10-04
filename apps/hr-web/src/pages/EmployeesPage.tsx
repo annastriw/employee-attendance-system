@@ -4,9 +4,8 @@ import { CaretLeft, CaretRight, Plus, Users } from '@phosphor-icons/react';
 import { AuthError, type AuthClient } from '../lib/auth-client';
 import { loadActiveMasters, type EmployeeInput, type EmployeePage, type ProvisioningOperation, type TemporaryCredential } from '../lib/employees';
 import type { MasterRecord } from '../lib/master-data';
-import { StatusBadge } from '../components/molecules/StatusBadge';
-import { Notice } from '../components/molecules/Notice';
-import { ConfirmDialog } from '../components/organisms/ConfirmDialog';
+import { StatusBadge, Notice, ConfirmDialog } from "@attendance/ui";
+
 import { EmployeeDetailPage } from './EmployeeDetailPage';
 import { EmployeeForm } from '../components/organisms/EmployeeForm';
 import { TemporaryPasswordDialog } from '../components/organisms/TemporaryPasswordDialog';

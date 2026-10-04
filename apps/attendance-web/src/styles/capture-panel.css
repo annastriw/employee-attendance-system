@@ -15,8 +15,8 @@
 }
 .capture-header button {
   flex-shrink: 0;
-  min-width: 44px;
-  min-height: 44px;
+  min-width: var(--ui-icon-button);
+  min-height: var(--ui-control-height);
 }
 .capture-title {
   margin-bottom: 20px;
@@ -36,7 +36,7 @@
   overflow: hidden;
   aspect-ratio: 4 / 3;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--ui-card-radius);
   background: var(--surface-secondary);
 }
 .capture-video,
@@ -114,12 +114,12 @@
 .capture-location button {
   padding-inline: 8px;
   flex-shrink: 0;
-  min-width: 44px;
-  min-height: 44px;
+  min-width: var(--ui-icon-button);
+  min-height: var(--ui-control-height);
 }
 .capture-page .alert {
   margin-top: 16px;
-  border-radius: 12px;
+  border-radius: var(--ui-card-radius);
   overflow-wrap: anywhere;
 }
 .capture-ready {
@@ -140,7 +140,7 @@
 .capture-actions button {
   flex: 1;
   min-width: 0;
-  min-height: 44px;
+  min-height: var(--ui-control-height);
   padding-inline: 12px;
 }
 .capture-note {
@@ -183,4 +183,4 @@
   letter-spacing: 0;
 }
 
-.capture-page > .button { min-height: 44px; }
+.capture-page > .button { min-height: var(--ui-control-height); }

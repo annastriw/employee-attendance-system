@@ -1,0 +1,48 @@
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+.status-dot { width: 0.5rem; height: 0.5rem; border-radius: 9999px; }
+.status-active { color: var(--accent-soft-foreground); }
+.status-active .status-dot { background: var(--accent); }
+.status-inactive { color: var(--muted); }
+.status-inactive .status-dot { background: var(--field-border); }
+.status-archived { color: var(--foreground); }
+.status-archived .status-dot { background: var(--muted); }
+
+.dialog { border-radius: var(--ui-card-radius); box-shadow: var(--overlay-shadow); }
+.dialog-title { font-size: var(--ui-section-title); font-weight: 600; letter-spacing: -0.01em; }
+.dialog-body { display: grid; gap: 1rem; }
+.dialog-text { color: var(--muted); line-height: 1.6; }
+.dialog-text strong { color: var(--foreground); font-weight: 500; }
+.dialog-footer { display: flex; justify-content: flex-end; gap: 0.5rem; }
+.dialog-footer .button { min-height: var(--ui-control-height); }
+
+/* ---------- Empty state ---------- */
+.empty-state {
+  display: grid;
+  justify-items: center;
+  gap: 0.375rem;
+  padding: 4rem 1.5rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--ui-card-radius);
+  text-align: center;
+}
+.empty-icon {
+  display: grid;
+  place-items: center;
+  width: var(--ui-icon-button);
+  height: var(--ui-icon-button);
+  margin-bottom: 0.5rem;
+  border-radius: var(--ui-card-radius);
+  background: var(--accent-soft);
+  color: var(--accent-soft-foreground);
+}
+.empty-title { font-weight: 500; }
+.empty-body { color: var(--muted); font-size: 0.8125rem; max-width: 22rem; }
+.empty-action { margin-top: 0.75rem; }
+
+/* ---------- List pages (toolbar, table, pagination) ---------- */

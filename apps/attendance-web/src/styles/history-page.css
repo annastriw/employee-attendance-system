@@ -5,7 +5,7 @@
   margin-top: 1.5rem;
 }
 .history-page .button {
-  min-height: 2.75rem;
+  min-height: var(--ui-control-height);
 }
 .history-back {
   justify-self: start;
@@ -27,7 +27,7 @@
 }
 .history-filter .input {
   width: 100%;
-  min-height: 2.75rem;
+  min-height: var(--ui-control-height);
 }
 .history-list {
   list-style: none;
@@ -42,7 +42,7 @@
   padding: 1rem;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
+  border-radius: var(--ui-card-radius);
   display: grid;
   gap: 0.5rem;
   min-width: 0;
@@ -137,7 +137,7 @@
 }
 .history-skeleton-row {
   height: 8rem;
-  border-radius: 0.75rem;
+  border-radius: var(--ui-card-radius);
 }
 .history-empty {
   padding: 1.5rem 0;

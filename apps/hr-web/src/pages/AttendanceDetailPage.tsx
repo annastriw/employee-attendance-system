@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Button, Label, TextArea } from "@heroui/react";
 import { ArrowLeft, Trash, ArrowCounterClockwise } from "@phosphor-icons/react";
-import { Notice } from "../components/molecules/Notice";
-import { ConfirmDialog } from "../components/organisms/ConfirmDialog";
+import { Notice, ConfirmDialog } from "@attendance/ui";
+
 import { AttendanceEvidence } from "../components/organisms/AttendanceEvidence";
 import { AuthError, type AuthClient } from "../lib/auth-client";
 import {

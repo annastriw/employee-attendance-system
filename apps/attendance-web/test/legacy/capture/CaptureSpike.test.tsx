@@ -6,9 +6,9 @@ const mocks = vi.hoisted(() => ({
   load: vi.fn(), inspect: vi.fn(), close: vi.fn(), media: vi.fn(),
   stop: vi.fn(), trackListener: vi.fn(), locate: vi.fn(), photograph: vi.fn(),
 }));
-vi.mock("../../features/capture/vision", () => ({ loadVision: mocks.load }));
-vi.mock("../../features/capture/browser-capture", async importOriginal => ({
-  ...await importOriginal<typeof import("../../features/capture/browser-capture")>(),
+vi.mock("../../../src/features/capture/vision", () => ({ loadVision: mocks.load }));
+vi.mock("../../../src/features/capture/browser-capture", async importOriginal => ({
+  ...await importOriginal<typeof import("../../../src/features/capture/browser-capture")>(),
   requestLocation: mocks.locate, photograph: mocks.photograph,
 }));
 const validFace = { confidence: 0.9, box: { x: 0.3, y: 0.2, width: 0.4, height: 0.5 } };

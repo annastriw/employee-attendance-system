@@ -8,7 +8,7 @@ import {
   Modal,
   TextField,
 } from '@heroui/react';
-import { Notice } from '../molecules/Notice';
+import { Notice } from "@attendance/ui";
 import type { HolidayRecord } from '../../lib/holidays';
 
 type Errors = { holidayDate?: string; description?: string };

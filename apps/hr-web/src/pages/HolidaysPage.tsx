@@ -13,9 +13,8 @@ import {
   Plus,
   Trash,
 } from '@phosphor-icons/react';
-import { Notice } from '../components/molecules/Notice';
-import { StatusPill } from '../components/molecules/StatusPill';
-import { ConfirmDialog } from '../components/organisms/ConfirmDialog';
+import { Notice, StatusPill, ConfirmDialog } from "@attendance/ui";
+
 import { HolidayFormDialog } from '../components/organisms/HolidayFormDialog';
 import { AuthError, type AuthClient } from '../lib/auth-client';
 import {

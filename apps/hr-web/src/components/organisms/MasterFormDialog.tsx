@@ -1,6 +1,6 @@
 import { useState, type SubmitEvent } from "react";
 import { Button, Description, FieldError, Input, Label, Modal, TextField } from "@heroui/react";
-import { Notice } from "../molecules/Notice";
+import { Notice } from "@attendance/ui";
 import type { MasterRecord } from "../../lib/master-data";
 
 const CODE = /^[A-Z0-9][A-Z0-9_-]*$/;

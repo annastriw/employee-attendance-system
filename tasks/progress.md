@@ -1,5 +1,28 @@
 # Progres dan titik lanjut
 
+## T3 implementasi selesai — fondasi UI bersama (2026-10-05)
+
+- Task aktif: T3, serial tanpa subagen. Scope file: `packages/ui/src` + package
+  manifest/lockfile, import komponen kedua portal, CSS `src/styles`, viewport
+  `index.html`/`main.tsx`, unit HR untuk logika bersama, arsip spike Karyawan.
+- Notice, PasswordField, ConfirmDialog, StatusBadge/Pill dipindahkan ke UI bersama;
+  FormField, DateRangeField, SearchInput, DataList ditambahkan. SidebarShell T5.
+- D11/D12: zoom lock + token kompak + shell fixed diterapkan; test
+  tanggal WIB/debounce/viewport 12/12 lulus setelah 11 test awal gagal.
+- Verifikasi: unit terdampak HR 90/90 (termasuk 12 test logika bersama),
+  Karyawan 40/40; lint kedua portal dan packages/ui lulus, typecheck kedua portal
+  lulus, diff tanpa whitespace error. Fixture capture lama tetap diuji di test/legacy.
+- Build/dev server tidak dimulai (RAM <3 GiB); build menunggu CI PR sesuai
+  keputusan pengguna. Port 5173/5174 tidak dibuka oleh agen.
+- Manual setelah deploy: cek login, daftar/detail dan modal desktop/mobile;
+  konten scroll dalam layar, ukuran kompak, Ctrl/Cmd +/-/0 dan pinch halaman
+  diblokir, pinch peta tetap berfungsi. Acceptance UI belum dicentang.
+- Acceptance T2 Karyawan tetap tertunda; "oke lanjut" adalah arahan melanjutkan,
+  bukan klaim riwayat/detail/foto production sudah diterima.
+- Perlu PR+deploy: fondasi frontend kedua portal; tidak ada backend/migration.
+- Lanjut: T4 kontrol/filter seragam; build T3 melalui CI PR dan manual UI pengguna
+  tetap tertunda. Commit/push ke dev; tidak ada perubahan main.
+
 ## T2 aktif — validator riwayat Karyawan menolak UUID demo v5 (2026-10-05)
 
 - [x] Pengguna mengonfirmasi detail HR dari Absensi dan Ringkasan sudah berfungsi.

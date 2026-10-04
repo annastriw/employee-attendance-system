@@ -1,7 +1,7 @@
 import { Button } from "@heroui/react";
 import { Camera, MapPin, Stop, ArrowCounterClockwise, Clock } from "@phosphor-icons/react";
 import { PortalBrand } from "@attendance/ui";
-import { useCapture } from "../../features/capture/use-capture";
+import { useCapture } from "../../../src/features/capture/use-capture";
 
 const hints = {
   none: "Posisikan wajah di dalam panduan.",

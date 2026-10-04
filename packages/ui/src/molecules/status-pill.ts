@@ -1,5 +1,3 @@
-import type { MonitoringEmployeeItem } from "../../lib/monitoring";
-
 /** Visual tone for a status pill, mapped to the shared status-badge classes. */
 export type PillTone = "active" | "inactive" | "archived";
 
@@ -11,7 +9,7 @@ export const PILL_TONE_CLASS: Record<PillTone, string> = {
 
 /** Maps a monitoring attendance status to a pill tone. */
 export function monitoringTone(
-  status: MonitoringEmployeeItem["status"],
+  status: "CHECKED_IN" | "COMPLETED" | "MISSING" | "PENDING_CHECK_IN" | "DELETED" | "NOT_ELIGIBLE" | "NON_WORKING_DAY",
 ): PillTone {
   switch (status) {
     case "COMPLETED":

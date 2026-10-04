@@ -1,8 +1,8 @@
 import { Button } from "@heroui/react";
 import { Clock } from "@phosphor-icons/react";
-import { AuthShell } from "@attendance/ui";
+import { AuthShell, Notice } from "@attendance/ui";
 import { CapturePanel } from "../components/organisms/CapturePanel";
-import { Notice } from "../components/molecules/Notice";
+
 import type { AuthClient } from "../lib/auth-client";
 import type { AttendancePurpose } from "../lib/attendance-client";
 import { useToday } from "../features/checkin/use-today";

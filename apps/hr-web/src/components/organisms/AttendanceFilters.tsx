@@ -1,6 +1,6 @@
 import { useEffect, useState, type SubmitEvent } from "react";
 import { Button, Input, Label, SearchField } from "@heroui/react";
-import { Notice } from "../molecules/Notice";
+import { Notice } from "@attendance/ui";
 import type { AuthClient } from "../../lib/auth-client";
 type Client = Pick<AuthClient, "api">;
 type Params = Record<string, string | undefined>;

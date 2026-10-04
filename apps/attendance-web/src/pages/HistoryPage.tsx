@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type SubmitEvent } from "react";
 import { Button, Input, Label, Skeleton } from "@heroui/react";
 import { ArrowLeft, CaretLeft, CaretRight, Clock } from "@phosphor-icons/react";
-import { AuthShell } from "@attendance/ui";
-import { Notice } from "../components/molecules/Notice";
+import { AuthShell, Notice } from "@attendance/ui";
+
 import { HistoryEvidence } from "../components/organisms/HistoryEvidence";
 import { AuthError, type AuthClient } from "../lib/auth-client";
 import { clockLabel } from "../lib/attendance-client";
@@ -15,7 +15,7 @@ import {
   type HistoryResult,
   type HistoryParams,
 } from "../lib/attendance-history";
-import "./history-page.css";
+import "../styles/history-page.css";
 export default function HistoryPage({
   client,
   params,

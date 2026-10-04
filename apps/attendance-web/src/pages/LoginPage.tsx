@@ -6,9 +6,7 @@ import {
   ClockCounterClockwise,
   MapPinArea,
 } from "@phosphor-icons/react";
-import { AuthShell, type AuthShowcase } from "@attendance/ui";
-import { Notice } from "../components/molecules/Notice";
-import { PasswordField } from "../components/molecules/PasswordField";
+import { AuthShell, type AuthShowcase, Notice, PasswordField } from "@attendance/ui";
 
 const showcase: AuthShowcase = {
   title: "Check-in dan riwayat absensi dalam satu portal.",

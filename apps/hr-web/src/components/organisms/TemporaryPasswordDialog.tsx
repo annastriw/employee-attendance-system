@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button, Input, Label, Modal, TextField } from '@heroui/react';
 import { Copy } from '@phosphor-icons/react';
-import { Notice } from '../molecules/Notice';
+import { Notice } from "@attendance/ui";
 import type { TemporaryCredential } from '../../lib/employees';
 export function TemporaryPasswordDialog({ credential, onClose }: { credential: TemporaryCredential; onClose: () => void }) {
   const [message, setMessage] = useState(''); const [failed, setFailed] = useState(false);

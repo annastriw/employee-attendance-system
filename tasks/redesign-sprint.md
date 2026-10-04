@@ -220,6 +220,9 @@ Fase B:
   detail + foto. Unit untuk validator yang diubah.
 
 ### T3 `[ ]` Fondasi bersama `packages/ui` + rapikan struktur
+- Status 2026-10-05: implementasi selesai; lint/typecheck kedua portal dan unit
+  terdampak HR 90/90 + Karyawan 40/40 lulus. Build CI PR dan acceptance manual
+  pengguna masih menunggu; checkbox DoD tetap terbuka.
 - **Angkat** dari hr-web/attendance-web ke `packages/ui`: `Notice`, `PasswordField`,
   `ConfirmDialog`, `StatusBadge`, `StatusPill` (+ `status-pill.ts`). Hapus duplikat,
   update import kedua portal, CSS-nya pindah ke `packages/ui/src/theme.css` atau

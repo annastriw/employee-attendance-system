@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@heroui/react";
-import { Notice } from "../molecules/Notice";
+import { Notice } from "@attendance/ui";
 import { AuthError, type AuthClient } from "../../lib/auth-client";
 import {
   getHistoryPhoto,

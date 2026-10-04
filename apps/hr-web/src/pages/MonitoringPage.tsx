@@ -12,9 +12,8 @@ import {
   CalendarBlank,
   ArrowSquareOut,
 } from "@phosphor-icons/react";
-import { Notice } from "../components/molecules/Notice";
-import { StatusPill } from "../components/molecules/StatusPill";
-import { monitoringTone } from "../components/molecules/status-pill";
+import { Notice, StatusPill, monitoringTone } from "@attendance/ui";
+
 import { AuthError, type AuthClient } from "../lib/auth-client";
 import {
   monitoringDateFormatted,

@@ -18,8 +18,8 @@ import {
 } from "@phosphor-icons/react";
 import { Brand, PageTitle } from "../atoms/Brand";
 import { AccountMenu } from "../molecules/AccountMenu";
-import { Notice } from "../molecules/Notice";
-import { ThemeToggle, setThemePreference } from "@attendance/ui";
+import { Notice, ThemeToggle, setThemePreference } from "@attendance/ui";
+
 import { useAuth } from "../../routes/auth-context";
 import { viewPath, type View } from "../../routes/routes";
 import { CommandPalette, type Command } from "../organisms/CommandPalette";

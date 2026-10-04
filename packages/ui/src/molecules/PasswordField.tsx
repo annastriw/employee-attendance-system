@@ -40,6 +40,7 @@ export function PasswordField({
           <Button
             type="button"
             variant="ghost"
+            size="sm"
             isIconOnly
             className="password-toggle"
             aria-label={`${action} ${label.toLowerCase()}`}

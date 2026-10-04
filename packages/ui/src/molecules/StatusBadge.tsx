@@ -1,6 +1,4 @@
-import type { MasterStatus } from "../../lib/departments";
-
-type BadgeStatus = MasterStatus | "ARCHIVED";
+type BadgeStatus = "ACTIVE" | "INACTIVE" | "ARCHIVED";
 
 const LABELS: Record<BadgeStatus, string> = {
   ACTIVE: "Aktif",

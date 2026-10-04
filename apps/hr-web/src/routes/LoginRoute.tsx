@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { PageTitle } from "../components/atoms/Brand";
-import { Notice } from "../components/molecules/Notice";
+import { Notice } from "@attendance/ui";
 import { LoginForm } from "../components/organisms/AuthForms";
 import { AuthLayout } from "../components/templates/AuthLayout";
 import { useAuth } from "./auth-context";

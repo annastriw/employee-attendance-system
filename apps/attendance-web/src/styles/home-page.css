@@ -6,7 +6,7 @@
 .today-card {
   padding: 20px;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--ui-card-radius);
   background: var(--surface);
   margin-bottom: 24px;
 }
@@ -45,5 +45,5 @@
 }
 
 .auth-content .today-action {
-  min-height: 2.75rem;
+  min-height: var(--ui-control-height);
 }

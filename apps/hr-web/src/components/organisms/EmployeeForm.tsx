@@ -1,7 +1,7 @@
 import { useState, type SubmitEvent } from 'react';
 import { Button, FieldError, Input, Label, TextField, ToggleButton, ToggleButtonGroup } from '@heroui/react';
 import { MasterAssignmentSelect } from '../molecules/MasterAssignmentSelect';
-import { Notice } from '../molecules/Notice';
+import { Notice } from "@attendance/ui";
 import type { MasterRecord } from '../../lib/master-data';
 import type { EmployeeInput } from '../../lib/employees';
 export function EmployeeForm({ departments, positions, busy, error, onSubmit, onCancel, initial, editing = false }: { departments: MasterRecord[]; positions: MasterRecord[]; busy: boolean; error: string; onSubmit: (input: EmployeeInput) => void; onCancel: () => void; initial?: EmployeeInput; editing?: boolean }) {
