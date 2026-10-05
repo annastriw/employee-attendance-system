@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { App } from "./App";
 import { memoryRouter } from "./test/router";
@@ -86,6 +86,9 @@ describe("HR portal authentication journey", () => {
     render(<App client={api} router={memoryRouter(["/"])} />);
     await screen.findByRole("heading", { name: "Ringkasan" });
     expect(await screen.findByText("Karyawan Aktif")).toBeInTheDocument();
+    fireEvent.keyDown(window, { key: "k", ctrlKey: true });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Cari/ })).not.toBeInTheDocument();
     const collapse = screen.getByRole("button", { name: "Ciutkan sidebar" });
     await user.click(collapse);
     expect(screen.getByRole("button", { name: "Perluas sidebar" })).toHaveAttribute("aria-expanded", "false");
@@ -93,7 +96,16 @@ describe("HR portal authentication journey", () => {
     fireEvent.keyDown(window, { key: "[" });
     expect(screen.getByRole("button", { name: "Ciutkan sidebar" })).toHaveAttribute("aria-expanded", "true");
     await user.click(screen.getByRole("button", { name: "Menu navigasi" }));
+    await screen.findByRole("dialog", { name: "Navigasi" });
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "Navigasi" })).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("button", { name: "Menu navigasi" })).toHaveFocus());
+    await user.click(screen.getByRole("button", { name: "Menu navigasi" }));
     const drawer = await screen.findByRole("dialog", { name: "Navigasi" });
+    await user.click(within(drawer).getByRole("button", { name: /Pilih tema/ }));
+    await user.click(await screen.findByRole("menuitemradio", { name: "Gelap" }));
+    expect(localStorage.getItem("theme")).toBe("dark");
+    expect(within(drawer).getByRole("button", { name: "Menu akun" })).toBeInTheDocument();
     await user.click(within(drawer).getByRole("link", { name: "Karyawan" }));
     await screen.findByRole("heading", { name: "Karyawan" });
     expect(drawer).not.toBeInTheDocument();

@@ -13,6 +13,7 @@ Mulai dari [README Inggris](../README.md) untuk ringkasan produk dan akun demo.
 | [Database/ERD](database.md) | Tabel, relasi fisik/logis, constraint, grants |
 | [API](api.md) | Metode/path aktual, auth dan contoh request |
 | [Development](development.md) | SDD, Kanban, unit/integrasi cepat, Git |
+| [Finalisasi](development/finalization.md) | Hasil frontend, verifikasi historis dan kurasi repository |
 | [Milestone](development/history.md) | Kurasi history dengan tanggal sumber asli |
 | [Deployment](deployment.md) | PR main, Vercel, GHCR dan VPS |
 | [Keamanan](security.md) | Secret, akun demo dan batas audit |

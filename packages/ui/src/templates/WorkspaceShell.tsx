@@ -5,10 +5,10 @@ import { SidebarShell } from "./SidebarShell";
 import { ThemeToggle } from "../molecules/ThemeToggle";
 
 /** One workspace for both roles. Routing and role destinations belong to each app. */
-export function WorkspaceShell({ brand, title, pathname, storageKey, navigation, account, actions, children }: {
+export function WorkspaceShell({ brand, title, pathname, storageKey, navigation, account, children }: {
   brand: ReactNode; title: string; pathname: string; storageKey: string;
   navigation: (close: () => void) => ReactNode; account: ReactNode;
-  actions?: ReactNode; children: ReactNode;
+  children: ReactNode;
 }) {
   const [collapsed, setCollapsed] = useState(() => {
     try { return window.localStorage.getItem(storageKey) === "true"; }
@@ -18,7 +18,15 @@ export function WorkspaceShell({ brand, title, pathname, storageKey, navigation,
   const open = openedAt === pathname;
   if (openedAt !== null && openedAt !== pathname) setOpenedAt(null);
   const toggle = useRef<HTMLButtonElement>(null);
+  const wasOpen = useRef(false);
   const drawerId = useId();
+  useEffect(() => {
+    const restoreFocus = wasOpen.current && !open;
+    wasOpen.current = open;
+    if (!restoreFocus) return;
+    const frame = requestAnimationFrame(() => toggle.current?.focus());
+    return () => cancelAnimationFrame(frame);
+  }, [open]);
   useEffect(() => {
     try {
       if (collapsed) window.localStorage.setItem(storageKey, "true");
@@ -46,7 +54,6 @@ export function WorkspaceShell({ brand, title, pathname, storageKey, navigation,
   }, []);
   const close = () => {
     setOpenedAt(null);
-    if (open) requestAnimationFrame(() => toggle.current?.focus());
   };
   return <div className="workspace-shell" data-sidebar-collapsed={collapsed}>
       <header className="workspace-header">
@@ -54,20 +61,22 @@ export function WorkspaceShell({ brand, title, pathname, storageKey, navigation,
           <Button ref={toggle} variant="ghost" isIconOnly className="workspace-menu-toggle"
             aria-label="Menu navigasi" aria-expanded={open} aria-controls={drawerId}
             onPress={() => open ? close() : setOpenedAt(pathname)}><List size={18} aria-hidden="true" /></Button>
-          <Button size="sm" variant="ghost" isIconOnly className="workspace-sidebar-collapse"
-            aria-label={collapsed ? "Perluas sidebar" : "Ciutkan sidebar"}
-            aria-expanded={!collapsed} aria-controls={`${drawerId}-desktop`} onPress={() => setCollapsed(value => !value)}>
-            <SidebarSimple size={18} aria-hidden="true" />
-          </Button>
-          <div className="workspace-header-brand">{brand}</div>
+          <div className="workspace-mobile-brand">{brand}</div>
           <span className="workspace-context-title">{title}</span>
         </div>
-        <div className="workspace-header-actions">{actions}<ThemeToggle />{account}</div>
       </header>
     <SidebarShell navigation={navigation(close)} collapsed={collapsed} open={open}
+      control={<Button variant="ghost" isIconOnly className="workspace-sidebar-collapse"
+        aria-label={collapsed ? "Perluas sidebar" : "Ciutkan sidebar"}
+        aria-expanded={!collapsed} aria-controls={`${drawerId}-desktop`} onPress={() => setCollapsed(value => !value)}>
+        <SidebarSimple size={18} aria-hidden="true" />
+      </Button>}
+      brand={brand} footer={<><ThemeToggle showLabel placement="top start" />{account}</>}
       drawerId={drawerId} onOpenChange={value => value ? setOpenedAt(pathname) : close()} />
     <div className="workspace-main">
-      <main id="konten" className="workspace-content" aria-label={title}>{children}</main>
+      <main id="konten" className="workspace-content" aria-label={title}>
+        <div key={pathname} className="workspace-page">{children}</div>
+      </main>
     </div>
   </div>;
 }

@@ -5,6 +5,17 @@ import { ThemeToggle, WorkspaceAccountMenu } from '@attendance/ui';
 
 beforeEach(() => localStorage.clear());
 describe('Workspace controls shared across roles', () => {
+  it('keeps desktop and drawer theme controls synchronized in the same tab', async () => {
+    render(<><ThemeToggle /><ThemeToggle showLabel placement="top start" /></>);
+    const user = userEvent.setup();
+    await user.click(screen.getAllByRole('button', { name: /Pilih tema/ })[1]);
+    await user.click(await screen.findByRole('menuitemradio', { name: 'Gelap' }));
+    expect(screen.getAllByRole('button', { name: 'Pilih tema: Gelap' })).toHaveLength(2);
+    await user.click(screen.getAllByRole('button', { name: /Pilih tema/ })[0]);
+    await user.click(await screen.findByRole('menuitemradio', { name: 'Sistem' }));
+    expect(screen.getAllByRole('button', { name: 'Pilih tema: Sistem' })).toHaveLength(2);
+    expect(localStorage.getItem('theme')).toBeNull();
+  });
   it('opens theme options on demand, selects and persists the preference', async () => {
     render(<ThemeToggle />);
     const user = userEvent.setup();

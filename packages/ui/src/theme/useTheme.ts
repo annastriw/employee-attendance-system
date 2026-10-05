@@ -4,6 +4,7 @@ export type ThemePreference = "light" | "dark" | "system";
 export type ResolvedTheme = "light" | "dark";
 
 const STORAGE_KEY = "theme";
+const THEME_CHANGE_EVENT = "attendance:theme-change";
 
 function prefersDark(): boolean {
   return (
@@ -42,6 +43,7 @@ export function setThemePreference(pref: ThemePreference): void {
     /* ignore */
   }
   applyTheme(resolveTheme(pref));
+  window.dispatchEvent(new CustomEvent<ThemePreference>(THEME_CHANGE_EVENT, { detail: pref }));
 }
 
 /**
@@ -71,19 +73,24 @@ export function useTheme() {
         setResolved(resolveTheme("system"));
       }
     };
+    const syncPreference = (next = getStoredPreference()) => {
+      setPref(next);
+      applyTheme(resolveTheme(next));
+      setResolved(resolveTheme(next));
+    };
     const onStorage = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY) {
-        const next = getStoredPreference();
-        setPref(next);
-        applyTheme(resolveTheme(next));
-        setResolved(resolveTheme(next));
-      }
+      if (e.key === STORAGE_KEY || e.key === null) syncPreference();
+    };
+    const onThemeChange = (event: Event) => {
+      syncPreference((event as CustomEvent<ThemePreference>).detail);
     };
     media.addEventListener("change", onOsChange);
     window.addEventListener("storage", onStorage);
+    window.addEventListener(THEME_CHANGE_EVENT, onThemeChange);
     return () => {
       media.removeEventListener("change", onOsChange);
       window.removeEventListener("storage", onStorage);
+      window.removeEventListener(THEME_CHANGE_EVENT, onThemeChange);
     };
   }, []);
 

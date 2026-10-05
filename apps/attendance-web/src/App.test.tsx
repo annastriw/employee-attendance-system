@@ -80,8 +80,16 @@ describe("Employee portal authentication journey", () => {
     await screen.findByRole("heading", { name: "Hari ini" });
     const menu = screen.getByRole("button", { name: "Menu navigasi" });
     await user.click(menu);
+    await user.click(within(await screen.findByRole("dialog", { name: "Navigasi" })).getByRole("button", { name: "Tutup navigasi" }));
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "Navigasi" })).not.toBeInTheDocument());
+    await waitFor(() => expect(menu).toHaveFocus());
+    await user.click(menu);
     const drawer = await screen.findByRole("dialog", { name: "Navigasi" });
-    await user.click(within(drawer).getByRole("link", { name: "Profil" }));
+    await user.click(within(drawer).getByRole("button", { name: /Pilih tema/ }));
+    await user.click(await screen.findByRole("menuitemradio", { name: "Terang" }));
+    expect(localStorage.getItem("theme")).toBe("light");
+    await user.click(within(drawer).getByRole("button", { name: "Menu akun" }));
+    await user.click(await screen.findByRole("menuitem", { name: "Profil" }));
     await screen.findByRole("heading", { name: "Profil" });
     await waitFor(() => expect(screen.queryByRole("dialog", { name: "Navigasi" })).not.toBeInTheDocument());
     await waitFor(() => expect(menu).toHaveFocus());

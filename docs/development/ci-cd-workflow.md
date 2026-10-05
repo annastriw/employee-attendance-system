@@ -8,4 +8,6 @@ Merge main: frontend mengikuti Vercel. Backend/schema/build inputs memicu Produc
 
 Main default branch dan ruleset meminta PR/CI result, melarang deletion/force push untuk workflow harian. Tidak membutuhkan reviewer approval pada pengembang tunggal. [Payload ruleset](../../infra/github/main-ruleset.json) adalah referensi, bukan bukti setting remote otomatis berubah.
 
-Pemilik menyetujui pengecualian satu kali untuk kurasi history dev/main. Backup privat, preserved dates dan force-with-lease diperlukan; proteksi normal dipulihkan setelah perapian. Tidak membuat branch remote tambahan. Snapshot source live tetap tersedia pada backup; rewrite history mengubah SHA, bukan data aplikasi.
+Pemilik menyetujui kurasi history awal dan pengecualian baru untuk finalisasi 2026-10-05. Keduanya bukan izin force push rutin. Backup privat, preserved dates dan force-with-lease diperlukan; proteksi normal dipulihkan setelah perapian. Tidak membuat branch remote tambahan. Snapshot source live tetap tersedia pada backup; rewrite history mengubah SHA, bukan data aplikasi.
+
+[Finalisasi dan bukti frontend](finalization.md); hasil CI/CD serta sinkronisasi terkini ada di [progress](../../tasks/progress.md).

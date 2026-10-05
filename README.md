@@ -111,6 +111,7 @@ tasks/         roadmap and accepted feature status
 - [Development: SDD, Kanban, tests, and Git](docs/development.md)
 - [Deployment and automatic releases](docs/deployment.md)
 - [Module specifications](docs/sdd/README.md)
+- [Frontend finalization and verification record](docs/development/finalization.md)
 - [Security and audit scope](docs/security.md)
 
 Private environment files, tokens, deployment keys, licenses, backups, and photo data are excluded from Git. The public demo password is an explicit exception; it is not a database, storage, or deployment credential.
