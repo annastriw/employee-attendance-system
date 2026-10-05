@@ -437,7 +437,8 @@ export class AttendanceMonitoringService {
     let filtered = items;
 
     if (query.departmentId) {
-      filtered = filtered.filter((i) => i.departmentId === query.departmentId);
+      const departmentId = query.departmentId.toLowerCase();
+      filtered = filtered.filter((i) => i.departmentId?.toLowerCase() === departmentId);
     }
 
     if (query.search && query.search.trim().length > 0) {

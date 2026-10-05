@@ -38,7 +38,7 @@ export class LocationDto {
   capturedAt: string;
 }
 export class CheckInDto implements CheckInInput {
-  @ApiProperty({ format: 'uuid' }) @IsUUID('4') photoObjectId: string;
+  @ApiProperty({ format: 'uuid' }) @IsUUID() photoObjectId: string;
   @ApiProperty({ format: 'date-time' })
   @IsISO8601({ strict: true, strictSeparator: true })
   @Matches(zone)
@@ -63,6 +63,6 @@ export class CheckInDto implements CheckInInput {
 
 export class CheckOutDto extends CheckInDto {
   @ApiProperty({ format: 'uuid', description: 'Owned daily record from today' })
-  @IsUUID('4')
+  @IsUUID()
   dailyRecordId: string;
 }

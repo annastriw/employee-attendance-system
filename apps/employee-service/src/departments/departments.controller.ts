@@ -4,7 +4,7 @@ import { AdminGuard, AuthClient, type EmployeeRequest } from '../auth/admin.guar
 import { CreateDepartmentDto, ListDepartmentsQuery, UpdateDepartmentDto } from './departments.dto';
 import { DepartmentsService } from './departments.service';
 
-const uuid = new ParseUUIDPipe({ version: '4' });
+const uuid = new ParseUUIDPipe();
 const actor = (request: EmployeeRequest) => ({ accountId: request.actor!.id, requestId: request.requestId });
 
 @ApiTags('Departments')

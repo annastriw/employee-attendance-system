@@ -55,7 +55,7 @@ export class MonitoringEmployeesQueryDto {
 
   @ApiPropertyOptional({ format: 'uuid' })
   @IsOptional()
-  @IsUUID('4')
+  @IsUUID()
   departmentId?: string;
 
   @ApiPropertyOptional({ enum: MONITORING_STATUSES, default: 'ALL' })

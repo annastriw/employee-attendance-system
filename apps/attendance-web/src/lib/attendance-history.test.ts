@@ -45,6 +45,14 @@ function clientFor(data: unknown, detail = false) {
 }
 
 describe("attendance history UUID compatibility", () => {
+  it("accepts an uppercase URL UUID matching the returned record", async () => {
+    expect((await getHistoryDetail(clientFor(record(), true), recordId.toUpperCase(), signal())).id).toBe(recordId);
+  });
+  it('accepts v1 database record/event IDs in both list and detail', async () => {
+    const id = '3b81c559-bfef-11f1-85c7-76e03cd5f3d3';
+    expect((await getHistory(clientFor(record(id, id)), new URLSearchParams(), signal())).data[0].id).toBe(id);
+    expect((await getHistoryDetail(clientFor(record(id, id), true), id, signal())).checkIn.id).toBe(id);
+  });
   it("accepts seeded UUID v5 record and event IDs in a successful list response", async () => {
     const result = await getHistory(clientFor(record()), new URLSearchParams(), signal());
     expect(result.data[0].id).toBe(recordId);
