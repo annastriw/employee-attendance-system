@@ -83,7 +83,7 @@ html, body, #root {
 :root :is(.today-card, .status-card) { padding: var(--ui-card-padding); border-radius: var(--ui-card-radius); }
 :root .today-checkin strong { font-size: var(--ui-metric-font); }
 :root .nav-link { min-height: var(--ui-nav-height); }
-:root :is(.cmdk-trigger, .toggle-button) { min-height: var(--ui-control-height); font-size: var(--ui-control-font); }
+:root .toggle-button { min-height: var(--ui-control-height); font-size: var(--ui-control-font); }
 :root .monitoring-metric-card { padding: var(--ui-card-padding); border-radius: var(--ui-card-radius); }
 :root :is(.metric-value, .attendance-event-time, .capture-success-time) { font-size: var(--ui-metric-font); }
 :root :is(.table__cell, .table__column, td, th) { padding: var(--ui-cell-y) var(--ui-cell-x); font-size: var(--ui-text); }

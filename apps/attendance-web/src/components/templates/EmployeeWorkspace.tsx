@@ -23,7 +23,7 @@ export function EmployeeWorkspace({ user, busy, onLogout, children, client, onSe
         <Icon size={18} aria-hidden="true" /><span>{label}</span>
       </NavLink>)}
     </div></div>}
-    account={<WorkspaceAccountMenu client={client} onSessionExpired={onSessionExpired} email={user.email} roleLabel="Karyawan" busy={busy} onLogout={onLogout} onProfile={() => navigate("/profil")} />}>
+    account={<WorkspaceAccountMenu placement="top start" client={client} onSessionExpired={onSessionExpired} email={user.email} roleLabel="Karyawan" busy={busy} onLogout={onLogout} onProfile={() => navigate("/profil")} />}>
     {children}
   </WorkspaceShell>;
 }

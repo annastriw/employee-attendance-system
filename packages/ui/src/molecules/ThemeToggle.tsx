@@ -8,14 +8,17 @@ const OPTIONS: { value: ThemePreference; label: string; Icon: typeof Sun }[] = [
   { value: "system", label: "Sistem", Icon: Monitor },
 ];
 
-export function ThemeToggle() {
+export function ThemeToggle({ showLabel = false, placement = "bottom end" }: {
+  showLabel?: boolean; placement?: "bottom end" | "top start";
+}) {
   const { preference, setTheme } = useTheme();
   const selected = OPTIONS.find(option => option.value === preference)!;
   return <Dropdown>
-    <Button variant="ghost" isIconOnly aria-label={`Pilih tema: ${selected.label}`} className="theme-menu-trigger">
+    <Button variant="ghost" isIconOnly={!showLabel} aria-label={`Pilih tema: ${selected.label}`} className="theme-menu-trigger">
       <selected.Icon size={18} aria-hidden="true" />
+      {showLabel && <span className="theme-menu-label">Tema: {selected.label}</span>}
     </Button>
-    <Dropdown.Popover placement="bottom end">
+    <Dropdown.Popover placement={placement}>
       <Dropdown.Menu aria-label="Tema tampilan" selectionMode="single" selectedKeys={[preference]}
         onAction={key => { const option = OPTIONS.find(item => item.value === key); if (option) setTheme(option.value); }}>
         {OPTIONS.map(({ value, label, Icon }) => <Dropdown.Item key={value} id={value} textValue={label}>

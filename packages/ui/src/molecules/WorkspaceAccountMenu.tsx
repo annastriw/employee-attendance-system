@@ -9,7 +9,8 @@ function initials(email: string) {
   return letters.toUpperCase() || "A";
 }
 
-export function WorkspaceAccountMenu({ email, busy, onLogout, onProfile, roleLabel = "Admin HRD", client, onSessionExpired }: {
+export function WorkspaceAccountMenu({ email, busy, onLogout, onProfile, roleLabel = "Admin HRD", client, onSessionExpired, placement = "bottom end" }: {
+  placement?: "bottom end" | "top start";
   roleLabel?: string;
   email: string;
   busy: boolean;
@@ -40,7 +41,7 @@ export function WorkspaceAccountMenu({ email, busy, onLogout, onProfile, roleLab
         <span className="avatar" aria-hidden="true">{initials(email)}</span>
         <span className="account-identity"><strong>{name}</strong><span className="account-email">{email}</span></span>
       </Button>
-      <Dropdown.Popover className="account-popover" placement="bottom end">
+      <Dropdown.Popover className="account-popover" placement={placement}>
         <div className="account-header">
           <span className="avatar" aria-hidden="true">{initials(email)}</span>
           <div className="account-identity">

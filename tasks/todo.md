@@ -68,3 +68,20 @@ Keputusan terbaru pengguna 2026-10-05 setelah verifikasi: commit dan push
 perubahan terverifikasi ke dev diizinkan dan diminta. Menggantikan batas
 local-only sebelumnya. PR/merge/main/deployment belum diminta; acceptance
 manual tetap pending.
+
+## S01 - Sidebar penuh tinggi dan motion (2026-10-05)
+
+- [x] Audit Git/source dan klarifikasi drawer mobile/tablet, rail desktop.
+- [x] Shell HR/Karyawan: brand menetap, drawer penuh tinggi, tema/akun bawah sidebar, hapus Ctrl+K.
+- [x] Motion ringan bersama, reduced motion, unit terfokus/lint/build/review.
+- [x] Commit/push dev bersama increment S01; hasil diperiksa setelah command.
+- [ ] Manual pengguna: 320/768/1024/1440 px dan landscape; buka/tutup/scroll sidebar, akun/tema, navigasi kedua role.
+- [ ] Pengguna menyatakan oke untuk S01.
+
+## S02 - Sidebar konsisten setelah feedback localhost (2026-10-05)
+
+- [x] Audit dan kontrak: logo boleh mengikuti sidebar; tombol di kiri dan drawer dari kiri.
+- [x] Header sidebar/rail desktop dan drawer mobile/tablet konsisten kedua role.
+- [x] Unit terfokus, lint/build/review; commit/push dev bersama increment S02.
+- [ ] Manual pengguna kedua role pada desktop/tablet/mobile serta landscape; navigasi, close/Escape, tema/akun dan scroll.
+- [ ] Pengguna menyatakan oke S02 (S01 belum diterima).

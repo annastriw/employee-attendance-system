@@ -1,5 +1,44 @@
 # Progres dan titik lanjut
 
+## S02 selesai teknis - sidebar konsisten semua layar (2026-10-05)
+
+- Feedback pengguna setelah cek kedua localhost: S01 belum rapi pada seluruh ukuran, tombol harus kiri dan drawer dari kiri. Brand boleh mengikuti sidebar; desain diserahkan kepada agen. Acceptance S01 belum diterima, S02 menggantikan susunan brand/header.
+- Git awal dev bersih pada 436c1dc. Implementasi bersama kedua role: sidebar desktop 248px, rail 64px, header sidebar berisi tombol kiri lalu brand; header konten desktop berada di kolom konten. Mobile/tablet <1024px memakai tombol kiri lalu brand dan drawer penuh tinggi dari kiri. Brand disembunyikan saat rail; tema/akun tetap di bawah dan menu memiliki scroller/safe-area.
+- Source HeroUI menunjukkan close-trigger absolute end-4 top-4, header flex-col dan body margin bawaan. Posisi close sekarang static di kiri, header horizontal, body margin direset; tidak lagi mendorong/mengambangkan tombol ke kanan. Motion/reduced motion S01 tetap digunakan.
+- Scope: templates WorkspaceShell/SidebarShell, shared workspace CSS, App unit kedua role, baseline/design system/plan/todo/progress. Tidak mengubah backend/API/database/migration atau menambah dependency.
+- Verifikasi: HR App 5/5 dan Karyawan App 11/11 unit lulus, termasuk close lewat tombol, Escape, fokus kembali, navigasi, tema/akun serta rail. Lint kedua frontend dan dua template shared lulus; build/typecheck kedua frontend lulus (peringatan chunk >500 kB yang sudah ada). Diff dan tautan relatif dokumentasi lulus. Tidak menjalankan browser/integrasi/live; tampilan S02 belum diterima pengguna.
+- Commit/push dev bersama increment ini sesuai izin; hasil SHA/push diperiksa setelah command. Tidak merge main/deploy. Berikutnya hanya manual S02 kedua role: desktop/sidebar dan rail, tablet/mobile/drawer, landscape/scroll, tombol kiri, tema/akun.
+- Server localhost pengguna tetap berjalan: 5173 PID 9136, 5174 PID 9788 pada audit awal. Tidak memulai, merestart, atau menghentikan server. Proses unit/lint/build sementara selesai.
+
+## S01 selesai teknis - sidebar penuh tinggi dan motion (2026-10-05)
+
+- Audit awal: dev bersih pada 1423550, sesuai origin/dev. T22-T31/CI sebelumnya tidak diulang; pengguna mengonfirmasi production berjalan. Drawer mobile/tablet dan rail desktop dikonfirmasi pengguna.
+- Kedua role: sidebar desktop menjangkau seluruh tinggi viewport; drawer mobile/tablet mulai tepi atas, tanpa offset header. Header brand tetap pada posisi kiri atas dan tidak ikut scroll/ciut; drawer memakai posisi brand yang sama. Menu memiliki scroller dan safe-area, kontrol tema/akun berada di bawah. Rail memakai ikon/avatar; identitas lengkap tersedia di popup.
+- Trigger/shortcut global Ctrl+K dilepas dari HR; pencarian/filter data halaman tetap. CSS pemicu/palette yang tidak dipakai dibuang; komponen/test palette lama tetap tersimpan sebagai bukti historis dan tidak dipasang dalam shell.
+- Motion bersama: perubahan lebar sidebar 200 ms, drawer HeroUI 200/160 ms, fade halaman 180 ms, hover menu/kontrol 140 ms; reduced motion dihormati. Kamera/foto tidak mendapat animasi berulang. Kontrol tema drawer/desktop sinkron melalui event dalam tab; pemulihan fokus menu setelah drawer menutup melalui effect, termasuk navigasi lewat popup akun.
+- Scope file: templates WorkspaceShell/SidebarShell, shared workspace/compact CSS, ThemeToggle/WorkspaceAccountMenu/useTheme; layout HR/Karyawan, HR workspace CSS, App tests/kontrol bersama; baseline/design system/plan/todo/progress.
+- Verifikasi: unit terfokus HR App (5), kontrol bersama (4), preferences (3), Karyawan App (11), total 23 kasus unik lulus. Lint kedua frontend dan lima file shared TS/TSX berubah lulus; build/typecheck kedua frontend lulus. Build masih mengeluarkan peringatan chunk >500 kB yang sudah ada, tanpa error. Tautan relatif dokumen dan diff diperiksa. Tidak menjalankan suite integrasi/browser/live atau mengklaim acceptance visual.
+- Increment ini di-commit/push ke dev sesuai izin; hasil SHA/push diperiksa setelah command. Tidak merge main/deploy. Manual S01 masih pending: kedua role, 320/768/1024/1440 px serta landscape, scroll/navigasi/tema/akun dan reduced motion. Konfirmasi production sebelumnya tidak mencentang acceptance revisi baru.
+- Tidak menjalankan server/proses port baru. Port 5173/5174/3000-3004 tidak ditemukan listen saat audit; proses verifikasi sementara telah selesai. Lanjut hanya feedback manual S01 pengguna, bukan mengulang T22-T31.
+
+## CI fase D selesai - seluruh checks lulus (2026-10-05)
+
+- Fix terakhir `a0f0ddf` telah dipush ke dev. CI
+  [37277057100](https://github.com/annastriw/employee-attendance-system/actions/runs/37277057100)
+  pada SHA a0f0ddf2bb0944f7364560af2ebe6351ba4dc475 **success**: branch policy,
+  Quality dan CI result semuanya lulus. Termasuk lint, Prisma, typecheck DB,
+  build, unit seluruh package serta pemeriksaan deployment script.
+- Penyelesaian: test filter kategori menunggu dropdown anak unmount lalu
+  menutup parent menggunakan dismiss accessible yang ditangkap sebelum child
+  dibuka; membuktikan parent unmount sebelum melanjutkan. Semua assertion
+  kategori/status/search/page/clear/reset dipertahankan. Source aplikasi dan
+  workflow CI tidak berubah; tidak ada penambahan timeout, skip atau mock overlay.
+- Lokal: filter/EmployeesPage 9/9 dengan CI=true, lint file dan tsc -b HR lulus.
+  Catatan kegagalan/run sebelumnya di bawah bersifat checkpoint historis.
+- Task perbaikan CI selesai; tidak ada proses verifikasi/server lokal tersisa,
+  tidak membuat/merge PR atau menjalankan deployment. PR #15 yang sudah ada
+  diperbarui otomatis oleh push dev. Acceptance visual fase D tetap manual.
+
 ## CI overlay filter - tindak lanjut fokus (2026-10-05)
 
 - Run [37276394119](https://github.com/annastriw/employee-attendance-system/actions/runs/37276394119)

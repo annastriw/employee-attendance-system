@@ -45,3 +45,11 @@ Keputusan terbaru pengguna 2026-10-05 setelah verifikasi: commit dan push
 perubahan terverifikasi ke dev diizinkan dan diminta. Menggantikan batas
 local-only sebelumnya. PR/merge/main/deployment belum diminta; acceptance
 manual tetap pending.
+
+## Revisi shell/motion - increment S01 (2026-10-05)
+
+Fase D T22-T31 selesai, CI hijau pada a0f0ddf (catatan 1423550); pengguna mengonfirmasi production berjalan. Acuan aktif berikut: S01 audit/kontrak - shell penuh tinggi dan kontrol sidebar kedua role - motion ringan/reduced motion - unit terfokus/lint/build/review - commit/push dev. UI manual oleh pengguna; tidak merge main/deploy.
+
+## S02 - Penyusunan ulang sidebar semua layar
+
+Audit source/feedback S01 → header/sidebar terpisah, tombol kiri dan brand dalam sidebar → reset posisi/spacing bawaan drawer HeroUI → unit navigasi/close terfokus, lint/build/review → commit/push dev. HR dan Karyawan memakai implementasi bersama. UI manual pengguna, tanpa backend/main/deployment.
