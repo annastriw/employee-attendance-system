@@ -29,9 +29,9 @@ export function RingkasanRoute() {
 }
 
 export function ProfileRoute() {
-  const { client, user, busy, error, changePassword, logout, sessionExpired } = useAuth();
+  const { client, user, busy, error, changePassword, sessionExpired } = useAuth();
   if (!user) return null;
-  return <ProfilePage client={client} user={user} busy={busy} error={error} onChangePassword={changePassword} onLogout={logout} onSessionExpired={sessionExpired} />;
+  return <ProfilePage client={client} user={user} busy={busy} error={error} onChangePassword={changePassword} onSessionExpired={sessionExpired} />;
 }
 
 export function KaryawanRoute() {

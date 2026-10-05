@@ -6,10 +6,10 @@ import type { AuthClient, AdminUser } from "../lib/auth-client";
 interface ProfileData { name: string; nik: string; email: string; phone: string | null; department: string; position: string; startDate: string; status: string; }
 interface ProfileResponse { data: ProfileData | null; }
 
-export function ProfilePage({ client, user, busy, error, onChangePassword, onLogout, onSessionExpired }: {
+export function ProfilePage({ client, user, busy, error, onChangePassword, onSessionExpired }: {
   client: AuthClient; user: AdminUser; busy: boolean; error: string;
   onChangePassword: (current: string, replacement: string) => Promise<void>;
-  onLogout: () => Promise<void>; onSessionExpired: () => void;
+  onSessionExpired: () => void;
 }) {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -45,7 +45,7 @@ export function ProfilePage({ client, user, busy, error, onChangePassword, onLog
       {loaded && missingEndpoint && <Button size="sm" variant="secondary" onPress={() => { setLoaded(false); setReload(x => x + 1); }}>Muat ulang</Button>}
     </section> : <section className="profile-panel profile-security" aria-label="Keamanan akun">
       <h2>Ganti password</h2><p className="profile-guidance">Setelah password berubah, Anda akan keluar dan perlu masuk kembali.</p>
-      <ChangePasswordForm busy={busy} error={error} onSubmit={onChangePassword} onLogout={onLogout} />
+      <ChangePasswordForm busy={busy} error={error} onSubmit={onChangePassword} />
     </section>}
   </div>;
 }

@@ -1,5 +1,68 @@
 # Progres dan titik lanjut
 
+## Instruksi terbaru - commit/push dev (2026-10-05)
+
+Pengguna meminta push ke dev setelah selesai. Menggantikan batas local-only
+fase D. Verifikasi teknis T22-T31 lulus; commit dipisah perbaikan UUID/filter
+API dan revisi UI/logout. PR/merge/main/deployment tidak diminta; acceptance
+manual tetap pending. Tidak ada perubahan schema/migration.
+Commit UUID/filter `1f15d96` telah dipush ke origin/dev. Revisi UI/logout dan
+catatan fase D disimpan pada commit berikutnya bersama entri ini.
+
+## Fase D - T29-T31 tambahan selesai teknis lokal (2026-10-05)
+
+- Permintaan lanjutan pengguna: satu akses Keluar di popup akun kedua portal,
+  scan seluruh UUID dan perbaiki bug/issue terkonfirmasi. Total fase D 10 task
+  T22-T31 selesai teknis; acceptance visual tetap pending.
+- Logout di profil/form/command palette dihapus. Layar wajib ganti password
+  mendapatkan popup akun tanpa navigasi Profil; busy memblokir aksi.
+- Audit UUID memperbaiki pipe master Employee, reset password Auth, bind Media,
+  referensi foto/daily Attendance dan parser record/event Karyawan. UUID v1/v5
+  diterima, malformed tetap ditolak, aturan v4 Idempotency-Key dipertahankan.
+  Filter monitoring/detail riwayat case-insensitive; tanggal mustahil ditolak.
+  Fixture storage Media yang gagal typecheck kini memuat workerEnabled:false.
+- Bukti tambahan: 109 unit terfokus lulus (sebagian tumpang tindih checkpoint
+  sebelumnya); lint dua frontend + empat backend, noEmit empat backend dan
+  build/typecheck dua frontend lulus. Rincian/batas: [fase D](frontend-revision-phase-d.md).
+- File terkait: shared ChangePasswordForm/AuthShell/WorkspaceAccountMenu/styles;
+  profil/layout/route/App/tests kedua portal; DTO/pipe/service serta regresi
+  Employee/Auth/Media/Attendance; parser attendance-client/history dan tests;
+  design-system serta tasks. Tidak ada migration atau data tersimpan diubah.
+- Tidak ada server permanen baru. Test deadline storage menutup server loopback
+  sementara. Proses verifikasi selesai; tidak ada pemeriksaan live/DB/browser.
+- Semua unstaged/lokal di dev, **tanpa commit/push/PR/merge/deploy**. Kelima service
+  dan kedua frontend perlu rilis terpisah agar perbaikan tersedia di production.
+- Lanjut: pengguna cek [acceptance manual](frontend-revision-phase-d.md) termasuk
+  popup logout dan UUID; checklist tidak dicentang sebelum pengguna menyatakan oke.
+
+## Fase D - T22-T28 selesai teknis lokal (2026-10-05)
+
+- Seluruh task revisi selesai teknis; [audit, plan, bukti dan checklist](frontend-revision-phase-d.md). UI/alur manual belum diterima pengguna dan checkbox acceptance tetap kosong.
+- Perbaikan: UUID v1 filter Ringkasan; Gateway kategori daftar karyawan; toolbar search/filter/tab/Tambah sejajar dengan chips terpisah; kalender fixed sebulan utuh tanpa scroll dengan tombol bulan; danger/warning/success aksi dan konfirmasi; brand tetap di header; tema via menu; nama profil + email akun terlihat; shared shell kedua role mobile/tablet/desktop.
+- Verifikasi terfokus: HR 75 unit, Karyawan 30, backend 30 = 135 unit lulus. Lint HR/Karyawan/Gateway/Attendance, tsc kedua frontend dan noEmit dua backend lulus. Build kedua portal lulus (warning ukuran chunk masih ada); Vite rebuild sesudah perubahan CSS drawer akhir lulus. Review diff/whitespace dan tautan dokumen lulus. Tidak ada test integrasi DB/live atau browser harness dijalankan.
+- **Perlu rilis terpisah:** Attendance Service GET /api/v1/monitoring/employees menerima UUID sah, API Gateway GET /api/v1/employees meneruskan departmentId/positionId. Dua frontend perlu rilis bersama. Tanpa migration; production belum berubah.
+- Semua perubahan tetap unstaged di branch dev, tanpa commit/push/PR/merge/deploy sesuai instruksi terbaru. Hasil build ignored. Tidak menjalankan server baru; seluruh proses verifikasi selesai.
+- File terkait: kedua backend DTO/proxy + regresi; shared UI calendar/theme/account/shell/confirm/styles; HR list/detail/layout/tests, Karyawan App/workspace/test; design-system dan tasks. Tidak menimpa pekerjaan pengguna (tree awal bersih).
+- **Lanjut pengguna:** jalankan kedua portal lokal sesuai tooling yang ada; cek seluruh matriks filter, bulan 28/29/30/31 hari termasuk 6 minggu, toolbar/warna/header/akun/tema, drawer/rail dan capture pada 320/375/768/1024/1440px + landscape, dua tema. Catat scope yang oke sebelum centang acceptance. Tidak memerlukan task coding baru otomatis.
+
+
+## Fase D — implementasi/verifikasi T23–T28 (2026-10-05)
+
+- Klarifikasi pengguna diterima: kalender fixed satu bulan utuh tanpa geser, tombol pindah bulan; brand tetap di header walaupun sidebar terbuka. Pengguna meminta terus sampai seluruh task selesai teknis.
+- Filter API diperbaiki lokal (Attendance DTO UUID sah dan Gateway departemen/jabatan khusus list employees). Unit Attendance monitoring 14/14 dan Gateway 11/11 lulus. Tanpa migration.
+- Toolbar/shared kalender, warna konfirmasi/aksi, shell header tetap, menu tema dan identitas nama/email telah diimplementasikan. HR 7 halaman 68/68; filter karyawan interaksi 1/1; kontrol workspace 3/3; Karyawan History/Login/Capture 20/20 dan App ulang 10/10 lulus. Lint empat package dan typecheck dua frontend/dua backend lulus pada checkpoint ini.
+- Review menemukan callback expiry yang berubah memicu fetch identitas berulang; kini menggunakan ref, lookup berdasarkan client/email/role. Fixture App absensi diperbaiki berbasis endpoint agar request identitas tidak memakan respons absensi berdasarkan urutan effect.
+- Task aktif T28: unit tambahan master/holiday dan build frontend sedang berjalan, kemudian final lint/diff/docs/checklist. Tidak ada server baru; tidak commit/push. Acceptance visual tetap pending.
+
+## Fase D — T22 audit selesai, klarifikasi awal (2026-10-05)
+
+- Instruksi terbaru: T terdahulu dianggap selesai oleh pengguna. Revisi baru T22–T28 serial, lokal **tanpa commit/push**, PR/merge/deploy. Ini menggantikan instruksi push pada entri sebelumnya untuk scope revisi ini.
+- Tree awal bersih, branch dev. Audit sumber dua portal/shared UI/Gateway/service mencatat D01–D12 dan matriks seluruh filter di [fase D](frontend-revision-phase-d.md). Tidak menjalankan browser, unit atau build untuk tahap audit/dokumentasi ini.
+- Dua akar masalah terkonfirmasi: Monitoring DTO hanya UUID v4, menolak UUID v1 laporan; Gateway direktori employees menolak departmentId/positionId walau DTO/query Employee sudah mendukungnya.
+- Task aktif: T22 penyelesaian audit/klarifikasi. Pertanyaan dikirim tentang target scroll kalender dan lokasi brand tetap. Plan T23–T28 siap; belum mengubah kode aplikasi.
+- File sesi: tasks/frontend-revision-phase-d.md, plan.md, todo.md, redesign-sprint.md, progress.md dan docs/sdd/frontend-design-system.md. Proses/port: tidak menjalankan server baru; 5173/5174/3000–3004 tidak ditemukan listening saat audit awal.
+- **Lanjut:** jawaban klarifikasi lalu T23 filter API (Attendance/Gateway, tanpa migration), T24 toolbar/kalender, T25 warna, T26 shell/tema/akun, T27 semua layar kedua role, T28 verifikasi/handoff. Acceptance visual belum dicentang; gunakan checklist fase D.
+
 ## Perbaikan CI setelah T21 (2026-10-05)
 
 - CI run [37268278818](https://github.com/annastriw/employee-attendance-system/actions/runs/37268278818), SHA 9ea86b6: lint, Prisma validate/generate, typecheck database dan build seluruh aplikasi lulus; unit Karyawan gagal pada App.test.tsx, test deep link riwayat. API mock belum dipanggil saat assertion setelah heading.

@@ -168,16 +168,7 @@ export function HolidaysPage({
 
   return (
     <div className="holidays-page">
-      <PageHeader title="Hari Libur" breadcrumb={[{ label: "Master data" }, { label: "Hari Libur" }]} actions={        <Button
-          variant="primary"
-          onPress={() => {
-            setActionError('');
-            setForm({});
-          }}
-        >
-          <Plus size={16} aria-hidden="true" />
-          Tambah Hari Libur
-        </Button>} />
+      <PageHeader title="Hari Libur" breadcrumb={[{ label: "Master data" }, { label: "Hari Libur" }]} />
       <div className="list-toolbar">
         <SearchInput label="Cari keterangan hari libur" value={query} onChange={setQuery} onSearch={value => setFilters({ search: value.trim(), page: 1 })} placeholder="Cari keterangan hari libur" />
 
@@ -187,6 +178,16 @@ export function HolidaysPage({
         ]} onReset={() => { setQuery(''); onParamsChange(rangeQuery(null)); }}>
           <DateRangeField value={range} onChange={value => onParamsChange({ search: search || undefined, ...rangeQuery(value) })} />
         </FilterPanel>
+        <Button
+          variant="primary" className="list-add"
+          onPress={() => {
+            setActionError('');
+            setForm({});
+          }}
+        >
+          <Plus size={16} aria-hidden="true" />
+          Tambah Hari Libur
+        </Button>
       </div>
 
       {success && <Notice message={success} success />}
@@ -314,6 +315,7 @@ export function HolidaysPage({
                                 size="sm"
                                 isDisabled={busy || isPast}
                                 aria-label={`Hapus ${record.description}`}
+                                className="action-danger"
                                 onClick={event => event.stopPropagation()}
                                 onPress={() => {
                                   setActionError('');
@@ -392,6 +394,7 @@ export function HolidaysPage({
         open={Boolean(toDelete)}
         title="Hapus Hari Libur?"
         confirmLabel="Hapus"
+        tone="danger"
         busy={busy}
         error={actionError}
         onClose={() => setToDelete(null)}

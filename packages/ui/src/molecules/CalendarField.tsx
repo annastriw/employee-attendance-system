@@ -21,9 +21,9 @@ export function CalendarField({ label, value, onChange, disabled = false, requir
       </DateField.Group>
       {hint && <Description>{hint}</Description>}
       {error && <FieldError>{error}</FieldError>}
-      <DatePicker.Popover>
-        <Calendar aria-label={label}>
-          <Calendar.Header><Calendar.YearPickerTrigger><Calendar.YearPickerTriggerHeading /><Calendar.YearPickerTriggerIndicator /></Calendar.YearPickerTrigger><Calendar.NavButton slot="previous" /><Calendar.NavButton slot="next" /></Calendar.Header>
+      <DatePicker.Popover className="app-calendar-popover">
+        <Calendar aria-label={label} visibleDuration={{ months: 1 }}>
+          <Calendar.Header><Calendar.Heading /><Calendar.NavButton slot="previous" /><Calendar.NavButton slot="next" /></Calendar.Header>
           <Calendar.Grid><Calendar.GridHeader>{(day) => <Calendar.HeaderCell>{day}</Calendar.HeaderCell>}</Calendar.GridHeader><Calendar.GridBody>{(date) => <Calendar.Cell date={date} />}</Calendar.GridBody></Calendar.Grid>
         </Calendar>
       </DatePicker.Popover>

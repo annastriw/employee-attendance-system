@@ -117,3 +117,10 @@
 @media (prefers-reduced-motion: reduce) {
   :root :is(.input, .textarea, .input-group, .search-field__group, .date-input-group, .select__trigger) { transition: none; }
 }
+
+:root .button.action-danger { color: var(--danger-ink); background: var(--danger-surface); border: 1px solid var(--danger-border); }
+:root .button.action-success { color: var(--success-ink); background: var(--success-surface); border: 1px solid var(--success-border); }
+:root .button.action-warning { color: var(--warning-ink); background: var(--warning-surface); border: 1px solid var(--warning-border); }
+@media (hover: hover) {
+  :root .button:is(.action-danger, .action-success, .action-warning):hover:not([disabled]) { filter: brightness(.95); }
+}

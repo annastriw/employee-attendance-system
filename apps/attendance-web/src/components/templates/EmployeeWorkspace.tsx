@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { CalendarCheck, ClockCounterClockwise, UserCircle } from "@phosphor-icons/react";
 import { PortalBrand, WorkspaceAccountMenu, WorkspaceShell } from "@attendance/ui";
-import type { EmployeeUser } from "../../lib/auth-client";
+import type { EmployeeUser, AuthClient } from "../../lib/auth-client";
 
 const destinations = [
   { to: "/", label: "Hari ini", Icon: CalendarCheck, end: true },
@@ -10,8 +10,8 @@ const destinations = [
   { to: "/profil", label: "Profil", Icon: UserCircle, end: false },
 ];
 
-export function EmployeeWorkspace({ user, busy, onLogout, children }: {
-  user: EmployeeUser; busy: boolean; onLogout: () => Promise<void>; children: ReactNode;
+export function EmployeeWorkspace({ user, busy, onLogout, children, client, onSessionExpired }: {
+  client: AuthClient; onSessionExpired: () => void; user: EmployeeUser; busy: boolean; onLogout: () => Promise<void>; children: ReactNode;
 }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -23,7 +23,7 @@ export function EmployeeWorkspace({ user, busy, onLogout, children }: {
         <Icon size={18} aria-hidden="true" /><span>{label}</span>
       </NavLink>)}
     </div></div>}
-    account={<WorkspaceAccountMenu email={user.email} roleLabel="Karyawan" busy={busy} onLogout={onLogout} onProfile={() => navigate("/profil")} />}>
+    account={<WorkspaceAccountMenu client={client} onSessionExpired={onSessionExpired} email={user.email} roleLabel="Karyawan" busy={busy} onLogout={onLogout} onProfile={() => navigate("/profil")} />}>
     {children}
   </WorkspaceShell>;
 }

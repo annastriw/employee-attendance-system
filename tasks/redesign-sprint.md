@@ -1,5 +1,10 @@
 # Sprint Redesain — Overhaul UI/UX dua portal (versi gabungan)
 
+> Arahan terbaru fase D (2026-10-05): pengguna menganggap T sebelumnya selesai.
+> Ikuti [audit/plan T22–T28](frontend-revision-phase-d.md), serial tanpa subagen,
+> **tanpa commit/push**. Status lama di bawah dipertahankan sebagai rekaman;
+> jangan mengaktifkan ulang T lama atau mengikuti instruksi push lama untuk fase ini.
+
 > **Sumber kebenaran** redesain. Ditulis agar agen mana pun (kiro CLI / sesi lain)
 > bisa melanjutkan tanpa transkrip. Mendampingi [plan.md](plan.md), [todo.md](todo.md),
 > [progress.md](progress.md); mengevolusikan

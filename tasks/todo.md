@@ -33,8 +33,38 @@ Restore backup, backup terjadwal, uji beban/kapasitas dan hardening tambahan dit
 
 ## Increment berikut
 
+Arahan terbaru 2026-10-05: seluruh T terdahulu dianggap selesai oleh pengguna;
+ini penutupan backlog, bukan klaim menjalankan ulang test atau acceptance visual.
+Backlog aktif [fase D](frontend-revision-phase-d.md):
+
+- [x] T22 audit source, matriks filter, plan dan pertanyaan.
+- [x] T23 validasi UUID dan forwarding/filter API seluruh daftar.
+- [x] T24 toolbar sejajar dan kalender sesuai klarifikasi.
+- [x] T25 warna aksi dan konfirmasi konsisten.
+- [x] T26 brand stabil, tema via menu, nama/email akun terlihat.
+- [x] T27 semua layar HR/Karyawan responsif dan konsisten.
+- [x] T28 verifikasi teknis dan checklist manual/handoff.
+
+T22-T28 selesai teknis lokal; bukti [fase D](frontend-revision-phase-d.md).
+Kerja serial, **tanpa commit/push** fase ini. Manual acceptance tetap pending
+sampai pengguna menyatakan oke.
+
 [Perapian repo dan handoff](progress.md), dikerjakan serial dan sudah selesai. Feature/backend/frontend baru tidak ditambahkan hanya untuk mengulang uji auto-deploy yang sudah lulus.
 
 ## Sumber acceptance dan verifikasi
 
 [SDD domain](../docs/sdd/README.md), [source/test service](../apps/), [workflow](../.github/workflows/ci.yml), [progress](progress.md). Unit logika berubah wajib; integrasi cepat bila perlu; manual acceptance hanya untuk scope yang dinyatakan oke pengguna.
+
+
+## Tambahan fase D (2026-10-05)
+
+Permintaan lanjutan menambah T29 satu akses logout, T30 audit semua UUID dan
+perbaikan bug terkonfirmasi, T31 verifikasi/review tambahan. Ketiganya selesai
+teknis lokal; total fase D 10 task T22-T31. [Rincian dan bukti](frontend-revision-phase-d.md).
+Tidak commit/push/PR/deploy; acceptance manual kedua role tetap pending.
+
+
+Keputusan terbaru pengguna 2026-10-05 setelah verifikasi: commit dan push
+perubahan terverifikasi ke dev diizinkan dan diminta. Menggantikan batas
+local-only sebelumnya. PR/merge/main/deployment belum diminta; acceptance
+manual tetap pending.

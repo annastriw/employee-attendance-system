@@ -26,6 +26,17 @@ function setup(rows: Department[] = [finance], params = "", fail?: Error) {
 }
 
 describe("Departments page", () => {
+  it("preserves search while changing status and resets pagination", async () => {
+    const { api, onParamsChange, user } = setup([finance], "search=fin&status=ACTIVE&page=3");
+    await screen.findByRole("grid", { name: "Daftar departemen" });
+    const query = new URLSearchParams(api.mock.calls.find(([path]) => path.startsWith("departments?"))![0].split("?")[1]);
+    expect(query.get("search")).toBe("fin"); expect(query.get("status")).toBe("ACTIVE"); expect(query.get("page")).toBe("3");
+    await user.click(screen.getByRole("radio", { name: "Nonaktif" }));
+    expect(onParamsChange).toHaveBeenLastCalledWith({ search: "fin", status: "INACTIVE", page: undefined });
+    await user.click(screen.getByRole("button", { name: "Reset filter" }));
+    expect(onParamsChange).toHaveBeenLastCalledWith({});
+  });
+
   it("lists departments with status and actions", async () => {
     setup();
     const table = await screen.findByRole("grid", { name: "Daftar departemen" });

@@ -96,9 +96,7 @@ export function MasterDataPage({ client, params, onParamsChange, onSessionExpire
     <div className="list-page">
       <PageHeader title={resource === "departments" ? "Departemen" : "Jabatan"}
         breadcrumb={[{ label: "Master data" }, { label: resource === "departments" ? "Departemen" : "Jabatan" }]}
-        actions={        <Button variant="primary"  onPress={() => openForm()}>
-          <Plus size={16} aria-hidden="true" />Tambah
-        </Button>} />
+        />
       <div className="list-toolbar" role="search">
         <SearchInput label={`Cari ${label}`} value={query} onChange={setQuery} onSearch={value => setFilters({ search: value.trim(), page: 1 })} placeholder="Cari nama atau kode" />
         <ToggleButtonGroup aria-label="Filter status" selectionMode="single" disallowEmptySelection
@@ -109,6 +107,7 @@ export function MasterDataPage({ client, params, onParamsChange, onSessionExpire
           <ToggleButton id="INACTIVE"><ToggleButtonGroup.Separator />Nonaktif</ToggleButton>
         </ToggleButtonGroup>
         {filtered && <Button size="sm" variant="ghost" onPress={() => { setQuery(""); onParamsChange({}); }}>Reset filter</Button>}
+        <Button variant="primary" className="list-add" onPress={() => openForm()}><Plus size={16} aria-hidden="true" />Tambah</Button>
       </div>
 
       {success && <Notice message={success} success />}
@@ -168,7 +167,7 @@ export function MasterDataPage({ client, params, onParamsChange, onSessionExpire
                             onClick={event => event.stopPropagation()} onPress={() => openForm(record)}>
                             <PencilSimple size={16} aria-hidden="true" /><span className="action-label">Ubah</span>
                           </Button>
-                          <Button variant="ghost" size="sm" isDisabled={busy} onClick={event => event.stopPropagation()} onPress={() => void toggle(record)}
+                          <Button variant="secondary" className={record.status === "ACTIVE" ? "action-warning" : "action-success"} size="sm" isDisabled={busy} onClick={event => event.stopPropagation()} onPress={() => void toggle(record)}
                             aria-label={`${record.status === "ACTIVE" ? "Nonaktifkan" : "Aktifkan"} ${record.name}`}>
                             <Power size={16} aria-hidden="true" />
                             <span className="action-label">{record.status === "ACTIVE" ? "Nonaktifkan" : "Aktifkan"}</span>
@@ -201,7 +200,7 @@ export function MasterDataPage({ client, params, onParamsChange, onSessionExpire
             (d) => `${d.name} ${form.record ? "diperbarui" : "ditambahkan"}.`,
           )} />
       )}
-      <ConfirmDialog open={Boolean(confirm)} title={`Nonaktifkan ${label}?`} confirmLabel="Nonaktifkan"
+      <ConfirmDialog open={Boolean(confirm)} title={`Nonaktifkan ${label}?`} confirmLabel="Nonaktifkan" tone="warning"
         busy={busy} error={actionError} onClose={() => setConfirm(null)}
         onConfirm={() => confirm && void run(() => api.setStatus(confirm.id, "INACTIVE"), (d) => `${d.name} dinonaktifkan.`)}>
         <p className="dialog-text">

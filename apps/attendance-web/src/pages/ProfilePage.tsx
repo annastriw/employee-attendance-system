@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Button } from "@heroui/react";
-import { SignOut } from "@phosphor-icons/react";
 import { ChangePasswordForm, PageHeader, Notice, Skeleton, UnderlineTabs } from "@attendance/ui";
 import type { AuthClient, EmployeeUser } from "../lib/auth-client";
 
@@ -13,9 +12,9 @@ function validProfile(value: unknown): value is ProfileData {
     (row.phone === null || typeof row.phone === "string") && typeof row.startDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(row.startDate);
 }
 
-export function ProfilePage({ client, user, busy, error, onHome, onLogout, onChangePassword, onSessionExpired }: {
+export function ProfilePage({ client, user, busy, error, onHome, onChangePassword, onSessionExpired }: {
   client: AuthClient; user: EmployeeUser; busy: boolean; error: string;
-  onHome: () => void; onLogout: () => Promise<void>;
+  onHome: () => void;
   onChangePassword: (current: string, replacement: string) => Promise<void>;
   onSessionExpired: () => void;
 }) {
@@ -44,8 +43,7 @@ export function ProfilePage({ client, user, busy, error, onHome, onLogout, onCha
   const date = (value: string) => new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Jakarta" }).format(new Date(`${value}T00:00:00+07:00`));
   return <div className="employee-profile-page">
     <PageHeader title="Profil" description="Informasi diri Anda dikelola oleh HR."
-      breadcrumb={[{ label: "Hari ini", href: "/" }, { label: "Profil" }]} onNavigate={onHome}
-      actions={<Button variant="ghost" size="sm" onPress={() => { void onLogout(); }}><SignOut size={16} /> Keluar</Button>} />
+      breadcrumb={[{ label: "Hari ini", href: "/" }, { label: "Profil" }]} onNavigate={onHome} />
     <UnderlineTabs items={[{ id: "profile", label: "Profil" }, { id: "security", label: "Keamanan" }]} active={tab} onSelect={setTab} />
     {tab === "profile" ? <section className="employee-profile-panel" aria-label="Data profil">
       <h2>Informasi diri</h2>
@@ -58,7 +56,7 @@ export function ProfilePage({ client, user, busy, error, onHome, onLogout, onCha
       {loaded && missingEndpoint && <Button size="sm" variant="secondary" onPress={() => { setLoaded(false); setReload(x => x + 1); }}>Muat ulang</Button>}
     </section> : <section className="employee-profile-panel" aria-label="Keamanan akun">
       <h2>Ganti password</h2><p className="profile-guidance">Setelah password berubah, Anda akan keluar dan perlu masuk kembali.</p>
-      <ChangePasswordForm busy={busy} error={error} onSubmit={onChangePassword} onLogout={onLogout} />
+      <ChangePasswordForm busy={busy} error={error} onSubmit={onChangePassword} />
     </section>}
   </div>;
 }

@@ -24,9 +24,10 @@ interface AuthShellProps {
    * Omit it for focused auth screens such as password change.
    */
   showcase?: AuthShowcase;
+  account?: ReactNode;
 }
 
-export function AuthShell({ name, children, brandIcon, showcase }: AuthShellProps) {
+export function AuthShell({ name, children, brandIcon, showcase, account }: AuthShellProps) {
   const content = (
     <div className="auth-content">
       <PortalBrand name={name} icon={brandIcon} />
@@ -36,18 +37,20 @@ export function AuthShell({ name, children, brandIcon, showcase }: AuthShellProp
 
   if (!showcase)
     return (
-      <main className="auth-main">
+      <main className="auth-main" data-has-account={!!account}>
         <div className="auth-theme-corner">
           <ThemeToggle />
+          {account}
         </div>
         {content}
       </main>
     );
 
   return (
-    <main className="auth-main auth-split">
+    <main className="auth-main auth-split" data-has-account={!!account}>
       <div className="auth-theme-corner">
         <ThemeToggle />
+        {account}
       </div>
       <div className="auth-form-column">{content}</div>
       <aside className="auth-showcase" aria-label={`Tentang ${name}`}>

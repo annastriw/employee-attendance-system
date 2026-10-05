@@ -59,6 +59,20 @@ function setup(rows: HolidayRecord[] = [futureHoliday, pastHoliday], params = ''
 }
 
 describe('HolidaysPage (H13)', () => {
+  it('sends search/range/page together and applies a date preset without keeping legacy filters', async () => {
+    const { api, onParamsChange, user } = setup([futureHoliday], 'search=Natal&startDate=2026-12-01&endDate=2026-12-31&page=3');
+    await screen.findByRole('grid', { name: 'Daftar hari libur' });
+    const query = new URLSearchParams(api.mock.calls.find(([path]) => path.startsWith('holidays?'))![0].split('?')[1]);
+    expect(query.get('search')).toBe('Natal'); expect(query.get('startDate')).toBe('2026-12-01');
+    expect(query.get('endDate')).toBe('2026-12-31'); expect(query.get('page')).toBe('3');
+    await user.click(screen.getByRole('button', { name: 'Buka filter' }));
+    await user.click(await screen.findByRole('button', { name: /Buka kalender rentang tanggal/ }));
+    await user.click(await screen.findByRole('button', { name: '7 hari' }));
+    expect(onParamsChange).toHaveBeenLastCalledWith(expect.objectContaining({ search: 'Natal', startDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/), endDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/), page: undefined }));
+    expect(onParamsChange.mock.calls.at(-1)![0]).not.toHaveProperty('year');
+    expect(onParamsChange.mock.calls.at(-1)![0]).not.toHaveProperty('month');
+  });
+
   it('lists holidays with status badges and disables action buttons for past dates', async () => {
     setup();
 

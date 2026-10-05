@@ -10,7 +10,6 @@ import {
   MagnifyingGlass,
   Monitor,
   MoonStars,
-  SignOut,
   SquaresFour,
   Sun,
   Users,
@@ -111,10 +110,10 @@ const shortcutHint = isMac ? "⌘K" : "Ctrl K";
  * mounted while only the content changes. The active destination and title
  * derive from the current path, so deep links and browser back/forward keep
  * the navigation state correct. A command palette (Cmd/Ctrl-K) offers fast
- * navigation plus theme and logout actions.
+ * navigation actions. Account actions live in the account menu.
  */
 export function WorkspaceLayout() {
-  const { user, busy, error, logout } = useAuth();
+  const { user, busy, error, logout, client, sessionExpired } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -171,24 +170,14 @@ export function WorkspaceLayout() {
         run: () => setThemePreference("system"),
       },
     ];
-    const account: Command[] = [
-      {
-        id: "logout",
-        label: "Keluar",
-        group: "Akun",
-        keywords: "logout sign out keluar",
-        icon: <SignOut size={18} aria-hidden="true" />,
-        run: () => void logout(),
-      },
-    ];
-    return [...navigation, ...theme, ...account];
-  }, [navigate, logout]);
+    return [...navigation, ...theme];
+  }, [navigate]);
 
   return <>
     <WorkspaceShell title={title} pathname={location.pathname} storageKey="hr-sidebar-collapsed"
       brand={<Link to="/ringkasan" aria-label="HR Portal · Ringkasan"><Brand /></Link>}
       navigation={close => <NavLinks onNavigate={close} />}
-      account={<AccountMenu email={user?.email ?? ""} busy={busy} onLogout={logout} onProfile={() => navigate("/profil")} />}
+      account={<AccountMenu client={client} onSessionExpired={sessionExpired} email={user?.email ?? ""} busy={busy} onLogout={logout} onProfile={() => navigate("/profil")} />}
       actions={<Button ref={paletteTrigger} variant="secondary" className="cmdk-trigger" onPress={() => setPaletteOpen(true)} aria-haspopup="dialog">
         <MagnifyingGlass size={16} aria-hidden="true" /><span className="cmdk-trigger-label">Cari…</span><kbd className="cmdk-trigger-kbd">{shortcutHint}</kbd>
       </Button>}>

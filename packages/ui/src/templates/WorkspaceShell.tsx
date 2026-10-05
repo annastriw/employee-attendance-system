@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Button } from "@heroui/react";
-import { List } from "@phosphor-icons/react";
+import { List, SidebarSimple } from "@phosphor-icons/react";
 import { SidebarShell } from "./SidebarShell";
 import { ThemeToggle } from "../molecules/ThemeToggle";
 
@@ -49,21 +49,24 @@ export function WorkspaceShell({ brand, title, pathname, storageKey, navigation,
     if (open) requestAnimationFrame(() => toggle.current?.focus());
   };
   return <div className="workspace-shell" data-sidebar-collapsed={collapsed}>
-    <SidebarShell brand={brand} navigation={navigation(close)}
-      footer={<><ThemeToggle />{account}</>} collapsed={collapsed}
-      onToggle={() => setCollapsed(value => !value)} open={open}
-      drawerId={drawerId} onOpenChange={value => value ? setOpenedAt(pathname) : close()} />
-    <div className="workspace-main">
       <header className="workspace-header">
         <div className="workspace-heading">
           <Button ref={toggle} variant="ghost" isIconOnly className="workspace-menu-toggle"
             aria-label="Menu navigasi" aria-expanded={open} aria-controls={drawerId}
             onPress={() => open ? close() : setOpenedAt(pathname)}><List size={18} aria-hidden="true" /></Button>
-          <div className="workspace-mobile-brand">{brand}</div>
+          <Button size="sm" variant="ghost" isIconOnly className="workspace-sidebar-collapse"
+            aria-label={collapsed ? "Perluas sidebar" : "Ciutkan sidebar"}
+            aria-expanded={!collapsed} aria-controls={`${drawerId}-desktop`} onPress={() => setCollapsed(value => !value)}>
+            <SidebarSimple size={18} aria-hidden="true" />
+          </Button>
+          <div className="workspace-header-brand">{brand}</div>
           <span className="workspace-context-title">{title}</span>
         </div>
-        {actions && <div className="workspace-header-actions">{actions}</div>}
+        <div className="workspace-header-actions">{actions}<ThemeToggle />{account}</div>
       </header>
+    <SidebarShell navigation={navigation(close)} collapsed={collapsed} open={open}
+      drawerId={drawerId} onOpenChange={value => value ? setOpenedAt(pathname) : close()} />
+    <div className="workspace-main">
       <main id="konten" className="workspace-content" aria-label={title}>{children}</main>
     </div>
   </div>;

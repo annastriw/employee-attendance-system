@@ -27,8 +27,8 @@ export function DateRangeField({ label = "Rentang tanggal", value, onChange, dis
             </DateField.Suffix>
           </DateField.Group>
           {error && <FieldError>{error}</FieldError>}
-          <DateRangePicker.Popover>
-            <RangeCalendar aria-label={label}>
+          <DateRangePicker.Popover className="app-calendar-popover">
+            <RangeCalendar aria-label={label} visibleDuration={{ months: 1 }}>
               <RangeCalendar.Header>
                 <RangeCalendar.Heading />
                 <RangeCalendar.NavButton slot="previous" />

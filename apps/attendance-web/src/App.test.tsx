@@ -47,11 +47,31 @@ function client(): AuthClient {
   };
 }
 
+// Identity and attendance are separate requests; fixtures must not depend on effect order.
+function mockTodayResponse(auth: AuthClient, response: unknown) {
+  vi.mocked(auth.api).mockImplementation((async (path: string) =>
+    path === "me/profile" ? { data: { name: "Synthetic Employee" } } : response
+  ) as AuthClient["api"]);
+}
+
 beforeEach(() => {
   window.history.replaceState(null, "", "/");
 });
 
 describe("Employee portal authentication journey", () => {
+  it("offers logout only through the account popup during mandatory password change", async () => {
+    const auth = client();
+    vi.mocked(auth.restore).mockResolvedValue(employee);
+    const user = userEvent.setup();
+    render(<App client={auth} />);
+    await screen.findByRole("heading", { name: "Buat password baru" });
+    expect(screen.queryByRole("button", { name: /Keluar/ })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Menu akun" }));
+    expect(screen.queryByRole("menuitem", { name: "Profil" })).not.toBeInTheDocument();
+    await user.click(await screen.findByRole("menuitem", { name: "Keluar" }));
+    await screen.findByRole("heading", { name: "Masuk" });
+    expect(auth.logout).toHaveBeenCalledOnce();
+  });
   it("closes the shared drawer after navigation, restores menu focus, and persists the rail shortcut", async () => {
     const auth = client();
     vi.mocked(auth.restore).mockResolvedValue({ ...employee, mustChangePassword: false });
@@ -145,7 +165,9 @@ describe("Employee portal authentication journey", () => {
     expect(await screen.findByText("Synthetic Employee")).toBeVisible();
     expect(screen.getByText("Belum check-in")).toBeVisible();
     await user.click(screen.getByRole("link", { name: "Profil" }));
-    await user.click(await screen.findByRole("button", { name: "Keluar" }));
+    expect(screen.queryByRole("button", { name: /Keluar/ })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Menu akun" }));
+    await user.click(await screen.findByRole("menuitem", { name: "Keluar" }));
     await screen.findByRole("heading", { name: "Masuk" });
     expect(auth.logout).toHaveBeenCalledTimes(1);
   }, 15000);
@@ -182,7 +204,9 @@ describe("Employee portal authentication journey", () => {
     render(<App client={auth} />);
     await screen.findByRole("heading", { name: "Hari ini" });
     await user.click(screen.getByRole("link", { name: "Profil" }));
-    await user.click(await screen.findByRole("button", { name: "Keluar" }));
+    expect(screen.queryByRole("button", { name: /Keluar/ })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Menu akun" }));
+    await user.click(await screen.findByRole("menuitem", { name: "Keluar" }));
     await screen.findByRole("heading", { name: "Masuk" });
     expect(screen.getByRole("alert")).toHaveTextContent(
       "Sesi Anda telah berakhir",
@@ -226,7 +250,7 @@ describe("capture route protection", () => {
       expect.anything(),
     );
     expect(vi.mocked(auth.api).mock.calls.filter(c => c[0] === "me/attendance/today").length).toBeGreaterThan(0);
-    vi.mocked(auth.api).mockResolvedValueOnce({
+    mockTodayResponse(auth, {
       data: {
         employeeName: "Synthetic Employee",
         attendanceDate: "2026-10-02",
@@ -313,7 +337,7 @@ describe("capture route protection", () => {
     await user.click(next);
     await screen.findByRole("heading", { name: "Foto checkout" });
     expect(window.location.pathname).toBe("/absen/pulang");
-    vi.mocked(auth.api).mockResolvedValueOnce({
+    mockTodayResponse(auth, {
       ...response,
       data: {
         ...response.data,

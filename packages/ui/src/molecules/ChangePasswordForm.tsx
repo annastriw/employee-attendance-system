@@ -4,10 +4,9 @@ import { Notice } from './Notice';
 import { PasswordField } from './PasswordField';
 import { passwordChangeError } from '../lib/password-change';
 
-export function ChangePasswordForm({ busy, error, onSubmit, onLogout }: {
+export function ChangePasswordForm({ busy, error, onSubmit }: {
   busy: boolean; error: string;
   onSubmit: (current: string, replacement: string) => Promise<void>;
-  onLogout: () => Promise<void>;
 }) {
   const [current, setCurrent] = useState('');
   const [replacement, setReplacement] = useState('');
@@ -26,6 +25,5 @@ export function ChangePasswordForm({ busy, error, onSubmit, onLogout }: {
     <PasswordField label="Konfirmasi password baru" value={confirmation} onChange={value => { setConfirmation(value); setValidation(''); }} autoComplete="new-password" disabled={busy} />
     {(validation || error) && <Notice message={validation || error} />}
     <Button type="submit" className="primary-button" isDisabled={busy}>{busy ? 'Menyimpan…' : 'Simpan password'}</Button>
-    <Button type="button" variant="ghost" isDisabled={busy} onPress={() => { void onLogout(); }}>Keluar dari akun</Button>
   </form>;
 }

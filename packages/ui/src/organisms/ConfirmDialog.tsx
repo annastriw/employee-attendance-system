@@ -8,6 +8,7 @@ export function ConfirmDialog({
   title,
   children,
   confirmLabel,
+  tone = "primary",
   busy,
   confirmDisabled = false,
   className = "",
@@ -19,6 +20,7 @@ export function ConfirmDialog({
   title: string;
   children: ReactNode;
   confirmLabel: string;
+  tone?: "primary" | "danger" | "warning";
   busy: boolean;
   confirmDisabled?: boolean;
   className?: string;
@@ -48,7 +50,8 @@ export function ConfirmDialog({
             </Button>
             <Button
               size="sm"
-              variant="primary"
+              variant={tone === "danger" ? "danger" : "primary"}
+              className={tone === "warning" ? "action-warning" : undefined}
               isDisabled={busy || confirmDisabled}
               onPress={onConfirm}
             >

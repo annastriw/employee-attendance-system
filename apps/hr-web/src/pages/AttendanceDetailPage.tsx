@@ -120,7 +120,7 @@ export function AttendanceDetailPage({
         description={data ? `${attendanceDate(data.attendanceDate)} · ${data.department} · ${data.position}` : undefined}
         actions={data && <>
           <StatusPill tone={data.deletedAt ? "archived" : data.checkOut ? "active" : "inactive"} label={attendanceStatus(data)} />
-          <Button variant="secondary" isDisabled={busy || mustRefresh} onPress={() => {
+          <Button variant={data.deletedAt ? "primary" : "danger"} isDisabled={busy || mustRefresh} onPress={() => {
             setConfirm(data); setReason(""); setReasonError(""); setActionError("");
           }}>
             {data.deletedAt ? <ArrowCounterClockwise size={16} aria-hidden="true" /> : <Trash size={16} aria-hidden="true" />}
@@ -217,6 +217,7 @@ export function AttendanceDetailPage({
           confirm?.deletedAt ? "Pulihkan absensi?" : "Hapus absensi satu hari?"
         }
         confirmLabel={confirm?.deletedAt ? "Pulihkan" : "Hapus satu hari"}
+        tone={confirm?.deletedAt ? "primary" : "danger"}
         busy={busy}
         confirmDisabled={mustRefresh}
         error={actionError}

@@ -85,12 +85,12 @@ function RoutedApp({ client }: { client: AuthClient }) {
   let page: ReactNode;
   if (location.pathname === "/") page = <HomePage client={client} user={user} busy={busy} error={error} onCapture={purpose => navigate(purpose === "CHECK_OUT" ? "/absen/pulang" : "/absen/masuk")} onSessionExpired={sessionExpired} onHistory={() => navigate("/riwayat")} />;
   else if (location.pathname === "/riwayat" || historyMatch) page = <HistoryPage client={client} params={params} recordId={historyMatch?.params.recordId} onParamsChange={onHistoryParamsChange} onHome={() => navigate("/")} onSessionExpired={sessionExpired} />;
-  else if (location.pathname === "/profil") page = <ProfilePage client={client} user={user} busy={busy} error={error} onHome={() => navigate("/")} onLogout={logout} onSessionExpired={sessionExpired} onChangePassword={(current, replacement) => act(async () => {
+  else if (location.pathname === "/profil") page = <ProfilePage client={client} user={user} busy={busy} error={error} onHome={() => navigate("/")} onSessionExpired={sessionExpired} onChangePassword={(current, replacement) => act(async () => {
     await client.changePassword(current, replacement); setUser(null); setMessage("Password berhasil diperbarui. Silakan masuk dengan password baru."); navigate("/masuk", { replace: true });
   })} />;
   else page = <section className="employee-not-found"><h1>Halaman tidak ditemukan</h1><p>Alamat ini tidak tersedia.</p><Button variant="secondary" onPress={() => navigate("/", { replace: true })}>Kembali ke Hari ini</Button></section>;
 
-  return <EmployeeWorkspace user={user} busy={busy} onLogout={logout}>{page}</EmployeeWorkspace>;
+  return <EmployeeWorkspace client={client} onSessionExpired={sessionExpired} user={user} busy={busy} onLogout={logout}>{page}</EmployeeWorkspace>;
 }
 
 export function App({ client = authClient, router }: { client?: AuthClient; router?: (children: ReactNode) => ReactNode }) {
