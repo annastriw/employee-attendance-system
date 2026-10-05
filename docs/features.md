@@ -43,11 +43,9 @@ Kedua portal memakai sidebar/rail desktop dan drawer mobile/tablet yang sama.
 Brand menuju beranda role; form/detail memenuhi lebar konten, tabel HR menjadi
 kartu berlabel di layar kecil, dan filter kategori dikelompokkan bersama chip/reset.
 
-### Backend yang menunggu PR ke `main` dan deploy
+### API pendukung portal
 
-Perubahan backend berikut sudah tersedia di branch `dev`; production memerlukannya
-setelah PR pengguna digabung dan VPS dideploy. Tidak ada migration database untuk
-endpoint-endpoint ini.
+Endpoint berikut mendukung kedua portal dan sudah termasuk rilis fase D. Revisi tidak memerlukan migration database.
 
 | Service | Endpoint | Perubahan |
 | --- | --- | --- |
@@ -55,15 +53,13 @@ endpoint-endpoint ini.
 | Attendance Service + API Gateway | `GET /api/v1/monitoring/trend?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD` | Data tren kehadiran harian |
 | Employee Service + API Gateway | `GET /api/v1/me/profile` | Profil pengguna berdasarkan sesi |
 
-Fitur tren dan profil memiliki fallback aman sebelum endpoint tersedia di production.
+Fitur tren dan profil menyediakan fallback aman saat API gagal/tidak tersedia.
 
 ### Revisi 2026-10-05
 
 Absensi memakai filter periode, departemen dan jabatan historis; employeeId tetap
-didukung dari konteks detail karyawan. **Perlu PR+deploy:** Attendance Service +
-API Gateway, `GET /api/v1/attendance` menerima `departmentId` dan `positionId`.
-Query menyaring snapshot sebelum pagination/count, tanpa migration. Frontend dan
-backend revisi di dev perlu dirilis bersama sebelum filter kategori diuji production.
+didukung dari konteks detail karyawan. Attendance Service + API Gateway: `GET /api/v1/attendance` menerima `departmentId` dan `positionId`.
+Query menyaring snapshot sebelum pagination/count, tanpa migration. [Penutupan revisi frontend/backend](development/finalization.md).
 
 ## Batas
 

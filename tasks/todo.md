@@ -31,57 +31,17 @@ Ringkasan menggantikan checkpoint sesi yang berulang. Status berikut bersumber d
 
 Restore backup, backup terjadwal, uji beban/kapasitas dan hardening tambahan ditunda atas instruksi pengguna. Isolasi instance test lokal bukan terpisah; schema/bucket/user berbeda saja. Keterbatasan ini tidak diubah menjadi checklist lulus.
 
-## Increment berikut
+## Penutupan revisi dan finalisasi
 
-Arahan terbaru 2026-10-05: seluruh T terdahulu dianggap selesai oleh pengguna;
-ini penutupan backlog, bukan klaim menjalankan ulang test atau acceptance visual.
-Backlog aktif [fase D](frontend-revision-phase-d.md):
+- [x] Revisi frontend/backend fase D T22–T31 selesai; CI/rilis terdahulu berhasil.
+- [x] Sidebar/motion S01 diperbaiki oleh S02; verifikasi teknis terkait lulus.
+- [x] Pengguna menyatakan seluruh backend/frontend final, termasuk S02, 2026-10-05.
+- [x] Push dev, kurasi history dengan backup dan PR/merge main diizinkan untuk finalisasi.
+- [x] Konsolidasi dokumentasi dan audit berkas selesai, review/tautan/diff lulus.
+- [ ] PR final dev → main dan CI head terbaru hijau.
+- [ ] Merge main dan workflow production/deployment yang relevan hijau.
+- [ ] dev/main lokal dan remote identik; ruleset main asli aktif, working tree bersih.
 
-- [x] T22 audit source, matriks filter, plan dan pertanyaan.
-- [x] T23 validasi UUID dan forwarding/filter API seluruh daftar.
-- [x] T24 toolbar sejajar dan kalender sesuai klarifikasi.
-- [x] T25 warna aksi dan konfirmasi konsisten.
-- [x] T26 brand stabil, tema via menu, nama/email akun terlihat.
-- [x] T27 semua layar HR/Karyawan responsif dan konsisten.
-- [x] T28 verifikasi teknis dan checklist manual/handoff.
-
-T22-T28 selesai teknis lokal; bukti [fase D](frontend-revision-phase-d.md).
-Kerja serial, **tanpa commit/push** fase ini. Manual acceptance tetap pending
-sampai pengguna menyatakan oke.
-
-[Perapian repo dan handoff](progress.md), dikerjakan serial dan sudah selesai. Feature/backend/frontend baru tidak ditambahkan hanya untuk mengulang uji auto-deploy yang sudah lulus.
-
-## Sumber acceptance dan verifikasi
-
-[SDD domain](../docs/sdd/README.md), [source/test service](../apps/), [workflow](../.github/workflows/ci.yml), [progress](progress.md). Unit logika berubah wajib; integrasi cepat bila perlu; manual acceptance hanya untuk scope yang dinyatakan oke pengguna.
-
-
-## Tambahan fase D (2026-10-05)
-
-Permintaan lanjutan menambah T29 satu akses logout, T30 audit semua UUID dan
-perbaikan bug terkonfirmasi, T31 verifikasi/review tambahan. Ketiganya selesai
-teknis lokal; total fase D 10 task T22-T31. [Rincian dan bukti](frontend-revision-phase-d.md).
-Tidak commit/push/PR/deploy; acceptance manual kedua role tetap pending.
-
-
-Keputusan terbaru pengguna 2026-10-05 setelah verifikasi: commit dan push
-perubahan terverifikasi ke dev diizinkan dan diminta. Menggantikan batas
-local-only sebelumnya. PR/merge/main/deployment belum diminta; acceptance
-manual tetap pending.
-
-## S01 - Sidebar penuh tinggi dan motion (2026-10-05)
-
-- [x] Audit Git/source dan klarifikasi drawer mobile/tablet, rail desktop.
-- [x] Shell HR/Karyawan: brand menetap, drawer penuh tinggi, tema/akun bawah sidebar, hapus Ctrl+K.
-- [x] Motion ringan bersama, reduced motion, unit terfokus/lint/build/review.
-- [x] Commit/push dev bersama increment S01; hasil diperiksa setelah command.
-- [ ] Manual pengguna: 320/768/1024/1440 px dan landscape; buka/tutup/scroll sidebar, akun/tema, navigasi kedua role.
-- [ ] Pengguna menyatakan oke untuk S01.
-
-## S02 - Sidebar konsisten setelah feedback localhost (2026-10-05)
-
-- [x] Audit dan kontrak: logo boleh mengikuti sidebar; tombol di kiri dan drawer dari kiri.
-- [x] Header sidebar/rail desktop dan drawer mobile/tablet konsisten kedua role.
-- [x] Unit terfokus, lint/build/review; commit/push dev bersama increment S02.
-- [ ] Manual pengguna kedua role pada desktop/tablet/mobile serta landscape; navigasi, close/Escape, tema/akun dan scroll.
-- [ ] Pengguna menyatakan oke S02 (S01 belum diterima).
+[Bukti frontend dan pengujian historis](../docs/development/finalization.md).
+[Progress](progress.md) mencatat task aktif serta hasil final; tidak mengulang pengujian
+lama tanpa perubahan atau risiko baru.

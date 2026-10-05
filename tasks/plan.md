@@ -18,38 +18,13 @@ Task utama T01–T31 satu backlog; UX01–UX07 dahulu merupakan pemetaan layar, 
 
 Kerja serial satu fitur ujung ke ujung, SDD + Kanban. Unit logika berubah wajib; integrasi cepat hanya jika perlu; UI manual pengguna. Coding/push dev, PR main untuk live. [Development](../docs/development.md), [testing](../docs/testing/workflow.md).
 
-## Pekerjaan aktif
+## Finalisasi aktif
 
-Revisi terbaru 2026-10-05: pengguna menutup T terdahulu dan meminta audit seluruh
-layar/filter, lalu revisi serial T22–T28. [Audit dan plan fase D](frontend-revision-phase-d.md)
-menjadi acuan aktif: filter API → toolbar/kalender → warna aksi → shell/tema/akun
-→ sweep kedua role → verifikasi/handoff. Semua perubahan lokal **tanpa commit/push**;
-instruksi ini menggantikan aturan push otomatis untuk fase D. Klarifikasi kalender
-dan posisi brand diterima setelah audit source. T22-T28 selesai teknis lokal;
-acceptance manual pending dan bukti tercatat di fase D.
+Backend/frontend diterima final oleh pengguna pada 2026-10-05, termasuk revisi S02.
+Satu increment serial: konsolidasi docs dan audit berkas → review/verifikasi → kurasi
+history dengan backup privat → push dev → PR main dan CI → merge → CD hijau →
+sinkronisasi dev/main lokal/remote. Tidak ada subagen atau fitur baru.
 
-Perapian repo/docs/history pada 2026-10-04–05 selesai. Pengguna meminta folder temporary dihapus; hasil dan handoff disimpan pada [progress](progress.md). Pekerjaan berikut dibahas sesuai prioritas pengguna, bukan otomatis menambah fitur/task operasional.
-
-Restore drill, backup terjadwal, uji beban/kapasitas dan hardening tambahan ditunda pengguna dalam scope demo. Penundaan bukan klaim pekerjaan lulus. Source/tests/migrations tetap disimpan; hasil lama tidak dijalankan ulang tanpa perubahan/risiko baru.
-
-
-## Tambahan fase D (2026-10-05)
-
-Permintaan lanjutan menambah T29 satu akses logout, T30 audit semua UUID dan
-perbaikan bug terkonfirmasi, T31 verifikasi/review tambahan. Ketiganya selesai
-teknis lokal; total fase D 10 task T22-T31. [Rincian dan bukti](frontend-revision-phase-d.md).
-Tidak commit/push/PR/deploy; acceptance manual kedua role tetap pending.
-
-
-Keputusan terbaru pengguna 2026-10-05 setelah verifikasi: commit dan push
-perubahan terverifikasi ke dev diizinkan dan diminta. Menggantikan batas
-local-only sebelumnya. PR/merge/main/deployment belum diminta; acceptance
-manual tetap pending.
-
-## Revisi shell/motion - increment S01 (2026-10-05)
-
-Fase D T22-T31 selesai, CI hijau pada a0f0ddf (catatan 1423550); pengguna mengonfirmasi production berjalan. Acuan aktif berikut: S01 audit/kontrak - shell penuh tinggi dan kontrol sidebar kedua role - motion ringan/reduced motion - unit terfokus/lint/build/review - commit/push dev. UI manual oleh pengguna; tidak merge main/deploy.
-
-## S02 - Penyusunan ulang sidebar semua layar
-
-Audit source/feedback S01 → header/sidebar terpisah, tombol kiri dan brand dalam sidebar → reset posisi/spacing bawaan drawer HeroUI → unit navigasi/close terfokus, lint/build/review → commit/push dev. HR dan Karyawan memakai implementasi bersama. UI manual pengguna, tanpa backend/main/deployment.
+[Rangkuman frontend dan bukti](../docs/development/finalization.md), [status](todo.md),
+[titik lanjut](progress.md). Restore drill, backup terjadwal, uji beban dan hardening
+masih ditunda pengguna; bukan klaim lulus.

@@ -111,6 +111,14 @@ Pengguna mengizinkan akun HR/karyawan dan password demo dipublikasikan di README
 
 ## Revisi shell dan motion - 2026-10-05
 
-Kedua portal memakai sidebar desktop penuh tinggi viewport dengan rail ikon opsional; tablet/mobile memakai drawer dari tepi atas hingga bawah, menutup setelah navigasi. Brand menetap di pojok kiri atas ketika buka/tutup. Pencarian global Ctrl+K dihapus; tema dan identitas/menu akun dipindah ke sidebar. Animasi ringan bersama mengikuti reduced motion. Detail [design system](../sdd/frontend-design-system.md). T22-T31/CI sebelumnya selesai dan production dikonfirmasi berjalan; revisi baru tidak membuka ulang tugas tersebut. Commit/push dev diizinkan; merge main/deploy belum diinstruksikan.
+Kedua portal memakai sidebar desktop penuh tinggi viewport dengan rail ikon opsional; tablet/mobile memakai drawer dari tepi atas hingga bawah, menutup setelah navigasi. Brand menetap di pojok kiri atas ketika buka/tutup. Pencarian global Ctrl+K dihapus; tema dan identitas/menu akun dipindah ke sidebar. Animasi ringan bersama mengikuti reduced motion. Detail [design system](../sdd/frontend-design-system.md). T22-T31/CI sebelumnya selesai dan production dikonfirmasi berjalan; revisi baru tidak membuka ulang tugas tersebut. Pada finalisasi 2026-10-05 pengguna menerima backend/frontend dan mengizinkan PR/merge main serta CI/CD sampai hijau.
 
-Revisi S02 setelah cek localhost 2026-10-05: pengguna menyatakan S01 belum rapi di seluruh ukuran. Brand tidak wajib fixed; desain sidebar kedua role diserahkan kepada agen. Tombol buka/tutup wajib di kiri, drawer membuka dari kiri. Brand menjadi bagian sidebar/drawer; konten desktop memiliki header terpisah. Tema/akun tetap di sidebar dan motion tetap ringan. Ini menggantikan kewajiban brand menetap S01; acceptance visual S02 belum diterima.
+Revisi S02 setelah cek localhost 2026-10-05: pengguna menyatakan S01 belum rapi di seluruh ukuran. Brand tidak wajib fixed; desain sidebar kedua role diserahkan kepada agen. Tombol buka/tutup wajib di kiri, drawer membuka dari kiri. Brand menjadi bagian sidebar/drawer; konten desktop memiliki header terpisah. Tema/akun tetap di sidebar dan motion tetap ringan. Ini menggantikan kewajiban brand menetap S01; S02 diterima melalui konfirmasi final backend/frontend pengguna pada 2026-10-05.
+
+## Finalisasi repository — 2026-10-05
+
+Pengguna mengizinkan pengecualian rewrite baru pada dev/main dengan backup privat,
+tanggal milestone sumber dan force-with-lease; konsolidasi dokumentasi/berkas yang
+tidak diperlukan; PR/merge main, CI/CD sampai hijau dan sinkronisasi lokal/remote.
+Ruleset main asli dipulihkan sesudah kurasi. Aturan harian tanpa force push tetap
+berlaku setelah finalisasi. [Log finalisasi](../development/finalization.md).

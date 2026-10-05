@@ -33,3 +33,19 @@ Mapping SHA lama/baru dan backup lengkap disimpan privat di `.local/repository-c
 | 2026-10-04T23:24:37+07:00 | expose the active backend release in health responses |
 
 [SDD](../sdd/README.md) mencerminkan implementasi terbaru, bukan transkrip sesi. [Workflow harian](../development.md) kembali ke dev → PR main tanpa force push setelah perapian selesai.
+
+## Milestone finalisasi 2026-10-05
+
+Kurasi lanjutan disetujui pengguna dengan backup privat dan preserved dates.
+26 milestone awal tetap; revisi portal dan perbaikan CI berulang digabung ke snapshot
+berikut. Source tree main sebelum rilis tidak berubah.
+
+| Tanggal/waktu sumber | Milestone |
+| --- | --- |
+| 2026-10-05T03:42:00+07:00 | Production API proxies and HR path routing |
+| 2026-10-05T06:10:47+07:00 | Responsive portals, monitoring trends and self-service profiles |
+| 2026-10-05T14:22:17+07:00 | Attendance category filters, valid data UUIDs and stable CI regressions |
+| 2026-10-05T15:09:25+07:00 | Shared full-height sidebars, left drawers and motion |
+
+Dokumentasi finalisasi memakai tanggal pengerjaan aktual. PR penutupan dan hasil
+CI/CD dicatat di [progress](../../tasks/progress.md); [log frontend](finalization.md).
