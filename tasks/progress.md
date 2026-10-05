@@ -1,5 +1,26 @@
 # Progres dan titik lanjut
 
+## Perbaikan CI fase D - overlay filter (2026-10-05)
+
+- Pengguna meminta membaca dan memperbaiki CI hingga lulus. Run
+  [37275831556](https://github.com/annastriw/employee-attendance-system/actions/runs/37275831556)
+  pada SHA 1fb79d1: lint, Prisma, typecheck DB dan build lulus; unit HR gagal satu
+  EmployeeFilters.test. HR lain 124 unit dan Karyawan 106 unit lulus pada CI itu.
+- Penyebab: setelah memilih dropdown kategori, test langsung mengirim Escape
+  saat dropdown anak belum selesai unmount. Escape tidak menutup panel induk;
+  tombol Buka filter masih tertutup secara aksesibilitas. Tidak ada bukti query
+  filter aplikasi rusak dari kegagalan ini.
+- Fix hanya test: tangkap node menu/panel, tunggu menu anak dilepas dari DOM,
+  kirim Escape lalu tunggu panel induk dilepas sebelum interaksi selanjutnya.
+  Tidak menggunakan delay tetap, hidden query, mock overlay atau timeout lebih besar.
+- Task aktif: verifikasi terfokus dan push fix ke dev, kemudian pantau CI PR
+  yang sudah ada. Source aplikasi/workflow/aturan bisnis tidak diubah.
+- File: apps/hr-web/src/pages/EmployeeFilters.test.tsx dan tasks/progress.md.
+  Verifikasi kedua file filter/EmployeesPage 9/9 lulus, termasuk run CI=true.
+  Lint file dan tsc -b HR lulus. Build tidak diulang karena hanya test/docs
+  berubah dan build CI sebelumnya lulus. Tidak ada server permanen baru.
+  Hasil CI setelah push harus dinilai pada SHA baru, bukan run gagal sebelumnya.
+
 ## Instruksi terbaru - commit/push dev (2026-10-05)
 
 Pengguna meminta push ke dev setelah selesai. Menggantikan batas local-only
