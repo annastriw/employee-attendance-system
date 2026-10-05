@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Button, Drawer, Skeleton, useOverlayState } from "@heroui/react";
+import { Button, Drawer, Skeleton, Table, useOverlayState } from "@heroui/react";
 import {
   CaretLeft,
   CaretRight,
@@ -12,7 +12,7 @@ import {
   ArrowSquareOut,
   X,
 } from "@phosphor-icons/react";
-import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, Tooltip, XAxis, YAxis, Notice, StatusPill, monitoringTone, CalendarField, SearchInput, FilterSelect, DateRangeField, ChartContainer, ChartLegend, ChartTooltip, type ChartSeriesConfig, dateRangePreset } from "@attendance/ui";
+import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, Tooltip, XAxis, YAxis, Notice, PageHeader, StatusPill, monitoringTone, CalendarField, SearchInput, FilterSelect, FilterPanel, DateRangeField, ChartContainer, ChartLegend, ChartTooltip, type ChartSeriesConfig, dateRangePreset } from "@attendance/ui";
 
 import { loadMasters } from "../lib/employees";
 import type { MasterRecord } from "../lib/master-data";
@@ -25,6 +25,8 @@ import {
   type MonitoringEmployeesResult,
   type MonitoringSummary,
 } from "../lib/monitoring";
+
+const STATUS_FILTER_OPTIONS = [{ id: "ALL", name: "Semua Status" }, { id: "CHECKED_IN", name: "Hadir" }, { id: "LATE", name: "Terlambat" }, { id: "EARLY_DEPARTURE", name: "Pulang Lebih Awal" }, { id: "PENDING_CHECKOUT", name: "Belum Checkout" }, { id: "COMPLETED", name: "Selesai" }, { id: "MISSING", name: "Tidak Ada Absensi" }, { id: "PENDING_CHECK_IN", name: "Belum Check-in" }, { id: "DELETED", name: "Dihapus HRD" }];
 
 type Client = Pick<AuthClient, "api">;
 type Params = Record<string, string | undefined>;
@@ -122,7 +124,7 @@ export function MonitoringPage({
   const [trendError, setTrendError] = useState<{ key: string; status?: number; message: string } | null>(null);
   const [trendReload, setTrendReload] = useState(0);
   const [selectedEmployee, setSelectedEmployee] = useState<MonitoringEmployeeItem | null>(null);
-  const rowRefs = useRef(new Map<string, HTMLTableRowElement>());
+  const rowRefs = useRef(new Map<string, HTMLElement>());
   const drawerState = useOverlayState({
     isOpen: Boolean(selectedEmployee),
     onOpenChange: open => { if (!open) setSelectedEmployee(null); },
@@ -282,6 +284,7 @@ export function MonitoringPage({
 
   return (
     <div className="monitoring-page">
+      <PageHeader title="Ringkasan" />
       {/* Date Navigation & Calendar Type Banner */}
       <div className="monitoring-date-header">
         <div className="monitoring-date-picker-wrap">
@@ -542,10 +545,10 @@ export function MonitoringPage({
             </div>
           ) : trend.length ? <>
             <ChartContainer label="Grafik tren harian: hadir, terlambat, belum hadir" height={250}>
-              <AreaChart data={trend} margin={{ top: 8, right: 8, bottom: 0, left: -20 }}>
+              <AreaChart data={trend} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
                 <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
-                <XAxis dataKey="date" tickFormatter={(value: string) => new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", timeZone: "Asia/Jakarta" }).format(new Date(`${value}T00:00:00+07:00`))} />
-                <YAxis allowDecimals={false} />
+                <XAxis minTickGap={24} tickMargin={8} dataKey="date" tickFormatter={(value: string) => new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", timeZone: "Asia/Jakarta" }).format(new Date(`${value}T00:00:00+07:00`))} />
+                <YAxis width={32} allowDecimals={false} tickMargin={6} />
                 <Tooltip content={<ChartTooltip series={TREND_SERIES} />} />
                 <Area type="monotone" dataKey="present" stroke="var(--success)" fill="var(--success)" fillOpacity={0.14} />
                 <Area type="monotone" dataKey="late" stroke="var(--warning)" fill="var(--warning)" fillOpacity={0.12} />
@@ -577,25 +580,20 @@ export function MonitoringPage({
       <div className="monitoring-filters-toolbar">
         <SearchInput label="Cari nama atau NIK" value={searchInput} onChange={setSearchInput} onSearch={value => update({ search: value.trim() || undefined, page: undefined })} placeholder="Cari nama atau NIK" />
 
-        <div className="monitoring-selectors">
+        <FilterPanel active={[
+            ...(selectedDept ? [{ key: "department", label: departments.find(d => d.id === selectedDept)?.name ?? "Departemen terpilih", onRemove: () => update({ departmentId: undefined, page: undefined }) }] : []),
+            ...(selectedStatus !== "ALL" ? [{ key: "status", label: STATUS_FILTER_OPTIONS.find(option => option.id === selectedStatus)?.name ?? selectedStatus, onRemove: () => update({ status: undefined, page: undefined }) }] : []),
+            ...(searchInput ? [{ key: "search", label: searchInput, onRemove: () => { setSearchInput(""); update({ search: undefined, page: undefined }); } }] : []),
+          ]} onReset={handleClearFilters}>
           <FilterSelect label="Filter Departemen" value={selectedDept}
             onChange={value => update({ departmentId: value || undefined, page: undefined })}
             options={[{ id: "", name: "Semua departemen" }, ...departments.map(d => ({ id: d.id, name: d.name + (d.status === "INACTIVE" ? " (Nonaktif)" : "") }))]} />
 
           <FilterSelect label="Filter Status Kehadiran" value={selectedStatus}
             onChange={value => update({ status: value === "ALL" ? undefined : value, page: undefined })}
-            options={[{ id: "ALL", name: "Semua Status" }, { id: "CHECKED_IN", name: "Hadir" }, { id: "LATE", name: "Terlambat" }, { id: "EARLY_DEPARTURE", name: "Pulang Lebih Awal" }, { id: "PENDING_CHECKOUT", name: "Belum Checkout" }, { id: "COMPLETED", name: "Selesai" }, { id: "MISSING", name: "Tidak Ada Absensi" }, { id: "PENDING_CHECK_IN", name: "Belum Check-in" }, { id: "DELETED", name: "Dihapus HRD" }]} />
+            options={STATUS_FILTER_OPTIONS} />
 
-          {isFiltered && (
-            <Button
-              variant="ghost"
-              className="monitoring-reset-btn"
-              onPress={handleClearFilters}
-            >
-              Reset Filter
-            </Button>
-          )}
-        </div>
+        </FilterPanel>
       </div>
 
       {/* Employees Attendance Table */}
@@ -627,66 +625,57 @@ export function MonitoringPage({
           )}
         </div>
       ) : (
-        <div className="table-responsive">
-          <table className="portal-table" aria-label="Tabel monitoring kehadiran">
-            <thead>
-              <tr>
-                <th scope="col">Karyawan</th>
-                <th scope="col">Departemen &amp; Jabatan</th>
-                <th scope="col">Check-in</th>
-                <th scope="col">Checkout</th>
-                <th scope="col">Status Kehadiran</th>
-                <th scope="col">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
+        <Table className="data-table monitoring-table" onKeyDownCapture={event => {
+          if (event.key !== " " || !(event.target instanceof HTMLElement) || !event.target.matches('[data-interactive-row="true"]')) return;
+          const item = items.find(item => item.employeeId === (event.target as HTMLElement).dataset.employeeId);
+          if (item) { event.preventDefault(); event.stopPropagation(); setSelectedEmployee(item); }
+        }}>
+          <Table.ScrollContainer>
+          <Table.Content className="portal-table" aria-label="Tabel monitoring kehadiran">
+            <Table.Header>
+                <Table.Column isRowHeader>Karyawan</Table.Column>
+                <Table.Column>Departemen &amp; Jabatan</Table.Column>
+                <Table.Column>Check-in</Table.Column>
+                <Table.Column>Checkout</Table.Column>
+                <Table.Column>Status Kehadiran</Table.Column>
+                <Table.Column>Aksi</Table.Column>
+              </Table.Header>
+            <Table.Body>
               {items.map((item: MonitoringEmployeeItem) => (
-                <tr key={item.employeeId} ref={node => { if (node) rowRefs.current.set(item.employeeId, node); else rowRefs.current.delete(item.employeeId); }} data-interactive-row="true" tabIndex={0}
-                  aria-label={`Buka detail ${item.name}`}
-                  onClick={event => {
-                    if (event.target instanceof Element && event.target.closest("a, button")) return;
-                    setSelectedEmployee(item);
-                  }}
-                  onKeyDown={event => {
-                    if (
-                      event.target === event.currentTarget &&
-                      (event.key === "Enter" || event.key === " ")
-                    ) {
-                      event.preventDefault();
-                      setSelectedEmployee(item);
-                    }
-                  }}>
-                  <td data-label="Karyawan">
+                <Table.Row id={item.employeeId} key={item.employeeId}
+                  ref={node => { if (node) rowRefs.current.set(item.employeeId, node); else rowRefs.current.delete(item.employeeId); }}
+                  data-interactive-row="true" data-employee-id={item.employeeId} aria-label={`Buka detail ${item.name}`} onAction={() => setSelectedEmployee(item)}>
+                  <Table.Cell data-label="Karyawan">
                     <div className="table-cell-title">{item.name}</div>
                     <div className="table-cell-subtitle">{item.nik}</div>
-                  </td>
-                  <td data-label="Departemen & Jabatan">
+                  </Table.Cell>
+                  <Table.Cell data-label="Departemen & Jabatan">
                     <div>{item.department}</div>
                     <div className="table-cell-subtitle">{item.position}</div>
-                  </td>
-                  <td data-label="Check-in">
+                  </Table.Cell>
+                  <Table.Cell data-label="Check-in">
                     <div className="time-badge-wrap">
                       <span>{monitoringTimeFormatted(item.checkInTime)}</span>
                       {item.isLate && (
                         <span className="badge badge-warning">Terlambat</span>
                       )}
                     </div>
-                  </td>
-                  <td data-label="Checkout">
+                  </Table.Cell>
+                  <Table.Cell data-label="Checkout">
                     <div className="time-badge-wrap">
                       <span>{monitoringTimeFormatted(item.checkOutTime)}</span>
                       {item.isEarlyDeparture && (
                         <span className="badge badge-warning">Pulang Awal</span>
                       )}
                     </div>
-                  </td>
-                  <td data-label="Status Kehadiran">
+                  </Table.Cell>
+                  <Table.Cell data-label="Status Kehadiran">
                     <StatusPill
                       tone={monitoringTone(item.status)}
                       label={monitoringStatusLabel(item.status)}
                     />
-                  </td>
-                  <td data-label="Aksi">
+                  </Table.Cell>
+                  <Table.Cell data-label="Aksi">
                     {item.recordId ? (
                       <Link
                         to={`/absensi?id=${item.recordId}`}
@@ -699,12 +688,13 @@ export function MonitoringPage({
                     ) : (
                       <span className="text-muted">—</span>
                     )}
-                  </td>
-                </tr>
+                  </Table.Cell>
+                </Table.Row>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </Table.Body>
+          </Table.Content>
+          </Table.ScrollContainer>
+        </Table>
       )}
 
       {/* Pagination */}

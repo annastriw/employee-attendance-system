@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button, Skeleton } from "@heroui/react";
 import { ArrowRight, CalendarCheck, CheckCircle, Clock, ClockCounterClockwise, WarningCircle } from "@phosphor-icons/react";
-import { Notice, StatusPill } from "@attendance/ui";
+import { Notice, PageHeader, StatusPill } from "@attendance/ui";
 import type { AuthClient, EmployeeUser } from "../lib/auth-client";
 import { clockLabel, type AttendancePurpose } from "../lib/attendance-client";
 import { getHistory, historyDate, historyStatus, type HistoryResult } from "../lib/attendance-history";
@@ -60,10 +60,8 @@ export function HomePage({ client, user, busy, error, onCapture, onSessionExpire
   const statusLabel = status === "DELETED" ? "Absensi perlu ditinjau HR" : completed ? "Absensi hari ini selesai" : checked ? today.data?.record?.checkIn.isLate ? "Check-in terlambat" : "Sudah check-in" : "Belum check-in";
 
   return <div className="employee-home-page">
-    <header className="employee-page-heading">
-      <div><p className="employee-eyebrow">Ruang kerja karyawan</p><h1>Hari ini</h1><p>{today.data?.employeeName ?? user.email}</p></div>
-      <div className="employee-server-clock"><span>Waktu server · WIB</span><strong>{serverClock}</strong></div>
-    </header>
+    <PageHeader title="Hari ini" description={today.data?.employeeName ?? user.email}
+      actions={<div className="employee-server-clock"><span>Waktu server · WIB</span><strong>{serverClock}</strong></div>} />
     {pending && <Notice message="Pengiriman absensi sebelumnya belum dapat dipastikan. Periksa hasilnya sebelum mengirim lagi." />}
     {(today.error || error) && <Notice message={today.error || error} />}
     {today.error && <Button variant="secondary" size="sm" onPress={today.reload}>Muat ulang</Button>}

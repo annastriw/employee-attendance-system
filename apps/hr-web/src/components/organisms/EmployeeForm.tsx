@@ -28,7 +28,7 @@ export function EmployeeForm({ departments, positions, busy, error, onSubmit, on
       <Label>{label}</Label><Input type={type} autoComplete={key === 'email' ? 'off' : undefined} maxLength={key === 'nik' ? 40 : key === 'name' ? 120 : key === 'phone' ? 30 : undefined} /><FieldError>{own}</FieldError>
     </TextField>;
   };
-  return <form className="employee-form" onSubmit={submit} noValidate aria-busy={busy} aria-label={editing ? "Edit profil karyawan" : "Tambah karyawan"}>
+  return <form className="employee-form" data-editing={editing} onSubmit={submit} noValidate aria-busy={busy} aria-label={editing ? "Edit profil karyawan" : "Tambah karyawan"}>
     <div className="form-section"><h2>Data karyawan</h2><div className="employee-form-grid">
       {field('nik', 'NIK')}{field('name', 'Nama')}{field('phone', 'Telepon (opsional)', 'tel')}<CalendarField label="Mulai bekerja" value={input.startDate} onChange={value => set('startDate', value)} disabled={busy} required error={errors.startDate} />
       <div><p className="form-label">Departemen</p><MasterAssignmentSelect label="Departemen" records={departments} current={departments.find(row => row.id === input.departmentId)} onChange={value => set('departmentId', value)} disabled={busy} />{errors.departmentId && <p className="field-validation" role="alert">{errors.departmentId}</p>}</div>

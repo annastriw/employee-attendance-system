@@ -39,8 +39,6 @@ export function DateRangeField({ label = "Rentang tanggal", value, onChange, dis
                 <RangeCalendar.GridBody>{(date) => <RangeCalendar.Cell date={date} />}</RangeCalendar.GridBody>
               </RangeCalendar.Grid>
             </RangeCalendar>
-          </DateRangePicker.Popover>
-        </DateRangePicker>
         <div className="date-range-presets" role="group" aria-label="Pilihan rentang cepat">
           {DATE_RANGE_PRESETS.map((preset) => {
             const dates = dateRangePreset(preset.id, now);
@@ -49,6 +47,9 @@ export function DateRangeField({ label = "Rentang tanggal", value, onChange, dis
               isDisabled={disabled} onPress={() => onChange(dates)}>{preset.label}</Button>;
           })}
         </div>
+          </DateRangePicker.Popover>
+        </DateRangePicker>
+
       </div>
     </I18nProvider>
   );

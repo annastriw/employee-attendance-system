@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { App } from "./App";
 import {
@@ -52,6 +52,25 @@ beforeEach(() => {
 });
 
 describe("Employee portal authentication journey", () => {
+  it("closes the shared drawer after navigation, restores menu focus, and persists the rail shortcut", async () => {
+    const auth = client();
+    vi.mocked(auth.restore).mockResolvedValue({ ...employee, mustChangePassword: false });
+    const user = userEvent.setup({ delay: null });
+    render(<App client={auth} />);
+    await screen.findByRole("heading", { name: "Hari ini" });
+    const menu = screen.getByRole("button", { name: "Menu navigasi" });
+    await user.click(menu);
+    const drawer = await screen.findByRole("dialog", { name: "Navigasi" });
+    await user.click(within(drawer).getByRole("link", { name: "Profil" }));
+    await screen.findByRole("heading", { name: "Profil" });
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "Navigasi" })).not.toBeInTheDocument());
+    await waitFor(() => expect(menu).toHaveFocus());
+    await user.keyboard("[[");
+    expect(await screen.findByRole("button", { name: "Perluas sidebar" })).toHaveAttribute("aria-expanded", "false");
+    expect(localStorage.getItem("employee-sidebar-collapsed")).toBe("true");
+    await user.keyboard("[[");
+    expect(localStorage.getItem("employee-sidebar-collapsed")).toBeNull();
+  });
   it("protects history routes until login and password change, without reading private records", async () => {
     window.history.replaceState(
       null,
@@ -125,7 +144,7 @@ describe("Employee portal authentication journey", () => {
     expect(window.location.pathname).toBe("/");
     expect(await screen.findByText("Synthetic Employee")).toBeVisible();
     expect(screen.getByText("Belum check-in")).toBeVisible();
-    await user.click(screen.getByRole("link", { name: "Profil akun" }));
+    await user.click(screen.getByRole("link", { name: "Profil" }));
     await user.click(await screen.findByRole("button", { name: "Keluar" }));
     await screen.findByRole("heading", { name: "Masuk" });
     expect(auth.logout).toHaveBeenCalledTimes(1);
@@ -162,7 +181,7 @@ describe("Employee portal authentication journey", () => {
     const user = userEvent.setup({ delay: null });
     render(<App client={auth} />);
     await screen.findByRole("heading", { name: "Hari ini" });
-    await user.click(screen.getByRole("link", { name: "Profil akun" }));
+    await user.click(screen.getByRole("link", { name: "Profil" }));
     await user.click(await screen.findByRole("button", { name: "Keluar" }));
     await screen.findByRole("heading", { name: "Masuk" });
     expect(screen.getByRole("alert")).toHaveTextContent(

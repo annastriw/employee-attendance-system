@@ -18,12 +18,14 @@ export function AttendanceDetailPage({
   onBack,
   handle,
   onSessionExpired = () => {},
+  deleted = false,
 }: {
   client: Client;
   id: string;
   onBack: () => void;
   handle: (e: unknown) => string;
   onSessionExpired?: () => void;
+  deleted?: boolean;
 }) {
   const [data, setData] = useState<AttendanceRecord | null>(null);
   const [reload, setReload] = useState(0);
@@ -110,7 +112,7 @@ export function AttendanceDetailPage({
   return (
     <div className="attendance-detail">
       <PageHeader
-        breadcrumb={[{ label: "Absensi", href: "/absensi" },
+        breadcrumb={[{ label: deleted ? "Absensi dihapus" : "Absensi", href: deleted ? "/absensi-dihapus" : "/absensi" },
           { label: data ? attendanceDate(data.attendanceDate) : "Tanggal" },
           { label: data?.employee.name ?? "Detail" }]}
         onNavigate={() => onBack()}
@@ -150,7 +152,7 @@ export function AttendanceDetailPage({
               { id: "history", label: "Riwayat perubahan", count: data.history?.length ?? 0 },
             ]} active={activeTab} onSelect={setActiveTab} />
             {activeTab === "evidence" ? <>
-            <section className="form-section">
+            <section className="attendance-evidence-section">
               {data.employee.status === "ARCHIVED" && <p className="employee-secondary">Karyawan arsip</p>}
               <div className="attendance-evidence-grid">
                 <AttendanceEvidence

@@ -1,5 +1,10 @@
 export const SIDEBAR_COLLAPSED_KEY = "hr-sidebar-collapsed";
 
+/** Match route segments, so absensi does not also match absensi-dihapus. */
+export function isWorkspacePath(pathname: string, destination: string): boolean {
+  return pathname === destination || pathname.startsWith(destination + "/");
+}
+
 export function readSidebarCollapsed(storage: Storage): boolean {
   try { return storage.getItem(SIDEBAR_COLLAPSED_KEY) === "true"; }
   catch { return false; }

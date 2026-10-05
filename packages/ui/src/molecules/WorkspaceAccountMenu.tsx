@@ -1,0 +1,44 @@
+import { Button, Dropdown, Label } from "@heroui/react";
+import { SignOut, UserCircle } from "@phosphor-icons/react";
+
+function initials(email: string) {
+  const local = email.split("@")[0] ?? "";
+  const parts = local.split(/[._-]+/).filter(Boolean);
+  const letters = parts.length > 1 ? parts[0][0] + parts[1][0] : local.slice(0, 2);
+  return letters.toUpperCase() || "A";
+}
+
+export function WorkspaceAccountMenu({ email, busy, onLogout, onProfile, roleLabel = "Admin HRD" }: {
+  roleLabel?: string;
+  email: string;
+  busy: boolean;
+  onLogout: () => Promise<void>;
+  onProfile: () => void;
+}) {
+  return (
+    <Dropdown>
+      <Button variant="ghost" isIconOnly isDisabled={busy} aria-label="Menu akun" className="account-trigger">
+        <span className="avatar" aria-hidden="true">{initials(email)}</span>
+      </Button>
+      <Dropdown.Popover className="account-popover" placement="bottom end">
+        <div className="account-header">
+          <span className="avatar" aria-hidden="true">{initials(email)}</span>
+          <div className="account-identity">
+            <strong>{roleLabel}</strong>
+            <span className="account-email">{email}</span>
+          </div>
+        </div>
+        <Dropdown.Menu aria-label="Tindakan akun" onAction={key => { if (key === "profile") onProfile(); else if (key === "logout") void onLogout(); }}>
+          <Dropdown.Item id="profile" textValue="Profil">
+            <UserCircle size={16} aria-hidden="true" />
+            <Label>Profil</Label>
+          </Dropdown.Item>
+          <Dropdown.Item id="logout" textValue="Keluar">
+            <SignOut size={16} aria-hidden="true" />
+            <Label>{busy ? "Keluar…" : "Keluar"}</Label>
+          </Dropdown.Item>
+        </Dropdown.Menu>
+      </Dropdown.Popover>
+    </Dropdown>
+  );
+}

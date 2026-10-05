@@ -35,6 +35,6 @@
   .employee-page-heading { align-items: flex-start; }
   .employee-home-grid { gap: .75rem; }
   .employee-today-panel, .employee-week-panel { gap: .75rem; }
-  .employee-primary-action { width: 100%; min-height: 2.5rem; }
+  .employee-primary-action { width: 100%; min-height: var(--ui-control-height); }
 }
 @media (max-width: 380px) { .employee-page-heading { flex-direction: column; align-items: stretch; } .employee-server-clock { width: max-content; } }

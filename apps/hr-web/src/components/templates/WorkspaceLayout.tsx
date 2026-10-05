@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@heroui/react";
 import {
   Briefcase,
@@ -7,7 +7,6 @@ import {
   CalendarBlank,
   Clock,
   Trash,
-  List,
   MagnifyingGlass,
   Monitor,
   MoonStars,
@@ -16,14 +15,14 @@ import {
   Sun,
   Users,
 } from "@phosphor-icons/react";
-import { Brand, PageTitle } from "../atoms/Brand";
+import { Brand } from "../atoms/Brand";
 import { AccountMenu } from "../molecules/AccountMenu";
-import { Notice, SidebarShell, ThemeToggle, setThemePreference } from "@attendance/ui";
+import { Notice, WorkspaceShell, setThemePreference } from "@attendance/ui";
 
 import { useAuth } from "../../routes/auth-context";
 import { viewPath, type View } from "../../routes/routes";
 import { CommandPalette, type Command } from "../organisms/CommandPalette";
-import { isTextEditingTarget, readSidebarCollapsed, writeSidebarCollapsed } from "../../lib/workspace-preferences";
+import { isWorkspacePath } from "../../lib/workspace-preferences";
 
 // Only destinations that exist in this increment are listed (spec: no dead links).
 const NAV: { view: View; label: string; icon: ReactNode; keywords?: string }[] = [
@@ -118,18 +117,11 @@ export function WorkspaceLayout() {
   const { user, busy, error, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [menuOpenedAtPath, setMenuOpenedAtPath] = useState(location.pathname);
-  const drawerOpen = menuOpen && menuOpenedAtPath === location.pathname;
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => readSidebarCollapsed(window.localStorage));
   const [paletteOpen, setPaletteOpen] = useState(false);
-  const menuToggle = useRef<HTMLButtonElement>(null);
   const paletteTrigger = useRef<HTMLButtonElement>(null);
 
-  const active = NAV.find((item) => location.pathname.startsWith(viewPath(item.view)))?.view;
+  const active = NAV.find((item) => isWorkspacePath(location.pathname, viewPath(item.view)))?.view;
   const title = location.pathname === "/profil" ? "Profil" : TITLES[active ?? "ringkasan"];
-
-  useEffect(() => { writeSidebarCollapsed(window.localStorage, sidebarCollapsed); }, [sidebarCollapsed]);
 
   // Global Cmd/Ctrl-K toggles the palette from anywhere in the shell.
   useEffect(() => {
@@ -138,10 +130,6 @@ export function WorkspaceLayout() {
         event.preventDefault();
         setPaletteOpen((open) => !open);
         return;
-      }
-      if (event.key === "[" && !isTextEditingTarget(event.target)) {
-        event.preventDefault();
-        setSidebarCollapsed((collapsed) => !collapsed);
       }
     };
     window.addEventListener("keydown", onKey);
@@ -196,52 +184,16 @@ export function WorkspaceLayout() {
     return [...navigation, ...theme, ...account];
   }, [navigate, logout]);
 
-  return (
-    <div className="dashboard-layout" data-sidebar-collapsed={sidebarCollapsed}>
-      <SidebarShell brand={<Brand />} navigation={<NavLinks onNavigate={() => setMenuOpen(false)} />}
-        footer={<><ThemeToggle /><AccountMenu email={user?.email ?? ""} busy={busy} onLogout={logout} onProfile={() => navigate("/profil")} /></>}
-        collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(value => !value)}
-        open={drawerOpen} onOpenChange={(open) => {
-          setMenuOpenedAtPath(location.pathname);
-          setMenuOpen(open);
-          if (!open) requestAnimationFrame(() => menuToggle.current?.focus());
-        }} />
-      <main id="konten" className="dashboard-main">
-        <header className="dashboard-header">
-          <div className="header-title">
-            <Button
-              ref={menuToggle}
-              variant="ghost"
-              isIconOnly
-              className="mobile-menu-toggle"
-              aria-label="Menu navigasi"
-              aria-expanded={drawerOpen}
-              aria-controls="hr-navigation-drawer"
-              onPress={() => { setMenuOpenedAtPath(location.pathname); setMenuOpen(!drawerOpen); }}
-            >
-              <List size={20} aria-hidden="true" />
-            </Button>
-              <PageTitle key={active ?? "profil"}>{title}</PageTitle>
-          </div>
-          <div className="header-actions">
-            <button
-              ref={paletteTrigger}
-              type="button"
-              className="cmdk-trigger"
-              onClick={() => setPaletteOpen(true)}
-              aria-haspopup="dialog"
-            >
-              <MagnifyingGlass size={16} aria-hidden="true" />
-              <span className="cmdk-trigger-label">Cari…</span>
-              <kbd className="cmdk-trigger-kbd">{shortcutHint}</kbd>
-            </button>
-          </div>
-        </header>
-        <section className="dashboard-content" aria-label={title}>
-          {error && <Notice message={error} />}
-          <Outlet />
-        </section>
-      </main>
+  return <>
+    <WorkspaceShell title={title} pathname={location.pathname} storageKey="hr-sidebar-collapsed"
+      brand={<Link to="/ringkasan" aria-label="HR Portal · Ringkasan"><Brand /></Link>}
+      navigation={close => <NavLinks onNavigate={close} />}
+      account={<AccountMenu email={user?.email ?? ""} busy={busy} onLogout={logout} onProfile={() => navigate("/profil")} />}
+      actions={<Button ref={paletteTrigger} variant="secondary" className="cmdk-trigger" onPress={() => setPaletteOpen(true)} aria-haspopup="dialog">
+        <MagnifyingGlass size={16} aria-hidden="true" /><span className="cmdk-trigger-label">Cari…</span><kbd className="cmdk-trigger-kbd">{shortcutHint}</kbd>
+      </Button>}>
+      {error && <Notice message={error} />}<Outlet />
+    </WorkspaceShell>
       <CommandPalette
         open={paletteOpen}
         commands={commands}
@@ -250,6 +202,5 @@ export function WorkspaceLayout() {
           paletteTrigger.current?.focus();
         }}
       />
-    </div>
-  );
+  </>;
 }

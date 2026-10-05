@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Skeleton, Table } from "@heroui/react";
 import { CaretLeft, CaretRight, Clock } from "@phosphor-icons/react";
-import { Notice, StatusPill, attendanceTone, listDateRange } from "@attendance/ui";
+import { Notice, PageHeader, StatusPill, attendanceTone, listDateRange } from "@attendance/ui";
 
 import { AttendanceFilters } from "../components/organisms/AttendanceFilters";
 import { AttendanceDetailPage } from "./AttendanceDetailPage";
@@ -45,19 +45,23 @@ export function AttendancePage({
   const range = listDateRange(params);
   const startDate = range?.startDate ?? "",
     endDate = range?.endDate ?? "",
-    employeeId = params.get("employeeId") ?? "";
+    employeeId = params.get("employeeId") ?? "",
+    departmentId = params.get("departmentId") ?? "",
+    positionId = params.get("positionId") ?? "";
   const page = Math.max(1, Math.min(1000000, Number(params.get("page")) || 1));
   const [data, setData] = useState<AttendancePageResult | null>(null);
   const [reload, setReload] = useState(0);
   const [loaded, setLoaded] = useState("");
   const [error, setError] = useState("");
-  const key = [deleted, startDate, endDate, employeeId, page, reload].join("|");
+  const key = [deleted, startDate, endDate, employeeId, departmentId, positionId, page, reload].join("|");
   const loading = key !== loaded;
   function update(next: Params) {
     onParamsChange({
       startDate: startDate || undefined,
       endDate: endDate || undefined,
       employeeId: employeeId || undefined,
+      departmentId: departmentId || undefined,
+      positionId: positionId || undefined,
       period: params.get("period") ?? undefined,
       page: page > 1 ? String(page) : undefined,
       id: undefined,
@@ -75,6 +79,8 @@ export function AttendancePage({
     if (startDate) query.set("startDate", startDate);
     if (endDate) query.set("endDate", endDate);
     if (employeeId) query.set("employeeId", employeeId);
+    if (departmentId) query.set("departmentId", departmentId);
+    if (positionId) query.set("positionId", positionId);
     client
       .api<AttendancePageResult>("attendance?" + query.toString())
       .then((result) => {
@@ -99,6 +105,8 @@ export function AttendancePage({
     startDate,
     endDate,
     employeeId,
+    departmentId,
+    positionId,
     page,
     reload,
     key,
@@ -110,6 +118,7 @@ export function AttendancePage({
         key={id}
         client={client}
         id={id}
+        deleted={deleted}
         onBack={() => update({ id: undefined })}
         handle={handle}
         onSessionExpired={onSessionExpired}
@@ -118,8 +127,9 @@ export function AttendancePage({
   const total = data?.meta.total ?? 0;
   return (
     <div className="attendance-page">
+      <PageHeader title={deleted ? "Absensi dihapus" : "Absensi"} />
       <AttendanceFilters
-        key={[startDate, endDate, employeeId].join("|")}
+        key={[startDate, endDate, employeeId, departmentId, positionId].join("|")}
         client={client}
         params={params}
         apply={update}
@@ -151,7 +161,7 @@ export function AttendancePage({
             {deleted ? "Tidak ada absensi dihapus" : "Tidak ada absensi"}
           </p>
           <p className="empty-body">Belum ada catatan dalam pilihan ini.</p>
-          {(startDate || endDate || employeeId || page > 1) && (
+          {(startDate || endDate || employeeId || departmentId || positionId || page > 1) && (
             <Button variant="secondary" onPress={() => onParamsChange({})}>
               Bersihkan filter
             </Button>
@@ -175,7 +185,7 @@ export function AttendancePage({
                     <InteractiveTableRow id={row.id} key={row.id}
                       label={`Buka absensi ${row.employee.name} ${attendanceDate(row.attendanceDate)}`}
                       onActivate={() => update({ id: row.id })}>
-                      <Table.Cell>
+                      <Table.Cell data-label="Karyawan">
                         <Button
                           variant="tertiary"
                           className="cell-strong employee-name"
@@ -198,7 +208,7 @@ export function AttendancePage({
                           {row.employee.status === "ARCHIVED" ? " · Arsip" : ""}
                         </span>
                       </Table.Cell>
-                      <Table.Cell>
+                      <Table.Cell data-label="Waktu WIB">
                         <span className="tabular">
                           {attendanceTime(row.checkIn?.eventTime)} —{" "}
                           {attendanceTime(row.checkOut?.eventTime)}
@@ -212,7 +222,7 @@ export function AttendancePage({
                           </span>
                         )}
                       </Table.Cell>
-                      <Table.Cell>
+                      <Table.Cell data-label="Status">
                         <StatusPill
                           tone={attendanceTone(deleted)}
                           label={attendanceStatus(row)}

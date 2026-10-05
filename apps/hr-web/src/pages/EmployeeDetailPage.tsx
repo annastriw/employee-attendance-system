@@ -496,7 +496,8 @@ export function EmployeeDetailPage({
   return (
     <div className="employee-detail">
       <PageHeader
-        breadcrumb={[{ label: 'Karyawan', href: '/karyawan' }, { label: detail?.name ?? 'Memuat…' }]}
+        breadcrumb={[{ label: 'Karyawan', href: '/karyawan' }, { label: detail?.name ?? 'Memuat…' },
+          ...(tab === 'detail' && detail?.status !== 'ARCHIVED' ? [{ label: 'Ubah profil' }] : [])]}
         onNavigate={() => onBack()}
         title={
           <span className="employee-detail-title">

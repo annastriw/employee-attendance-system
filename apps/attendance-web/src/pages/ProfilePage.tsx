@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@heroui/react";
-import { ArrowLeft, SignOut } from "@phosphor-icons/react";
-import { ChangePasswordForm, Notice, Skeleton, UnderlineTabs } from "@attendance/ui";
+import { SignOut } from "@phosphor-icons/react";
+import { ChangePasswordForm, PageHeader, Notice, Skeleton, UnderlineTabs } from "@attendance/ui";
 import type { AuthClient, EmployeeUser } from "../lib/auth-client";
 
 interface ProfileData { name: string; nik: string; email: string; phone: string | null; department: string; position: string; startDate: string; status: string; }
@@ -43,8 +43,9 @@ export function ProfilePage({ client, user, busy, error, onHome, onLogout, onCha
   }, [client, reload, onSessionExpired]);
   const date = (value: string) => new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Jakarta" }).format(new Date(`${value}T00:00:00+07:00`));
   return <div className="employee-profile-page">
-    <header className="employee-page-heading"><div><p className="employee-eyebrow">Akun karyawan</p><h1>Profil</h1><p>Informasi diri Anda dikelola oleh HR.</p></div><Button variant="ghost" size="sm" onPress={() => { void onLogout(); }}><SignOut size={16} /> Keluar</Button></header>
-    <div className="employee-profile-top"><Button variant="ghost" size="sm" onPress={onHome}><ArrowLeft size={16} /> Hari ini</Button></div>
+    <PageHeader title="Profil" description="Informasi diri Anda dikelola oleh HR."
+      breadcrumb={[{ label: "Hari ini", href: "/" }, { label: "Profil" }]} onNavigate={onHome}
+      actions={<Button variant="ghost" size="sm" onPress={() => { void onLogout(); }}><SignOut size={16} /> Keluar</Button>} />
     <UnderlineTabs items={[{ id: "profile", label: "Profil" }, { id: "security", label: "Keamanan" }]} active={tab} onSelect={setTab} />
     {tab === "profile" ? <section className="employee-profile-panel" aria-label="Data profil">
       <h2>Informasi diri</h2>

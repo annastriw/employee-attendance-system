@@ -149,3 +149,13 @@
   gap: 0.5rem;
 }
 @media (prefers-reduced-motion: reduce) { .history-card[data-interactive-row="true"] { transition: none; } }
+
+.history-filter > .filter-panel { display: flex; flex: initial; gap: .5rem; }
+.history-evidence-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: .75rem; min-width: 0; }
+.history-photo img { max-height: 320px; object-fit: contain; background: var(--background); }
+.history-card, .history-evidence, .history-deleted { padding: var(--ui-card-padding); }
+.history-card { gap: .375rem; }
+.history-list { grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); }
+.history-times { margin: .25rem 0; gap: .75rem; }
+.history-times dd { font-size: var(--ui-metric-font); }
+@media (max-width: 767px) { .history-evidence-grid { grid-template-columns: minmax(0, 1fr); } .history-pager { flex-wrap: wrap; } }

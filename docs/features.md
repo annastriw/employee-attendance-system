@@ -39,8 +39,9 @@ Gunakan akun pada [README](../README.md#live-demo). HR: buka monitoring periode 
 Karyawan: buka Hari ini, Riwayat dan detail presensi. Untuk presensi baru, izinkan kamera/lokasi pada HTTPS atau localhost. Foto/koordinat yang dikirim pengunjung berasal dari perangkatnya; contoh historis memakai ilustrasi dan koordinat simulasi.
 
 Profil di kedua portal menampilkan data diri read-only dan menyediakan ganti password.
-Portal Karyawan memakai navigasi desktop pada layar lebar dan bottom navigation pada
-mobile; tabel monitoring HR berubah menjadi kartu berlabel di layar kecil.
+Kedua portal memakai sidebar/rail desktop dan drawer mobile/tablet yang sama.
+Brand menuju beranda role; form/detail memenuhi lebar konten, tabel HR menjadi
+kartu berlabel di layar kecil, dan filter kategori dikelompokkan bersama chip/reset.
 
 ### Backend yang menunggu PR ke `main` dan deploy
 
@@ -55,6 +56,14 @@ endpoint-endpoint ini.
 | Employee Service + API Gateway | `GET /api/v1/me/profile` | Profil pengguna berdasarkan sesi |
 
 Fitur tren dan profil memiliki fallback aman sebelum endpoint tersedia di production.
+
+### Revisi 2026-10-05
+
+Absensi memakai filter periode, departemen dan jabatan historis; employeeId tetap
+didukung dari konteks detail karyawan. **Perlu PR+deploy:** Attendance Service +
+API Gateway, `GET /api/v1/attendance` menerima `departmentId` dan `positionId`.
+Query menyaring snapshot sebelum pagination/count, tanpa migration. Frontend dan
+backend revisi di dev perlu dirilis bersama sebelum filter kategori diuji production.
 
 ## Batas
 

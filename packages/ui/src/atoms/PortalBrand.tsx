@@ -13,7 +13,7 @@ export function PortalBrand({ name, icon }: PortalBrandProps) {
       <span className="brand-mark" aria-hidden="true">
         {icon ?? <UsersThree size={16} weight="bold" />}
       </span>
-      {name}
+      <span className="brand-label">{name}</span>
     </div>
   );
 }

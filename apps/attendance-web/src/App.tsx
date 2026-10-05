@@ -90,7 +90,7 @@ function RoutedApp({ client }: { client: AuthClient }) {
   })} />;
   else page = <section className="employee-not-found"><h1>Halaman tidak ditemukan</h1><p>Alamat ini tidak tersedia.</p><Button variant="secondary" onPress={() => navigate("/", { replace: true })}>Kembali ke Hari ini</Button></section>;
 
-  return <EmployeeWorkspace user={user}>{page}</EmployeeWorkspace>;
+  return <EmployeeWorkspace user={user} busy={busy} onLogout={logout}>{page}</EmployeeWorkspace>;
 }
 
 export function App({ client = authClient, router }: { client?: AuthClient; router?: (children: ReactNode) => ReactNode }) {

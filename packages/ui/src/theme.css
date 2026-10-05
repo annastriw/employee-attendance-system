@@ -2,6 +2,9 @@
 @import "@fontsource-variable/geist-mono";
 @import "./styles/patterns.css";
 @import "./styles/compact.css";
+@import "./styles/controls.css";
+@import "./styles/workspace.css";
+@import "./styles/lists.css";
 
 /*
  * Shared theme for HR Portal and Attendance Portal.

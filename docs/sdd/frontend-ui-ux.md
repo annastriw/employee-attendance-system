@@ -2,13 +2,13 @@
 
 ## Attendance Portal
 
-Login → ganti password awal jika wajib → Hari ini. Di desktop, workspace memakai header dan navigasi horizontal serta beranda dua kolom bila ruang cukup; pada layar kecil navigasi berpindah ke bottom bar dan konten menjadi satu kolom. Hari ini menampilkan jadwal/status serta check-in atau checkout sesuai kondisi. Capture membuka kamera/lokasi → validasi satu wajah → blink/manual → preview/retake → alasan late/early jika diminta → submit → hasil resmi.
+Login -> ganti password awal jika wajib -> Hari ini. Kedua role memakai WorkspaceShell yang sama: sidebar/rail desktop dan drawer tablet/mobile, brand menuju beranda, theme/menu akun seragam. Beranda mempertahankan dua kolom bila ruang cukup. Semua halaman memenuhi lebar konten dan memakai PageHeader/breadcrumb. Capture kamera tetap fullscreen dengan CTA di area bawah. Riwayat memakai filter periode grouped/chip/reset, grid kartu responsif, serta detail dua kolom bukti bila cukup ruang. Detail menjaga query ketika kembali; record terhapus berlabel dan tanpa foto. Profil read-only dan ganti password memakai pola HR.
 
 Riwayat memiliki DateRangeField dengan preset periode dan pagination; detail menjaga konteks kembali, waktu/alasan/lokasi, serta tombol foto sementara. Record terhapus berlabel dan tanpa foto. Menu akun menyediakan profil read-only, ganti password, dan logout.
 
 ## HR Portal
 
-Login → ganti password awal jika wajib → dashboard/monitoring. Desktop memakai sidebar yang dapat diringkas menjadi rail ikon; tablet/mobile memakai drawer. Ringkasan menampilkan metrik, tren kehadiran harian dengan rentang tanggal, dan komposisi hadir/terlambat/belum hadir pada tanggal terpilih. Daftar karyawan dapat difilter per tanggal/karyawan/departemen/status; pada layar kecil baris tabel tampil sebagai kartu berlabel dan tetap membuka detail presensi.
+Login → ganti password awal jika wajib → dashboard/monitoring. Desktop memakai sidebar yang dapat diringkas menjadi rail ikon; tablet/mobile memakai drawer. Ringkasan menampilkan metrik, tren kehadiran harian dengan rentang tanggal, dan komposisi hadir/terlambat/belum hadir pada tanggal terpilih. Direktori karyawan difilter departemen/jabatan/status dengan pencarian nama/NIK; Absensi difilter periode/departemen/jabatan snapshot historis, dengan konteks employeeId dari detail karyawan; pada layar kecil baris tabel tampil sebagai kartu berlabel dan tetap membuka detail presensi.
 
 Detail presensi berisi foto serta peta. Delete meminta alasan dan konfirmasi satu hari; halaman terhapus menyediakan restore. Menu akun menyediakan profil read-only dan ganti password.
 

@@ -12,7 +12,7 @@ import {
   Plus,
   Trash,
 } from '@phosphor-icons/react';
-import { Notice, StatusPill, ConfirmDialog, SearchInput, DateRangeField, listDateRange, rangeQuery } from "@attendance/ui";
+import { Notice, StatusPill, ConfirmDialog, SearchInput, PageHeader, FilterPanel, DateRangeField, listDateRange, rangeQuery } from "@attendance/ui";
 
 import { HolidayFormDialog } from '../components/organisms/HolidayFormDialog';
 import { InteractiveTableRow } from '../components/molecules/InteractiveTableRow';
@@ -168,12 +168,8 @@ export function HolidaysPage({
 
   return (
     <div className="holidays-page">
-      <div className="list-toolbar">
-        <SearchInput label="Cari keterangan hari libur" value={query} onChange={setQuery} onSearch={value => setFilters({ search: value.trim(), page: 1 })} placeholder="Cari keterangan hari libur" />
-
-        <Button
+      <PageHeader title="Hari Libur" breadcrumb={[{ label: "Master data" }, { label: "Hari Libur" }]} actions={        <Button
           variant="primary"
-          className="list-add"
           onPress={() => {
             setActionError('');
             setForm({});
@@ -181,13 +177,18 @@ export function HolidaysPage({
         >
           <Plus size={16} aria-hidden="true" />
           Tambah Hari Libur
-        </Button>
+        </Button>} />
+      <div className="list-toolbar">
+        <SearchInput label="Cari keterangan hari libur" value={query} onChange={setQuery} onSearch={value => setFilters({ search: value.trim(), page: 1 })} placeholder="Cari keterangan hari libur" />
+
+        <FilterPanel active={[
+          ...(range || year || month ? [{ key: "period", label: year || month ? [year, month].filter(Boolean).join(" / ") : range ? range.startDate + " s.d. " + range.endDate : "Semua tanggal", onRemove: () => onParamsChange({ search: search || undefined, ...rangeQuery(null) }) }] : []),
+          ...(search ? [{ key: "search", label: search, onRemove: () => { setQuery(''); setFilters({ search: '', page: 1 }); } }] : []),
+        ]} onReset={() => { setQuery(''); onParamsChange(rangeQuery(null)); }}>
+          <DateRangeField value={range} onChange={value => onParamsChange({ search: search || undefined, ...rangeQuery(value) })} />
+        </FilterPanel>
       </div>
 
-      <DateRangeField value={range} onChange={value => {
-        onParamsChange({ search: search || undefined, ...rangeQuery(value) });
-      }} />
-      <Button size="sm" variant="ghost" onPress={() => onParamsChange({ search: search || undefined, period: "ALL" })}>Semua tanggal</Button>
       {success && <Notice message={success} success />}
       {actionError && !form && !toDelete && <Notice message={actionError} />}
       {loadError && (
@@ -278,12 +279,12 @@ export function HolidaysPage({
                         <InteractiveTableRow key={record.id} id={record.id}
                           label={`Lihat hari libur ${formatted}`}
                           onActivate={() => { setActionError(''); setForm({ record }); }}>
-                          <Table.Cell className="cell-strong tabular">
+                          <Table.Cell data-label="Tanggal" className="cell-strong tabular">
                             {formatted}
                           </Table.Cell>
-                          <Table.Cell>{dayName}</Table.Cell>
-                          <Table.Cell>{record.description}</Table.Cell>
-                          <Table.Cell>
+                          <Table.Cell data-label="Hari">{dayName}</Table.Cell>
+                          <Table.Cell data-label="Keterangan">{record.description}</Table.Cell>
+                          <Table.Cell data-label="Status">
                             {isPast ? (
                               <StatusPill tone="inactive" label="Lampau" />
                             ) : isToday ? (
@@ -292,7 +293,7 @@ export function HolidaysPage({
                               <StatusPill tone="archived" label="Mendatang" />
                             )}
                           </Table.Cell>
-                          <Table.Cell className="col-actions">
+                          <Table.Cell data-label="Aksi" className="col-actions">
                             <div className="row-actions">
                               <Button
                                 variant="ghost"

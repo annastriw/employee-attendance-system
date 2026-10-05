@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Button, Skeleton } from "@heroui/react";
 import { ArrowLeft, CaretLeft, CaretRight } from "@phosphor-icons/react";
-import { Notice, DateRangeField, listDateRange, rangeQuery } from "@attendance/ui";
+import { Notice, PageHeader, FilterPanel, StatusPill, DateRangeField, listDateRange, rangeQuery } from "@attendance/ui";
 
 import { HistoryEvidence } from "../components/organisms/HistoryEvidence";
 import { AuthError, type AuthClient } from "../lib/auth-client";
@@ -89,23 +89,16 @@ export default function HistoryPage({
   const refresh = () => setReload((r) => r + 1);
   return (
       <div className="history-page">
-        <Button
-          variant="ghost"
-          className="history-back"
-          onPress={id ? () => update({ id: undefined }) : onHome}
-        >
-          <ArrowLeft size={16} aria-hidden="true" />
-          {id ? "Kembali ke riwayat" : "Hari ini"}
-        </Button>
-        <h1 tabIndex={-1} ref={title}>
-          {id ? "Detail absensi" : "Riwayat"}
-        </h1>
-        {!id && (
-          <div className="history-filter">
-            <DateRangeField value={range} onChange={value => update(rangeQuery(value))} />
-            <Button variant="ghost" onPress={() => update(rangeQuery(null))}>Semua tanggal</Button>
-          </div>
-        )}
+        <PageHeader title={id ? "Detail absensi" : "Riwayat"} titleRef={title}
+          breadcrumb={[{ label: "Hari ini", href: "/" }, { label: "Riwayat", ...(id ? { href: "/riwayat" } : {}) }, ...(id ? [{ label: detail ? historyDate(detail.attendanceDate) : "Detail absensi" }] : [])]}
+          onNavigate={href => href === "/" ? onHome() : update({ id: undefined })}
+          actions={<Button variant="ghost" onPress={id ? () => update({ id: undefined }) : onHome}>
+            <ArrowLeft size={16} aria-hidden="true" />{id ? "Kembali ke riwayat" : "Hari ini"}</Button>} />
+        {!id && <div className="history-filter"><FilterPanel
+          active={range ? [{ key: "period", label: historyDate(range.startDate) + " s.d. " + historyDate(range.endDate), onRemove: () => update(rangeQuery(null)) }] : []}
+          onReset={() => update(rangeQuery(null))}>
+          <DateRangeField value={range} onChange={value => update(rangeQuery(value))} />
+        </FilterPanel></div>}
         {loading ? (
           <div
             aria-busy="true"
@@ -127,7 +120,7 @@ export default function HistoryPage({
           <>
             <div className="history-detail-heading">
               <p>{historyDate(detail.attendanceDate)}</p>
-              <span className="history-status">{historyStatus(detail)}</span>
+              <StatusPill tone={detail.deletedAt ? "archived" : detail.checkIn.isLate ? "inactive" : "active"} label={historyStatus(detail)} />
             </div>
             <p className="history-muted">
               {detail.department} · {detail.position}
@@ -144,6 +137,7 @@ export default function HistoryPage({
                 <p className="history-reason">{detail.deleteReason}</p>
               </section>
             )}
+            <div className="history-evidence-grid">
             <HistoryEvidence
               key={detail.id + "-in-" + reload}
               client={client}
@@ -166,6 +160,7 @@ export default function HistoryPage({
               onSessionExpired={onSessionExpired}
               onReload={refresh}
             />
+            </div>
             <Button variant="ghost" onPress={refresh}>
               Muat ulang
             </Button>
@@ -188,7 +183,7 @@ export default function HistoryPage({
                     onClick={() => update({ id: row.id })}
                     onKeyDown={event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); update({ id: row.id }); } }}>
                     <span className="history-date-label">{historyDate(row.attendanceDate)}</span>
-                    <span className="history-status">{historyStatus(row)}</span>
+                    <StatusPill tone={row.deletedAt ? "archived" : row.checkIn.isLate ? "inactive" : "active"} label={historyStatus(row)} />
                     <dl className="history-times">
                       <div>
                         <dt>Check-in</dt>

@@ -6,6 +6,13 @@
 > [frontend-design-system.md](../docs/sdd/frontend-design-system.md) dan
 > [frontend-ui-ux.md](../docs/sdd/frontend-ui-ux.md). Revisi 2026-10-05 (gabungan R + X).
 
+> **Arahan revisi terbaru 2026-10-05 — Fase C:** audit dahulu, lalu T12–T21 serial.
+> Seluruh revisi dikerjakan lokal terlebih dahulu. Instruksi terbaru setelah T21:
+> pengguna meminta agen commit/push ke dev; tidak membuat PR atau merge.
+> Pengguna menangani PR main dan rilis. Kedua role memakai sidebar/shell
+> seragam. Detail/form memenuhi lebar area konten. Arahan ini menggantikan aturan
+> push per task dan top/bottom navigation Karyawan untuk fase revisi.
+
 ## 0. Cara memakai dokumen ini (WAJIB dibaca agen baru)
 
 1. `git fetch; git status -sb; git log --oneline -10` — HEAD/branch aktual adalah
@@ -34,11 +41,11 @@
 | --- | --- | --- |
 | D1 | Bug runtime | Pengguna mengirim console/Network error bila diminta; agen beri instruksi cek spesifik. |
 | D2 | Chart | shadcn chart (Recharts). Dua chart di Ringkasan: **tren kehadiran harian** (rentang) + **donut hadir/terlambat/belum hadir hari ini**. Backend boleh ditambah. |
-| D3 | Sidebar | Collapsible **rail ikon** di desktop + **Drawer** di mobile/tablet; state tersimpan `localStorage`. |
+| D3 | Sidebar | Kedua role memakai shell/sidebar bersama: collapsible **rail ikon** di desktop + **Drawer** di mobile/tablet; state tersimpan `localStorage`. |
 | D4 | Profil | Tiap role punya halaman Profil: **lihat data diri (read-only) + ganti password**. Tidak ada edit data profil oleh diri sendiri (revisi pengguna 2026-10-05: "cukup ubah password, itu yang penting"). |
 | D5 | Rentang tanggal | HeroUI `DateRangePicker` + preset Hari ini / 7 hari / 30 hari / Bulan ini; default **30 hari terakhir** (list). Ringkasan default hari ini. |
 | D6 | Search | Trigger saat ketik, debounce **300 ms**, tanpa tombol Cari; kosong = semua. |
-| D7 | Backend | Boleh diubah. **Langsung push `dev` + beri tahu pengguna** (sebut service, endpoint, migration bila ada). Pengguna PR ke `main` lalu cek di production. |
+| D7 | Backend | Boleh diubah; sebut service, endpoint, migration bila ada. Fase C: seluruh perubahan tetap lokal, pengguna push dev/PR main/deploy. Jangan push otomatis. |
 | D8 | "Tanpa iterasi" | Tiap task diserahkan utuh (build/lint/test hijau). Penyesuaian rasa dari pengguna = finishing normal, bukan task gagal. |
 | D9 | Testing | Manual oleh pengguna. Agen: typecheck/build + lint + unit untuk logika murni berubah (bagian 5). Tanpa Playwright/E2E/screenshot. |
 | D10 | Edit profil | Tidak ada (lihat D4). Data profil tetap dikelola HR sesuai baseline — tidak perlu ubah baseline. |
@@ -371,6 +378,80 @@ Fase B:
   date range, profil), `docs/features.md`, README bila perlu.
 - Ringkasan perubahan backend untuk PR main (endpoint, migration).
 - Squash commit hanya bila pengguna minta (tanpa force push ke main).
+
+### Fase C — revisi setelah pemeriksaan production (2026-10-05)
+
+Sumber audit: [frontend-revision-audit.md](frontend-revision-audit.md). Untuk fase
+ini `[x]` berarti pekerjaan teknis lokal selesai, bukan sudah dipush. Acceptance
+visual tetap terpisah. Satu task aktif pada satu waktu, tanpa subagen.
+
+### T12 `[x]` Audit frontend dan kontrak revisi
+- Audit kedua portal, shared UI, CSS library terpasang, dan kontrak API filter.
+- Temuan A01–A15, arah UI, dependensi dan batas verifikasi tercatat pada audit.
+- Tidak mengubah implementasi aplikasi atau memicu deployment.
+
+### T13 `[x]` Kontrol/state bersama dan skala kompak
+- Rapikan focus/hover mulai Login: satu ring pada group, ukuran input anak/suffix/
+  clear button seragam, tanpa outline bersarang atau garis keluar batas kontrol.
+- Seragamkan Button, segmented status/tabs, Chip/status badge, label dan spacing
+  lewat HeroUI dan token shared; pertahankan fokus keyboard yang terlihat.
+- DoD teknis: lint/typecheck, unit hanya logika yang berubah. Visual pending user.
+
+### T14 `[x]` Workspace/sidebar bersama kedua role
+- Susun CSS base sebelum media; satu shell di packages/ui, drawer <1024 dan rail
+  desktop, footer/theme/account rapi, label nav terlihat sesuai mode.
+- Brand HR link ke Ringkasan; brand Karyawan link ke Hari ini. Logo, label dan
+  tombol collapse satu baris konsisten. Drawer punya ID/label reusable.
+- Perbaiki active route/title `/absensi-dihapus`, close-on-navigation, Escape dan
+  pengembalian fokus. Unit untuk resolusi route/preference yang berubah.
+
+### T15 `[x]` Filter Absensi berbasis kategori ujung ke ujung
+- Ganti picker berbasis nama menjadi periode, departemen dan jabatan; employeeId
+  tetap mendukung konteks deep link dari detail karyawan.
+- Backend Attendance Service + API Gateway: optional departmentId/positionId,
+  query snapshot historis sebelum pagination/count; tanpa migration karena kolom
+  snapshot sudah ada. Unit DTO/query/gateway; frontend state query dan Back utuh.
+- Catat Perlu PR+deploy; jangan push. Tidak menyaring hanya halaman hasil di UI.
+
+### T16 `[x]` Toolbar/filter dikelompokkan dan tabel HR kompak
+- Satu pola grouped filter HeroUI Popover/Drawer, chips aktif, reset sejajar dan
+  search terpisah sesuai konteks; terapkan Absensi/terhapus/direktori/monitoring.
+- Rampingkan semua tabel, sel identitas, status, aksi/pager dengan Table HeroUI;
+  mobile cards berlabel, informasi penting tetap bisa dibaca/dibuka.
+- Unit query/filter yang berubah, regresi file list terdampak.
+
+### T17 `[x]` Detail/form full width dan breadcrumb
+- Absensi detail, karyawan detail/ubah/tambah memenuhi lebar konten shell pada
+  semua ukuran; susun grid identitas, form dan evidence, kurangi panel bersarang.
+- PageHeader/Breadcrumb pada list→tambah/detail/ubah; Back mempertahankan konteks.
+- Unit logika navigasi/form terdampak, tanpa perubahan lifecycle bisnis.
+
+### T18 `[x]` Ringkasan dan chart responsif
+- Perbaiki urutan cascade breakpoint; metrik, date controls, trend dan donut
+  tertata pada mobile/tablet/desktop. Range/preset tidak menekan chart.
+- Atur tinggi/ruang sumbu/legend/tooltip, header dan status chart secara kompak.
+- Query/metric data tetap benar; verifikasi file monitoring terdampak.
+
+### T19 `[x]` Master data seragam
+- Departemen/Jabatan/Hari Libur: PageHeader, toolbar kategori, reset, tab status,
+  tabel/cards, pagination, empty/error/loading dan dialog satu pola bersama.
+- Periode Hari Libur tidak lagi menjadi sibling lepas tanpa toolbar/layout.
+- Regresi unit file master data terdampak, lint/typecheck.
+
+### T20 `[x]` Portal Karyawan seragam dengan HR
+- Integrasikan sidebar/shell T14 pada Hari ini/Riwayat/Profil; header, breadcrumb,
+  filter, status, aksi, spacing dan detail memakai pola shared.
+- Beranda tetap responsif desktop; detail riwayat memenuhi konten. Kamera tetap
+  mode fokus fullscreen dengan kontrol/copy seragam dan kembali ke workspace.
+- Unit route/guard dan file alur terdampak, manual kamera oleh pengguna.
+
+### T21 `[x]` Pemeriksaan akhir dan handoff lokal
+- Review diff dan audit ulang A01–A15; lint/typecheck, unit berubah, build bila
+  resource memungkinkan. Tidak mengarang bukti render/hasil build.
+- Sinkronkan spec/progress; daftar file/perubahan backend/hasil verifikasi dan
+  checklist manual 320/768/1024/1440 + terang/gelap + keyboard + D11.
+- Semua hasil tetap lokal; pengguna push/PR/deploy. Jangan centang visual acceptance
+  sebelum pengguna oke.
 
 ## 7. Peta permintaan pengguna → task
 
