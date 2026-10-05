@@ -351,7 +351,9 @@ describe("employee browser routes", () => {
     const detail = render(<App client={auth} />);
     expect(await screen.findByRole("heading", { name: "Detail absensi" })).toBeInTheDocument();
     expect(window.location.pathname).toBe(`/riwayat/${recordId}`);
-    expect(auth.api).toHaveBeenCalledWith(`me/attendance/${recordId}`, expect.anything());
+    // The header renders before HistoryPage's data-loading effect has run.
+    await waitFor(() => expect(auth.api).toHaveBeenCalledWith(`me/attendance/${recordId}`, expect.anything()));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Fixture detail unavailable");
     detail.unmount();
 
     const profileAuth = client();
@@ -361,5 +363,7 @@ describe("employee browser routes", () => {
     render(<App client={profileAuth} />);
     expect(await screen.findByRole("heading", { name: "Profil" })).toBeInTheDocument();
     expect(window.location.pathname).toBe("/profil");
+    await waitFor(() => expect(profileAuth.api).toHaveBeenCalledWith("me/profile"));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Profil karyawan belum dapat dimuat.");
   });
 });

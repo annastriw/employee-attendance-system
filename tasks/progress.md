@@ -1,5 +1,14 @@
 # Progres dan titik lanjut
 
+## Perbaikan CI setelah T21 (2026-10-05)
+
+- CI run [37268278818](https://github.com/annastriw/employee-attendance-system/actions/runs/37268278818), SHA 9ea86b6: lint, Prisma validate/generate, typecheck database dan build seluruh aplikasi lulus; unit Karyawan gagal pada App.test.tsx, test deep link riwayat. API mock belum dipanggil saat assertion setelah heading.
+- Root cause: heading PageHeader tersedia sebelum effect data-loading; test menganggap heading menandakan request telah dimulai. Lokal fokus lulus tetapi CI membuktikan race pada penjadwalan React.
+- Fix hanya test: tunggu request dengan waitFor dan buktikan error fixture tampil sebelum unmount. Bagian profil juga menunggu request dan hasil fallback. Tidak menambah delay tetap, mengurangi assertion, atau mengubah aplikasi/workflow CI/backend.
+- File: apps/attendance-web/src/App.test.tsx dan tasks/progress.md. Pengguna meminta commit/push dev; tidak membuat PR/main/deployment. Tidak ada server baru.
+- Verifikasi lokal: App.test 10/10, lint attendance-web dan tsc -b lulus. Build tidak diulang: hanya test/dokumentasi berubah dan build CI SHA sebelumnya lulus; RAM bebas OS 1,74 GiB, resource_status tidak tersedia.
+- **Lanjut:** commit/push dev, lalu pantau CI PR yang sudah ada. Acceptance visual revisi tetap mengikuti checklist T21.
+
 ## T21 selesai teknis; pengguna meminta commit/push dev (2026-10-05)
 
 - T12-T21 selesai teknis setelah audit A01-A15. Sidebar/shell kedua role, kontrol hover/focus inset, grouped filter/chips/reset, Table HeroUI/cards mobile, detail/form fullwidth/breadcrumb, chart dan master data telah diperbaiki. Acceptance visual/kamera belum dicentang.
