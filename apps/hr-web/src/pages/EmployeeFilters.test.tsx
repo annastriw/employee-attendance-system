@@ -30,13 +30,14 @@ describe('Employee category filters through shared overlays', () => {
     const select = async (label: string, name: string) => {
       await user.click(screen.getByRole('button', { name: 'Buka filter' }));
       const panel = await screen.findByRole('dialog', { name: 'Filter daftar' });
+      const [dismissPanel] = screen.getAllByRole('button', { name: 'Dismiss' });
       await user.click(await screen.findByRole('button', { name: label }));
       const menu = await screen.findByRole('menu');
       await user.click(await screen.findByRole('menuitemradio', { name }));
-      // Wait for the nested dropdown to finish closing before Escape targets
-      // the parent panel. Its exit animation can outlive user.click in CI.
+      // The dropdown closes asynchronously. Use the parent overlay's accessible
+      // dismiss control rather than racing its keyboard focus restoration.
       await waitFor(() => expect(menu).not.toBeInTheDocument());
-      await user.keyboard('{Escape}');
+      await user.click(dismissPanel);
       await waitFor(() => expect(panel).not.toBeInTheDocument());
     };
     await screen.findByText('Belum ada karyawan');

@@ -1,5 +1,23 @@
 # Progres dan titik lanjut
 
+## CI overlay filter - tindak lanjut fokus (2026-10-05)
+
+- Run [37276394119](https://github.com/annastriw/employee-attendance-system/actions/runs/37276394119)
+  pada 4c4e2f4 masih gagal pada penutupan panel induk. Menunggu dropdown anak
+  unmount belum menjamin pemulihan fokus keyboard selesai; Escape di jsdom CI
+  tidak mencapai panel. Unit lain/lint/build tetap lulus pada run tersebut.
+- Test kategori/query kini menutup parent melalui tombol dismiss accessible
+  bawaan React Aria setelah dropdown anak unmount, lalu membuktikan parent
+  terlepas dari DOM. Kontrol penutup parent ditangkap sebelum dropdown anak
+  dibuka agar tidak tertukar dengan kontrol dismiss overlay anak.
+  Tetap memakai overlay asli dan semua assertion kategori,
+  kombinasi status/search, pagination, clear dan reset; tidak menyembunyikan
+  kegagalan dengan delay, mock, skip, hidden query atau menambah timeout.
+- File/task aktif tetap EmployeeFilters.test dan catatan ini; verifikasi
+  terfokus CI=true 9/9 lulus, lint file dan tsc -b HR lulus.
+  Berikutnya push dev dan pantau CI SHA terbaru.
+  Tidak mengubah aplikasi, workflow, schema atau membuat server permanen.
+
 ## Perbaikan CI fase D - overlay filter (2026-10-05)
 
 - Pengguna meminta membaca dan memperbaiki CI hingga lulus. Run
