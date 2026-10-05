@@ -25,3 +25,10 @@ Pemeriksaan sesudah kurasi pada 2026-10-05 mencakup 898 blob reachable dengan at
 Batas: regex tidak menjamin semua format token atau secret lama yang sudah diganti terdeteksi. GitHub Environment secrets, isi VPS, dan percakapan di luar Git tidak termasuk audit blob. Audit dependency/security sebelumnya bukan jaminan keadaan dependency saat ini. Jika ada secret aktif yang terungkap, rotasi di penerbitnya diperlukan; menghapus history saja tidak membatalkan credential.
 
 Kredensial storage demo lama pernah ditempelkan dalam percakapan setup. Infrastruktur demo lama kemudian dihapus/reset menurut output pengguna. Jika nilainya dipakai ulang di lingkungan lain, credential tersebut perlu diganti; nilainya tidak disalin ke dokumentasi ini.
+
+## Audit finalisasi 2026-10-05
+
+Sebelum kurasi lanjutan: 1.346 blob reachable; sesudah kurasi: 1.199 blob.
+Tidak ditemukan pola secret/match secret lokal aktif maupun path sensitif tracked
+pada kedua checkpoint. Aturan dan batas audit sama seperti bagian sebelumnya.
+Backup lengkap/mapping tanggal/proteksi tetap privat dan ignored.

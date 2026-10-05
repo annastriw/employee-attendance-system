@@ -52,3 +52,10 @@ curl --max-time 15 -fsS https://attendance-api.annastriwidagdo.me/health
 Backend release baru harus memperlihatkan release sesuai SHA image. Periksa workflow dan fitur live manual. Health gagal memicu rollback image aplikasi sebelumnya; migration/data tidak dibalik otomatis. Gunakan migration kompatibel dan backup sebelum perubahan schema.
 
 Backup DB sebelum seed/migration pernah dikonfirmasi pengguna. Restore drill, backup terjadwal, uji kapasitas dan hardening tambahan ditunda pengguna untuk scope demo; dokumen tidak mengklaim pekerjaan tersebut lulus. [Runbook operasional](deployment/vps-production-manual.md).
+
+## Deployment branch frontend
+
+Kedua aplikasi menyimpan `git.deploymentEnabled` pada vercel.json: main aktif, dev
+nonaktif. Push dev dan PR tidak membuat preview; CI GitHub tetap memeriksa build/unit.
+Ini menerapkan keputusan production-only dan mencegah build preview menghabiskan
+kuota. [Referensi resmi Vercel](https://vercel.com/docs/project-configuration/git-configuration).

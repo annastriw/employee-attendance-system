@@ -18,13 +18,15 @@ Task utama T01–T31 satu backlog; UX01–UX07 dahulu merupakan pemetaan layar, 
 
 Kerja serial satu fitur ujung ke ujung, SDD + Kanban. Unit logika berubah wajib; integrasi cepat hanya jika perlu; UI manual pengguna. Coding/push dev, PR main untuk live. [Development](../docs/development.md), [testing](../docs/testing/workflow.md).
 
-## Finalisasi aktif
+## Finalisasi
 
 Backend/frontend diterima final oleh pengguna pada 2026-10-05, termasuk revisi S02.
-Satu increment serial: konsolidasi docs dan audit berkas → review/verifikasi → kurasi
+Urutan finalisasi serial: konsolidasi docs dan audit berkas → review/verifikasi → kurasi
 history dengan backup privat → push dev → PR main dan CI → merge → CD hijau →
 sinkronisasi dev/main lokal/remote. Tidak ada subagen atau fitur baru.
 
 [Rangkuman frontend dan bukti](../docs/development/finalization.md), [status](todo.md),
 [titik lanjut](progress.md). Restore drill, backup terjadwal, uji beban dan hardening
 masih ditunda pengguna; bukan klaim lulus.
+
+Rilis produk final PR #16 dan CI/CD hijau. Penutupan bukti/config production-only mengikuti PR berikut; lihat [progress](progress.md).

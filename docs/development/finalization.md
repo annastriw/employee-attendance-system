@@ -104,3 +104,29 @@ Tidak menjalankan ulang suite DB/storage/browser atau mengubah data production h
 untuk finalisasi. Warning bundle frontend >500 kB historis masih ada; build sebelumnya
 berhasil. Status CI/CD dan sinkronisasi final dicatat di [progress](../../tasks/progress.md).
 Acuan pengujian berikutnya: [workflow testing](../testing/workflow.md).
+
+## Hasil rilis final
+
+[PR #16](https://github.com/annastriw/employee-attendance-system/pull/16) merged pada
+2026-10-05, SHA dee438b4bef5d2c86ae1721a2faab256f982f2ab.
+[CI final](https://github.com/annastriw/employee-attendance-system/actions/runs/37282766000)
+lulus branch policy, lint, Prisma validate/generate, typecheck, build seluruh aplikasi,
+unit dan checks script deployment.
+[Production images](https://github.com/annastriw/employee-attendance-system/actions/runs/37283169859)
+sukses; image/migration/VPS dilewati sesuai detector karena tidak ada perubahan backend.
+
+Vercel production HR dan Karyawan Ready, domain production terpasang dan kedua checks
+success pada SHA merge. Push sinkronisasi dev sempat menghasilkan status rate-limit
+preview yang kemudian digantikan hasil sukses production; bukan kegagalan build source.
+Konfigurasi kedua portal sekarang menonaktifkan deployment dev agar production-only
+sesuai keputusan pengguna. Perubahan konfigurasi/bukti penutupan mengikuti PR biasa.
+
+Health API HTTP 200: status ok, auth ready, release 3404061 (rilis backend sebelumnya).
+HTTP kedua domain portal 200. SHA backend tetap benar karena finalisasi frontend/docs
+tidak mengganti backend. Pemeriksaan HTTP awal dengan User-Agent Python default
+mendapat 403; request dengan User-Agent browser berhasil. Ini pemeriksaan operasional,
+bukan login/E2E atau penerimaan visual baru.
+
+Kurasi menjadi 31 commit dev sebelum merge, lalu 32 setelah PR #16. dev/main lokal
+dan remote identik pada checkpoint dee438b; commit bukti/config berikut tidak dikurasi
+ulang. Proteksi main-production asli aktif dan working tree bersih pada checkpoint.

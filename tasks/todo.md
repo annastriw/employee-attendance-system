@@ -38,10 +38,14 @@ Restore backup, backup terjadwal, uji beban/kapasitas dan hardening tambahan dit
 - [x] Pengguna menyatakan seluruh backend/frontend final, termasuk S02, 2026-10-05.
 - [x] Push dev, kurasi history dengan backup dan PR/merge main diizinkan untuk finalisasi.
 - [x] Konsolidasi dokumentasi dan audit berkas selesai, review/tautan/diff lulus.
-- [ ] PR final dev → main dan CI head terbaru hijau.
-- [ ] Merge main dan workflow production/deployment yang relevan hijau.
-- [ ] dev/main lokal dan remote identik; ruleset main asli aktif, working tree bersih.
+- [x] PR final dev → main dan CI head terbaru hijau.
+- [x] Merge main dan workflow production/deployment yang relevan hijau.
+- [x] dev/main lokal dan remote identik; ruleset main asli aktif, working tree bersih.
 
 [Bukti frontend dan pengujian historis](../docs/development/finalization.md).
 [Progress](progress.md) mencatat task aktif serta hasil final; tidak mengulang pengujian
 lama tanpa perubahan atau risiko baru.
+
+Checklist rilis/sinkronisasi di atas terbukti pada checkpoint PR #16 (dee438b).
+Penutupan bukti dan konfigurasi dev tanpa preview dirilis lewat PR biasa, tanpa
+mengubah frontend/backend produk.
