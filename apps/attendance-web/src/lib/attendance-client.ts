@@ -53,7 +53,10 @@ interface Envelope<T> {
   meta: { requestId: string; serverTime: string };
 }
 const uuid =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const calendarDate = (value: unknown): value is string =>
+  typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value) &&
+  Number.isFinite(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value;
 const zoned = (s: unknown): s is string =>
   typeof s === "string" &&
   /[+]07:00$/.test(s) &&
@@ -63,7 +66,7 @@ export function readRecord(value: unknown): CheckInRecord {
   if (
     !row ||
     !uuid.test(row.id) ||
-    !/^\d{4}-\d{2}-\d{2}$/.test(row.attendanceDate) ||
+    !calendarDate(row.attendanceDate) ||
     row.deletedAt !== null ||
     !row.checkIn ||
     !uuid.test(row.checkIn.id) ||
@@ -101,7 +104,7 @@ export async function getToday(client: AuthClient, signal?: AbortSignal) {
     !d ||
     !zoned(value.meta?.serverTime) ||
     typeof d.employeeName !== "string" ||
-    !/^\d{4}-\d{2}-\d{2}$/.test(d.attendanceDate) ||
+    !calendarDate(d.attendanceDate) ||
     typeof d.eligible !== "boolean" ||
     typeof d.reasonRequired !== "boolean" ||
     typeof d.checkoutReasonRequired !== "boolean" ||

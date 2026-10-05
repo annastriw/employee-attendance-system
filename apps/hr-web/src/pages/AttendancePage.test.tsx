@@ -55,7 +55,7 @@ function setup(
   const api = vi.fn(
     async (path: string, init?: { method?: string; body?: unknown }) => {
       if (override) return override(path, init);
-      if (path.startsWith("employees?")) return { items: [], total: 0, page: 1, pageSize: 20 };
+      if (/^(departments|positions)\?/.test(path)) return { items: [], total: 0, page: 1, pageSize: 100 };
       return path.includes("?")
         ? { data: [record], meta: { total: 21, page: 1, pageSize: 20 } }
         : { data: record };
@@ -81,6 +81,18 @@ function setup(
   };
 }
 describe("HRD attendance lifecycle", () => {
+  it("sends historical category filters to the server and preserves them on detail navigation", async () => {
+    const { api, user, onParamsChange } = setup(`departmentId=${id}&positionId=${id}&employeeId=${id}&period=all`);
+    await screen.findByRole("button", { name: /Buka absensi Sari/ });
+    const request = api.mock.calls.find(([path]) => path.startsWith("attendance?"))![0];
+    const query = new URLSearchParams(request.split("?")[1]);
+    expect(query.get("departmentId")).toBe(id);
+    expect(query.get("positionId")).toBe(id);
+    await user.click(screen.getByRole("button", { name: /Buka absensi Sari/ }));
+    expect(onParamsChange).toHaveBeenCalledWith(expect.objectContaining({ id, departmentId: id, positionId: id, employeeId: id }));
+    await user.click(screen.getByRole("button", { name: "Reset filter" }));
+    expect(onParamsChange).toHaveBeenLastCalledWith(expect.objectContaining({ departmentId: undefined, positionId: undefined, employeeId: undefined, page: undefined }));
+  });
   it("requires reason and confirmation of employee/date before deleting the whole day", async () => {
     const { user, api } = setup();
     await user.click(

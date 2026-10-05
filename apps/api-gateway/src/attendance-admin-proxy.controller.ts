@@ -22,6 +22,8 @@ const QUERIES = new Set([
   'startDate',
   'endDate',
   'employeeId',
+  'departmentId',
+  'positionId',
   'page',
   'pageSize',
 ]);

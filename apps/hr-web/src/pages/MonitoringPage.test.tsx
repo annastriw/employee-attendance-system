@@ -189,16 +189,25 @@ describe("MonitoringPage (Layar H02 Monitoring & Rekap)", () => {
   it("opens inline employee details and links to attendance evidence", async () => {
     const { user } = setup();
     await screen.findByText("Karyawan Aktif");
-    await user.click(screen.getByRole("row", { name: "Buka detail Aditya Pratama" }));
+    await user.click(await screen.findByRole("row", { name: /Aditya Pratama/ }));
     expect(await screen.findByRole("dialog", { name: "Detail Aditya Pratama" })).toBeInTheDocument();
     const detail = screen.getByRole("dialog", { name: "Detail Aditya Pratama" });
     expect(detail).toHaveTextContent("Teknologi Informasi");
     expect(within(detail).getByRole("link", { name: /Buka detail absensi/i })).toHaveAttribute("href", "/absensi?id=rec-1");
     await user.click(screen.getByRole("button", { name: "Tutup detail" }));
     await waitFor(() => expect(screen.queryByRole("dialog", { name: "Detail Aditya Pratama" })).not.toBeInTheDocument());
-    await user.click(screen.getByRole("row", { name: "Buka detail Citra Dewi" }));
+    await user.click(await screen.findByRole("row", { name: /Citra Dewi/ }));
     expect(await screen.findByRole("dialog", { name: "Detail Citra Dewi" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Buka profil karyawan" })).toHaveAttribute("href", "/karyawan?employee=emp-3");
+  });
+
+  it("opens an employee row with the keyboard on desktop and mobile layouts", async () => {
+    const { user } = setup();
+    await screen.findByText("Karyawan Aktif");
+    const row = await screen.findByRole("row", { name: /Aditya Pratama/ });
+    row.focus();
+    await user.keyboard(" ");
+    expect(await screen.findByRole("dialog", { name: "Detail Aditya Pratama" })).toBeInTheDocument();
   });
 
   it("shows the pending-release fallback when the trend endpoint is unavailable", async () => {
@@ -274,6 +283,7 @@ describe("MonitoringPage (Layar H02 Monitoring & Rekap)", () => {
   it("filters by department dropdown", async () => {
     const { onParamsChange, user } = setup();
 
+    await user.click(await screen.findByRole("button", { name: "Buka filter" }));
     await waitFor(() => {
       expect(screen.getByLabelText("Filter Departemen")).toBeInTheDocument();
     });

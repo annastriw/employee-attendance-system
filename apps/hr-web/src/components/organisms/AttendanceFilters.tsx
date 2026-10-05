@@ -1,39 +1,46 @@
 import { useEffect, useState } from "react";
-import { Button } from "@heroui/react";
-import { DateRangeField, FilterSelect, Notice, SearchInput, listDateRange, rangeQuery } from "@attendance/ui";
+
+import { DateRangeField, FilterSelect, FilterPanel, Notice, listDateRange, rangeQuery } from "@attendance/ui";
 import type { AuthClient } from "../../lib/auth-client";
+import { loadMasters } from "../../lib/employees";
 type Params = Record<string, string | undefined>;
+type Option = { id: string; name: string };
 export function AttendanceFilters({ client, params, apply, handle }: {
   client: Pick<AuthClient, "api">; params: URLSearchParams;
   apply: (params: Params) => void; handle: (e: unknown) => string;
 }) {
-  const [query, setQuery] = useState("");
-  const [search, setSearch] = useState("");
-  const employeeId = params.get("employeeId") ?? "";
-  const [options, setOptions] = useState<{ id: string; name: string }[]>([]);
+  const [departments, setDepartments] = useState<Option[]>([]);
+  const [positions, setPositions] = useState<Option[]>([]);
   const [error, setError] = useState("");
-  const [searching, setSearching] = useState(false);
+  const departmentId = params.get("departmentId") ?? "";
+  const positionId = params.get("positionId") ?? "";
   useEffect(() => {
     let active = true;
-    client.api<{ items: { id: string; name: string }[] }>("employees?pageSize=20" + (search ? "&search=" + encodeURIComponent(search) : ""))
-      .then(result => { if (active) { setOptions(result.items); setError(""); } })
-      .catch((e: unknown) => { if (active) setError(handle(e)); })
-      .finally(() => { if (active) setSearching(false); });
+    Promise.all([loadMasters(client, "departments"), loadMasters(client, "positions")])
+      .then(([departments, positions]) => { if (active) { setDepartments(departments); setPositions(positions); setError(""); } })
+      .catch((e: unknown) => { if (active) setError(handle(e)); });
     return () => { active = false; };
-  }, [client, search, handle]);
+  }, [client, handle]);
+  function options(rows: Option[], id: string, label: string) {
+    return [{ id: "", name: `Semua ${label}` }, ...(id && !rows.some(row => row.id === id) ? [{ id, name: `${label} terpilih` }] : []), ...rows];
+  }
+  const range = listDateRange(params);
+  const clear = () => apply({ ...rangeQuery(null), departmentId: undefined, positionId: undefined, employeeId: undefined, page: undefined });
+  const active = [
+    ...(departmentId ? [{ key: "department", label: departments.find(row => row.id === departmentId)?.name ?? "Departemen terpilih", onRemove: () => apply({ departmentId: undefined, page: undefined }) }] : []),
+    ...(positionId ? [{ key: "position", label: positions.find(row => row.id === positionId)?.name ?? "Jabatan terpilih", onRemove: () => apply({ positionId: undefined, page: undefined }) }] : []),
+    ...(params.get("employeeId") ? [{ key: "employee", label: "Karyawan terpilih", onRemove: () => apply({ employeeId: undefined, page: undefined }) }] : []),
+    ...(range ? [{ key: "period", label: range.startDate + " s.d. " + range.endDate, onRemove: () => apply(rangeQuery(null)) }] : []),
+  ];
   return <div>
     <div className="attendance-filters">
-      <DateRangeField value={listDateRange(params)} onChange={value => apply(rangeQuery(value))} />
-      <Button size="sm" variant="ghost" onPress={() => apply(rangeQuery(null))}>Semua tanggal</Button>
-      <div className="attendance-employee-filter">
-        <SearchInput label="Cari karyawan untuk filter" value={query}
-          onChange={value => { setQuery(value); setSearching(true); }} onSearch={value => setSearch(value.trim())}
-          placeholder="Cari nama atau NIK" />
-        <FilterSelect label="Karyawan" value={employeeId}
-          onChange={value => apply({ employeeId: value || undefined, page: undefined, id: undefined })}
-          options={[{ id: "", name: "Semua karyawan" }, ...(employeeId && !options.some(e => e.id === employeeId) ? [{ id: employeeId, name: "Karyawan terpilih" }] : []), ...options]} />
-        {query && <span className="employee-secondary" role="status">{searching ? "Mencari\u2026" : options.length ? "Pilih hasil pencarian." : "Tidak ada hasil pencarian."}</span>}
-      </div>
+      <FilterPanel active={active} onReset={clear}>
+        <DateRangeField value={range} onChange={value => apply(rangeQuery(value))} />
+        <FilterSelect label="Departemen" value={departmentId} options={options(departments, departmentId, "departemen")}
+          onChange={value => apply({ departmentId: value || undefined, page: undefined })} />
+        <FilterSelect label="Jabatan" value={positionId} options={options(positions, positionId, "jabatan")}
+          onChange={value => apply({ positionId: value || undefined, page: undefined })} />
+      </FilterPanel>
     </div>
     {error && <Notice message={error} />}
   </div>;

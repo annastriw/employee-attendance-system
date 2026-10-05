@@ -1,191 +1,95 @@
-import { Button, Spinner } from "@heroui/react";
-import { Clock, CheckCircle, SignOut, ArrowRight } from "@phosphor-icons/react";
-import { AuthShell, Notice } from "@attendance/ui";
-
+import { useEffect, useState } from "react";
+import { Button, Skeleton } from "@heroui/react";
+import { ArrowRight, CalendarCheck, CheckCircle, Clock, ClockCounterClockwise, WarningCircle } from "@phosphor-icons/react";
+import { Notice, PageHeader, StatusPill } from "@attendance/ui";
 import type { AuthClient, EmployeeUser } from "../lib/auth-client";
 import { clockLabel, type AttendancePurpose } from "../lib/attendance-client";
+import { getHistory, historyDate, historyStatus, type HistoryResult } from "../lib/attendance-history";
 import { useToday } from "../features/checkin/use-today";
-import {
-  hasPendingCheckIn,
-  pendingAttendancePurpose,
-} from "../features/checkin/use-check-in";
+import { hasPendingCheckIn, pendingAttendancePurpose } from "../features/checkin/use-check-in";
 import "../styles/home-page.css";
+
 interface Props {
-  client: AuthClient;
-  user: EmployeeUser;
-  busy: boolean;
-  error: string;
-  onLogout: () => Promise<void>;
-  onCapture: (purpose: AttendancePurpose) => void;
-  onSessionExpired: () => void;
+  client: AuthClient; user: EmployeeUser; busy: boolean; error: string;
+  onCapture: (purpose: AttendancePurpose) => void; onSessionExpired: () => void;
   onHistory: () => void;
-  onProfile: () => void;
 }
-export function HomePage({
-  client,
-  user,
-  busy,
-  error,
-  onLogout,
-  onCapture,
-  onSessionExpired,
-  onHistory,
-  onProfile,
-}: Props) {
+
+function dateStep(value: string, amount: number) {
+  const date = new Date(`${value}T12:00:00+07:00`);
+  date.setDate(date.getDate() + amount);
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta", year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
+}
+
+export function HomePage({ client, user, busy, error, onCapture, onSessionExpired, onHistory }: Props) {
   const today = useToday(client, onSessionExpired);
-  const d = today.data,
-    pending = hasPendingCheckIn(client);
-  const checked = d?.status === "CHECKED_IN" || d?.status === "CHECKED_OUT";
-  const completed = d?.status === "CHECKED_OUT";
-  const nextPurpose =
-    pendingAttendancePurpose(client) ?? (checked ? "CHECK_OUT" : "CHECK_IN");
-  return (
-    <AuthShell
-      name="Attendance Portal"
-      brandIcon={<Clock size={16} weight="bold" />}
-    >
-      <h1>Hari ini</h1>
-      <p className="page-intro">{d?.employeeName ?? user.email}</p>
-      {today.loading ? (
-        <p role="status">
-          <Spinner size="sm" /> Memuat absensi…
-        </p>
-      ) : (
-        d && (
-          <>
-            <div className="today-date">
-              {new Intl.DateTimeFormat("id-ID", {
-                weekday: "long",
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-                timeZone: "Asia/Jakarta",
-              }).format(new Date(d.attendanceDate + "T00:00:00+07:00"))}
-            </div>
-            <section className="today-card" aria-label="Absensi hari ini">
-              <div className="today-card-top">
-                <span>
-                  {d.schedule.type === "REGULAR_WORKDAY"
-                    ? "Jam kerja"
-                    : d.schedule.type === "HOLIDAY"
-                      ? "Hari libur"
-                      : "Akhir pekan"}
-                </span>
-                <span>
-                  {d.schedule.start.slice(0, 5)}–{d.schedule.end.slice(0, 5)}{" "}
-                  WIB
-                </span>
-              </div>
-              <div className="today-checkin">
-                <span>Check-in</span>
-                <strong>
-                  {d.record?.checkIn
-                    ? clockLabel(d.record.checkIn.eventTime)
-                    : "—"}
-                </strong>
-              </div>
-              {d.record?.checkIn && (
-                <div className="today-checkin">
-                  <span>Checkout</span>
-                  <strong>
-                    {d.record.checkOut
-                      ? clockLabel(d.record.checkOut.eventTime)
-                      : "—"}
-                  </strong>
-                </div>
-              )}
-              <p
-                className={checked ? "today-status recorded" : "today-status"}
-                role="status"
-              >
-                {checked && <CheckCircle size={16} aria-hidden="true" />}
-                {d.status === "DELETED"
-                  ? "Absensi dihapus HRD"
-                  : completed
-                    ? d.record?.checkOut?.isOutsideSchedule
-                      ? "Selesai · Di luar jadwal"
-                      : d.record?.checkOut?.isEarlyDeparture
-                        ? "Selesai · Pulang lebih awal"
-                        : "Absensi selesai"
-                    : checked
-                      ? d.record?.checkIn.isOutsideSchedule
-                        ? "Di luar jadwal"
-                        : d.record?.checkIn.isLate
-                          ? "Terlambat"
-                          : "Tepat waktu"
-                      : "Belum check-in"}
-              </p>
-            </section>
-            {d.status === "DELETED" && (
-              <p className="page-intro">
-                Tanggal ini sudah memiliki catatan. Hubungi HRD untuk
-                pemeriksaan.
-              </p>
-            )}
-            {!d.eligible && (
-              <Notice
-                message={
-                  d.ineligibilityMessage ??
-                  "Akun belum memenuhi syarat absensi."
-                }
-              />
-            )}
-          </>
-        )
-      )}
-      {pending && (
-        <Notice message="Pengiriman absensi sebelumnya belum dapat dipastikan. Periksa hasilnya." />
-      )}
-      {(today.error || error) && <Notice message={today.error || error} />}
-      {today.error && (
-        <Button variant="outline" fullWidth onPress={today.reload}>
-          Muat ulang
-        </Button>
-      )}
-      <Button
-        variant="primary"
-        className="today-action"
-        fullWidth
-        isDisabled={
-          busy ||
-          (!pending &&
-            (today.loading ||
-              !d?.eligible ||
-              !["NOT_CHECKED_IN", "CHECKED_IN"].includes(d.status)))
-        }
-        onPress={() => onCapture(nextPurpose)}
-      >
-        {pending
-          ? nextPurpose === "CHECK_OUT"
-            ? "Cek hasil checkout"
-            : "Cek hasil check-in"
-          : completed
-            ? "Absensi selesai"
-            : checked
-              ? "Checkout"
-              : "Check-in"}
-        {(!completed || pending) && <ArrowRight size={16} aria-hidden="true" />}
-      </Button>
-      <Button
-        variant="secondary"
-        className="today-action"
-        fullWidth
-        onPress={onHistory}
-      >
-        Riwayat absensi
-      </Button>
-      <Button variant="ghost" className="today-action" onPress={onProfile}>Profil &amp; keamanan akun</Button>
-      <Button
-        variant="ghost"
-        className="primary-button today-action"
-        isDisabled={busy}
-        onPress={() => {
-          void onLogout();
-        }}
-      >
-        <SignOut size={16} aria-hidden="true" />
-        {busy ? "Keluar…" : "Keluar"}
-      </Button>
-    </AuthShell>
-  );
+  const pending = hasPendingCheckIn(client);
+  const checked = today.data?.status === "CHECKED_IN" || today.data?.status === "CHECKED_OUT";
+  const completed = today.data?.status === "CHECKED_OUT";
+  const nextPurpose = pendingAttendancePurpose(client) ?? (checked ? "CHECK_OUT" : "CHECK_IN");
+  const [recent, setRecent] = useState<HistoryResult | null>(null);
+  const [recentError, setRecentError] = useState("");
+  const [clockNow, setClockNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (!today.data?.attendanceDate) return;
+    const controller = new AbortController();
+    const endDate = today.data.attendanceDate;
+    const query = new URLSearchParams({ startDate: dateStep(endDate, -6), endDate, page: "1" });
+    getHistory(client, query, controller.signal).then(result => {
+      if (!controller.signal.aborted) { setRecent(result); setRecentError(""); }
+    }).catch((reason: unknown) => {
+      if (!controller.signal.aborted) {
+        if (reason instanceof Error && "status" in reason && reason.status === 401) onSessionExpired();
+        setRecentError(reason instanceof Error ? reason.message : "Ringkasan belum dapat dimuat.");
+      }
+    });
+    return () => controller.abort();
+  }, [client, today.data?.attendanceDate, onSessionExpired]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setClockNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const serverClock = today.serverTime
+    ? new Intl.DateTimeFormat("id-ID", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" })
+      .format(new Date(Date.parse(today.serverTime) + Math.max(0, clockNow - today.serverTimeReceivedAt)))
+    : "--:--:--";
+  const status = today.data?.status;
+  const statusLabel = status === "DELETED" ? "Absensi perlu ditinjau HR" : completed ? "Absensi hari ini selesai" : checked ? today.data?.record?.checkIn.isLate ? "Check-in terlambat" : "Sudah check-in" : "Belum check-in";
+
+  return <div className="employee-home-page">
+    <PageHeader title="Hari ini" description={today.data?.employeeName ?? user.email}
+      actions={<div className="employee-server-clock"><span>Waktu server · WIB</span><strong>{serverClock}</strong></div>} />
+    {pending && <Notice message="Pengiriman absensi sebelumnya belum dapat dipastikan. Periksa hasilnya sebelum mengirim lagi." />}
+    {(today.error || error) && <Notice message={today.error || error} />}
+    {today.error && <Button variant="secondary" size="sm" onPress={today.reload}>Muat ulang</Button>}
+    <div className="employee-home-grid">
+      <section className="employee-today-panel" aria-label="Status absensi hari ini">
+        <div className="employee-panel-heading"><div><h2>Status hari ini</h2><p>{today.data ? new Intl.DateTimeFormat("id-ID", { timeZone: "Asia/Jakarta", weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(new Date(`${today.data.attendanceDate}T00:00:00+07:00`)) : "Jadwal dan catatan kehadiran"}</p></div>
+          {today.data && <StatusPill tone={today.data.schedule.type === "REGULAR_WORKDAY" ? "active" : "inactive"} label={today.data.schedule.type === "REGULAR_WORKDAY" ? "Hari kerja" : today.data.schedule.type === "HOLIDAY" ? "Hari libur" : "Akhir pekan"} />}
+        </div>
+        {today.loading ? <div className="employee-today-loading" aria-busy="true"><Skeleton /><Skeleton /><Skeleton /></div> : today.data ? <>
+          <div className={`employee-today-status${checked ? " is-recorded" : ""}`}><span>{checked ? <CheckCircle size={18} /> : <CalendarCheck size={18} />}</span><div><strong>{statusLabel}</strong><p>{today.data.schedule.start.slice(0, 5)}–{today.data.schedule.end.slice(0, 5)} WIB · Jam kerja</p></div></div>
+          <div className="employee-punches">
+            <div><span>Check-in</span><strong>{today.data.record?.checkIn ? clockLabel(today.data.record.checkIn.eventTime) : "—"}</strong></div>
+            <div><span>Checkout</span><strong>{today.data.record?.checkOut ? clockLabel(today.data.record.checkOut.eventTime) : "—"}</strong></div>
+          </div>
+          {!today.data.eligible && <Notice message={today.data.ineligibilityMessage ?? "Akun belum memenuhi syarat absensi."} />}
+          {status === "DELETED" && <Notice message="Catatan hari ini telah dihapus HR. Hubungi HR untuk pemeriksaan." />}
+          <Button variant="primary" className="employee-primary-action" isDisabled={busy || (!pending && (today.loading || !today.data.eligible || !["NOT_CHECKED_IN", "CHECKED_IN"].includes(today.data.status)))} onPress={() => onCapture(nextPurpose)}>
+            {pending ? nextPurpose === "CHECK_OUT" ? "Cek hasil checkout" : "Cek hasil check-in" : completed ? "Absensi selesai" : checked ? "Checkout" : "Check-in"}{(!completed || pending) && <ArrowRight size={16} />}
+          </Button>
+        </> : <div className="employee-empty-panel"><WarningCircle size={20} /><span>Data hari ini belum tersedia.</span></div>}
+      </section>
+      <section className="employee-week-panel" aria-label="Ringkasan tujuh hari">
+        <div className="employee-panel-heading"><div><h2>Aktivitas 7 hari</h2><p>{recent ? `${recent.data.length} catatan kehadiran` : "Riwayat terbaru"}</p></div><Button variant="ghost" size="sm" onPress={onHistory}>Lihat semua <ArrowRight size={14} /></Button></div>
+        {recentError ? <Notice message={recentError} /> : !today.data || (!recent && !recentError) ? <div className="employee-week-loading" aria-busy="true"><Skeleton /><Skeleton /><Skeleton /></div> : recent?.data.length ? <ul className="employee-recent-list">{recent.data.slice(0, 7).map(record => <li key={record.id}>
+          <div className="employee-recent-date"><span>{historyDate(record.attendanceDate)}</span><small>{record.department}</small></div><StatusPill tone={record.checkIn.isLate ? "inactive" : "active"} label={historyStatus(record)} />
+        </li>)}</ul> : <div className="employee-empty-panel"><ClockCounterClockwise size={20} /><span>Belum ada catatan dalam tujuh hari terakhir.</span></div>}
+        <div className="employee-week-footnote"><Clock size={14} /> Pembaruan data mengikuti waktu server.</div>
+      </section>
+    </div>
+  </div>;
 }

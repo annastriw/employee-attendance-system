@@ -26,6 +26,17 @@ function setup(rows: Position[] = [finance], params = "", fail?: Error) {
 }
 
 describe("Positions page", () => {
+  it("preserves search while changing status and resets pagination", async () => {
+    const { api, onParamsChange, user } = setup([finance], "search=fin&status=ACTIVE&page=3");
+    await screen.findByRole("grid", { name: "Daftar jabatan" });
+    const query = new URLSearchParams(api.mock.calls.find(([path]) => path.startsWith("positions?"))![0].split("?")[1]);
+    expect(query.get("search")).toBe("fin"); expect(query.get("status")).toBe("ACTIVE"); expect(query.get("page")).toBe("3");
+    await user.click(screen.getByRole("radio", { name: "Nonaktif" }));
+    expect(onParamsChange).toHaveBeenLastCalledWith({ search: "fin", status: "INACTIVE", page: undefined });
+    await user.click(screen.getByRole("button", { name: "Reset filter" }));
+    expect(onParamsChange).toHaveBeenLastCalledWith({});
+  });
+
   it("shows an activation failure and keeps the inactive row", async () => {
     const { api, user } = setup([{ ...finance, status: "INACTIVE" }]);
     await screen.findByText("Keuangan");

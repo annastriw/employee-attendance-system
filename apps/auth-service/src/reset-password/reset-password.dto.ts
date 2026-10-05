@@ -1,9 +1,9 @@
 import { IsUUID } from 'class-validator';
 
 export class ResetEmployeePasswordDto {
-  @IsUUID('4', { message: 'employeeId harus UUID v4.' })
+  @IsUUID(undefined, { message: 'employeeId harus UUID.' })
   employeeId!: string;
 
-  @IsUUID('4', { message: 'actorAccountId harus UUID v4.' })
+  @IsUUID(undefined, { message: 'actorAccountId harus UUID.' })
   actorAccountId!: string;
 }

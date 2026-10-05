@@ -1,5 +1,239 @@
 # Progres dan titik lanjut
 
+## CI overlay filter - tindak lanjut fokus (2026-10-05)
+
+- Run [37276394119](https://github.com/annastriw/employee-attendance-system/actions/runs/37276394119)
+  pada 4c4e2f4 masih gagal pada penutupan panel induk. Menunggu dropdown anak
+  unmount belum menjamin pemulihan fokus keyboard selesai; Escape di jsdom CI
+  tidak mencapai panel. Unit lain/lint/build tetap lulus pada run tersebut.
+- Test kategori/query kini menutup parent melalui tombol dismiss accessible
+  bawaan React Aria setelah dropdown anak unmount, lalu membuktikan parent
+  terlepas dari DOM. Kontrol penutup parent ditangkap sebelum dropdown anak
+  dibuka agar tidak tertukar dengan kontrol dismiss overlay anak.
+  Tetap memakai overlay asli dan semua assertion kategori,
+  kombinasi status/search, pagination, clear dan reset; tidak menyembunyikan
+  kegagalan dengan delay, mock, skip, hidden query atau menambah timeout.
+- File/task aktif tetap EmployeeFilters.test dan catatan ini; verifikasi
+  terfokus CI=true 9/9 lulus, lint file dan tsc -b HR lulus.
+  Berikutnya push dev dan pantau CI SHA terbaru.
+  Tidak mengubah aplikasi, workflow, schema atau membuat server permanen.
+
+## Perbaikan CI fase D - overlay filter (2026-10-05)
+
+- Pengguna meminta membaca dan memperbaiki CI hingga lulus. Run
+  [37275831556](https://github.com/annastriw/employee-attendance-system/actions/runs/37275831556)
+  pada SHA 1fb79d1: lint, Prisma, typecheck DB dan build lulus; unit HR gagal satu
+  EmployeeFilters.test. HR lain 124 unit dan Karyawan 106 unit lulus pada CI itu.
+- Penyebab: setelah memilih dropdown kategori, test langsung mengirim Escape
+  saat dropdown anak belum selesai unmount. Escape tidak menutup panel induk;
+  tombol Buka filter masih tertutup secara aksesibilitas. Tidak ada bukti query
+  filter aplikasi rusak dari kegagalan ini.
+- Fix hanya test: tangkap node menu/panel, tunggu menu anak dilepas dari DOM,
+  kirim Escape lalu tunggu panel induk dilepas sebelum interaksi selanjutnya.
+  Tidak menggunakan delay tetap, hidden query, mock overlay atau timeout lebih besar.
+- Task aktif: verifikasi terfokus dan push fix ke dev, kemudian pantau CI PR
+  yang sudah ada. Source aplikasi/workflow/aturan bisnis tidak diubah.
+- File: apps/hr-web/src/pages/EmployeeFilters.test.tsx dan tasks/progress.md.
+  Verifikasi kedua file filter/EmployeesPage 9/9 lulus, termasuk run CI=true.
+  Lint file dan tsc -b HR lulus. Build tidak diulang karena hanya test/docs
+  berubah dan build CI sebelumnya lulus. Tidak ada server permanen baru.
+  Hasil CI setelah push harus dinilai pada SHA baru, bukan run gagal sebelumnya.
+
+## Instruksi terbaru - commit/push dev (2026-10-05)
+
+Pengguna meminta push ke dev setelah selesai. Menggantikan batas local-only
+fase D. Verifikasi teknis T22-T31 lulus; commit dipisah perbaikan UUID/filter
+API dan revisi UI/logout. PR/merge/main/deployment tidak diminta; acceptance
+manual tetap pending. Tidak ada perubahan schema/migration.
+Commit UUID/filter `1f15d96` telah dipush ke origin/dev. Revisi UI/logout dan
+catatan fase D disimpan pada commit berikutnya bersama entri ini.
+
+## Fase D - T29-T31 tambahan selesai teknis lokal (2026-10-05)
+
+- Permintaan lanjutan pengguna: satu akses Keluar di popup akun kedua portal,
+  scan seluruh UUID dan perbaiki bug/issue terkonfirmasi. Total fase D 10 task
+  T22-T31 selesai teknis; acceptance visual tetap pending.
+- Logout di profil/form/command palette dihapus. Layar wajib ganti password
+  mendapatkan popup akun tanpa navigasi Profil; busy memblokir aksi.
+- Audit UUID memperbaiki pipe master Employee, reset password Auth, bind Media,
+  referensi foto/daily Attendance dan parser record/event Karyawan. UUID v1/v5
+  diterima, malformed tetap ditolak, aturan v4 Idempotency-Key dipertahankan.
+  Filter monitoring/detail riwayat case-insensitive; tanggal mustahil ditolak.
+  Fixture storage Media yang gagal typecheck kini memuat workerEnabled:false.
+- Bukti tambahan: 109 unit terfokus lulus (sebagian tumpang tindih checkpoint
+  sebelumnya); lint dua frontend + empat backend, noEmit empat backend dan
+  build/typecheck dua frontend lulus. Rincian/batas: [fase D](frontend-revision-phase-d.md).
+- File terkait: shared ChangePasswordForm/AuthShell/WorkspaceAccountMenu/styles;
+  profil/layout/route/App/tests kedua portal; DTO/pipe/service serta regresi
+  Employee/Auth/Media/Attendance; parser attendance-client/history dan tests;
+  design-system serta tasks. Tidak ada migration atau data tersimpan diubah.
+- Tidak ada server permanen baru. Test deadline storage menutup server loopback
+  sementara. Proses verifikasi selesai; tidak ada pemeriksaan live/DB/browser.
+- Semua unstaged/lokal di dev, **tanpa commit/push/PR/merge/deploy**. Kelima service
+  dan kedua frontend perlu rilis terpisah agar perbaikan tersedia di production.
+- Lanjut: pengguna cek [acceptance manual](frontend-revision-phase-d.md) termasuk
+  popup logout dan UUID; checklist tidak dicentang sebelum pengguna menyatakan oke.
+
+## Fase D - T22-T28 selesai teknis lokal (2026-10-05)
+
+- Seluruh task revisi selesai teknis; [audit, plan, bukti dan checklist](frontend-revision-phase-d.md). UI/alur manual belum diterima pengguna dan checkbox acceptance tetap kosong.
+- Perbaikan: UUID v1 filter Ringkasan; Gateway kategori daftar karyawan; toolbar search/filter/tab/Tambah sejajar dengan chips terpisah; kalender fixed sebulan utuh tanpa scroll dengan tombol bulan; danger/warning/success aksi dan konfirmasi; brand tetap di header; tema via menu; nama profil + email akun terlihat; shared shell kedua role mobile/tablet/desktop.
+- Verifikasi terfokus: HR 75 unit, Karyawan 30, backend 30 = 135 unit lulus. Lint HR/Karyawan/Gateway/Attendance, tsc kedua frontend dan noEmit dua backend lulus. Build kedua portal lulus (warning ukuran chunk masih ada); Vite rebuild sesudah perubahan CSS drawer akhir lulus. Review diff/whitespace dan tautan dokumen lulus. Tidak ada test integrasi DB/live atau browser harness dijalankan.
+- **Perlu rilis terpisah:** Attendance Service GET /api/v1/monitoring/employees menerima UUID sah, API Gateway GET /api/v1/employees meneruskan departmentId/positionId. Dua frontend perlu rilis bersama. Tanpa migration; production belum berubah.
+- Semua perubahan tetap unstaged di branch dev, tanpa commit/push/PR/merge/deploy sesuai instruksi terbaru. Hasil build ignored. Tidak menjalankan server baru; seluruh proses verifikasi selesai.
+- File terkait: kedua backend DTO/proxy + regresi; shared UI calendar/theme/account/shell/confirm/styles; HR list/detail/layout/tests, Karyawan App/workspace/test; design-system dan tasks. Tidak menimpa pekerjaan pengguna (tree awal bersih).
+- **Lanjut pengguna:** jalankan kedua portal lokal sesuai tooling yang ada; cek seluruh matriks filter, bulan 28/29/30/31 hari termasuk 6 minggu, toolbar/warna/header/akun/tema, drawer/rail dan capture pada 320/375/768/1024/1440px + landscape, dua tema. Catat scope yang oke sebelum centang acceptance. Tidak memerlukan task coding baru otomatis.
+
+
+## Fase D — implementasi/verifikasi T23–T28 (2026-10-05)
+
+- Klarifikasi pengguna diterima: kalender fixed satu bulan utuh tanpa geser, tombol pindah bulan; brand tetap di header walaupun sidebar terbuka. Pengguna meminta terus sampai seluruh task selesai teknis.
+- Filter API diperbaiki lokal (Attendance DTO UUID sah dan Gateway departemen/jabatan khusus list employees). Unit Attendance monitoring 14/14 dan Gateway 11/11 lulus. Tanpa migration.
+- Toolbar/shared kalender, warna konfirmasi/aksi, shell header tetap, menu tema dan identitas nama/email telah diimplementasikan. HR 7 halaman 68/68; filter karyawan interaksi 1/1; kontrol workspace 3/3; Karyawan History/Login/Capture 20/20 dan App ulang 10/10 lulus. Lint empat package dan typecheck dua frontend/dua backend lulus pada checkpoint ini.
+- Review menemukan callback expiry yang berubah memicu fetch identitas berulang; kini menggunakan ref, lookup berdasarkan client/email/role. Fixture App absensi diperbaiki berbasis endpoint agar request identitas tidak memakan respons absensi berdasarkan urutan effect.
+- Task aktif T28: unit tambahan master/holiday dan build frontend sedang berjalan, kemudian final lint/diff/docs/checklist. Tidak ada server baru; tidak commit/push. Acceptance visual tetap pending.
+
+## Fase D — T22 audit selesai, klarifikasi awal (2026-10-05)
+
+- Instruksi terbaru: T terdahulu dianggap selesai oleh pengguna. Revisi baru T22–T28 serial, lokal **tanpa commit/push**, PR/merge/deploy. Ini menggantikan instruksi push pada entri sebelumnya untuk scope revisi ini.
+- Tree awal bersih, branch dev. Audit sumber dua portal/shared UI/Gateway/service mencatat D01–D12 dan matriks seluruh filter di [fase D](frontend-revision-phase-d.md). Tidak menjalankan browser, unit atau build untuk tahap audit/dokumentasi ini.
+- Dua akar masalah terkonfirmasi: Monitoring DTO hanya UUID v4, menolak UUID v1 laporan; Gateway direktori employees menolak departmentId/positionId walau DTO/query Employee sudah mendukungnya.
+- Task aktif: T22 penyelesaian audit/klarifikasi. Pertanyaan dikirim tentang target scroll kalender dan lokasi brand tetap. Plan T23–T28 siap; belum mengubah kode aplikasi.
+- File sesi: tasks/frontend-revision-phase-d.md, plan.md, todo.md, redesign-sprint.md, progress.md dan docs/sdd/frontend-design-system.md. Proses/port: tidak menjalankan server baru; 5173/5174/3000–3004 tidak ditemukan listening saat audit awal.
+- **Lanjut:** jawaban klarifikasi lalu T23 filter API (Attendance/Gateway, tanpa migration), T24 toolbar/kalender, T25 warna, T26 shell/tema/akun, T27 semua layar kedua role, T28 verifikasi/handoff. Acceptance visual belum dicentang; gunakan checklist fase D.
+
+## Perbaikan CI setelah T21 (2026-10-05)
+
+- CI run [37268278818](https://github.com/annastriw/employee-attendance-system/actions/runs/37268278818), SHA 9ea86b6: lint, Prisma validate/generate, typecheck database dan build seluruh aplikasi lulus; unit Karyawan gagal pada App.test.tsx, test deep link riwayat. API mock belum dipanggil saat assertion setelah heading.
+- Root cause: heading PageHeader tersedia sebelum effect data-loading; test menganggap heading menandakan request telah dimulai. Lokal fokus lulus tetapi CI membuktikan race pada penjadwalan React.
+- Fix hanya test: tunggu request dengan waitFor dan buktikan error fixture tampil sebelum unmount. Bagian profil juga menunggu request dan hasil fallback. Tidak menambah delay tetap, mengurangi assertion, atau mengubah aplikasi/workflow CI/backend.
+- File: apps/attendance-web/src/App.test.tsx dan tasks/progress.md. Pengguna meminta commit/push dev; tidak membuat PR/main/deployment. Tidak ada server baru.
+- Verifikasi lokal: App.test 10/10, lint attendance-web dan tsc -b lulus. Build tidak diulang: hanya test/dokumentasi berubah dan build CI SHA sebelumnya lulus; RAM bebas OS 1,74 GiB, resource_status tidak tersedia.
+- **Lanjut:** commit/push dev, lalu pantau CI PR yang sudah ada. Acceptance visual revisi tetap mengikuti checklist T21.
+
+## T21 selesai teknis; pengguna meminta commit/push dev (2026-10-05)
+
+- T12-T21 selesai teknis setelah audit A01-A15. Sidebar/shell kedua role, kontrol hover/focus inset, grouped filter/chips/reset, Table HeroUI/cards mobile, detail/form fullwidth/breadcrumb, chart dan master data telah diperbaiki. Acceptance visual/kamera belum dicentang.
+- Verifikasi: HR 7 file 53/53; Karyawan App/History/Login/Capture 30/30 (App terakhir 10/10 termasuk drawer/focus/rail). Attendance lifecycle 3/3; Gateway attendance proxy 13/13. Total 99 test terdampak lulus. Lint HR/Karyawan/Attendance/Gateway, typecheck kedua frontend dan noEmit kedua backend lulus. Tautan Markdown dan diff diperiksa.
+- Build tidak dijalankan: resource_status tidak tersedia; free RAM OS terakhir 2,61 GiB. Tidak menjalankan dev server baru atau browser harness. Proses test/typecheck selesai.
+- **Perlu PR+deploy:** Attendance Service + API Gateway, GET /api/v1/attendance optional departmentId/positionId; filter snapshot historis sebelum pagination/count, UUID seeded diterima. Tanpa migration. Rilis bersama HR frontend.
+- Instruksi terbaru pengguna menggantikan local-only: commit dan push ke dev di repository origin proyek. PR/merge/main/deployment tetap oleh pengguna; tanpa force push. Stage hanya file revisi/test/spec/progress, bukan tooling/env/dist/generated.
+- File: shared controls/workspace/filter/date/header/chart/account; kedua portal/layout/pages/styles/tests; Attendance lifecycle DTO/service/test; Gateway proxy/test; sprint/audit/spec/checklist.
+- **Lanjut:** setelah push berhasil, pengguna PR dev ke main; build CI dan deploy, lalu [checklist manual](frontend-revision-manual-checklist.md) 320/768/1024/1440px, dua tema, keyboard/zoom dan alur kamera. Untuk runtime kirim URL/method/status/Response request gagal dan Console stack pertama, tanpa cookie/token.
+
+## T20 selesai lokal; T21 aktif (2026-10-05)
+
+- Portal Karyawan memakai WorkspaceShell/sidebar/account yang sama dengan HR. Hari ini/Profil/Riwayat memakai PageHeader dan breadcrumb; detail bukti dua kolom desktop dan fullwidth; daftar riwayat grid responsif, status/filter shared. Stylesheet shell lama dihapus; capture fullscreen dipertahankan.
+- Lint/typecheck Karyawan lulus; App/Login/History/Capture 29/29. Perbaikan review tambahan: drawer tidak terbuka kembali ketika kembali ke route lama; fokus menu hanya dipulihkan bila drawer terbuka; breadcrumb ubah karyawan lengkap. Regression drawer/rail sedang diuji T21.
+- File: App/test, EmployeeWorkspace, Home/History/Profile, History test, CSS home/history, shared PageHeader/WorkspaceShell.
+- Semua lokal tanpa commit/push. **Lanjut:** T21 review diff, lint/typecheck/regresi terdampak, spec dan checklist handoff. Build hanya bila resource lega, visual/kamera oleh pengguna.
+
+## T19 selesai lokal; T20 aktif (2026-10-05)
+
+- Master Departemen/Jabatan/Hari Libur memakai PageHeader/breadcrumb, aksi tambah di header, toolbar/reset sejajar dan sel berlabel untuk mobile cards. Periode Hari Libur dikelompokkan dalam FilterPanel; tab mengikuti kontrol shared. Header list Absensi/Ringkasan ditambahkan.
+- Unit HolidaysPage 9/9 dan typecheck HR lulus. Tidak ada file MasterDataPage.test; perubahan layout master tidak mengubah aturan bisnis. Final lint/regresi kontrak pada T21.
+- File: MasterDataPage/HolidaysPage/AttendancePage/MonitoringPage dan HR workspace.css. Semua lokal; tidak commit/push/dev/build.
+- **Lanjut:** T20 keseragaman halaman Karyawan dan T21 pemeriksaan/handoff. Acceptance visual pending.
+
+## T18 selesai lokal; T19 aktif (2026-10-05)
+
+- Ringkasan chart satu kolom <1200px, tinggi mobile 210px, date range tidak menekan chart, ruang sumbu tidak negatif, legend/donut terbatas sesuai konten. Metrik mobile dua kolom dan badge kompak. Data/query tidak berubah.
+- File: MonitoringPage, HR workspace.css dan shared ChartContainer. Lint/typecheck HR lulus; unit MonitoringPage 9/9 pada T16, grafik tidak mengubah logika. Render belum diverifikasi pengguna.
+- Tidak commit/push/build/dev. **Lanjut:** T19 master data seragam, lalu T20 portal Karyawan.
+
+## T17 selesai lokal; T18 aktif (2026-10-05)
+
+- Detail absensi/karyawan dan form tambah/ubah memenuhi lebar workspace. Form tambah dua panel pada desktop, satu kolom mobile; evidence dua kolom tablet/desktop tanpa panel bersarang. Breadcrumb tambah/ubah dan asal absensi terhapus sesuai konteks; Back tetap mempertahankan query.
+- Unit AttendancePage/EmployeesPage/EmployeeDetailPage 28/28; typecheck HR lulus. File: tiga halaman HR, EmployeeForm, workspace.css. Visual pending pengguna.
+- Tidak commit/push, build/dev server belum dijalankan.
+- **Lanjut:** T18 Ringkasan/chart responsif, lalu master data T19.
+
+## T16 selesai lokal; T17 aktif (2026-10-05)
+
+- FilterPanel HeroUI, chip aktif/removable dan reset shared di Absensi, direktori, Ringkasan. Preset tanggal di kalender. Tabel monitoring beralih HeroUI, Space tetap membuka detail dan link anak tetap terpisah. Semua tabel utama mengikuti ukuran kompak; daftar absensi/karyawan mobile cards berlabel.
+- Unit AttendancePage 10/10, EmployeesPage 8/8, MonitoringPage 9/9. Typecheck HR lulus sebelum perbaikan capture Space; final lint/typecheck kembali pada T21. File: shared FilterPanel/lists/DateRangeField, tiga halaman HR beserta regression test.
+- Semua lokal; tidak commit/push/dev server/build. Visual tidak diklaim telah diperiksa.
+- **Lanjut:** T17 fullwidth detail/form dan breadcrumb, kemudian T18 chart responsif.
+
+## T14 dan T15 selesai lokal; T16 aktif (2026-10-05)
+
+- T14: shell/sidebar dan menu akun shared kedua role, brand link, route title berbatas segmen. Lint/typecheck dua portal lulus; unit HR preference 3/3 dan Employee App 9/9.
+- T15: filter departemen/jabatan menggantikan picker nama; konteks employeeId tetap dipertahankan ketika membuka detail. Snapshot historis difilter sebelum pagination/count. Frontend AttendancePage 10/10, service 3/3, Gateway 13/13; lint backend dan typecheck HR lulus.
+- **Perlu PR+deploy:** Attendance Service + API Gateway, GET /api/v1/attendance menerima departmentId/positionId; employeeId menerima seeded UUID. Tanpa migration. Semua masih lokal, tidak commit/push.
+- File: shared workspace/controls/account, EmployeeWorkspace/App, HR WorkspaceLayout/preferences/AttendanceFilters/AttendancePage, attendance-lifecycle DTO/service/test, Gateway attendance-admin proxy/test. Tidak ada dev server baru. Build ditunda RAM.
+- **Lanjut:** T16 grouped toolbar/filter dan tabel kompak. Acceptance visual tetap menunggu pengguna.
+
+## T13 selesai lokal; T14 aktif (2026-10-05)
+
+- Pengguna mengonfirmasi garis offside saat hover dan fokus. Kontrol shared kini memakai ring inset tunggal, input anak/suffix kompak, tabs/status/badge proporsional.
+- File: packages/ui/src/styles/controls.css dan theme.css. Lint dan typecheck kedua portal lulus. Tidak ada logika bisnis berubah pada T13. Acceptance visual belum diperiksa pengguna.
+- T14: WorkspaceShell/SidebarShell bersama, brand link, drawer/rail kedua role, account menu shared; unit route segment HR 3/3 lulus. Regresi employee App sedang diverifikasi.
+- Proses: tidak menjalankan dev server/build; RAM bebas 2,83 GiB saat cek. resource_status tidak tersedia. Semua perubahan lokal, tanpa commit/push.
+- **Lanjut:** tuntaskan regresi T14 lalu T15 filter kategori Absensi.
+
+## T12 selesai lokal — audit revisi; T13 menunggu klarifikasi reproduksi (2026-10-05)
+
+- HEAD awal `18edf0b`, branch dev sinkron origin/dev, tree bersih. Audit sumber kedua
+  frontend, shared UI dan kontrak filter menemukan A01–A15; lihat
+  [frontend-revision-audit.md](frontend-revision-audit.md).
+- Root cause sidebar/chart mobile: aturan base sesudah media menimpa aturan
+  responsif. Detail/form masih dibatasi 48rem. Tab status 40px menimpa token 32px.
+  Focus input native bersaing dengan group HeroUI; trigger laporan pengguna perlu
+  dibedakan antara hover dan fokus.
+- Backlog T12–T21 ditambahkan serial. Instruksi terbaru: seluruh revisi lokal,
+  tanpa commit/push otomatis; pengguna mengurus push dev/PR/main/deploy.
+- API Absensi belum menerima departemen/jabatan; T15 membutuhkan Attendance Service
+  + API Gateway, GET /api/v1/attendance dengan departmentId/positionId optional.
+  Snapshot ID sudah ada, tanpa migration. Perlu PR+deploy setelah fase lokal.
+- Belum mengubah implementasi aplikasi atau menjalankan build/dev server/tests.
+  Perubahan audit hanya dokumentasi; isi, tautan lokal dan diff diperiksa.
+- **Lanjut:** klarifikasi state garis hijau offside, lalu T13 kontrol/focus/hover
+  bersama (packages/ui, Login/Search/DateRange). Task kode belum dimulai.
+
+## T11 selesai - dokumentasi dan perapian (2026-10-05)
+
+- Design system dan UX spec kini mencatat pola rail/drawer HR, navigasi responsif
+  Karyawan, chart/rentang tanggal, profil read-only, tabel kartu mobile, serta D11/D12.
+- `docs/features.md` mencatat fitur UI dan daftar backend yang perlu PR ke `main` lalu
+  deploy: Employee Service + API Gateway `GET /api/v1/employees` (filter optional),
+  Attendance Service + API Gateway `GET /api/v1/monitoring/trend`, Employee Service +
+  API Gateway `GET /api/v1/me/profile`; ketiganya tanpa migration.
+- Verifikasi dokumentasi: `git diff --check`, isi, dan tautan relatif diperiksa; tidak
+  menjalankan test aplikasi untuk perubahan dokumentasi saja.
+- **Lanjut:** acceptance visual T10 tetap menunggu pemeriksaan pengguna di 320/768/
+  1024/1440px, dua tema, dan kontrol zoom. Checkbox acceptance tidak dicentang.
+
+## T10 teknis selesai - sweep responsif, a11y, dan skala kompak (2026-10-05)
+
+- T10 kode selesai: tabel Monitoring HR menjadi kartu berlabel di bawah 768px tanpa
+  scroll horizontal; sel tabel dan metrik memakai token D12; baris membuka detail
+  dengan Enter/Space. Riwayat karyawan memakai ukuran waktu metrik bersama.
+- Lint + typecheck HR dan Karyawan lulus; unit `MonitoringPage.test.tsx` lulus 9/9.
+  Build/dev server tidak dijalankan karena `resource_status` tidak tersedia (catatan
+  RAM bebas terakhir ~2.1 GiB). Zoom lock D11 sebelumnya sudah punya unit test.
+- Acceptance visual T10 masih menunggu pengguna; checklist tetap tidak dicentang.
+- **Lanjut:** T11 dokumentasi selesai; tunggu acceptance visual manual dari pengguna.
+
+## T9 teknis selesai - Portal Karyawan responsif (2026-10-05)
+
+- Migrasi hash ke React Router DOM 7.18.4; rute `/masuk`, `/ganti-password`, `/`,
+  `/absen/masuk`, `/absen/pulang`, `/riwayat`, `/riwayat/:id`, `/profil`, dan
+  halaman 404 ber-guard. Filter riwayat tetap di query URL, detail membuka pathname
+  dan tombol browser Back/list mempertahankan filter.
+- Shell baru: topbar brand/theme/avatar dan nav desktop/tablet, bottom nav mobile,
+  area konten fixed dengan scroller tunggal, lebar konten terkendali tanpa ruang
+  kosong. Beranda menggunakan dua kolom pada desktop cukup lebar, status/jadwal/
+  tombol utama, jam server WIB, dan aktivitas tujuh hari; pada mobile panel tersusun
+  satu kolom. Detail riwayat tetap memuat foto/lokasi; kartu riwayat seluruhnya
+  clickable dengan fokus keyboard. Profil dan ganti password tetap dari shell.
+- Verifikasi: 29 unit di App, HistoryPage, LoginPage, dan CapturePanel lulus; lint
+  dan TypeScript attendance-web lulus. Build tidak dijalankan (resource_status tidak
+  tersedia; catatan RAM bebas terakhir sekitar 2.1 GiB). Tidak ada perubahan backend.
+- UI desktop/tablet/mobile, tema terang/gelap, kamera, dan acceptance manual menunggu
+  pemeriksaan pengguna. PR+deploy hanya frontend setelah acceptance.
+- Lanjut: T10 sweep responsif/a11y/polish untuk kedua portal. T9 akan di-commit/push
+  ke `dev`; checklist acceptance visual tetap belum dicentang.
+
 ## T8 teknis selesai - Profil dan keamanan dua role (2026-10-05)
 
 - Endpoint diri `GET /api/v1/me/profile` memverifikasi sesi lewat Auth Service,

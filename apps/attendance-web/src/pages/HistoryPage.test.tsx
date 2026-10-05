@@ -103,9 +103,12 @@ describe("Personal attendance history", () => {
   });
   it("applies date presets immediately and resets pagination", async () => {
     const { user, onParamsChange } = setup("page=2");
-    await user.click(screen.getByRole("button", { name: "7 hari" }));
+    await user.click(screen.getByRole("button", { name: "Buka filter" }));
+    await user.click(screen.getByRole("button", { name: /Buka kalender rentang tanggal/ }));
+    await user.click(await screen.findByRole("button", { name: "7 hari" }));
     expect(onParamsChange).toHaveBeenCalledWith(expect.objectContaining({ page: undefined, id: undefined, startDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/) }));
-    await user.click(screen.getByRole("button", { name: "Semua tanggal" }));
+    await user.keyboard("{Escape}");
+    await user.click(screen.getByRole("button", { name: "Reset filter" }));
     expect(onParamsChange).toHaveBeenLastCalledWith(expect.objectContaining({ period: "ALL", startDate: undefined, endDate: undefined }));
   });
   it("shows original evidence and deletion reason without offering or requesting any photo", async () => {

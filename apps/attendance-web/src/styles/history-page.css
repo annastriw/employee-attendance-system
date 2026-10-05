@@ -2,7 +2,7 @@
   display: grid;
   gap: 1rem;
   min-width: 0;
-  margin-top: 1.5rem;
+  margin-top: 0;
 }
 .history-page .button {
   min-height: var(--ui-control-height);
@@ -47,6 +47,10 @@
   gap: 0.5rem;
   min-width: 0;
 }
+.history-card[data-interactive-row="true"] { cursor: pointer; outline: none; transition: background-color 120ms ease, border-color 120ms ease; }
+.history-card[data-interactive-row="true"]:hover, .history-card[data-interactive-row="true"]:focus-visible { border-color: var(--focus); background: var(--surface-secondary); }
+.history-card[data-interactive-row="true"]:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.history-date-label { justify-self: start; font-size: .875rem; font-weight: 600; }
 .history-page .history-date-button {
   padding: 0;
   justify-self: start;
@@ -86,7 +90,7 @@
   font-weight: 500;
 }
 .history-event-time {
-  font-size: 1.75rem;
+  font-size: var(--ui-metric-font);
   font-variant-numeric: tabular-nums;
   font-weight: 500;
   letter-spacing: -0.03em;
@@ -144,3 +148,14 @@
   display: grid;
   gap: 0.5rem;
 }
+@media (prefers-reduced-motion: reduce) { .history-card[data-interactive-row="true"] { transition: none; } }
+
+.history-filter > .filter-panel { display: flex; flex: initial; gap: .5rem; }
+.history-evidence-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: .75rem; min-width: 0; }
+.history-photo img { max-height: 320px; object-fit: contain; background: var(--background); }
+.history-card, .history-evidence, .history-deleted { padding: var(--ui-card-padding); }
+.history-card { gap: .375rem; }
+.history-list { grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); }
+.history-times { margin: .25rem 0; gap: .75rem; }
+.history-times dd { font-size: var(--ui-metric-font); }
+@media (max-width: 767px) { .history-evidence-grid { grid-template-columns: minmax(0, 1fr); } .history-pager { flex-wrap: wrap; } }

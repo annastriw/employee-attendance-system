@@ -2,6 +2,9 @@
 @import "@fontsource-variable/geist-mono";
 @import "./styles/patterns.css";
 @import "./styles/compact.css";
+@import "./styles/controls.css";
+@import "./styles/workspace.css";
+@import "./styles/lists.css";
 
 /*
  * Shared theme for HR Portal and Attendance Portal.
@@ -48,6 +51,9 @@
   --field-shadow: 0 1px 2px rgba(24, 24, 27, 0.04);
 
   --danger-ink: #b42318;
+  --warning-ink: #92400e;
+  --warning-surface: #fffbeb;
+  --warning-border: #fcd34d;
   --danger-surface: #fef3f2;
   --danger-border: #fecdca;
   --success-ink: #05603a;
@@ -92,6 +98,9 @@
   --field-shadow: none;
 
   --danger-ink: #fda29b;
+  --warning-ink: #fcd34d;
+  --warning-surface: #2b2110;
+  --warning-border: #6b4f17;
   --danger-surface: #2a1210;
   --danger-border: #5c2420;
   --success-ink: #75e0a7;
@@ -500,6 +509,7 @@ textarea:focus-visible {
 .profile-skeleton > * { height: 2.5rem; border-radius: .5rem; }
 .employee-profile-top { display: flex; justify-content: space-between; align-items: center; gap: .5rem; margin-bottom: 1rem; color: var(--muted); font-size: .8125rem; }
 .employee-profile-panel { margin-top: .75rem; }
+.employee-profile-page { display: grid; gap: .75rem; min-width: 0; }
 @media (max-width: 767px) { .profile-fields { grid-template-columns: minmax(0, 1fr); } }
 
 /* ---------- Skeleton ---------- */

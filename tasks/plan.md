@@ -20,6 +20,28 @@ Kerja serial satu fitur ujung ke ujung, SDD + Kanban. Unit logika berubah wajib;
 
 ## Pekerjaan aktif
 
+Revisi terbaru 2026-10-05: pengguna menutup T terdahulu dan meminta audit seluruh
+layar/filter, lalu revisi serial T22–T28. [Audit dan plan fase D](frontend-revision-phase-d.md)
+menjadi acuan aktif: filter API → toolbar/kalender → warna aksi → shell/tema/akun
+→ sweep kedua role → verifikasi/handoff. Semua perubahan lokal **tanpa commit/push**;
+instruksi ini menggantikan aturan push otomatis untuk fase D. Klarifikasi kalender
+dan posisi brand diterima setelah audit source. T22-T28 selesai teknis lokal;
+acceptance manual pending dan bukti tercatat di fase D.
+
 Perapian repo/docs/history pada 2026-10-04–05 selesai. Pengguna meminta folder temporary dihapus; hasil dan handoff disimpan pada [progress](progress.md). Pekerjaan berikut dibahas sesuai prioritas pengguna, bukan otomatis menambah fitur/task operasional.
 
 Restore drill, backup terjadwal, uji beban/kapasitas dan hardening tambahan ditunda pengguna dalam scope demo. Penundaan bukan klaim pekerjaan lulus. Source/tests/migrations tetap disimpan; hasil lama tidak dijalankan ulang tanpa perubahan/risiko baru.
+
+
+## Tambahan fase D (2026-10-05)
+
+Permintaan lanjutan menambah T29 satu akses logout, T30 audit semua UUID dan
+perbaikan bug terkonfirmasi, T31 verifikasi/review tambahan. Ketiganya selesai
+teknis lokal; total fase D 10 task T22-T31. [Rincian dan bukti](frontend-revision-phase-d.md).
+Tidak commit/push/PR/deploy; acceptance manual kedua role tetap pending.
+
+
+Keputusan terbaru pengguna 2026-10-05 setelah verifikasi: commit dan push
+perubahan terverifikasi ke dev diizinkan dan diminta. Menggantikan batas
+local-only sebelumnya. PR/merge/main/deployment belum diminta; acceptance
+manual tetap pending.

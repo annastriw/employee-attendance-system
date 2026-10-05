@@ -5,7 +5,7 @@ export type { Command } from "./command-palette";
 
 /**
  * Command palette: a modal overlay with a fuzzy-filtered, keyboard-navigable
- * list of actions (navigate, theme, logout). Opened with Cmd/Ctrl-K from the
+ * list of navigation actions. Opened with Cmd/Ctrl-K from the
  * shell. Arrow keys move the active option, Enter runs it, Escape closes.
  *
  * The outer component gates on `open` and remounts the body on each open so the

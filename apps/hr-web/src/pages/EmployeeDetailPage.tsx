@@ -459,10 +459,10 @@ export function EmployeeDetailPage({
     <>
       {detail.status === 'ACTIVE' && (
         <>
-          <Button variant="secondary" isDisabled={actionsDisabled} onPress={() => setConfirmReset(true)}>
+          <Button variant="secondary" className="action-warning" isDisabled={actionsDisabled} onPress={() => setConfirmReset(true)}>
             Reset password
           </Button>
-          <Button variant="secondary" isDisabled={actionsDisabled} onPress={() => setConfirmLifecycle('INACTIVE')}>
+          <Button variant="secondary" className="action-warning" isDisabled={actionsDisabled} onPress={() => setConfirmLifecycle('INACTIVE')}>
             Nonaktifkan
           </Button>
           <Button variant="danger" isDisabled={actionsDisabled} onPress={() => setConfirmLifecycle('ARCHIVED')}>
@@ -472,7 +472,7 @@ export function EmployeeDetailPage({
       )}
       {detail.status === 'INACTIVE' && (
         <>
-          <Button variant="secondary" isDisabled={actionsDisabled} onPress={() => setConfirmReset(true)}>
+          <Button variant="secondary" className="action-warning" isDisabled={actionsDisabled} onPress={() => setConfirmReset(true)}>
             Reset password
           </Button>
           <Button variant="primary" isDisabled={actionsDisabled} onPress={() => setConfirmLifecycle('ACTIVE')}>
@@ -484,7 +484,7 @@ export function EmployeeDetailPage({
         </>
       )}
       {detail.status === 'ARCHIVED' && (
-        <Button variant="secondary" isDisabled={actionsDisabled} onPress={() => setConfirmLifecycle('INACTIVE')}>
+        <Button variant="secondary" className="action-success" isDisabled={actionsDisabled} onPress={() => setConfirmLifecycle('INACTIVE')}>
           Restore karyawan
         </Button>
       )}
@@ -496,7 +496,8 @@ export function EmployeeDetailPage({
   return (
     <div className="employee-detail">
       <PageHeader
-        breadcrumb={[{ label: 'Karyawan', href: '/karyawan' }, { label: detail?.name ?? 'Memuat…' }]}
+        breadcrumb={[{ label: 'Karyawan', href: '/karyawan' }, { label: detail?.name ?? 'Memuat…' },
+          ...(tab === 'detail' && detail?.status !== 'ARCHIVED' ? [{ label: 'Ubah profil' }] : [])]}
         onNavigate={() => onBack()}
         title={
           <span className="employee-detail-title">
@@ -754,6 +755,7 @@ export function EmployeeDetailPage({
 
       <ConfirmDialog
         open={confirmLifecycle !== null}
+        tone={confirmLifecycle === 'ARCHIVED' ? 'danger' : confirmLifecycle === 'INACTIVE' && detail?.status !== 'ARCHIVED' ? 'warning' : 'primary'}
         title={
           confirmLifecycle === 'INACTIVE'
             ? detail?.status === 'ARCHIVED'
@@ -812,6 +814,7 @@ export function EmployeeDetailPage({
         open={confirmReset}
         title="Reset password karyawan?"
         confirmLabel="Reset password"
+        tone="warning"
         busy={busy}
         error={lifecycleError}
         onClose={() => setConfirmReset(false)}

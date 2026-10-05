@@ -1,0 +1,63 @@
+.filter-panel { display: contents; }
+.filter-count { display: inline-grid; place-items: center; min-width: 1.125rem; height: 1.125rem; border-radius: .25rem; background: var(--default); font-size: .6875rem; }
+.filter-panel-popover { width: min(22rem, calc(100vw - 1.5rem)); max-height: min(36rem, calc(100dvh - 2rem)); overflow-y: auto; padding: var(--ui-card-padding); }
+.filter-panel-heading { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding-bottom: .75rem; border-bottom: 1px solid var(--border); }
+.filter-panel-heading h2 { font-size: .875rem; font-weight: 600; }
+.filter-panel-fields { display: grid; gap: .875rem; padding-top: .875rem; }
+.filter-panel-fields .form-field, .filter-panel-fields .date-range-field { width: 100%; min-width: 0; }
+.filter-panel-fields .form-field > .button { width: 100%; justify-content: space-between; }
+.filter-chips { display: flex; align-items: center; flex-wrap: wrap; gap: .375rem; min-width: 0; flex-basis: 100%; order: 10; }
+:root .filter-chip { min-height: 26px; height: auto; padding: .2rem .5rem; font-size: .75rem; white-space: normal; text-align: left; }
+.date-range-field { min-width: 0; }
+.date-range-presets { display: flex; flex-wrap: wrap; gap: .25rem; border-top: 1px solid var(--border); padding-top: .5rem; margin-top: .5rem; max-width: 20rem; }
+:root .list-toolbar, :root .monitoring-filters-toolbar { align-items: center; gap: .5rem; }
+:root .list-toolbar > .shared-search, :root .monitoring-filters-toolbar > .shared-search { flex: 1 1 14rem; min-width: 0; max-width: 24rem; }
+.shared-search > .label { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+:root .shared-search { gap: 0; }
+:root .list-toolbar > .status-filter { height: var(--ui-control-height); box-sizing: border-box; }
+:root .list-toolbar > .list-add { margin-left: auto; flex: none; }
+:root .data-table th, :root .data-table td, :root .monitoring-table th, :root .monitoring-table td { padding: .5rem .75rem; font-size: .8125rem; line-height: 1.35; }
+:root .data-table th, :root .monitoring-table th { height: 32px; font-size: .75rem; }
+:root .employee-name { min-height: 0; height: auto; padding: 0; background: transparent; line-height: inherit; }
+.employee-secondary { margin-top: .125rem; }
+.employee-extra { display: none; }
+@media (max-width: 767px) {
+  :root .data-table table { min-width: 0; width: 100%; table-layout: auto; }
+  :root .data-table-content, :root .attendance-table-content, :root .employee-table-content { min-width: 0; width: 100%; table-layout: auto; }
+  .data-table .table__scroll-container { overflow: visible; }
+  .data-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .data-table tbody { display: block; }
+  :root .data-table tbody tr { display: grid; grid-template-columns: minmax(0, 1fr); gap: .375rem; height: auto; min-height: 0; padding: .75rem; border-bottom: 1px solid var(--border); }
+  .data-table tbody tr:last-child { border-bottom: 0; }
+  :root .data-table tbody td { display: grid; grid-template-columns: 6rem minmax(0, 1fr); align-items: start; gap: .125rem .5rem; padding: 0; border: 0; width: auto; min-width: 0; white-space: normal; text-align: left; overflow-wrap: anywhere; }
+  .data-table tbody td::before { content: attr(data-label); grid-column: 1; grid-row: 1 / span 8; font-size: .75rem; color: var(--muted); padding-top: .125rem; }
+  .data-table tbody td > * { grid-column: 2; min-width: 0; }
+  .data-table tbody td.col-code { display: grid; }
+  :root .list-toolbar > .shared-search, :root .monitoring-filters-toolbar > .shared-search { max-width: none; flex-basis: 100%; }
+  .list-pager { gap: .5rem; flex-wrap: wrap; }
+}
+
+/* Keep the whole month visible; global table padding must never enlarge date cells. */
+:root .app-calendar-popover {
+  --calendar-day-size: min(34px, calc((100dvh - 180px) / 6));
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  translate: -50% -50%;
+  width: min(280px, calc(100vw - 24px));
+  max-width: none;
+  max-height: none !important;
+  height: auto;
+  overflow: visible;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--ui-card-radius);
+  animation: none;
+}
+:root .app-calendar-popover :is(.calendar, .range-calendar) { width: 100%; max-width: none; }
+:root .app-calendar-popover :is(.calendar__header, .range-calendar__header) { padding: 0 0 8px; min-height: 32px; }
+:root .app-calendar-popover :is(th, td) { padding: 0; font-size: 12px; }
+:root .app-calendar-popover :is(.calendar__header-cell, .range-calendar__header-cell) { height: 24px; padding: 0; }
+:root .app-calendar-popover :is(.calendar__cell, .range-calendar__cell) { height: var(--calendar-day-size); min-height: 0; width: 100%; aspect-ratio: auto; margin: 0; border-radius: 4px; }
+:root .app-calendar-popover .date-range-presets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: none; }
+:root .app-calendar-popover .date-range-presets .button { height: 28px; min-height: 28px; font-size: 12px; padding-inline: 4px; }

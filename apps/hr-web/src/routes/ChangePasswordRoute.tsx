@@ -4,6 +4,7 @@ import { ChangePasswordForm } from "../components/organisms/AuthForms";
 import { AuthLayout } from "../components/templates/AuthLayout";
 import { useAuth } from "./auth-context";
 import { LOGIN_PATH } from "./routes";
+import { WorkspaceAccountMenu } from "@attendance/ui";
 
 /**
  * Mandatory password-change screen for first-time accounts. Mirrors the former
@@ -18,14 +19,13 @@ export function ChangePasswordRoute() {
   if (!user.mustChangePassword) return <Navigate to="/" replace />;
 
   return (
-    <AuthLayout>
+    <AuthLayout account={<WorkspaceAccountMenu email={user.email} busy={busy} onLogout={logout} />}>
       <PageTitle>Buat password baru</PageTitle>
       <p className="page-intro">Ganti password awal untuk melanjutkan.</p>
       <p className="signed-in-email">{user.email}</p>
       <ChangePasswordForm
         busy={busy}
         error={error}
-        onLogout={logout}
         onSubmit={changePassword}
       />
     </AuthLayout>

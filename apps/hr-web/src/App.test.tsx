@@ -22,6 +22,19 @@ function client(): AuthClient {
   };
 }
 describe("HR portal authentication journey", () => {
+  it("offers logout only through the account popup during mandatory password change", async () => {
+    const api = client();
+    vi.mocked(api.restore).mockResolvedValue(admin);
+    const user = userEvent.setup();
+    render(<App client={api} router={memoryRouter(["/"])} />);
+    await screen.findByRole("heading", { name: "Buat password baru" });
+    expect(screen.queryByRole("button", { name: /Keluar/ })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Menu akun" }));
+    expect(screen.queryByRole("menuitem", { name: "Profil" })).not.toBeInTheDocument();
+    await user.click(await screen.findByRole("menuitem", { name: "Keluar" }));
+    await screen.findByRole("heading", { name: "Masuk" });
+    expect(api.logout).toHaveBeenCalledOnce();
+  });
   it("requires password change, validates confirmation and returns to login after success", async () => {
     const api = client();
     const user = userEvent.setup();

@@ -32,6 +32,7 @@ describe('Storage deadlines', () => {
       internalSecret: 'a'.repeat(64),
       port: 3004,
       timeoutMs: 150,
+      workerEnabled: false,
     } satisfies MediaConfig);
   });
   afterAll(async () => {

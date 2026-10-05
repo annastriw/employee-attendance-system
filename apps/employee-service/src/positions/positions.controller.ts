@@ -4,7 +4,7 @@ import { AdminGuard, AuthClient, type EmployeeRequest } from '../auth/admin.guar
 import { CreatePositionDto, ListPositionsQuery, UpdatePositionDto } from './positions.dto';
 import { PositionsService } from './positions.service';
 
-const uuid = new ParseUUIDPipe({ version: '4' });
+const uuid = new ParseUUIDPipe();
 const actor = (request: EmployeeRequest) => ({ accountId: request.actor!.id, requestId: request.requestId });
 
 @ApiTags('Positions')

@@ -41,6 +41,8 @@ export class AttendanceLifecycleService {
     const where: Prisma.AttDailyRecordWhereInput = {
       deletedAt: query.status === 'DELETED' ? { not: null } : null,
       ...(query.employeeId ? { employeeId: query.employeeId } : {}),
+      ...(query.departmentId ? { departmentIdSnapshot: query.departmentId } : {}),
+      ...(query.positionId ? { positionIdSnapshot: query.positionId } : {}),
       ...(query.startDate || query.endDate
         ? {
             attendanceDate: {

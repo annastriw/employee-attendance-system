@@ -7,7 +7,7 @@ export function ChartContainer({ children, label, height = 256 }: {
   label: string;
   height?: number;
 }) {
-  return <div className="chart-container" role="img" aria-label={label} style={{ height }}>
+  return <div className="chart-container" role="img" aria-label={label} style={{ height: `min(${height}px, var(--chart-responsive-height, ${height}px))` }}>
     <ResponsiveContainer width="100%" height="100%" minWidth={0}>
       {children}
     </ResponsiveContainer>

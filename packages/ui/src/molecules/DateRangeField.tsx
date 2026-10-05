@@ -27,8 +27,8 @@ export function DateRangeField({ label = "Rentang tanggal", value, onChange, dis
             </DateField.Suffix>
           </DateField.Group>
           {error && <FieldError>{error}</FieldError>}
-          <DateRangePicker.Popover>
-            <RangeCalendar aria-label={label}>
+          <DateRangePicker.Popover className="app-calendar-popover">
+            <RangeCalendar aria-label={label} visibleDuration={{ months: 1 }}>
               <RangeCalendar.Header>
                 <RangeCalendar.Heading />
                 <RangeCalendar.NavButton slot="previous" />
@@ -39,8 +39,6 @@ export function DateRangeField({ label = "Rentang tanggal", value, onChange, dis
                 <RangeCalendar.GridBody>{(date) => <RangeCalendar.Cell date={date} />}</RangeCalendar.GridBody>
               </RangeCalendar.Grid>
             </RangeCalendar>
-          </DateRangePicker.Popover>
-        </DateRangePicker>
         <div className="date-range-presets" role="group" aria-label="Pilihan rentang cepat">
           {DATE_RANGE_PRESETS.map((preset) => {
             const dates = dateRangePreset(preset.id, now);
@@ -49,6 +47,9 @@ export function DateRangeField({ label = "Rentang tanggal", value, onChange, dis
               isDisabled={disabled} onPress={() => onChange(dates)}>{preset.label}</Button>;
           })}
         </div>
+          </DateRangePicker.Popover>
+        </DateRangePicker>
+
       </div>
     </I18nProvider>
   );

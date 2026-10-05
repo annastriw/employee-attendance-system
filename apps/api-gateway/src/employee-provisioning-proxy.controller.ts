@@ -13,9 +13,10 @@ async function forward(proxy: AuthProxyService, method: 'GET' | 'POST' | 'PATCH'
   const url = new URL(req.originalUrl, 'http://gateway.local');
   if (!PATHS[resource].test(url.pathname)) throw new BadRequestException('Request tidak valid.');
   const list = resource === 'employees' && method === 'GET' && (url.pathname === '/api/v1/employees' || url.pathname.endsWith('/history'));
+  const employeeList = resource === 'employees' && method === 'GET' && url.pathname === '/api/v1/employees';
   if (!list && url.search) throw new BadRequestException('Request tidak valid.');
   const query = new URLSearchParams();
-  for (const [key, value] of url.searchParams) { if (!KEYS.has(key) || query.has(key)) throw new BadRequestException('Request tidak valid.'); query.set(key, value); }
+  for (const [key, value] of url.searchParams) { if ((!KEYS.has(key) && !(employeeList && ['departmentId', 'positionId'].includes(key))) || query.has(key)) throw new BadRequestException('Request tidak valid.'); query.set(key, value); }
   const headers: Record<string, string> = { 'X-Request-ID': String(res.getHeader('X-Request-ID')) };
   if (typeof req.headers.authorization === 'string') headers.authorization = req.headers.authorization;
   const needsKey = resource === 'employees' && method === 'POST';

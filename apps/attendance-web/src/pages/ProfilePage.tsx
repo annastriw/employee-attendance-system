@@ -1,15 +1,20 @@
 import { useEffect, useState } from "react";
 import { Button } from "@heroui/react";
-import { ArrowLeft, Clock } from "@phosphor-icons/react";
-import { AuthShell, ChangePasswordForm, Notice, Skeleton, UnderlineTabs } from "@attendance/ui";
+import { ChangePasswordForm, PageHeader, Notice, Skeleton, UnderlineTabs } from "@attendance/ui";
 import type { AuthClient, EmployeeUser } from "../lib/auth-client";
 
 interface ProfileData { name: string; nik: string; email: string; phone: string | null; department: string; position: string; startDate: string; status: string; }
 interface ProfileResponse { data: ProfileData | null; }
+function validProfile(value: unknown): value is ProfileData {
+  if (!value || typeof value !== "object") return false;
+  const row = value as Partial<ProfileData>;
+  return [row.name, row.nik, row.email, row.department, row.position, row.status].every(item => typeof item === "string") &&
+    (row.phone === null || typeof row.phone === "string") && typeof row.startDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(row.startDate);
+}
 
-export function ProfilePage({ client, user, busy, error, onHome, onLogout, onChangePassword, onSessionExpired }: {
+export function ProfilePage({ client, user, busy, error, onHome, onChangePassword, onSessionExpired }: {
   client: AuthClient; user: EmployeeUser; busy: boolean; error: string;
-  onHome: () => void; onLogout: () => Promise<void>;
+  onHome: () => void;
   onChangePassword: (current: string, replacement: string) => Promise<void>;
   onSessionExpired: () => void;
 }) {
@@ -22,7 +27,11 @@ export function ProfilePage({ client, user, busy, error, onHome, onLogout, onCha
   useEffect(() => {
     let active = true;
     client.api<ProfileResponse>("me/profile").then(result => {
-      if (active) { setProfile(result.data); setMissingEndpoint(false); setLoadError(""); }
+      if (active) {
+        setProfile(validProfile(result?.data) ? result.data : null);
+        setMissingEndpoint(false);
+        setLoadError(result?.data && !validProfile(result.data) ? "Format data profil belum dapat dibaca." : "");
+      }
     }).catch(reason => {
       if (!active) return;
       if (reason && typeof reason === "object" && "status" in reason && reason.status === 401) onSessionExpired();
@@ -32,9 +41,9 @@ export function ProfilePage({ client, user, busy, error, onHome, onLogout, onCha
     return () => { active = false; };
   }, [client, reload, onSessionExpired]);
   const date = (value: string) => new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Jakarta" }).format(new Date(`${value}T00:00:00+07:00`));
-  return <AuthShell name="Attendance Portal" brandIcon={<Clock size={16} weight="bold" />}>
-    <div className="employee-profile-top"><Button variant="ghost" size="sm" onPress={onHome}><ArrowLeft size={16} /> Hari ini</Button><span>Profil akun</span></div>
-    <h1>Profil</h1><p className="page-intro">Informasi diri Anda dikelola oleh HR.</p>
+  return <div className="employee-profile-page">
+    <PageHeader title="Profil" description="Informasi diri Anda dikelola oleh HR."
+      breadcrumb={[{ label: "Hari ini", href: "/" }, { label: "Profil" }]} onNavigate={onHome} />
     <UnderlineTabs items={[{ id: "profile", label: "Profil" }, { id: "security", label: "Keamanan" }]} active={tab} onSelect={setTab} />
     {tab === "profile" ? <section className="employee-profile-panel" aria-label="Data profil">
       <h2>Informasi diri</h2>
@@ -47,7 +56,7 @@ export function ProfilePage({ client, user, busy, error, onHome, onLogout, onCha
       {loaded && missingEndpoint && <Button size="sm" variant="secondary" onPress={() => { setLoaded(false); setReload(x => x + 1); }}>Muat ulang</Button>}
     </section> : <section className="employee-profile-panel" aria-label="Keamanan akun">
       <h2>Ganti password</h2><p className="profile-guidance">Setelah password berubah, Anda akan keluar dan perlu masuk kembali.</p>
-      <ChangePasswordForm busy={busy} error={error} onSubmit={onChangePassword} onLogout={onLogout} />
+      <ChangePasswordForm busy={busy} error={error} onSubmit={onChangePassword} />
     </section>}
-  </AuthShell>;
+  </div>;
 }

@@ -24,9 +24,9 @@ const showcase: AuthShowcase = {
   ],
 };
 
-export function AuthLayout({ children }: { children: ReactNode }) {
+export function AuthLayout({ children, account }: { children: ReactNode; account?: ReactNode }) {
   return (
-    <AuthShell name="HR Portal" showcase={showcase}>
+    <AuthShell name="HR Portal" showcase={showcase} account={account}>
       {children}
     </AuthShell>
   );

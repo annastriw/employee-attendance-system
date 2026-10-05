@@ -275,6 +275,18 @@ describe('AttendanceMonitoringService (T25)', () => {
   });
 
   describe('getEmployees', () => {
+    it('matches department UUIDs regardless of letter case', async () => {
+      const departmentId = '3b81c559-bfef-11f1-85c7-76e03cd5f3d3';
+      mockUpstream.roster.mockResolvedValue([
+        { ...mockRoster[0], departmentId },
+        mockRoster[1],
+      ]);
+      const result = await service.getEmployees(
+        { date: '2026-10-05', departmentId: departmentId.toUpperCase(), status: 'ALL', page: 1, pageSize: 20 },
+        'req-case',
+      );
+      expect(result.data.map((item) => item.employeeId)).toEqual(['emp-1']);
+    });
     it('returns all employees with accurate statuses, snapshots and pagination', async () => {
       const targetDate = '2026-10-05';
       mockDb.client.attDailyRecord.findMany.mockResolvedValue([

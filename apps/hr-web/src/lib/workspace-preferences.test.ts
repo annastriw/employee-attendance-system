@@ -1,7 +1,13 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { isTextEditingTarget, readSidebarCollapsed, SIDEBAR_COLLAPSED_KEY, writeSidebarCollapsed } from "./workspace-preferences";
+import { isTextEditingTarget, isWorkspacePath, readSidebarCollapsed, SIDEBAR_COLLAPSED_KEY, writeSidebarCollapsed } from "./workspace-preferences";
 
 describe("workspace shell preferences", () => {
+  it("keeps deleted attendance separate from the attendance destination", () => {
+    expect(isWorkspacePath("/absensi-dihapus", "/absensi")).toBe(false);
+    expect(isWorkspacePath("/absensi-dihapus", "/absensi-dihapus")).toBe(true);
+    expect(isWorkspacePath("/absensi/detail", "/absensi")).toBe(true);
+    expect(isWorkspacePath("/karyawan", "/karyawan")).toBe(true);
+  });
   beforeEach(() => localStorage.clear());
   it("persists collapse state and removes the key when expanded", () => {
     writeSidebarCollapsed(localStorage, true);
