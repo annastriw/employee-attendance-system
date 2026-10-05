@@ -70,6 +70,19 @@ describe('HRD attendance Gateway contract', () => {
       'attendance',
     );
   });
+  it('forwards historical category filters unchanged', async () => {
+    const request = req(
+      '?departmentId=' + id + '&positionId=' + id + '&page=2',
+    );
+    await controller.list(request, res());
+    expect(forward).toHaveBeenCalledWith(
+      request.originalUrl,
+      'GET',
+      { authorization: 'Bearer scoped', 'X-Request-ID': id },
+      undefined,
+      'attendance',
+    );
+  });
   it('accepts valid UUID v5 identifiers for seeded attendance details and photos', async () => {
     const dailyId = 'ee79c983-1129-5776-b94c-768aea5256e4';
     const eventId = '0aa74f9b-8d6e-5fbd-a875-16f38e959f39';

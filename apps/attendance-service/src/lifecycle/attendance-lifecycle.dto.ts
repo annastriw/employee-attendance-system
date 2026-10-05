@@ -30,8 +30,22 @@ export class AttendanceListDto {
   endDate?: string;
   @ApiPropertyOptional({ format: 'uuid' })
   @IsOptional()
-  @IsUUID('4')
+  @IsUUID()
   employeeId?: string;
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Departemen pada saat presensi',
+  })
+  @IsOptional()
+  @IsUUID()
+  departmentId?: string;
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Jabatan pada saat presensi',
+  })
+  @IsOptional()
+  @IsUUID()
+  positionId?: string;
   @ApiPropertyOptional({ default: 1, minimum: 1 })
   @Type(() => Number)
   @IsInt()
