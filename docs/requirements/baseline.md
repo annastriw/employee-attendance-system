@@ -5,18 +5,18 @@ Konteks kebutuhan: [analisis](analysis.md), [PRD](prd.md). Keterlacakan hingga r
 Dokumen ini merekam keputusan pengguna dalam sesi perencanaan. Dokumen rancangan terperinci berikutnya harus menjaga aturan ini. Status: kebutuhan, rancangan database, peta endpoint API dan arah UI/UX telah disetujui; rencana serta kemajuan implementasi mengikuti tasks/plan.md dan tasks/todo.md.
 
 ## Produk dan platform
-- Attendance Portal: attendance.annastriwidagdo.me.
-- HR Portal: hr.annastriwidagdo.me.
-- API: attendance-api.annastriwidagdo.me.
-- MinIO AIStor Free: attendance-storage.annastriwidagdo.me; bucket privat. Lokal dan VPS memakai Docker Compose, single-node, image versi/digest terkunci, volume persisten, dan lisensi Free aktif. Lisensi hanya lokal, tidak masuk GitHub. Keputusan terperinci: docs/architecture/adr-001-object-storage.md.
+- Attendance Portal: http://localhost:5173.
+- HR Portal: http://localhost:5174.
+- API: http://localhost:3000/api/v1.
+- MinIO AIStor Free: http://localhost:9000; bucket privat. Lokal dan VPS memakai Docker Compose, single-node, image versi/digest terkunci, volume persisten, dan lisensi Free aktif. Lisensi hanya lokal, tidak masuk GitHub. Keputusan terperinci: docs/architecture/adr-001-object-storage.md.
 - React TypeScript, HeroUI melalui MCP HeroUI dan komponen custom; Atomic Design; antarmuka Bahasa Indonesia, responsif dan memiliki arah desain yang jelas.
 - NestJS TypeScript; MySQL saja; JWT; bcrypt dengan salt; Swagger.
 - API Gateway, Auth, Employee, Attendance, Media: service terpisah dengan port internal berbeda.
-- Dua frontend memakai dua project Vercel terpisah: Attendance Portal dan HR Portal. Seluruh backend, MySQL, dan MinIO AIStor Free berjalan di VPS Ubuntu; DNS Cloudflare, domain dibeli di Hostinger.
+- Perubahan 2026-11-01: masa sewa server demo sudah berakhir. Jalankan dua frontend, lima backend, MySQL dan AIStor secara lokal; [setup lokal](../getting-started.md). Dua project Vercel, VPS Ubuntu dan Cloudflare merupakan topologi deployment terdahulu yang dipertahankan sebagai referensi, bukan hosting aktif.
 - Satu repository GitHub berbentuk monorepo: apps/{attendance-web,hr-web,api-gateway,auth-service,employee-service,attendance-service,media-service}, packages/{contracts,ui,config}, docs/{requirements,sdd,architecture,api,testing,deployment}, infra/.
 - Topologi repository/deployment disetujui: satu repo, dua project Vercel, backend/MySQL/storage di VPS. Detail: [ADR-003](../architecture/adr-003-repository-and-deployment.md).
 - Keputusan terbaru 2026-10-03: hanya dev dan main. Coding serta uji lokal di dev, commit/push langsung dev, lalu PR dev ke main untuk rilis. Satu production main untuk 5 karyawan + 1 HR, tanpa deployment dev/preview. [Workflow CI/CD](../development/ci-cd-workflow.md).
-- Repository public tetap [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system). Increment terverifikasi di-commit/push ke dev; main hanya melalui PR rilis. CD VPS sudah aktif dan dibuktikan dengan health SHA rilis pada 2026-10-04: [panduan VPS otomatis](../deployment/vps-auto-deploy.md).
+- Repository public tetap [annastriw/employee-attendance-system](https://github.com/annastriw/employee-attendance-system). Increment terverifikasi di-commit/push ke dev; main hanya melalui PR rilis. CD VPS pernah aktif dan dibuktikan dengan health SHA rilis pada 2026-10-04; bukti historis ini bukan status hosting saat ini: [panduan VPS otomatis](../deployment/vps-auto-deploy.md).
 - VPS dikhususkan untuk absensi; pengguna menyatakan UKG telah dipindahkan dan boleh dihapus. VPS sudah dipersiapkan ulang menurut output pengguna. Resource awal 2 vCPU/RAM sekitar 3,6 GiB; load test, restore drill dan hardening tambahan ditunda pengguna dalam scope demo. Health idle bukan bukti kapasitas beban.
 - GitHub: kode, spesifikasi, migration, konfigurasi aman, .env.example. Lokal: .env, kredensial, backup, data/foto pribadi.
 - SDD, context engineering, Kanban, implementasi bertahap, skills relevan, clean code dan maintainability.
@@ -107,7 +107,7 @@ Base /api/v1; Swagger service /docs; UUID; waktu presensi ISO8601 +07:00; pagina
 
 ## Keputusan demo dan dokumentasi terbaru
 
-Pengguna mengizinkan akun HR/karyawan dan password demo dipublikasikan di README, dengan profil/historical attendance fiktif. Secret DB/storage/JWT/SSH/lisensi tetap privat. Perapian 2026-10-04–05 mengonsolidasikan SDD/dokumentasi dan history secara serial. Tanggal commit milestone sumber dipertahankan, perubahan dokumentasi baru memakai tanggal aktual. Backup mapping privat sebelum rewrite. Pengecualian force-with-lease hanya sekali untuk perapian; flow harian tetap dev→PR→main.
+Pada demo terdahulu pengguna mengizinkan akun HR/karyawan dan password demo dipublikasikan di README, dengan profil/historical attendance fiktif. Sejak server berakhir pada pembaruan 2026-11-01, README mengarahkan ke localhost dan akun hasil setup lokal. Secret DB/storage/JWT/SSH/lisensi tetap privat. Perapian 2026-10-04–05 mengonsolidasikan SDD/dokumentasi dan history secara serial. Tanggal commit milestone sumber dipertahankan, perubahan dokumentasi baru memakai tanggal aktual. Backup mapping privat sebelum rewrite. Pengecualian force-with-lease hanya sekali untuk perapian; flow harian tetap dev→PR→main.
 
 ## Revisi shell dan motion - 2026-10-05
 

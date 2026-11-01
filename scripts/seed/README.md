@@ -1,5 +1,7 @@
 # Seed riwayat demo Test Company
 
+Status 2026-11-01: server demo terdahulu sudah berakhir. Ini dokumentasi importer historis dengan guard database production; bukan seed akun lokal. Untuk menjalankan aplikasi gunakan [setup lokal](../../docs/getting-started.md).
+
 `demo-attendance.mjs` adalah importer satu kali untuk database yang memang dipakai sebagai demo teknis. Ia tidak membuat/mengubah akun, hari libur, kebijakan kerja, atau menghapus data. Jalankan hanya setelah lima akun `DEMO001`–`DEMO005` aktif dan `attendance_prod` dicadangkan.
 
 Importer membuat riwayat 1 Agustus–30 September 2026 menggunakan jadwal Senin–Jumat WIB 08.00–17.00 dan melewati libur 17 serta 25 Agustus. Polanya menghasilkan 10 hari tanpa presensi, 195 rekap harian, 390 event, dan 390 ilustrasi avatar sintetis yang disimpan di bucket privat. Setiap event dan catatan audit diberi alasan `SIMULASI DEMO`; koordinat Jakarta adalah data contoh dan bukan lokasi aktual. Tidak memakai foto orang sungguhan.

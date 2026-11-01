@@ -1,5 +1,7 @@
 # Siklus SDD — kebutuhan sampai auto-deployment
 
+Status operasional 2026-11-01: server demo sudah berakhir. Jalankan aplikasi melalui [setup lokal](../getting-started.md). Tahap auto-deployment di bawah menjelaskan rancangan/histori siklus produk dan memerlukan infrastruktur sendiri jika diaktifkan kembali.
+
 SDD digunakan sepanjang siklus produk: kebutuhan menjelaskan masalah, PRD menentukan hasil, spesifikasi menetapkan kontrak, implementasi dan rilis dibuktikan sesuai perubahan. Analisis/PRD dirangkum pada 2026-10-05 dari keputusan existing; timestamp historis tetap mengikuti sumber asli.
 
 ```mermaid

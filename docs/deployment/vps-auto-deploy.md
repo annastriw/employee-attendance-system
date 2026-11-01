@@ -1,5 +1,7 @@
 # Deploy VPS otomatis dari main
 
+Status 2026-11-01: server demo sudah berakhir. Panduan ini untuk pemasangan ulang pada VPS milik sendiri. Untuk menjalankan aplikasi sekarang gunakan [setup lokal](../getting-started.md); workflow tidak menyediakan pengganti server secara otomatis.
+
 Setelah setup satu kali ini selesai dan gate `VPS_AUTO_DEPLOY_ENABLED=true` aktif, alur rilisnya: PR `dev → main` lulus CI dan disetujui pengguna → merge → perubahan backend/database membangun lima backend dan image migrator → deploy backend VPS dari SHA merge; Vercel menerbitkan frontend dari `main`. Perubahan frontend saja hanya memicu deployment Vercel dan tidak menyentuh VPS. Push ke `dev` tidak menerbitkan production.
 
 ## Pengamanan dan batas perubahan
@@ -109,6 +111,6 @@ Setelah itu pastikan environment secrets lengkap, migrator password file `.secre
 1. Coding dan push ke `dev`; unit test terdampak wajib, integrasi cepat bila perlu.
 2. Periksa UI/alur secara manual. Setelah siap, buat PR `dev → main` dan tunggu CI.
 3. Setelah merge yang diinstruksikan, Actions membangun image dan deploy VPS; Vercel deploy frontend dari `main`.
-4. Untuk rilis backend, periksa workflow **Production images** sampai `Deploy VPS production` selesai, lalu buka `https://attendance-api.annastriwidagdo.me/health` dan cocokkan properti `release` dengan SHA merge `main`. Perubahan frontend saja diperiksa melalui deployment Vercel dan tidak memicu VPS. Jika gagal, baca log sebelum mengulang; image aplikasi otomatis kembali ke SHA sebelumnya untuk kegagalan health, tetapi migration perlu penanganan database terpisah.
+4. Untuk rilis backend, periksa workflow **Production images** sampai `Deploy VPS production` selesai, lalu buka `http://localhost:3000/health` dari host backend yang sedang diperiksa dan cocokkan properti `release` dengan SHA merge `main`. Perubahan frontend saja diperiksa melalui deployment Vercel dan tidak memicu VPS. Jika gagal, baca log sebelum mengulang; image aplikasi otomatis kembali ke SHA sebelumnya untuk kegagalan health, tetapi migration perlu penanganan database terpisah.
 
-Setup ini sudah diselesaikan pemilik; deployment backend otomatis dibuktikan lewat SHA health live pada 2026-10-04. Panduan tetap tersedia untuk pemasangan ulang bila diperlukan. Lihat [alur CI/CD](../development/ci-cd-workflow.md). Perapian history tidak mereset secret, data atau backend live.
+Setup ini pernah diselesaikan pemilik; deployment backend otomatis dibuktikan lewat SHA health live pada 2026-10-04. Ini bukti historis, bukan ketersediaan server saat ini. Panduan tetap tersedia untuk pemasangan ulang bila diperlukan. Lihat [alur CI/CD](../development/ci-cd-workflow.md). Perapian history tidak mereset secret, data atau backend live.

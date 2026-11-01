@@ -4,16 +4,20 @@ A full-stack attendance platform with separate employee and HR portals. Employee
 
 Built as a TypeScript monorepo with **React**, **five NestJS microservices**, **MySQL**, and private S3-compatible photo storage.
 
-## Live demo
+## Local access
 
-| Portal | URL | Email | Password |
-| --- | --- | --- | --- |
-| HR | [hr.annastriwidagdo.me](https://hr.annastriwidagdo.me) | `hr@testcompany.com` | `TestCompany123` |
-| Employee | [attendance.annastriwidagdo.me](https://attendance.annastriwidagdo.me) | `john.doe@testcompany.com` | `TestCompany123` |
+The hosted demo is no longer available because its server subscription has ended.
+Run the backend, database, storage, and both portals locally using the [local setup guide](docs/getting-started.md).
+These addresses are available after starting the applications on your own computer:
 
-These are intentionally public demo accounts for **Test Company**, using fictional employees and simulated historical attendance. HR can use the management features, so demo data may change. Use the matching portal for each role. Camera and location permissions are needed for recording new attendance.
+| Portal | Local URL | Login |
+| --- | --- | --- |
+| HR | [localhost:5174](http://localhost:5174) | Seeded local HR account: `admin@example.test` |
+| Employee | [localhost:5173](http://localhost:5173) | Employee account created through the local HR portal |
 
-Explore HR monitoring for **August–September 2026** to see sample records for five employees, including late arrivals, early departures, and missing attendance. Historical sample photos are synthetic illustrations.
+The initial HR password is generated during setup and stored in `ADMIN_SEED_PASSWORD` in your private `.env.auth` file. Employee temporary passwords are shown once during account creation. Change the initial password after login. The previous hosted demo accounts and historical database are not included in a clean clone.
+
+Camera and location permissions are required for recording new attendance. Use `localhost` consistently for browser access, cookies, and allowed origins. The local API is `http://localhost:3000/api/v1`; private photo storage runs at `http://localhost:9000`.
 
 ## Features
 
@@ -73,7 +77,7 @@ npm install --global pnpm@10.28.0
 pnpm install --frozen-lockfile
 ```
 
-Follow the [local setup guide](docs/getting-started.md) for private environment files, MySQL/AIStor, migrations, a local HR account, and the seven applications. A clean clone does not include live credentials or an AIStor license. Public demo accounts belong to the hosted demo; local credentials are generated separately.
+Follow the [local setup guide](docs/getting-started.md) for private environment files, MySQL/AIStor, migrations, a local HR account, and the seven applications. A clean clone does not include a database snapshot, private credentials, or an AIStor license. Local credentials are generated separately.
 
 ## Development and delivery
 
@@ -82,7 +86,7 @@ dev locally → focused unit tests → manual UI check → push dev
 → PR dev to main → CI → merge → Vercel / VPS automatic deployment
 ```
 
-`dev` runs locally; `main` is the live release branch. Backend changes build cached images in GitHub Actions; VPS pulls the exact release, applies new migrations when needed, and checks health. Frontend-only changes deploy through Vercel without updating the VPS backend.
+`dev` is the development branch and `main` contains reviewed releases. The diagram describes the original delivery workflow; hosted operation is currently unavailable. Vercel/VPS deployment guides remain as references for provisioning your own infrastructure. Use the local setup guide to run the application now.
 
 Development uses **Specification-Driven Development (SDD)** and a **Kanban workflow**: define rules and contracts, implement one complete feature, verify the changed logic, review manually, then release. See [development](docs/development.md) and [deployment](docs/deployment.md).
 
@@ -114,4 +118,4 @@ tasks/         roadmap and accepted feature status
 - [Frontend finalization and verification record](docs/development/finalization.md)
 - [Security and audit scope](docs/security.md)
 
-Private environment files, tokens, deployment keys, licenses, backups, and photo data are excluded from Git. The public demo password is an explicit exception; it is not a database, storage, or deployment credential.
+Private environment files, tokens, deployment keys, licenses, backups, and photo data are excluded from Git. Local passwords are generated during setup and must stay private.

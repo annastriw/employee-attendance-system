@@ -1,12 +1,12 @@
 # Runbook VPS
 
-Deployment aplikasi sudah berjalan. Panduan rilis harian ada di [deployment](../deployment.md); instalasi akses otomatis ada di [auto-deploy](vps-auto-deploy.md). Dokumen ini mencatat struktur dan operasi yang relevan, bukan mengulang transkrip bootstrap bertahap.
+Server demo sudah berakhir sejak pembaruan 2026-11-01; gunakan [setup lokal](../getting-started.md). Runbook ini merupakan referensi historis dan hanya berlaku pada VPS milik sendiri yang sudah disiapkan. Panduan rilis harian ada di [deployment](../deployment.md); instalasi akses otomatis ada di [auto-deploy](vps-auto-deploy.md). Dokumen ini mencatat struktur dan operasi yang relevan, bukan mengulang transkrip bootstrap bertahap.
 
 ## Struktur
 
 Root /opt/attendance: compose.infra.yml, compose.backend.yml, backend-release.env, .secrets/, .licenses/, releases/, backups/. Secret dan backup tidak masuk repository. Infra menjalankan MySQL dan AIStor, backend lima image release.
 
-Domain: attendance-api.annastriwidagdo.me ke Gateway 3000, attendance-storage.annastriwidagdo.me ke S3 9000. Port backend 3000–3004, DB 3307, storage/Console 9000–9001 loopback; Nginx membuka HTTPS. Console bukan website publik.
+Endpoint loopback: http://localhost:3000 untuk Gateway dan http://localhost:9000 untuk S3. Jika deployment publik disediakan kembali, konfigurasikan domain/TLS milik sendiri. Port backend 3000–3004, DB 3307, storage/Console 9000–9001 loopback; Nginx membuka HTTPS. Console bukan website publik.
 
 ## Pemeriksaan singkat read-only
 
@@ -14,7 +14,7 @@ Domain: attendance-api.annastriwidagdo.me ke Gateway 3000, attendance-storage.an
 cd /opt/attendance
 sudo docker compose --env-file .secrets/aistor.env -f compose.infra.yml ps
 sudo docker compose --env-file backend-release.env -f compose.backend.yml ps
-curl --max-time 15 -fsS https://attendance-api.annastriwidagdo.me/health
+curl --max-time 15 -fsS http://localhost:3000/health
 free -h
 df -h /
 sudo docker stats --no-stream

@@ -45,3 +45,16 @@ Restore backup, backup terjadwal, uji beban/kapasitas dan hardening tambahan dit
 [Bukti frontend dan pengujian historis](../docs/development/finalization.md).
 [Progress](progress.md) mencatat task aktif serta hasil final; tidak mengulang pengujian
 lama tanpa perubahan atau risiko baru.
+
+## Pembaruan dokumentasi localhost — 2026-11-01
+
+- [x] Baca source port, API default frontend, origin Gateway dan seed akun lokal.
+- [x] Ganti domain demo pada dokumentasi dengan localhost; hapus klaim demo publik aktif.
+- [x] Bedakan akun lokal hasil seed/provisioning dari akun/data hosting lama.
+- [x] Tandai panduan/bukti hosting terdahulu sebagai historis setelah server berakhir.
+- [x] Verifikasi isi, alamat/port, tautan relatif dan diff; 40 Markdown, tanpa domain lama/tautan lokal rusak.
+- [ ] Commit/push dev dan PR main melalui CI; hasil remote menjadi acuan akhir.
+
+Task finalisasi 2026-10-05 di atas adalah checkpoint historis sebelum PR #16;
+rilis tersebut sudah merged dan diverifikasi pada sesi finalisasi. Increment ini
+hanya dokumentasi dan tidak mengulang test aplikasi atau bukti hosting lama.

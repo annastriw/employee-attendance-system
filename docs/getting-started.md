@@ -1,6 +1,6 @@
 # Clone dan menjalankan lokal
 
-Panduan clone bersih; semua command dari root repository. Gunakan database/storage lokal sendiri.
+Server demo terdahulu sudah berakhir. Panduan ini menjalankan seluruh sistem di komputer sendiri; semua command dari root repository. Gunakan database/storage lokal sendiri.
 
 ## 1. Prasyarat
 
@@ -69,7 +69,7 @@ Tunggu S3 siap sebelum `storage:setup`. Script membuat bucket privat dev/test da
 | `.env.attendance` | Endpoint dan secret sesuai Employee/Media |
 | `.env.gateway` | Endpoint backend dan origin frontend |
 
-Frontend default `http://localhost:3000/api/v1`. Override opsional di `.env.local` frontend masing-masing: `VITE_API_BASE_URL=http://localhost:3000/api/v1`; restart Vite setelah perubahan. Variabel `VITE_` publik dan tidak boleh memuat secret.
+Klien frontend default `http://localhost:3000/api/v1`. Jika sebelumnya memakai backend demo, set `VITE_API_BASE_URL=http://localhost:3000/api/v1` pada `.env.local` kedua frontend, atau salin `.env.example` masing-masing aplikasi jika `.env.local` belum ada. Jangan gunakan `/api/v1` relatif: proxy development lama di vite.config.ts ditujukan ke infrastruktur demo terdahulu. URL localhost absolut memanggil Gateway lokal secara langsung. Restart Vite setelah perubahan. Variabel `VITE_` publik dan tidak boleh memuat secret.
 
 ## 5. Seed HR lokal
 
@@ -78,7 +78,7 @@ pnpm --dir apps/auth-service build
 pnpm --dir apps/auth-service seed:admin
 ```
 
-Email lokal `admin@example.test`; password awal acak ada pada `ADMIN_SEED_PASSWORD` di `.env.auth`. Buka file di editor lokal, login HR, lalu ganti password. Seed ulang tidak reset akun existing. Akun demo live tidak otomatis ada lokal.
+Email lokal `admin@example.test`; password awal acak ada pada `ADMIN_SEED_PASSWORD` di `.env.auth`. Buka file di editor lokal, login HR, lalu ganti password. Seed ulang tidak reset akun existing. Akun demo terdahulu tidak otomatis ada lokal; gunakan akun hasil seed lokal ini.
 
 Setelah login HR, buat departemen, jabatan dan karyawan melalui UI. Password sementara tampil sekali; gunakan pada portal karyawan lalu ganti passwordnya. Importer historis production bukan langkah setup lokal.
 

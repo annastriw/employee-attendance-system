@@ -1,5 +1,7 @@
 # Workflow dev → main
 
+Status 2026-11-01: server demo sudah berakhir; jalankan sistem lewat [setup lokal](../getting-started.md). Alur deployment di bawah adalah referensi historis. Keberadaan workflow/variable GitHub tidak membuktikan bahwa VPS masih aktif.
+
 Coding/tes lokal dan push langsung dev. Main untuk live, tanpa deployment dev/staging. [Development](../development.md) menjelaskan SDD/Kanban dan [deployment](../deployment.md) menjelaskan Vercel/VPS.
 
 PR dev → main memeriksa branch policy, unit, lint, Prisma dan build/typecheck sekali. Integrasi terfokus bila diperlukan dikerjakan lokal sebelum rilis. Tidak ada Playwright atau integrasi penuh rutin; deployment tidak mengulang unit.

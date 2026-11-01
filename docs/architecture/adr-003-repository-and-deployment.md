@@ -1,5 +1,7 @@
 # ADR-003 — Monorepo dan rilis main
 
+Status 2026-11-01: topologi hosting berikut merekam keputusan historis. Server demo sudah berakhir; lingkungan yang digunakan sekarang adalah [localhost](../getting-started.md). Batas lima service dan dua frontend tetap berlaku.
+
 Keputusan awal: 2026-10-01; workflow dua branch disetujui 2026-10-03; implementasi rilis dibuktikan 2026-10-04.
 
 ## Keputusan

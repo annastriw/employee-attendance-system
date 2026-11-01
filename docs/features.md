@@ -32,9 +32,11 @@ Senin–Jumat 08.00–17.00 Asia/Jakarta. Tepat 08.00 masih tepat waktu; sesudah
 
 Akhir pekan/libur tidak wajib; presensi diberi label di luar hari kerja tanpa penilaian late/early. Satu pasangan check-in/checkout per karyawan/tanggal tetap berlaku setelah soft delete. Missing dihitung dari eligibility historis, bukan record presensi palsu.
 
-## Mencoba demo
+## Mencoba secara lokal
 
-Gunakan akun pada [README](../README.md#live-demo). HR: buka monitoring periode Agustus–September 2026, pilih karyawan dan detail foto/lokasi. Batch awal berisi lima profil fiktif, 195 rekap harian, 390 event dan 390 ilustrasi foto; jumlah aktual dapat berubah melalui akun demo publik.
+Ikuti [setup lokal](getting-started.md), lalu buka HR di http://localhost:5174 dan Karyawan di http://localhost:5173. Gunakan akun hasil seed HR lokal serta akun karyawan yang dibuat melalui portal HR; [ringkasan akses](../README.md#local-access). Server demo terdahulu sudah berakhir.
+
+Buat master departemen/jabatan, karyawan dan presensi lokal sebelum mencoba monitoring/detail. Data Agustus–September 2026 (lima profil fiktif, 195 rekap, 390 event/foto sintetis) adalah bukti demo historis, bukan data yang otomatis tersedia pada clone bersih. Importer demo lama bukan langkah setup lokal.
 
 Karyawan: buka Hari ini, Riwayat dan detail presensi. Untuk presensi baru, izinkan kamera/lokasi pada HTTPS atau localhost. Foto/koordinat yang dikirim pengunjung berasal dari perangkatnya; contoh historis memakai ilustrasi dan koordinat simulasi.
 

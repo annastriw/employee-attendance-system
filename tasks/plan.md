@@ -18,7 +18,7 @@ Task utama T01–T31 satu backlog; UX01–UX07 dahulu merupakan pemetaan layar, 
 
 Kerja serial satu fitur ujung ke ujung, SDD + Kanban. Unit logika berubah wajib; integrasi cepat hanya jika perlu; UI manual pengguna. Coding/push dev, PR main untuk live. [Development](../docs/development.md), [testing](../docs/testing/workflow.md).
 
-## Finalisasi aktif
+## Finalisasi historis
 
 Backend/frontend diterima final oleh pengguna pada 2026-10-05, termasuk revisi S02.
 Satu increment serial: konsolidasi docs dan audit berkas → review/verifikasi → kurasi
@@ -28,3 +28,11 @@ sinkronisasi dev/main lokal/remote. Tidak ada subagen atau fitur baru.
 [Rangkuman frontend dan bukti](../docs/development/finalization.md), [status](todo.md),
 [titik lanjut](progress.md). Restore drill, backup terjadwal, uji beban dan hardening
 masih ditunda pengguna; bukan klaim lulus.
+
+## Increment aktif — dokumentasi localhost (2026-11-01)
+
+Server demo sudah berakhir. Baca konfigurasi port, API default dan seed lokal;
+perbarui semua rujukan domain demo pada dokumentasi menjadi alamat localhost
+yang benar, pisahkan bukti hosting historis dari panduan saat ini, lalu verifikasi
+isi/tautan/diff. Satu commit docs ke dev, PR main melalui CI, dan sinkronkan remote.
+Tidak mengubah source aplikasi, credential, database atau infrastruktur runtime.
