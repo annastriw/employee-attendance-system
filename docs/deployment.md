@@ -1,6 +1,6 @@
 # Deployment dan rilis otomatis
 
-Live memakai dua project Vercel untuk Attendance/HR, satu VPS Ubuntu untuk lima backend, MySQL dan AIStor, dengan DNS Cloudflare dan Nginx HTTPS. [Arsitektur](architecture.md).
+Status 2026-11-01: server demo sudah berakhir. Untuk menjalankan aplikasi sekarang, gunakan [setup lokal](getting-started.md). Dokumen ini menyimpan workflow deployment terdahulu (dua project Vercel, VPS Ubuntu, Cloudflare/Nginx) untuk penyediaan infrastruktur milik sendiri; bukan petunjuk akses ke layanan demo aktif. [Arsitektur](architecture.md).
 
 ## Rilis harian
 
@@ -13,12 +13,12 @@ Live memakai dua project Vercel untuk Attendance/HR, satu VPS Ubuntu untuk lima 
 
 ## Vercel
 
-| Project | Root directory | Domain |
+| Portal | Root directory | Alamat pengujian lokal |
 | --- | --- | --- |
-| Attendance | apps/attendance-web | attendance.annastriwidagdo.me |
-| HR | apps/hr-web | hr.annastriwidagdo.me |
+| Attendance | apps/attendance-web | http://localhost:5173 |
+| HR | apps/hr-web | http://localhost:5174 |
 
-Production branch main, output dist, build aplikasi terkait dari workspace pnpm. Aktifkan Include source files outside of the Root Directory karena packages/ui digunakan bersama. `VITE_API_BASE_URL=https://attendance-api.annastriwidagdo.me/api/v1` pada environment Production. Nilai ini build-time; setelah mengubahnya harus redeploy. Arah branch/detil setting dapat diperiksa pada project Vercel masing-masing.
+Production branch main, output dist, build aplikasi terkait dari workspace pnpm. Aktifkan Include source files outside of the Root Directory karena packages/ui digunakan bersama. Untuk pengujian lokal, gunakan `VITE_API_BASE_URL=http://localhost:3000/api/v1`. Jika hosting publik disediakan kembali, environment Production harus menunjuk URL HTTPS Gateway milik sendiri; localhost hanya untuk pengujian lokal. Nilai ini build-time; setelah mengubahnya harus redeploy. Arah branch/detil setting dapat diperiksa pada project Vercel masing-masing.
 
 HR menggunakan BrowserRouter: [vercel.json](../apps/hr-web/vercel.json) pada root
 project HR menyediakan rewrite SPA ke `/index.html`, sesuai
@@ -37,7 +37,7 @@ Root deployment `/opt/attendance`. Compose infra memuat MySQL/AIStor; Compose ba
 
 GitHub environment production menggunakan `VPS_DEPLOY_HOST`, `VPS_DEPLOY_USER`, `VPS_DEPLOY_PRIVATE_KEY`, `VPS_DEPLOY_KNOWN_HOSTS`. Private key utuh disimpan sebagai secret, public key di authorized_keys akun deploy. Akun forced-command tidak menyediakan shell interaktif, dan sudo hanya entrypoint deploy yang disetujui. Token GitHub/SSH tidak masuk README.
 
-[Panduan akses dan instalasi auto-deploy](deployment/vps-auto-deploy.md), [artefak backend](../infra/compose.backend.yml), [workflow image](../.github/workflows/backend-images.yml). Setup ini sudah diaktifkan pemilik; health live untuk SHA merge f581f31 dibuktikan pada 2026-10-04. Setelah rewrite history, rilis aktif VPS dapat masih menyebut SHA lama sampai rilis backend berikutnya; perubahan dokumentasi bukan alasan mengganti image yang sehat.
+[Panduan akses dan instalasi auto-deploy](deployment/vps-auto-deploy.md), [artefak backend](../infra/compose.backend.yml), [workflow image](../.github/workflows/backend-images.yml). Setup ini pernah diaktifkan pemilik; health live untuk SHA merge f581f31 dibuktikan pada 2026-10-04. Bukti tersebut historis karena server sekarang sudah berakhir. Setelah rewrite history, rilis aktif VPS dapat masih menyebut SHA lama sampai rilis backend berikutnya; perubahan dokumentasi bukan alasan mengganti image yang sehat.
 
 ## Domain dan foto
 
@@ -46,9 +46,9 @@ Frontend CNAME ke Vercel; API/storage mengarah ke VPS melalui Cloudflare. Sertif
 ## Verifikasi dan kegagalan
 
 ```sh
-curl --max-time 15 -fsS https://attendance-api.annastriwidagdo.me/health
+curl --max-time 15 -fsS http://localhost:3000/health
 ```
 
-Backend release baru harus memperlihatkan release sesuai SHA image. Periksa workflow dan fitur live manual. Health gagal memicu rollback image aplikasi sebelumnya; migration/data tidak dibalik otomatis. Gunakan migration kompatibel dan backup sebelum perubahan schema.
+Perintah di atas memeriksa Gateway di komputer lokal setelah service berjalan. Untuk deployment milik sendiri, jalankan pemeriksaan loopback ini dari host backend. Backend release baru harus memperlihatkan release sesuai SHA image. Periksa workflow dan fitur live manual. Health gagal memicu rollback image aplikasi sebelumnya; migration/data tidak dibalik otomatis. Gunakan migration kompatibel dan backup sebelum perubahan schema.
 
 Backup DB sebelum seed/migration pernah dikonfirmasi pengguna. Restore drill, backup terjadwal, uji kapasitas dan hardening tambahan ditunda pengguna untuk scope demo; dokumen tidak mengklaim pekerjaan tersebut lulus. [Runbook operasional](deployment/vps-production-manual.md).

@@ -1,5 +1,7 @@
 # PRD — Employee Attendance System
 
+Status operasional 2026-11-01: hosting demo tidak lagi tersedia. Evaluasi fitur melalui [setup localhost](../getting-started.md); kriteria delivery mencatat rancangan dan penerimaan historis, bukan layanan publik aktif.
+
 Status: ringkasan produk disetujui, diselaraskan dengan baseline/source pada 2026-10-05. Tidak mengganti aturan rinci [baseline](baseline.md) atau membuat tanggal/bukti acceptance baru.
 
 ## Tujuan produk

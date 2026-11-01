@@ -10,14 +10,12 @@ Satu monorepo, dua portal React, lima proses NestJS. Pemisahan service berdasark
 | Attendance | 3003 | Jadwal, libur, eligibility, presensi, monitoring, lifecycle/outbox | `att_*` |
 | Media | 3004 | Validasi/normalisasi foto, metadata, signed URL, cleanup orphan | `media_*` dan S3 |
 
-## Deployment dan transport
+## Lingkungan lokal dan transport
 
 ```mermaid
 flowchart TD
-    User[Browser] --> Vercel[Attendance dan HR · dua project Vercel]
-    User --> CF[Cloudflare · API dan S3 HTTPS]
-    CF --> Nginx[Nginx VPS]
-    Nginx --> Gateway[Gateway · loopback 3000]
+    User[Browser] --> Portals[Attendance 5173 dan HR 5174 · localhost]
+    Portals --> Gateway[Gateway · localhost 3000]
     Gateway --> Auth[Auth · 3001]
     Gateway --> Employee[Employee · 3002]
     Gateway --> Attendance[Attendance · 3003]
@@ -31,12 +29,12 @@ flowchart TD
     Attendance --> DB
     Media --> DB
     Media --> S3[(AIStor · loopback 9000)]
-    Nginx --> S3
+    User --> S3
 ```
 
 Service bisnis juga memeriksa sesi melalui Auth. Diagram menampilkan jalur utama; bukan semua request internal. Transport memakai REST/HTTP, bukan broker NestJS/RabbitMQ. Durable operation/outbox menyediakan pemulihan lintasservice dengan HTTP idempotent.
 
-Backend VPS container terpisah memakai host networking dan bind loopback; infra MySQL/AIStor menggunakan Compose lain. Nginx host memublikasikan Gateway dan S3 lewat domain HTTPS. Console AIStor 9001 tetap loopback. Dua portal memakai API Gateway; DB, secret internal dan private key tidak masuk bundle frontend.
+Server demo sudah berakhir. Pada lingkungan lokal, dua portal berjalan di localhost:5173/5174 dan mengakses Gateway localhost:3000; lima backend tetap proses terpisah. MySQL/AIStor memakai Compose lokal; S3 di localhost:9000 dan Console di localhost:9001. Dua portal memakai API Gateway; DB, secret internal dan private key tidak masuk bundle frontend. Topologi deployment VPS/Vercel terdahulu tetap dicatat pada ADR-003.
 
 ## Data dan konsistensi
 

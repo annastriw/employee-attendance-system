@@ -1,6 +1,6 @@
 # Dokumentasi proyek
 
-Mulai dari [README Inggris](../README.md) untuk ringkasan produk dan akun demo.
+Mulai dari [README Inggris](../README.md) untuk ringkasan produk dan alamat localhost. Server demo sudah berakhir; jalankan aplikasi melalui [setup lokal](getting-started.md). Panduan deployment memuat referensi historis untuk infrastruktur milik sendiri.
 
 | Panduan | Isi |
 | --- | --- |

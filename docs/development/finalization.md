@@ -1,5 +1,7 @@
 # Finalisasi produk dan repository — 2026-10-05
 
+Catatan status 2026-11-01: bukti rilis/live pada dokumen ini bersifat historis. Server demo sudah berakhir; akses saat ini menggunakan [localhost dan setup lokal](../getting-started.md). Ini tidak membatalkan hasil penerimaan produk sebelumnya.
+
 Pengguna menyatakan backend dan frontend final, menerima revisi terakhir kedua portal,
 serta mengizinkan push dev, PR/merge main dan pemantauan CI/CD hingga hijau.
 Penerimaan ini berdasarkan konfirmasi pengguna; bukan klaim agen menjalankan ulang

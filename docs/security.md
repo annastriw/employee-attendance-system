@@ -2,7 +2,7 @@
 
 ## Batas publik/privat
 
-Akun HR dan karyawan pada README merupakan akun demo yang sengaja dipublikasikan atas instruksi pemilik. Password demo tidak dipakai sebagai JWT secret, password DB/storage atau kunci SSH. Foto historis/identitas seed fiktif. Pemakai yang mengirim presensi baru memasukkan foto/lokasi perangkatnya sendiri.
+README mengarahkan pengguna ke akun lokal hasil setup. Password HR awal dibuat acak dalam `.env.auth`; akun karyawan dibuat melalui portal HR. Server demo terdahulu sudah berakhir. Akun demo yang pernah sengaja dipublikasikan pemilik merupakan bukti historis, bukan kredensial instalasi lokal. Foto/identitas seed historis fiktif; presensi baru memakai foto/lokasi perangkat pengguna sendiri.
 
 Environment aktif, lisensi, token, SSH private key, backup DB dan data storage tidak masuk Git. `.gitignore` mengecualikan `.env.*` selain example, `.secrets/`, `.licenses/`, `.local/`, backup, upload, dependency dan hasil build. `VITE_` hanya konfigurasi publik.
 

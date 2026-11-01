@@ -1,5 +1,7 @@
 # Analisis kebutuhan
 
+Pembaruan operasional 2026-11-01: server demo sudah berakhir. Sistem dijalankan melalui [setup localhost](../getting-started.md); uraian hosting Vercel/VPS di bawah adalah rancangan dan bukti historis.
+
 Ringkasan kebutuhan yang disetujui dan implementasi saat ini, disusun pada 2026-10-05 untuk melengkapi keterlacakan SDD. Dokumen ini tidak dibuat seolah sudah ada sebelum development. Aturan rinci tetap pada [baseline](baseline.md).
 
 ## Masalah dan pengguna

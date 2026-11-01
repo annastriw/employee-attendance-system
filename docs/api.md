@@ -1,6 +1,6 @@
 # Kontrak API
 
-Base lokal: `http://localhost:3000/api/v1`. Live: `https://attendance-api.annastriwidagdo.me/api/v1`. Gateway hanya mengizinkan route publik; endpoint internal tidak tersedia melalui Gateway.
+Base API lokal: `http://localhost:3000/api/v1`. Hosting demo terdahulu tidak tersedia karena masa sewa server berakhir; jalankan backend lokal mengikuti [setup](getting-started.md). Gateway hanya mengizinkan route publik; endpoint internal tidak tersedia melalui Gateway.
 
 Swagger tersedia lokal pada `/docs` Auth/Employee/Attendance/Media. Controller dan DTO aktual menjadi acuan lengkap; tabel berikut mencatat route implementasi, bukan endpoint rancangan lama yang belum ada.
 

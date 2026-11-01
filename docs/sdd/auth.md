@@ -14,7 +14,7 @@ Password bcrypt cost 12; password baru minimum 12 karakter, maksimum 72 byte UTF
 
 ACTIVE dapat login; INACTIVE/ARCHIVED ditolak. Origin allowlist dan rate limit melindungi login/refresh; pemeriksaan `/auth/me` memakai limit terpisah. Tidak ada wildcard CORS dengan cookie.
 
-Seed HR membuat satu admin awal. Pengulangan tidak mengganti password/status akun existing. Password demo README merupakan keputusan penggunaan lingkungan live, bukan secret default seed lokal atau infra.
+Seed HR membuat satu admin awal. Pengulangan tidak mengganti password/status akun existing. Akun/password demo yang dahulu dipublikasikan hanya berlaku pada hosting lama yang sudah berakhir; gunakan password hasil seed lokal, bukan kredensial demo atau infra.
 
 ## Integrasi dan data
 
